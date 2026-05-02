@@ -5,7 +5,7 @@
       {
         "type": "command",
         "bash": ".github/hooks/scripts/session-start.sh",
-        "powershell": ".github/hooks/scripts/session-start.ps1",
+        "powershell": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .github/hooks/scripts/session-start.ps1",
         "timeout": 15
       }
     ],
@@ -13,7 +13,7 @@
       {
         "type": "command",
         "bash": ".github/hooks/scripts/pre-tool-use.sh",
-        "powershell": ".github/hooks/scripts/pre-tool-use.ps1",
+        "powershell": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .github/hooks/scripts/pre-tool-use.ps1",
         "timeout": 5
       }
     ],
@@ -21,7 +21,7 @@
       {
         "type": "command",
         "bash": ".github/hooks/scripts/post-tool-use.sh",
-        "powershell": ".github/hooks/scripts/post-tool-use.ps1",
+        "powershell": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .github/hooks/scripts/post-tool-use.ps1",
         "timeout": 5
       }
     ],
@@ -29,7 +29,7 @@
       {
         "type": "command",
         "bash": ".github/hooks/scripts/agent-stop.sh",
-        "powershell": ".github/hooks/scripts/agent-stop.ps1",
+        "powershell": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .github/hooks/scripts/agent-stop.ps1",
         "timeout": 10
       }
     ],
@@ -37,7 +37,7 @@
       {
         "type": "command",
         "bash": ".github/hooks/scripts/error-occurred.sh",
-        "powershell": ".github/hooks/scripts/error-occurred.ps1",
+        "powershell": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File .github/hooks/scripts/error-occurred.ps1",
         "timeout": 5
       }
     ]
