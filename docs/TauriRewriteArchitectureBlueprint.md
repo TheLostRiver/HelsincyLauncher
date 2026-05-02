@@ -4,7 +4,7 @@
 > Date: 2026-05-02
 > Scope note: this blueprint is self-contained and intended to serve as a standalone architecture baseline for the new project.
 > Storage note: this document is intentionally stored under `.artifacts/` and must not be included in git commits.
-> Companion local drafts: `.artifacts/docs/TauriFabInventoryLoadingDesign.md`, `.artifacts/docs/TauriDownloadRuntimeDesign.md`, `.artifacts/docs/TauriEngineVerificationRepairDesign.md`, `.artifacts/docs/TauriIPCAndStateContractsDesign.md`, `.artifacts/docs/TauriStorageAndDatabaseDesign.md`, `.artifacts/docs/TauriRustTsSchemaDesign.md`, `.artifacts/docs/TauriRepositoryPortsAndAdapterDesign.md`, `.artifacts/docs/TauriBackendCrateLayoutAndUseCaseStubDesign.md`, `.artifacts/docs/TauriFirstCrateApiDrafts.md`, `.artifacts/docs/TauriCompositionRootWiringDesign.md`, `.artifacts/docs/TauriKernelJobsRuntimeDesign.md`
+> Companion local drafts: `.artifacts/docs/TauriFabInventoryLoadingDesign.md`, `.artifacts/docs/TauriDownloadRuntimeDesign.md`, `.artifacts/docs/TauriEngineVerificationRepairDesign.md`, `.artifacts/docs/TauriIPCAndStateContractsDesign.md`, `.artifacts/docs/TauriStorageAndDatabaseDesign.md`, `.artifacts/docs/TauriRustTsSchemaDesign.md`, `.artifacts/docs/TauriRepositoryPortsAndAdapterDesign.md`, `.artifacts/docs/TauriBackendCrateLayoutAndUseCaseStubDesign.md`, `.artifacts/docs/TauriFirstCrateApiDrafts.md`, `.artifacts/docs/TauriCompositionRootWiringDesign.md`, `.artifacts/docs/TauriKernelJobsRuntimeDesign.md`, `.artifacts/docs/TauriAIDevelopmentTransactionProtocolDesign.md`
 
 ---
 
