@@ -2,7 +2,7 @@
 
 > Status: local draft v1
 > Date: 2026-05-02
-> Parent: `.artifacts/docs/TauriRewriteArchitectureBlueprint.md`
+> Parent: `docs/TauriRewriteArchitectureBlueprint.md`
 > Focus: verify -> diff -> repair plan -> targeted repair for installed Unreal Engine builds
 
 ---

@@ -2,7 +2,7 @@
 
 > Status: local draft v1
 > Date: 2026-05-02
-> Parent: `.artifacts/docs/TauriRewriteArchitectureBlueprint.md`
+> Parent: `docs/TauriRewriteArchitectureBlueprint.md`
 > Focus: command/query/event catalog, long-job schema, error envelope, state ownership, frontend read models
 
 ---

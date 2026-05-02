@@ -2,8 +2,8 @@
 
 > Status: local draft v1
 > Date: 2026-05-03
-> Parent: `.artifacts/docs/TauriRewriteArchitectureBlueprint.md`
-> Depends on: `.artifacts/docs/TauriRepositoryPortsAndAdapterDesign.md`, `.artifacts/docs/TauriIPCAndStateContractsDesign.md`, `.artifacts/docs/TauriDownloadRuntimeDesign.md`
+> Parent: `docs/TauriRewriteArchitectureBlueprint.md`
+> Depends on: `docs/TauriRepositoryPortsAndAdapterDesign.md`, `docs/TauriIPCAndStateContractsDesign.md`, `docs/TauriDownloadRuntimeDesign.md`
 > Focus: Rust workspace layout, module crate boundaries, composition root, use case stub catalog, dependency rules
 
 ---

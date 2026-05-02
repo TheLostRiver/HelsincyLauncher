@@ -2,8 +2,8 @@
 
 > Status: local draft v1
 > Date: 2026-05-03
-> Parent: `.artifacts/docs/TauriRewriteArchitectureBlueprint.md`
-> Depends on: `.artifacts/docs/TauriDownloadRuntimeDesign.md`, `.artifacts/docs/TauriRustTsSchemaDesign.md`, `.artifacts/docs/TauriFirstCrateApiDrafts.md`, `.artifacts/docs/TauriCompositionRootWiringDesign.md`
+> Parent: `docs/TauriRewriteArchitectureBlueprint.md`
+> Depends on: `docs/TauriDownloadRuntimeDesign.md`, `docs/TauriRustTsSchemaDesign.md`, `docs/TauriFirstCrateApiDrafts.md`, `docs/TauriCompositionRootWiringDesign.md`
 > Focus: shared job runtime host, queue policy, snapshot store, lease model, recovery lifecycle, module integration boundary
 
 ---

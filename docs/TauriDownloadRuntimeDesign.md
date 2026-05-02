@@ -2,7 +2,7 @@
 
 > Status: local draft v1
 > Date: 2026-05-02
-> Parent: `.artifacts/docs/TauriRewriteArchitectureBlueprint.md`
+> Parent: `docs/TauriRewriteArchitectureBlueprint.md`
 > Focus: scheduler, bounded concurrency, segmented resume, checkpointing, backpressure
 
 ---

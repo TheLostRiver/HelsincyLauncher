@@ -2,7 +2,7 @@
 
 > Status: local draft v1
 > Date: 2026-05-02
-> Parent: `.artifacts/docs/TauriRewriteArchitectureBlueprint.md`
+> Parent: `docs/TauriRewriteArchitectureBlueprint.md`
 > Focus: SQLite vs PostgreSQL decision, storage layering, `rusqlite` recommendation, data placement rules
 
 ---

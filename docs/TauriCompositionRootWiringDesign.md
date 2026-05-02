@@ -2,8 +2,8 @@
 
 > Status: local draft v1
 > Date: 2026-05-03
-> Parent: `.artifacts/docs/TauriRewriteArchitectureBlueprint.md`
-> Depends on: `.artifacts/docs/TauriBackendCrateLayoutAndUseCaseStubDesign.md`, `.artifacts/docs/TauriFirstCrateApiDrafts.md`, `.artifacts/docs/TauriFabInventoryLoadingDesign.md`, `.artifacts/docs/TauriDownloadRuntimeDesign.md`
+> Parent: `docs/TauriRewriteArchitectureBlueprint.md`
+> Depends on: `docs/TauriBackendCrateLayoutAndUseCaseStubDesign.md`, `docs/TauriFirstCrateApiDrafts.md`, `docs/TauriFabInventoryLoadingDesign.md`, `docs/TauriDownloadRuntimeDesign.md`
 > Focus: composition-root crate public API, adapter injection, DesktopAppServices assembly, startup pipeline staging, tauri integration boundary
 
 ---

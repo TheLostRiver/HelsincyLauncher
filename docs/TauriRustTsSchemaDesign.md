@@ -2,7 +2,7 @@
 
 > Status: local draft v1
 > Date: 2026-05-03
-> Parent: `.artifacts/docs/TauriRewriteArchitectureBlueprint.md`
+> Parent: `docs/TauriRewriteArchitectureBlueprint.md`
 > Focus: Rust-owned DTO schemas, TS generation, shared envelopes, long-job snapshots, Fab inventory prewarm/cache models
 
 ---

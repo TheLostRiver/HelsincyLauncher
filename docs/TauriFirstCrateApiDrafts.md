@@ -2,8 +2,8 @@
 
 > Status: local draft v1
 > Date: 2026-05-03
-> Parent: `.artifacts/docs/TauriRewriteArchitectureBlueprint.md`
-> Depends on: `.artifacts/docs/TauriBackendCrateLayoutAndUseCaseStubDesign.md`, `.artifacts/docs/TauriRepositoryPortsAndAdapterDesign.md`, `.artifacts/docs/TauriDownloadRuntimeDesign.md`, `.artifacts/docs/TauriFabInventoryLoadingDesign.md`, `.artifacts/docs/TauriRustTsSchemaDesign.md`
+> Parent: `docs/TauriRewriteArchitectureBlueprint.md`
+> Depends on: `docs/TauriBackendCrateLayoutAndUseCaseStubDesign.md`, `docs/TauriRepositoryPortsAndAdapterDesign.md`, `docs/TauriDownloadRuntimeDesign.md`, `docs/TauriFabInventoryLoadingDesign.md`, `docs/TauriRustTsSchemaDesign.md`
 > Focus: first implementation slice crate list, Cargo workspace members, crate-level public API sketches, module dependency surface
 
 ---

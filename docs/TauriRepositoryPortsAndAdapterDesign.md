@@ -2,7 +2,7 @@
 
 > Status: local draft v1
 > Date: 2026-05-03
-> Parent: `.artifacts/docs/TauriRewriteArchitectureBlueprint.md`
+> Parent: `docs/TauriRewriteArchitectureBlueprint.md`
 > Focus: repository ports, storage/file/secret/provider adapter boundaries, naming rules, orchestration ownership
 
 ---

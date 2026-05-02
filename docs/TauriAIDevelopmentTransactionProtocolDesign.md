@@ -2,9 +2,9 @@
 
 > Status: local draft v1
 > Date: 2026-05-03
-> Parent: `.artifacts/docs/TauriRewriteArchitectureBlueprint.md`
+> Parent: `docs/TauriRewriteArchitectureBlueprint.md`
 > Scope note: this document defines the new project's self-contained AI development protocol for complex tasks, context recovery, and atomic task execution.
-> Storage note: this document is intentionally stored under `.artifacts/` and must not be included in git commits.
+> Storage note: this document is intentionally stored under `docs/` and is intended to be included in git commits.
 
 ---
 
@@ -151,7 +151,7 @@ drafted -> ready -> in_progress -> validating -> committed
 理由：
 
 1. 属于本地工作记忆，不应污染源码目录主结构
-2. 与 `.artifacts/docs/` 一样天然适合非提交草稿和会话状态
+2. 与 `docs/` 一样适合集中放置专题文档，同时把会话状态与源码主结构隔离
 3. 方便新项目直接复制同一套目录约定
 
 ### 5.2 File Responsibilities
@@ -274,9 +274,9 @@ drafted -> ready -> in_progress -> validating -> committed
 - status: in_progress
 - goal: 固化 active-task/task-plan/progress/findings/handoff 的职责分工
 - scope: 只修改 AI 规范文档，不改业务代码
-- allowed_files: .artifacts/docs/TauriAIDevelopmentTransactionProtocolDesign.md
+- allowed_files: docs/TauriAIDevelopmentTransactionProtocolDesign.md
 - required_context:
-  - .artifacts/docs/TauriRewriteArchitectureBlueprint.md
+  - docs/TauriRewriteArchitectureBlueprint.md
 - hypothesis: 通过单活跃任务 + 文件分层可显著降低复杂任务的恢复成本
 - cheap_check: 回读文档并确认规则完整、无外部依赖引用
 - next_step: 补全原子任务状态机与 hooks 落点
