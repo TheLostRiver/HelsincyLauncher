@@ -42,6 +42,7 @@
 - A crate-local host shell with `bootstrap.rs`, `state.rs`, `main.rs`, and an explicit bin target is sufficient to make the `my-epic-launcher-desktop` package compile before any real Tauri transport or composition-root wiring exists.
 - The repo root must ignore Rust `target/`; otherwise even a narrow package-scoped `cargo check` leaves untracked incremental artifacts and breaks the clean-worktree expectation after backend validation.
 - Even with the skill retargeted correctly, users can still misread `.artifacts/ai/legacy-root-planning/` as live state unless the active `.artifacts/ai/` directory itself carries a local README that states the source-of-truth boundary.
+- The next backend atomic slice after `src-tauri` B1-B3 is documented as backend skeleton task B1: add `crates/kernel-foundation` and update the root workspace membership at the same time, not earlier and not later.
 
 ## Technical Decisions
 

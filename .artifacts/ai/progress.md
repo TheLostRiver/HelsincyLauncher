@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-013 - Clarify active workflow records
+- Active atomic task: none active; last committed task is AT-2026-05-03-014 - Bootstrap kernel foundation crate
 - Current phase: Phase 5 - Backend Skeleton Bootstrap
-- Last committed task before this slice: AT-2026-05-03-012 - Ignore Rust target artifacts
-- Next validation gate: none pending for AT-2026-05-03-013
+- Last committed task before this slice: AT-2026-05-03-013 - Clarify active workflow records
+- Next validation gate: none pending for AT-2026-05-03-014
 
 ## Session Timeline
 
@@ -81,6 +81,8 @@
 - Validated AT-2026-05-03-012 with `cargo check -p my-epic-launcher-desktop --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`, `git diff --check`, and `git status --short`; only the intended `.gitignore` and record updates remained visible.
 - Started AT-2026-05-03-013 after user feedback that `legacy-root-planning` still looks ambiguous, so the repo now needs an explicit local explanation inside `.artifacts/ai/` itself.
 - Validated AT-2026-05-03-013 with `git -C q:\DEV\MyEpicLauncher diff --check`, confirming the new `.artifacts/ai/README.md` and task-record updates are clean.
+- Started AT-2026-05-03-014 after the clarification slice landed, targeting documented backend skeleton task B1: first real `kernel-foundation` crate shell plus workspace registration.
+- Validated AT-2026-05-03-014 with `cargo check -p launcher-kernel-foundation --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`, confirming the first backend crate shell compiles without B2 content.
 
 ## Validation Snapshot
 

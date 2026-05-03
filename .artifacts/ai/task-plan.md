@@ -10,8 +10,8 @@ Phase 5 - Backend Skeleton Bootstrap
 
 ## Current Focus
 
-- Open the next backend slice for `kernel-foundation` on top of the cleaned AT-011/AT-012 baseline.
-- Keep the active/archive clarification as part of the stable repo workflow surface.
+- Use the committed `launcher-kernel-foundation` shell as the new backend baseline.
+- Open B2 next for real foundation modules and the named `foundation_contract_smoke` test.
 
 ## Phases
 
@@ -60,6 +60,7 @@ Phase 5 - Backend Skeleton Bootstrap
 11. AT-2026-05-03-011 - committed - added the thin host bootstrap surface under `src-tauri` so the desktop host crate can pass `cargo check` without composition-root yet.
 12. AT-2026-05-03-012 - committed - ignored Rust `target/` artifacts so backend validation no longer leaves the repo dirty.
 13. AT-2026-05-03-013 - committed - added a local README under `.artifacts/ai/` that clearly separates active workflow records from the archived legacy root planning files.
+14. AT-2026-05-03-014 - committed - bootstrapped the `launcher-kernel-foundation` crate shell and connected it to the root workspace.
 
 ## Key Questions
 
@@ -78,7 +79,7 @@ Phase 5 - Backend Skeleton Bootstrap
 ## Follow-up Queue
 
 1. Integrate planning-with-files' 2-action checkpoint cadence more explicitly into repo-level reminders if the adapter slice alone is not enough.
-2. After the clarification slice passes, begin `kernel-foundation` as the next backend bootstrap slice.
+2. After B1 passes, open B2 for the first real foundation types and named smoke test.
 
 ## Legacy Note
 
