@@ -2,13 +2,13 @@
 
 ## Identity
 
-- task id: AT-2026-05-03-042
-- title: Accept fab startup prewarm job
+- task id: AT-2026-05-03-043
+- title: Orchestrate startup stage-3 prewarm
 - status: committed
 
 ## Goal
 
-- exact local outcome: Replace the `FAB_NOT_WIRED` result on `FabFacade::run_startup_prewarm()` with a backend-owned accepted-job response that stays within the current module boundary, while leaving stage-3 startup orchestration and real job-runtime enqueue wiring for later slices.
+- exact local outcome: Replace the stage-3 no-op in `StartupPipelineFacade::run_stage3_background_prewarm()` with explicit, config-gated Fab prewarm orchestration that calls the already-wired `FabFacade::run_startup_prewarm()` path, while leaving real job-runtime execution and startup host ordering for later slices.
 
 ## Scope
 
@@ -17,10 +17,13 @@
   - update `.artifacts/ai/task-plan.md`
   - update `.artifacts/ai/progress.md`
   - update `.artifacts/ai/findings.md`
-  - update `crates/module-fab/src/facade/mod.rs`
+  - update `crates/composition-root/src/bootstrap.rs`
+  - update `crates/composition-root/src/startup.rs`
+  - update `crates/composition-root/tests/bootstrap_wiring_smoke.rs`
 - out of scope:
-  - wiring `StartupPipelineFacade::run_stage3_background_prewarm()` or startup host execution order
+  - changing startup host execution order in `src-tauri`
   - introducing real job-runtime enqueue wiring, provider IO, media-cache IO, or real SQLite queries
+  - adding auth/session-availability gating beyond current config capability gating
   - changing downloads, startup, or frontend code
   - touching user-owned frontend worktree changes
 
@@ -30,7 +33,9 @@
 2. .artifacts/ai/task-plan.md
 3. .artifacts/ai/progress.md
 4. .artifacts/ai/findings.md
-5. crates/module-fab/src/facade/mod.rs
+5. crates/composition-root/src/bootstrap.rs
+6. crates/composition-root/src/startup.rs
+7. crates/composition-root/tests/bootstrap_wiring_smoke.rs
 
 ## 已读取的本地任务记录
 
@@ -57,23 +62,25 @@
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If `FabFacade::run_startup_prewarm()` delegates job acceptance to a narrow prewarm-job boundary that has a placeholder implementation for the current `()` runtime dependency, then the Fab startup-prewarm command can return a backend-owned `AcceptedJob` without reopening stage-3 startup orchestration or the still-missing real job runtime wiring.
+- falsifiable local hypothesis: If `StartupPipelineFacade::run_stage3_background_prewarm()` explicitly calls the already-wired Fab prewarm facade path when startup prewarm is enabled, then stage-3 startup prewarm stops being a no-op without reopening real job-runtime execution or host-side startup sequencing.
 
 ## Cheap Check
 
-- narrowest check that can disconfirm the hypothesis: Verify a named module-fab test can prove `run_startup_prewarm()` returns a backend-owned `AcceptedJob` when the current placeholder runtime is injected, then rerun the existing host `transport_wiring_smoke` to confirm the broader host baseline still compiles.
+- narrowest check that can disconfirm the hypothesis: Verify a named composition-root test can prove `run_stage3_background_prewarm()` triggers Fab prewarm when the config gate is enabled, then rerun `bootstrap_wiring_smoke` and the existing host `transport_wiring_smoke` to confirm the broader baseline still compiles.
 
 ## Validation Gate
 
-1. `cargo test -p launcher-module-fab run_startup_prewarm_returns_backend_owned_accepted_job_with_placeholder_runtime --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`
-2. `cargo test -p my-epic-launcher-desktop transport_wiring_smoke --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`
-3. `git -C q:\DEV\MyEpicLauncher diff --check`
+1. `cargo test -p launcher-composition-root run_stage3_background_prewarm_triggers_fab_prewarm_when_enabled --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`
+2. `cargo test -p launcher-composition-root bootstrap_wiring_smoke --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`
+3. `cargo test -p my-epic-launcher-desktop transport_wiring_smoke --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`
+4. `git -C q:\DEV\MyEpicLauncher diff --check`
 
 ## Validation Result
 
-- `cargo test -p launcher-module-fab run_startup_prewarm_returns_backend_owned_accepted_job_with_placeholder_runtime --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` passed and proved the Fab startup-prewarm path now returns a backend-owned `AcceptedJob` when the current placeholder runtime is injected.
-- `cargo test -p my-epic-launcher-desktop transport_wiring_smoke --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` passed and confirmed the existing host transport baseline still compiles and executes after the Fab startup-prewarm accepted-job change.
-- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md crates/module-fab/src/facade/mod.rs` produced no blocking output for the AT-042 prewarm-job slice.
+- `cargo test -p launcher-composition-root run_stage3_background_prewarm_triggers_fab_prewarm_when_enabled --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` passed and proved stage-3 startup prewarm now triggers the Fab prewarm path when the config gate is enabled.
+- `cargo test -p launcher-composition-root bootstrap_wiring_smoke --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` passed and confirmed the composition root still assembles services while stage-3 prewarm stays callable.
+- `cargo test -p my-epic-launcher-desktop transport_wiring_smoke --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` passed and confirmed the existing host transport baseline still compiles and executes after the stage-3 startup change.
+- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md crates/composition-root/src/bootstrap.rs crates/composition-root/src/startup.rs crates/composition-root/tests/bootstrap_wiring_smoke.rs` produced no blocking output for the AT-043 stage-3 slice.
 
 ## 需要更新的文档和日志
 
@@ -81,19 +88,21 @@
 2. .artifacts/ai/task-plan.md
 3. .artifacts/ai/progress.md
 4. .artifacts/ai/findings.md
-5. crates/module-fab/src/facade/mod.rs
+5. crates/composition-root/src/bootstrap.rs
+6. crates/composition-root/src/startup.rs
+7. crates/composition-root/tests/bootstrap_wiring_smoke.rs
 
 ## 验证后的 Git 动作
 
-1. commit message plan: Accept fab startup prewarm job
+1. commit message plan: Orchestrate startup stage-3 prewarm
 2. push command plan: git push
 
 ## 停止条件
 
-1. wiring `run_startup_prewarm` requires reopening stage-3 startup orchestration, real job-runtime, provider, or startup host execution beyond the allowed module slice
+1. wiring stage-3 prewarm requires reopening real job-runtime execution, provider IO, or host-side startup ordering beyond the allowed composition-root slice
 2. the current module surfaces cannot express backend-owned job acceptance without changing files outside the allowed set
 3. same blocker still failing after 5 repair attempts
 
 ## 安全恢复点
 
-- exact next step if execution is interrupted: stage the AT-042 record and module-fab files, commit the slice, then decide whether the next Fab/backend task should move to startup stage-3 orchestration, a real runtime bundle, or another narrow backend path.
+- exact next step if execution is interrupted: stage the AT-043 record and composition-root files, commit the slice, then decide whether the next backend task should move to a real runtime bundle, richer startup gating, or another narrow backend path.

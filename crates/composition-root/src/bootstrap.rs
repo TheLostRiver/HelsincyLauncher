@@ -94,7 +94,7 @@ pub fn build_desktop_services(config: DesktopBootstrapConfig) -> AppResult<Deskt
 
     let fab = Arc::new(build_fab_module(sqlite_config.clone(), fab_provider));
     let downloads = Arc::new(build_downloads_module(sqlite_config));
-    let startup = Arc::new(build_startup_pipeline());
+    let startup = Arc::new(build_startup_pipeline(&config, fab.clone()));
 
     Ok(DesktopAppServices::new(fab, downloads, startup))
 }
@@ -149,8 +149,11 @@ fn build_downloads_module(sqlite_config: SqliteStorageAdapterConfig) -> DesktopD
     })
 }
 
-fn build_startup_pipeline() -> StartupPipelineFacade {
-    StartupPipelineFacade::new()
+fn build_startup_pipeline(
+    config: &DesktopBootstrapConfig,
+    fab: Arc<DesktopFabFacade>,
+) -> StartupPipelineFacade {
+    StartupPipelineFacade::new(config.enable_fab && config.enable_startup_prewarm, Some(fab))
 }
 
 fn invalid_builder_input(builder: &str, detail: &str) -> AppError {

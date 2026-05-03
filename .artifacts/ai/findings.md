@@ -88,6 +88,8 @@
 - The current Fab `job_runtime` placeholder can be wrapped behind a narrow sync-job acceptance boundary so `FabFacade::sync_inventory()` returns a backend-owned `AcceptedJob` now, while real enqueue/runtime wiring remains deferred to a later slice.
 - AT-042 confirmed that a facade-level startup-prewarm acceptance slice is still possible before stage-3 orchestration lands: `FabFacade::run_startup_prewarm()` can return a backend-owned `AcceptedJob` locally while the startup pipeline remains a no-op.
 - The current doc set still implies that real startup prewarm execution belongs to the later startup facade and runtime bundle, so the safe narrow move is to stop at facade acceptance and leave `StartupPipelineFacade::run_stage3_background_prewarm()` untouched for now.
+- AT-043 confirmed that the next narrow startup slice after facade acceptance is the composition-root stage-3 orchestration hook itself: `StartupPipelineFacade::run_stage3_background_prewarm()` can call the already-wired Fab prewarm facade path without opening real runtime execution.
+- The current startup surface can safely gate stage-3 prewarm on the existing config capability flag, but richer session-availability gating and true job-runtime execution still remain later startup/runtime slices.
 
 ## Technical Decisions
 

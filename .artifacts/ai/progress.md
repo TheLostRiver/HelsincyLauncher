@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-042 - Accept fab startup prewarm job
-- Current phase: Phase 14 - Fab Startup Prewarm Job Acceptance
-- Last committed task before this slice: AT-2026-05-03-041 - Accept fab sync inventory job
-- Next validation gate: none pending for AT-2026-05-03-042
+- Active atomic task: none active; last committed task is AT-2026-05-03-043 - Orchestrate startup stage-3 prewarm
+- Current phase: Phase 15 - Startup Stage-3 Fab Prewarm Orchestration
+- Last committed task before this slice: AT-2026-05-03-042 - Accept fab startup prewarm job
+- Next validation gate: none pending for AT-2026-05-03-043
 
 ## Session Timeline
 
@@ -194,10 +194,14 @@
 - Confirmed the current startup pipeline is still a no-op and the composition root still injects `()` for Fab `job_runtime`, so this prewarm slice must stay at backend-owned facade acceptance rather than widening into startup-stage orchestration or real runtime enqueue wiring.
 - Wired `FabFacade::run_startup_prewarm()` through a narrow prewarm-job acceptance boundary, implemented the current `()` dependency as a backend-owned placeholder acceptance path, and added a named module-fab unit test to prove the command now returns an accepted job instead of `FAB_NOT_WIRED`.
 - Validated AT-2026-05-03-042 with `cargo test -p launcher-module-fab run_startup_prewarm_returns_backend_owned_accepted_job_with_placeholder_runtime`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, and a scoped `git diff --check`.
+- Started AT-2026-05-03-043 after the user accepted the recommendation to work on startup stage-3 orchestration next instead of jumping to the larger real runtime bundle.
+- Confirmed the current `StartupPipelineFacade` is still a full no-op while the composition-root docs explicitly place Fab prewarm in stage 3, so the narrowest next startup slice is to wire a config-gated call from stage 3 into the already-accepted `FabFacade::run_startup_prewarm()` path.
+- Wired `StartupPipelineFacade::run_stage3_background_prewarm()` to trigger the existing Fab prewarm facade path when capability gating is enabled, added focused startup unit tests for enabled/disabled behavior, and upgraded the composition-root smoke to exercise the stage-3 call path.
+- Validated AT-2026-05-03-043 with `cargo test -p launcher-composition-root run_stage3_background_prewarm_triggers_fab_prewarm_when_enabled`, `cargo test -p launcher-composition-root bootstrap_wiring_smoke`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, and a scoped `git diff --check`.
 
 ## Validation Snapshot
 
-- Latest completed validation: AT-2026-05-03-042 passed `cargo test -p launcher-module-fab run_startup_prewarm_returns_backend_owned_accepted_job_with_placeholder_runtime`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, and the scoped `git diff --check` for the prewarm-job slice.
+- Latest completed validation: AT-2026-05-03-043 passed `cargo test -p launcher-composition-root run_stage3_background_prewarm_triggers_fab_prewarm_when_enabled`, `cargo test -p launcher-composition-root bootstrap_wiring_smoke`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, and the scoped `git diff --check` for the stage-3 orchestration slice.
 - Latest repo-wide backend validation remains the previously completed `cargo check --workspace` plus the named host/composition/foundation smoke tests from the post-E2 baseline.
 
 ## Error Log
@@ -210,8 +214,8 @@
 
 | Question | Answer |
 |----------|--------|
-| Where am I? | Phase 14 Fab startup-prewarm job acceptance is complete and no active atomic task is currently open |
-| Where am I going? | Decide whether the next Fab/backend slice should open startup stage-3 orchestration, a real runtime bundle, or another narrow backend path |
-| What's the goal? | Keep turning the remaining transport-owned or facade-level Fab command gaps into backend-owned local behavior one narrow route at a time |
-| What have I learned? | `run_startup_prewarm` was still narrow enough to become backend-owned locally, but real startup stage-3 orchestration still belongs to the later startup/runtime wiring surface |
+| Where am I? | Phase 15 startup stage-3 Fab prewarm orchestration is complete and no active atomic task is currently open |
+| Where am I going? | Decide whether the next backend slice should open a real runtime bundle, richer startup gating, or another narrow backend path |
+| What's the goal? | Keep turning the remaining startup/backend gaps into explicit backend-owned orchestration one narrow route at a time |
+| What have I learned? | After AT-042, the next narrow move really was the composition-root stage-3 hook; real runtime execution and richer startup gating still remain later slices |
 | What have I done? | See the session timeline above |
