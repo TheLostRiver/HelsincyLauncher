@@ -15,3 +15,5 @@
 - planning-with-files and strict-doc-driven-development are not competing at the responsibility level; the conflict appears only when both are allowed to own active planning files or hook injection surfaces.
 - docs/TauriAIDevelopmentTransactionProtocolDesign.md already expects a layered design across project instructions, on-demand skills, and hooks, so integrating planning-with-files as a context-management layer is consistent with the existing protocol.
 - The critical integration rule is not "pick one skill" but "preserve a single authoritative task record set under `.artifacts/ai` while borrowing planning-with-files' context checkpoint and recovery discipline."
+- `check-complete` cannot be pointed at the repo's `.artifacts/ai/task-plan.md` unchanged because the repo records atomic task status as numbered `AT-... - in_progress|committed` lines instead of Manus-style `### Phase` blocks.
+- Shell validation on Windows is sensitive to `.sh` line endings even when the PowerShell side works, so repo-local shell adapters need explicit LF preservation and syntax checks.

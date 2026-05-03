@@ -29,3 +29,8 @@
 - Added docs/TauriAIContextManagementIntegrationDesign.md to define the role split, single-source-of-truth rule, concept mapping table, integration rules, and migration phases for reusing planning-with-files inside the repo protocol.
 - Registered the new integration design draft in docs/TauriRewriteArchitectureBlueprint.md so it becomes part of the discoverable companion architecture set.
 - Validated the docs-only slice with `git diff --check` and a direct mapping readback, confirming the new design keeps `.artifacts/ai` as the only authoritative task record set while preserving planning-with-files as the context-management layer.
+- Started AT-2026-05-03-004 to retarget the repo-local planning-with-files copy away from root `task_plan.md` / `progress.md` / `findings.md` and onto the `.artifacts/ai` record set.
+- Identified the direct control path for legacy file ownership: planning-with-files SKILL hooks plus the `init-session`, `check-complete`, and `session-catchup` helper scripts.
+- Retargeted the repo-local planning-with-files skill hooks, repo usage guidance, init scripts, resolve helpers, and catchup script so the active planning surface now points at `.artifacts/ai/task-plan.md`, `.artifacts/ai/progress.md`, and `.artifacts/ai/findings.md`.
+- Adapted `check-complete.ps1` and `check-complete.sh` so stop-time reporting understands both legacy Manus-style phase sections and the repo's numbered atomic-task status lines in `.artifacts/ai/task-plan.md`.
+- Validated the adapter slice by running `init-session.ps1`, `check-complete.ps1`, `session-catchup.py`, shell syntax checks for the touched `.sh` files, and `git diff --check`; also removed the temporary Python bytecode cache generated during validation.

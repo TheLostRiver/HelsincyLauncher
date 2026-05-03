@@ -19,7 +19,11 @@ try:
 except ImportError:
     orjson = None
 
-PLANNING_FILES = ['task_plan.md', 'progress.md', 'findings.md']
+PLANNING_FILES = [
+    '.artifacts/ai/task-plan.md',
+    '.artifacts/ai/progress.md',
+    '.artifacts/ai/findings.md',
+]
 MIN_SESSION_BYTES = 5000
 
 
@@ -192,8 +196,9 @@ def parse_session_messages(session_file: Path) -> List[Dict[str, Any]]:
 def planning_file_from_path(path_value: Any) -> Optional[str]:
     if not isinstance(path_value, str):
         return None
+    normalized = path_value.replace('\\', '/')
     for pf in PLANNING_FILES:
-        if path_value.endswith(pf):
+        if normalized.endswith(pf):
             return pf
     return None
 
@@ -429,7 +434,7 @@ def main():
 
     print("\n--- RECOMMENDED ---")
     print("1. Run: git diff --stat")
-    print("2. Read: task_plan.md, progress.md, findings.md")
+    print("2. Read: .artifacts/ai/task-plan.md, .artifacts/ai/progress.md, .artifacts/ai/findings.md")
     print("3. Update planning files based on above context")
     print("4. Continue with task")
 

@@ -48,3 +48,4 @@ Add task-specific docs when relevant:
 
 For non-trivial implementation, planning, or review work, use the workspace skill .github/skills/strict-doc-driven-development.
 That skill contains the stricter task protocol and the subtask briefing template.
+For long-running or context-heavy work, pair it with .github/skills/planning-with-files so context checkpoints and catchup are written into .artifacts/ai/task-plan.md, .artifacts/ai/progress.md, and .artifacts/ai/findings.md instead of the legacy root planning files.

@@ -1,4 +1,4 @@
-# Initialize planning files for a new session
+# Initialize repo-local planning files for a new session.
 # Usage: .\init-session.ps1 [-Template TYPE] [project-name]
 # Templates: default, analytics
 
@@ -14,7 +14,12 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $SkillRoot = Split-Path -Parent $ScriptDir
 $TemplateDir = Join-Path $SkillRoot "templates"
 
-Write-Host "Initializing planning files for: $ProjectName (template: $Template)"
+$ArtifactsDir = Join-Path (Get-Location) ".artifacts/ai"
+$TaskPlanPath = Join-Path $ArtifactsDir "task-plan.md"
+$FindingsPath = Join-Path $ArtifactsDir "findings.md"
+$ProgressPath = Join-Path $ArtifactsDir "progress.md"
+
+Write-Host "Initializing repo-local planning files for: $ProjectName (template: $Template)"
 
 # Validate template
 if ($Template -ne "default" -and $Template -ne "analytics") {
@@ -22,11 +27,16 @@ if ($Template -ne "default" -and $Template -ne "analytics") {
     $Template = "default"
 }
 
-# Create task_plan.md if it doesn't exist
-if (-not (Test-Path "task_plan.md")) {
+# Ensure the repo-local workflow directory exists.
+if (-not (Test-Path $ArtifactsDir)) {
+    New-Item -ItemType Directory -Path $ArtifactsDir -Force | Out-Null
+}
+
+# Create .artifacts/ai/task-plan.md if it doesn't exist
+if (-not (Test-Path $TaskPlanPath)) {
     $AnalyticsPlan = Join-Path $TemplateDir "analytics_task_plan.md"
     if ($Template -eq "analytics" -and (Test-Path $AnalyticsPlan)) {
-        Copy-Item $AnalyticsPlan "task_plan.md"
+        Copy-Item $AnalyticsPlan $TaskPlanPath
     } else {
         @"
 # Task Plan: [Brief Description]
@@ -42,7 +52,7 @@ Phase 1
 ### Phase 1: Requirements & Discovery
 - [ ] Understand user intent
 - [ ] Identify constraints
-- [ ] Document in findings.md
+- [ ] Document in .artifacts/ai/findings.md
 - **Status:** in_progress
 
 ### Phase 2: Planning & Structure
@@ -57,7 +67,7 @@ Phase 1
 
 ### Phase 4: Testing & Verification
 - [ ] Verify requirements met
-- [ ] Document test results
+- [ ] Document test results in .artifacts/ai/progress.md
 - **Status:** pending
 
 ### Phase 5: Delivery
@@ -72,18 +82,18 @@ Phase 1
 ## Errors Encountered
 | Error | Resolution |
 |-------|------------|
-"@ | Out-File -FilePath "task_plan.md" -Encoding UTF8
+"@ | Out-File -FilePath $TaskPlanPath -Encoding UTF8
     }
-    Write-Host "Created task_plan.md"
+    Write-Host "Created .artifacts/ai/task-plan.md"
 } else {
-    Write-Host "task_plan.md already exists, skipping"
+    Write-Host ".artifacts/ai/task-plan.md already exists, skipping"
 }
 
-# Create findings.md if it doesn't exist
-if (-not (Test-Path "findings.md")) {
+# Create .artifacts/ai/findings.md if it doesn't exist
+if (-not (Test-Path $FindingsPath)) {
     $AnalyticsFindings = Join-Path $TemplateDir "analytics_findings.md"
     if ($Template -eq "analytics" -and (Test-Path $AnalyticsFindings)) {
-        Copy-Item $AnalyticsFindings "findings.md"
+        Copy-Item $AnalyticsFindings $FindingsPath
     } else {
         @"
 # Findings & Decisions
@@ -104,15 +114,15 @@ if (-not (Test-Path "findings.md")) {
 
 ## Resources
 -
-"@ | Out-File -FilePath "findings.md" -Encoding UTF8
+"@ | Out-File -FilePath $FindingsPath -Encoding UTF8
     }
-    Write-Host "Created findings.md"
+    Write-Host "Created .artifacts/ai/findings.md"
 } else {
-    Write-Host "findings.md already exists, skipping"
+    Write-Host ".artifacts/ai/findings.md already exists, skipping"
 }
 
-# Create progress.md if it doesn't exist
-if (-not (Test-Path "progress.md")) {
+# Create .artifacts/ai/progress.md if it doesn't exist
+if (-not (Test-Path $ProgressPath)) {
     if ($Template -eq "analytics") {
         @"
 # Progress Log
@@ -133,7 +143,7 @@ if (-not (Test-Path "progress.md")) {
 ### Errors
 | Error | Resolution |
 |-------|------------|
-"@ | Out-File -FilePath "progress.md" -Encoding UTF8
+"@ | Out-File -FilePath $ProgressPath -Encoding UTF8
     } else {
         @"
 # Progress Log
@@ -154,13 +164,13 @@ if (-not (Test-Path "progress.md")) {
 ### Errors
 | Error | Resolution |
 |-------|------------|
-"@ | Out-File -FilePath "progress.md" -Encoding UTF8
+"@ | Out-File -FilePath $ProgressPath -Encoding UTF8
     }
-    Write-Host "Created progress.md"
+    Write-Host "Created .artifacts/ai/progress.md"
 } else {
-    Write-Host "progress.md already exists, skipping"
+    Write-Host ".artifacts/ai/progress.md already exists, skipping"
 }
 
 Write-Host ""
-Write-Host "Planning files initialized!"
-Write-Host "Files: task_plan.md, findings.md, progress.md"
+Write-Host "Repo-local planning files initialized!"
+Write-Host "Files: .artifacts/ai/task-plan.md, .artifacts/ai/findings.md, .artifacts/ai/progress.md"

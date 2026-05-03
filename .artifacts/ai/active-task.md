@@ -1,27 +1,27 @@
 # Active Task
 
-- id: AT-2026-05-03-003
-- title: Define planning-with-files integration mapping
+- id: AT-2026-05-03-004
+- title: Adapt planning-with-files to artifacts
 - status: committed
-- goal: Define how planning-with-files should act as the repo's context-management layer without competing with the `.artifacts/ai` transaction protocol.
+- goal: Retarget the repo-local planning-with-files skill copy so its hooks, init flow, and catchup flow operate on `.artifacts/ai` instead of legacy root planning files.
 - scope:
-  - define the role split between strict-doc-driven-development and planning-with-files
-  - define the authoritative `.artifacts/ai` file mapping for planning, progress, findings, and handoff semantics
-  - keep this slice docs-only and avoid changing hook runtime behavior
+  - repoint planning-with-files hooks and helper scripts to `.artifacts/ai/task-plan.md`, `.artifacts/ai/progress.md`, and `.artifacts/ai/findings.md`
+  - keep the repo on a single active task path and avoid reintroducing root `task_plan.md` ownership
+  - add minimal repo-level usage guidance so strict-doc and planning-with-files are used together instead of separately
 - out_of_scope:
-  - rewriting the third-party planning-with-files skill itself
-  - implementing repo-local adapters or automatic persistence behavior in this slice
+  - changing the strict-doc repo hook runtime behavior
+  - retiring legacy root planning files in this slice
 - allowed_files:
   - .artifacts/ai/**
-  - docs/TauriRewriteArchitectureBlueprint.md
-  - docs/TauriAIContextManagementIntegrationDesign.md
+  - .github/copilot-instructions.md
+  - .github/skills/planning-with-files/**
 - required_context:
-  - docs/TauriRewriteArchitectureBlueprint.md
-  - docs/TauriArchitecturePrinciplesDesign.md
   - docs/TauriAIDevelopmentTransactionProtocolDesign.md
+  - docs/TauriAIContextManagementIntegrationDesign.md
+  - docs/TauriArchitecturePrinciplesDesign.md
   - docs/TauriTestingStrategyAndQualityGateDesign.md
   - .github/skills/planning-with-files/SKILL.md
   - .github/skills/strict-doc-driven-development/SKILL.md
-- hypothesis: If planning-with-files is constrained to act as a context-management layer that writes into `.artifacts/ai`, the repo can reuse its disk-based context recovery without reintroducing competing planning files or breaking the single-active-task rule.
-- cheap_check: Validate the new docs-only slice with `git diff --check`, then confirm the mapping doc explicitly preserves `.artifacts/ai` as the only authoritative task record set.
-- next_step: Start the repo-local adapter slice that moves planning-with-files persistence and catchup semantics onto `.artifacts/ai`.
+- hypothesis: If the repo-local planning-with-files copy is retargeted to `.artifacts/ai` at the skill-hook and helper-script level, the workspace can reuse its context checkpoint and catchup discipline without reviving root planning files or violating the single-active-task rule.
+- cheap_check: Run `init-session.ps1`, `check-complete.ps1`, and `session-catchup.py` against the current repo after the patch, and confirm they operate on `.artifacts/ai` instead of `task_plan.md` / `progress.md` / `findings.md` at repo root.
+- next_step: Start the follow-up slice for legacy root planning file retirement or for tightening planning-with-files checkpoint cadence inside the repo reminder layer.
