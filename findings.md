@@ -44,6 +44,8 @@
 - 现有 `docs/TauriBackendCrateLayoutAndUseCaseStubDesign.md`、`docs/TauriCompositionRootWiringDesign.md` 和 `docs/TauriFirstCrateApiDrafts.md` 已经定义了后端目标结构，但仍缺一个“基于当前仓库如何真正落骨架”的实现文档。
 - 对当前仓库而言，第一版后端骨架最合理的落地路径不是先迁移到 `apps/desktop/`，而是先保留根目录 Next.js 前端，在根目录新增 `Cargo.toml`、`src-tauri/` 和 `crates/`。
 - 当后端骨架实现文档进一步用于开工时，还必须继续拆到原子任务级别：每个任务只碰少量文件，并绑定一个最小 `cargo` 验证命令。
+- 仅把原子任务拆细还不够；若某个任务第一次引入新的 workspace member，就必须把根 `Cargo.toml` 也列入该任务文件范围。
+- E 阶段如果只写成 `cargo check --workspace`，并不能证明宿主层 wiring 真正打通；至少需要一条验证 commands 注册、shared state 注入和 facade 调用路径的 host smoke test。
 
 ## Issues Encountered
 | Issue | Resolution |

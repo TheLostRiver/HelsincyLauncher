@@ -79,6 +79,11 @@ Phase 5
 - [x] Bind each atomic task to a minimal validation step
 - **Status:** complete
 
+### Phase 14: Backend Skeleton Review Fixes
+- [x] Tighten the workspace-member onboarding rule inside the atomic task plan
+- [x] Add a host-level smoke-test gate for E-phase transport wiring proof
+- **Status:** complete
+
 ## Decisions Made
 | Decision | Rationale |
 |----------|-----------|
@@ -93,6 +98,8 @@ Phase 5
 | 选择继续时补 account-auth | 用户随后明确选择继续补 account-auth 模块文档 |
 | 当前仓库的第一版后端骨架先采用 root frontend + src-tauri + crates 方案 | 现有工作区仍是根目录 Next.js 原型，先落可编译骨架比先做目录大迁移更稳 |
 | 后端骨架文档需要继续拆到原子任务级别 | 真正开始 scaffolding 前，每一步都应限定文件范围和最小验证，避免大块不可回退施工 |
+| 后端骨架原子任务中，首次引入某个包路径的任务必须同步更新根 Cargo.toml | 否则后续包级 cargo check 无法成立，workspace 规则与任务表会互相矛盾 |
+| E 阶段的链路打通必须由宿主级 smoke test 证明 | 单纯 cargo check 只能证明可编译，不能证明 commands 注册和 shared state 注入真的生效 |
 
 ## Errors Encountered
 | Error | Resolution |

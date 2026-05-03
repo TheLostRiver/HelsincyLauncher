@@ -39,6 +39,9 @@
 - 根据用户后续确认，将 docs/TauriBackendSkeletonImplementationDesign.md 进一步拆成原子任务表，为后续逐步 scaffolding 做准备。
 - 已创建提交 `docs: add backend skeleton implementation guide`。
 - 当前再次回到仅剩 planning 三件套待独立提交的状态。
+- 根据后续 review 结论，已修正 docs/TauriBackendSkeletonImplementationDesign.md 中的 workspace member 接入规则，并把 E 阶段升级为宿主级 smoke test 验证门槛。
+- 已创建提交 `docs: tighten backend skeleton rollout guide`。
+- 当前再次回到仅剩 planning 三件套待独立提交的状态。
 
 ### Test Results
 | Test | Expected | Actual | Status |
@@ -55,6 +58,8 @@
 | inspect backend design docs for current-repo implementation gap | 应确认现有文档仍偏结构设计而非当前仓库实现文档 | 结果符合预期 | PASS |
 | inspect backend skeleton doc for atomic execution granularity | 应进一步拆成原子任务并绑定最小验证 | 结果符合预期 | PASS |
 | git status after backend skeleton doc commit | 仅剩 planning 三件套未提交 | 结果符合预期 | PASS |
+| inspect backend skeleton doc after review repairs | 应显式写出 workspace member 接入规则与宿主 smoke test gate | 结果符合预期 | PASS |
+| git status after backend skeleton review-fix doc commit | 仅剩 planning 三件套未提交 | 结果符合预期 | PASS |
 
 ### Errors
 | Error | Resolution |
