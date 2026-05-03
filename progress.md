@@ -57,6 +57,8 @@
 - 新增 docs/TauriSecurityCredentialsAndPermissionsDesign.md，并把它接入 docs/TauriRewriteArchitectureBlueprint.md 的 companion drafts。
 - 检查 docs 和当前 package.json 后确认 development-environment bootstrap 相关内容此前也分散存在，但缺少独立的仓库级总文档。
 - 新增 docs/TauriDevelopmentEnvironmentBootstrapDesign.md，并把它接入 docs/TauriRewriteArchitectureBlueprint.md 的 companion drafts。
+- 检查 docs 后确认 release / packaging / update 相关内容此前也分散存在，但缺少独立的仓库级总文档。
+- 新增 docs/TauriReleasePackagingAndUpdateDesign.md，并把它接入 docs/TauriRewriteArchitectureBlueprint.md 的 companion drafts。
 
 ### Test Results
 | Test | Expected | Actual | Status |
@@ -90,6 +92,8 @@
 | inspect blueprint companion drafts after security-doc addition | 新安全总文档应被接入 companion drafts | 结果符合预期 | PASS |
 | inspect docs for standalone environment documentation | 应确认此前缺的是独立开发环境 bootstrap 总文档，而不是零散 setup 提示 | 结果符合预期 | PASS |
 | inspect blueprint companion drafts after environment-doc addition | 新环境 bootstrap 总文档应被接入 companion drafts | 结果符合预期 | PASS |
+| inspect docs for standalone release documentation | 应确认此前缺的是独立发布/打包/更新总文档，而不是零散 updater 提示 | 结果符合预期 | PASS |
+| inspect blueprint companion drafts after release-doc addition | 新发布/打包/更新总文档应被接入 companion drafts | 结果符合预期 | PASS |
 
 ### Errors
 | Error | Resolution |
