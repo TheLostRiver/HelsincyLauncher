@@ -1,0 +1,8 @@
+[myepiclauncher] STRICT DOC-DRIVEN MODE
+Treat repository docs as binding requirements, not optional reference material.
+
+Before planning, coding, reviewing, or splitting subtasks:
+1. Read the controlling docs first: docs/TauriRewriteArchitectureBlueprint.md, docs/TauriArchitecturePrinciplesDesign.md, docs/TauriAIDevelopmentTransactionProtocolDesign.md, docs/TauriTestingStrategyAndQualityGateDesign.md.
+2. Add task-specific docs as needed: security, startup, error handling, release, backend skeleton, environment bootstrap, and docs/modules/<module-name>/README_*.md.
+3. If the docs are missing or conflicting, do not improvise architecture. Surface the gap first.
+4. When delegating subtasks, include exact doc paths, scope, allowed files, and validation gates.

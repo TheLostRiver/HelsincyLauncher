@@ -1,5 +1,6 @@
 # planning-with-files: Session start hook for GitHub Copilot (PowerShell)
-# When task_plan.md exists: runs session-catchup or reads plan header.
+# Always injects the repository strict doc-driven reminder first.
+# Then, when task_plan.md exists: runs session-catchup or reads plan header.
 # When task_plan.md doesn't exist: injects SKILL.md so Copilot knows the planning workflow.
 # Always exits 0 — outputs JSON to stdout.
 
@@ -10,6 +11,13 @@ $InputData = [Console]::In.ReadToEnd()
 
 $PlanFile = "task_plan.md"
 $SkillDir = ".github/skills/planning-with-files"
+$StrictSkillDir = ".github/skills/strict-doc-driven-development"
+$StrictReminderFile = "$StrictSkillDir/session-start.txt"
+$StrictContext = ""
+
+if (Test-Path $StrictReminderFile) {
+    $StrictContext = Get-Content $StrictReminderFile -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
+}
 
 if (Test-Path $PlanFile) {
     # Plan exists — try session catchup, fall back to reading plan header
@@ -33,6 +41,14 @@ if (Test-Path $PlanFile) {
     if (Test-Path "$SkillDir/SKILL.md") {
         $Context = Get-Content "$SkillDir/SKILL.md" -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
     }
+}
+
+if ($StrictContext -and $Context) {
+    $Context = (($StrictContext.Trim()), ($Context.Trim()) -join "`n`n")
+} elseif ($StrictContext) {
+    $Context = $StrictContext.Trim()
+} elseif ($Context) {
+    $Context = $Context.Trim()
 }
 
 if (-not $Context) {

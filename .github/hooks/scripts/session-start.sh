@@ -1,6 +1,7 @@
 #!/bin/bash
 # planning-with-files: Session start hook for GitHub Copilot
-# When task_plan.md exists: runs session-catchup or reads plan header.
+# Always injects the repository strict doc-driven reminder first.
+# Then, when task_plan.md exists: runs session-catchup or reads plan header.
 # When task_plan.md doesn't exist: injects SKILL.md so Copilot knows the planning workflow.
 # Always exits 0 — outputs JSON to stdout.
 
@@ -9,6 +10,9 @@ INPUT=$(cat)
 
 PLAN_FILE="task_plan.md"
 SKILL_DIR=".github/skills/planning-with-files"
+STRICT_SKILL_DIR=".github/skills/strict-doc-driven-development"
+STRICT_REMINDER_FILE="$STRICT_SKILL_DIR/session-start.txt"
+STRICT_CONTEXT=$(cat "$STRICT_REMINDER_FILE" 2>/dev/null || echo "")
 PYTHON=""
 for _p in /usr/bin/python3 /usr/local/bin/python3 /opt/homebrew/bin/python3; do
     [ -x "$_p" ] && { PYTHON="$_p"; break; }
@@ -33,6 +37,14 @@ else
     if [ -f "$SKILL_DIR/SKILL.md" ]; then
         CONTEXT=$(cat "$SKILL_DIR/SKILL.md" 2>/dev/null || echo "")
     fi
+fi
+
+if [ -n "$STRICT_CONTEXT" ] && [ -n "$CONTEXT" ]; then
+    CONTEXT="$STRICT_CONTEXT
+
+$CONTEXT"
+elif [ -n "$STRICT_CONTEXT" ]; then
+    CONTEXT="$STRICT_CONTEXT"
 fi
 
 if [ -z "$CONTEXT" ]; then
