@@ -1,27 +1,30 @@
 # Active Task
 
-- id: AT-2026-05-03-006
-- title: Repair workflow recovery control paths
+- id: AT-2026-05-03-007
+- title: Add slash-command workflow entry points
 - status: committed
-- goal: Make the repo-local workflow surfaces respect active-task state, recover from `.artifacts/ai` consistently, and stop pointing at user-global planning-with-files copies.
+- goal: Expose explicit workspace-level /plan-xxx workflow commands that wrap the repo's strict-doc and planning-with-files protocol without introducing a second planning source.
 - scope:
-  - make the pre-tool-use hooks stop injecting `.artifacts/ai/active-task.md` after the active task is already `committed` or `aborted`
-  - extend planning-with-files catchup and repo-local skill guidance so recovery covers `.artifacts/ai/active-task.md` and `.artifacts/ai/handoff.md`
-  - remove repo-local references to user-global `.claude/.../planning-with-files/...` paths and clean up stale root-style template guidance
+  - add a minimal set of workspace prompt files under `.github/prompts/` for atomic-task planning, backend-skeleton planning, review planning, and handoff resume
+  - keep the prompts aligned with `.artifacts/ai` as the only authoritative task record set
+  - avoid changing existing hook or skill behavior beyond documenting or referencing the current workflow surfaces
 - out_of_scope:
-  - broader checkpoint-cadence reminder design beyond the direct bug fixes in this slice
-  - any frontend or backend feature work outside the workflow surfaces
+  - implementing the backend skeleton itself
+  - redesigning existing skills, hooks, or language-mode behavior beyond what the prompt entry points need
+  - adding user-profile or global customization files outside this repository
 - allowed_files:
   - .artifacts/ai/**
-  - .github/hooks/scripts/pre-tool-use.ps1
-  - .github/hooks/scripts/pre-tool-use.sh
-  - .github/skills/planning-with-files/**
+  - .github/prompts/**
 - required_context:
-  - docs/TauriAIDevelopmentTransactionProtocolDesign.md
-  - docs/TauriAIContextManagementIntegrationDesign.md
+  - docs/TauriRewriteArchitectureBlueprint.md
   - docs/TauriArchitecturePrinciplesDesign.md
+  - docs/TauriAIDevelopmentTransactionProtocolDesign.md
   - docs/TauriTestingStrategyAndQualityGateDesign.md
+  - docs/TauriAIContextManagementIntegrationDesign.md
   - .github/copilot-instructions.md
-- hypothesis: If the workflow surfaces treat only non-terminal active-task states as injectable current work, and both catchup and repo-local skill guidance explicitly cover `active-task.md` and `handoff.md` without falling back to user-global `.claude` copies, then the repo will stop leaking committed task scope into new work and resume from a single repo-local source of truth.
-- cheap_check: Run `pre-tool-use.ps1` against the current committed AT-005 state and confirm it no longer injects that committed task; run `session-catchup.py` and repo-local path greps to confirm recovery guidance now includes `active-task.md` / `handoff.md` and no longer references user-global `.claude/.../planning-with-files/...` paths.
-- next_step: Start the follow-up slice that decides whether planning-with-files' 2-action checkpoint cadence needs stronger repo-level reminders beyond the direct bug repairs.
+  - .github/skills/strict-doc-driven-development/SKILL.md
+  - .github/skills/planning-with-files/SKILL.md
+- hypothesis: If the repo adds a small set of `.github/prompts/*.prompt.md` files that point back to the existing strict-doc and planning-with-files workflow plus the controlling docs, then VS Code chat will expose explicit `/plan-xxx` entries without duplicating planning state or changing the underlying protocol.
+- cheap_check: Validate the new prompt files by checking for prompt-file diagnostics and by confirming the touched markdown files pass `git diff --check` with the expected frontmatter and paths.
+- validation_result: `get_errors` reported no prompt-file diagnostics for the new `.github/prompts/*.prompt.md` files, and `git diff --check` passed after the prompt and task-record updates.
+- next_step: Use `/plan-backend-skeleton`, `/plan-atomic-task`, `/plan-doc-review`, and `/resume-from-handoff` as the explicit front door for future repo workflow tasks; only add more command surfaces if this set proves insufficient.
