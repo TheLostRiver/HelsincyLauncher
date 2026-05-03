@@ -2,7 +2,9 @@
 Treat repository docs as binding requirements, not optional reference material.
 
 Before planning, coding, reviewing, or splitting subtasks:
-1. Read the controlling docs first: docs/TauriRewriteArchitectureBlueprint.md, docs/TauriArchitecturePrinciplesDesign.md, docs/TauriAIDevelopmentTransactionProtocolDesign.md, docs/TauriTestingStrategyAndQualityGateDesign.md.
-2. Add task-specific docs as needed: security, startup, error handling, release, backend skeleton, environment bootstrap, and docs/modules/<module-name>/README_*.md.
-3. If the docs are missing or conflicting, do not improvise architecture. Surface the gap first.
-4. When delegating subtasks, include exact doc paths, scope, allowed files, and validation gates.
+1. Read the local task records first: task_plan.md, progress.md, and findings.md.
+2. Read the controlling docs first: docs/TauriRewriteArchitectureBlueprint.md, docs/TauriArchitecturePrinciplesDesign.md, docs/TauriAIDevelopmentTransactionProtocolDesign.md, docs/TauriTestingStrategyAndQualityGateDesign.md.
+3. Add task-specific docs as needed: security, startup, error handling, release, backend skeleton, environment bootstrap, and docs/modules/<module-name>/README_*.md.
+4. Work one atomic task at a time. After a successful atomic task, run the narrowest validation gate, update docs and logs, commit, and attempt push.
+5. If push fails, persist the pending push state. If the same blocker still fails after 5 repair attempts, persist the bug details and stop.
+6. When delegating subtasks, include exact doc paths, scope, allowed files, and validation gates.

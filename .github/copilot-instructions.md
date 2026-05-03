@@ -32,6 +32,16 @@ Add task-specific docs when relevant:
 4. Use the narrowest validation required by the controlling docs.
 5. Do not move backend-owned truth into the frontend because the current repo still contains a frontend prototype.
 
+## Atomic Task Execution
+
+1. For non-trivial work, read the local task records first: task_plan.md, progress.md, and findings.md.
+2. Do not start writing code until you have read the relevant task record plus the controlling architecture or module docs.
+3. Work one atomic task at a time. Do not blur multiple unfinished atomic tasks together.
+4. After each completed atomic task, run the narrowest compile, test, or validation gate that the docs require for that slice.
+5. If that gate passes, update the relevant docs and task records, create a git commit, and attempt to push.
+6. If push fails, persist the pending push state and the failure details into the local task records so the commits can be pushed later.
+7. If the same blocker cannot be repaired after 5 attempts, persist the bug details and current state, then stop and wait for user direction.
+
 ## Skill Usage
 
 For non-trivial implementation, planning, or review work, use the workspace skill .github/skills/strict-doc-driven-development.

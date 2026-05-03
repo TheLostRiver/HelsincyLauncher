@@ -18,6 +18,16 @@ Treat the repository docs as binding engineering requirements.
 4. When splitting or delegating subtasks, include exact doc paths, scope, allowed files, and validation gates.
 5. Use the narrowest validation that the controlling docs require. Do not replace it with a looser check.
 
+## Atomic Task Loop
+
+1. Read the local task records first: task_plan.md, progress.md, and findings.md.
+2. Do not begin coding until you have read both the task record and the relevant architecture or module docs.
+3. Keep exactly one active atomic task in progress until it reaches validation, commit, or a blocked state.
+4. After each successful atomic task, run the narrowest compile, test, or validation gate required by the docs.
+5. If that gate passes, update the relevant docs and task records, create a git commit, and attempt to push immediately.
+6. If push fails, do not panic and do not discard the commit. Persist the pending push details in the task records so the outstanding commits can be pushed later.
+7. If a blocker still fails after 5 repair attempts, persist the bug details, what was tried, and the current state, then stop and wait for user direction.
+
 ## Required Baseline Docs
 
 Read these first for most implementation tasks:
@@ -74,6 +84,8 @@ Before delegating, verify all of the following:
 3. The subtask names the narrowest validation to run immediately after editing.
 4. The subtask states which architectural moves are forbidden.
 5. The subtask does not assume frontend-only shortcuts when the docs assign ownership to backend, host, or composition root.
+6. The subtask names which task records and docs must be updated before commit.
+7. The subtask states whether a successful validation must be followed by git commit and push.
 
 ## Prohibited Behavior
 

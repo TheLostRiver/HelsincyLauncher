@@ -15,6 +15,12 @@ State the exact local outcome.
 
 - path/to/file-or-directory
 
+## Local Task Records To Read First
+
+- task_plan.md
+- progress.md
+- findings.md
+
 ## Controlling Docs
 
 1. docs/...
@@ -34,6 +40,16 @@ State the narrowest validation that can disconfirm the current hypothesis.
 
 1. command or focused check
 2. command or focused check
+
+## Task Records And Docs To Update
+
+1. task_plan.md / progress.md / findings.md updates
+2. repository or module docs to refresh
+
+## Post-validation Git Action
+
+1. commit message plan
+2. push immediately after validation, or record pending push details if push fails
 
 ## Done When
 
