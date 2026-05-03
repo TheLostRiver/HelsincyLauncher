@@ -34,6 +34,9 @@
 - 当前 projects 模块由 components/MyProjectsContent.tsx 单独承载，已经包含工程列表、选中详情、健康状态和操作入口四类语义。
 - projects 模块与 engines、fab-inventory 的关系更适合通过稳定摘要字段表达，而不是直接依赖其他模块内部状态。
 - 当前用户只选择继续该方向，因此最自然的下一步是按既定优先级先补 projects，而不是跳到 settings。
+- 当前 settings 模块由 components/Settings.tsx 单独承载，语义集中在两个高频设置开关和一个本地库路径摘要。
+- settings 模块最关键的边界是“前端只展示配置摘要与修改意图，真实配置读写和迁移仍应在后端或独立配置层”。
+- 当前 settings 文档的最自然 git 拆分是一组 settings 三件套，再单独跟一个 planning 三件套提交。
 
 ## Issues Encountered
 | Issue | Resolution |

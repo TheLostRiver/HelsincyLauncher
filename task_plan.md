@@ -56,6 +56,12 @@ Phase 5
 - [x] Keep task_plan.md, findings.md, and progress.md together for the follow-up planning commit
 - **Status:** complete
 
+### Phase 10: Settings Rollout
+- [x] Instantiate settings module docs
+- [x] Commit settings module guides separately
+- [x] Keep task_plan.md, findings.md, and progress.md together for the follow-up planning commit
+- **Status:** complete
+
 ## Decisions Made
 | Decision | Rationale |
 |----------|-----------|
@@ -66,6 +72,7 @@ Phase 5
 | 新增模块文档按三组提交拆分 | 先提交规范与模板，再提交实例模块文档，最后单独提交 planning 三件套，边界更清晰 |
 | 继续补 engines 后再补 downloads | 用户明确要求优先顺序，且两者都应各自独立提交 |
 | 在未指定 settings 前先补 projects | 现有模块优先顺序里 projects 在 settings 之前，且用户只选择继续该方向 |
+| 选择继续时补 settings | 用户在上一步明确选择了继续补 settings 模块文档 |
 
 ## Errors Encountered
 | Error | Resolution |
