@@ -111,6 +111,7 @@ cargo test -p my-epic-launcher-desktop transport_wiring_smoke
 ### Workflow And Governance
 
 - [CONTRIBUTING.md](CONTRIBUTING.md)
+- [docs/README.md](docs/README.md)
 - [docs/TauriAIDevelopmentTransactionProtocolDesign.md](docs/TauriAIDevelopmentTransactionProtocolDesign.md)
 - [docs/TauriDocumentationBenchmarkAgainstCodexManager.md](docs/TauriDocumentationBenchmarkAgainstCodexManager.md)
 - [.artifacts/ai/README.md](.artifacts/ai/README.md)

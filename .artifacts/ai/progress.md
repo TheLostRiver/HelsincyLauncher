@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-036 - Add current-repo architecture overview
-- Current phase: Phase 8 - Current-repo Architecture Overview
-- Last committed task before this slice: AT-2026-05-03-035 - Add contributor collaboration guide
-- Next validation gate: none pending for AT-2026-05-03-036
+- Active atomic task: none active; last committed task is AT-2026-05-03-037 - Add docs map overview
+- Current phase: Phase 9 - Docs Map Overview
+- Last committed task before this slice: AT-2026-05-03-036 - Add current-repo architecture overview
+- Next validation gate: none pending for AT-2026-05-03-037
 
 ## Session Timeline
 
@@ -171,10 +171,15 @@
 - Added `docs/TauriCurrentRepoArchitectureOverview.md` with the live repo shape, directory duties, key entrypoint index, host/composition bootstrap chain, validation entrypoints, structure hotspots, and suggested landing zones.
 - Updated `README.md` to expose the new overview from the architecture section.
 - Validated AT-2026-05-03-036 with README grep checks for the new architecture link, overview-doc grep checks for the required headings, and `git diff --check -- README.md docs/TauriCurrentRepoArchitectureOverview.md .artifacts/ai`.
+- Committed AT-2026-05-03-036 as `f5c40c5` (`Add current-repo architecture overview`) and pushed it to `main`.
+- Started AT-2026-05-03-037 after the user selected “继续 P3” in the confirmation UI, targeting the docs-map entry layer recommended by the benchmark.
+- Added `docs/README.md` as the docs map, grouping the current documentation into first-entry docs, principles, current-repo navigation, topic docs, governance docs, and module docs while explicitly routing what should stay out of the root README.
+- Updated `README.md` to expose the docs map from the workflow/governance section.
+- Validated AT-2026-05-03-037 with README grep checks for the docs-map link, docs-map grep checks for the required headings, and `git diff --check -- README.md docs/README.md .artifacts/ai`.
 
 ## Validation Snapshot
 
-- Latest completed validation: AT-2026-05-03-036 passed README grep checks for the architecture-overview link, overview-doc grep checks for the required headings, and `git diff --check -- README.md docs/TauriCurrentRepoArchitectureOverview.md .artifacts/ai`.
+- Latest completed validation: AT-2026-05-03-037 passed README grep checks for the docs-map link, docs-map grep checks for the required headings, and `git diff --check -- README.md docs/README.md .artifacts/ai`.
 - Latest repo-wide backend validation remains the previously completed `cargo check --workspace` plus the named host/composition/foundation smoke tests from the post-E2 baseline.
 
 ## Error Log

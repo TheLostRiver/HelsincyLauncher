@@ -6,12 +6,12 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 8 - Current-repo Architecture Overview
+Phase 9 - Docs Map Overview
 
 ## Current Focus
 
-- AT-2026-05-03-036 is implementing benchmark P2 by adding a current-repo architecture overview with entrypoint indexes, structure hotspots, and landing-zone guidance.
-- Keep the new overview complementary to the blueprint and principles docs rather than restating them.
+- AT-2026-05-03-037 is implementing benchmark P3 by adding `docs/README.md` as the docs map.
+- Keep the new map focused on ownership and routing, not on repeating deep doc content.
 
 ## Phases
 
@@ -63,6 +63,12 @@ Phase 8 - Current-repo Architecture Overview
 - Atomic tasks: AT-2026-05-03-036
 - **Status:** complete
 
+### Phase 9: Docs Map Overview
+
+- Outcome: add `docs/README.md` as the routing map for principles, topic docs, current-repo docs, governance docs, and module docs.
+- Atomic tasks: AT-2026-05-03-037
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -101,6 +107,7 @@ Phase 8 - Current-repo Architecture Overview
 34. AT-2026-05-03-034 - committed - benchmarked the repo documentation against Codex-Manager, recorded the optimization plan, and repaired the README entry surface to match the current repo state.
 35. AT-2026-05-03-035 - committed - added a root contributor collaboration guide and exposed it from README as the benchmarked P1 entry layer.
 36. AT-2026-05-03-036 - committed - added a current-repo architecture overview and exposed it from README as the benchmarked P2 entry layer.
+37. AT-2026-05-03-037 - committed - added `docs/README.md` as the benchmarked P3 docs map and exposed it from README.
 
 ## Key Questions
 
@@ -118,8 +125,8 @@ Phase 8 - Current-repo Architecture Overview
 
 ## Follow-up Queue
 
-1. Decide whether to implement benchmark P3 by adding `docs/README.md` as the docs map.
-2. If docs entrance work pauses after P2, resume the next backend validation or integration step from the validated host transport baseline while leaving user frontend edits untouched.
+1. After AT-2026-05-03-037, decide whether to continue broader documentation governance or return to backend integration.
+2. If docs entrance work pauses after P3, resume the next backend validation or integration step from the validated host transport baseline while leaving user frontend edits untouched.
 
 ## Legacy Note
 

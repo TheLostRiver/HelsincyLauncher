@@ -76,6 +76,8 @@
 - AT-036 confirmed that the missing P2 layer is not another principles doc; it is a current-state map of the live repo shape, key entrypoints, validation entrypoints, and landing zones.
 - The most useful current-repo architecture content is concrete and file-anchored: `src-tauri/src/bootstrap.rs`, `src-tauri/src/commands/mod.rs`, `crates/composition-root/src/bootstrap.rs`, and `src-tauri/tests/transport_wiring_smoke.rs` explain more about today's repo than repeating high-level boundaries.
 - The architecture overview should stay narrowly scoped to “where things live and how they connect today”; if it starts re-explaining all non-goals and principles from the blueprint, it will drift into a duplicate source.
+- AT-037 confirmed that the docs-map layer is most useful when it is opinionated about ownership and routing: which docs are first-entry docs, which are principles, which describe the current repo, which are topic docs, and which are module docs.
+- `docs/README.md` should not become a second README; its value is in telling contributors where to go next and what does not belong back in the root README.
 
 ## Technical Decisions
 
