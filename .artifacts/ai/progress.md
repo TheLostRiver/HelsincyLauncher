@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-015 - Persist kernel foundation lockfile
+- Active atomic task: none active; last committed task is AT-2026-05-03-016 - Implement foundation contract surface
 - Current phase: Phase 5 - Backend Skeleton Bootstrap
-- Last committed task before this slice: AT-2026-05-03-014 - Bootstrap kernel foundation crate
-- Next validation gate: none pending for AT-2026-05-03-015
+- Last committed task before this slice: AT-2026-05-03-015 - Persist kernel foundation lockfile
+- Next validation gate: none pending for AT-2026-05-03-016
 
 ## Session Timeline
 
@@ -86,6 +86,10 @@
 - Detected one adjacent cleanup artifact after AT-2026-05-03-014: adding the new workspace package updated `Cargo.lock`, so the repo needs one tiny follow-up slice before B2 can start from a clean baseline.
 - Started AT-2026-05-03-015 to persist that lockfile delta rather than carrying it forward as unrelated worktree noise.
 - Validated AT-2026-05-03-015 with `cargo check -p launcher-kernel-foundation --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`, `git diff --check`, and `git status --short`, confirming only the expected lockfile and task-record files remained before commit.
+- Started AT-2026-05-03-016 after the user selected “继续 B2”, targeting the first real `launcher-kernel-foundation` public surface plus the named `foundation_contract_smoke` test.
+- Confirmed a local doc drift before editing code: the B2 task table omits `crates/kernel-foundation/Cargo.toml`, `src/lib.rs`, and `src/result.rs` even though the current B1 baseline requires them to make the documented B2 surface compile and export correctly.
+- Validated AT-2026-05-03-016 with `cargo test -p launcher-kernel-foundation foundation_contract_smoke --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` and `git diff --check`, confirming the foundation surface and named smoke test now exist and pass.
+- Detected one adjacent cleanup artifact after AT-2026-05-03-016: adding chrono/serde-json-backed foundation dependencies updated `Cargo.lock`, so the repo needs one tiny follow-up slice before B3 can start cleanly.
 
 ## Validation Snapshot
 

@@ -10,3 +10,10 @@ name = "launcher_kernel_foundation"
 path = "src/lib.rs"
 
 [dependencies]
+chrono = { version = "0.4", features = ["serde"] }
+serde.workspace = true
+thiserror.workspace = true
+uuid.workspace = true
+
+[dev-dependencies]
+serde_json = "1"
