@@ -64,6 +64,8 @@
 - 当前真正缺的是独立的仓库级开发环境 bootstrap 总文档，因此已新增 `docs/TauriDevelopmentEnvironmentBootstrapDesign.md` 来统一 Windows 下的 Node、Rust、Build Tools、WebView2 与分阶段验证命令。
 - 当前 docs 里同样并非完全没有发布、打包和更新规则；Tauri 宿主打包职责、Updates 模块边界、auto-update UI 和 MSI 前提已经散落在 blueprint、settings 和环境文档里。
 - 当前真正缺的是独立的仓库级发布/打包/更新总文档，因此已新增 `docs/TauriReleasePackagingAndUpdateDesign.md` 来统一 app self-update、packaging、channel policy 和 rollback 边界。
+- 当前仓库根目录不存在 `README.md`，因此缺少一个解释“现在这个仓库到底是什么状态、能运行什么、应该先读哪些文档”的统一入口。
+- 当前真正缺的是根仓库 README，因此已新增 `README.md` 来统一 quick start、当前状态说明和关键文档入口。
 
 ## Issues Encountered
 | Issue | Resolution |

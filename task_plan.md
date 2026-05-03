@@ -138,6 +138,12 @@ Phase 5
 - [x] Wire the new release document into the architecture blueprint companion list
 - **Status:** complete
 
+### Phase 24: Repository README Baseline
+- [x] Verify whether a root repository README already exists
+- [x] Add a root README that explains current repo reality, quick start, and doc entry points
+- [x] Record the README addition in planning files
+- **Status:** complete
+
 ## Decisions Made
 | Decision | Rationale |
 |----------|-----------|
@@ -164,6 +170,7 @@ Phase 5
 | 当前仓库还需要一份独立的安全、凭据与权限总文档 | secure storage、token 生命周期、host permission surface 和日志脱敏规则虽然散落存在，但缺少统一入口会让实现阶段再次把 secret 边界打穿 |
 | 当前仓库还需要一份独立的开发环境 bootstrap 总文档 | Node、Rust、Windows Build Tools、WebView2 和“哪些命令当前应成功”虽然能从仓库与外部文档拼出来，但缺少统一入口会让环境问题和代码问题混在一起 |
 | 当前仓库还需要一份独立的发布/打包/更新总文档 | Updates 模块边界、app self-update、installer/packaging 和 rollback 规则虽然散落存在，但缺少统一入口会让更新链路与内容下载链路重新混层 |
+| 当前仓库还需要一个根 README 入口文档 | 没有仓库级入口页时，新成员必须自己从 package.json、docs 和 planning 文件里拼当前状态与阅读顺序 |
 
 ## Errors Encountered
 | Error | Resolution |

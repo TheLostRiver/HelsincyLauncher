@@ -59,6 +59,8 @@
 - 新增 docs/TauriDevelopmentEnvironmentBootstrapDesign.md，并把它接入 docs/TauriRewriteArchitectureBlueprint.md 的 companion drafts。
 - 检查 docs 后确认 release / packaging / update 相关内容此前也分散存在，但缺少独立的仓库级总文档。
 - 新增 docs/TauriReleasePackagingAndUpdateDesign.md，并把它接入 docs/TauriRewriteArchitectureBlueprint.md 的 companion drafts。
+- 检查仓库根目录后确认当前不存在 `README.md`，因此缺少仓库级入口文档。
+- 新增 `README.md`，统一说明当前 repo reality、前端 quick start、关键设计文档入口和近期开工方向。
 
 ### Test Results
 | Test | Expected | Actual | Status |
@@ -94,6 +96,8 @@
 | inspect blueprint companion drafts after environment-doc addition | 新环境 bootstrap 总文档应被接入 companion drafts | 结果符合预期 | PASS |
 | inspect docs for standalone release documentation | 应确认此前缺的是独立发布/打包/更新总文档，而不是零散 updater 提示 | 结果符合预期 | PASS |
 | inspect blueprint companion drafts after release-doc addition | 新发布/打包/更新总文档应被接入 companion drafts | 结果符合预期 | PASS |
+| inspect repo root for README | 当前应确认根目录没有仓库 README 入口文档 | 结果符合预期 | PASS |
+| inspect root README after addition | 新 README 应清楚写出 repo reality、quick start 和 key docs | 结果符合预期 | PASS |
 
 ### Errors
 | Error | Resolution |
