@@ -47,6 +47,7 @@
 - The current B2 task-table row is slightly stale against the committed B1 baseline: implementing the documented foundation surface also requires `crates/kernel-foundation/Cargo.toml`, `crates/kernel-foundation/src/lib.rs`, and `crates/kernel-foundation/src/result.rs`, so the controlling doc should be corrected before continuing.
 - The first dependency-bearing foundation slice can expand `Cargo.lock` substantially because the repo had not resolved `chrono` and `serde_json` trees before; this is still a lockfile cleanup concern, not a reason to widen the B2 code task.
 - The B3 `launcher-kernel-jobs` slice does not need the full later runtime directory tree yet; the current controlling docs already permit a narrower shell with `lib.rs`, `model.rs`, and `runtime.rs` as long as it exposes only shared job state, snapshot, and runtime traits.
+- The `launcher-kernel-jobs` B3 lockfile delta is smaller than the foundation one because it only adds the new workspace package entry and reuses already-resolved foundation dependencies; it should still be persisted as a separate cleanup slice.
 
 ## Technical Decisions
 

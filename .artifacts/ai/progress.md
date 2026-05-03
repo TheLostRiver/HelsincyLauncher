@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-018 - Bootstrap kernel jobs crate
+- Active atomic task: none active; last committed task is AT-2026-05-03-019 - Persist kernel jobs lockfile
 - Current phase: Phase 5 - Backend Skeleton Bootstrap
-- Last committed task before this slice: AT-2026-05-03-017 - Persist foundation dependency lockfile
-- Next validation gate: none pending for AT-2026-05-03-018
+- Last committed task before this slice: AT-2026-05-03-018 - Bootstrap kernel jobs crate
+- Next validation gate: none pending for AT-2026-05-03-019
 
 ## Session Timeline
 
@@ -96,6 +96,8 @@
 - Confirmed the B3 slice can stay narrower than the full runtime design: the controlling docs already align on `Cargo.toml`, `crates/kernel-jobs/Cargo.toml`, `src/lib.rs`, `model.rs`, and `runtime.rs` plus the package-scoped `cargo check` gate.
 - Validated AT-2026-05-03-018 with `cargo check -p launcher-kernel-jobs --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` and `git diff --check`, confirming the minimal job shell compiles without leaking module-specific runtime logic.
 - Detected one adjacent cleanup artifact after AT-2026-05-03-018: adding the new workspace member updated `Cargo.lock`, so the repo needs one tiny follow-up slice before the next crate starts cleanly.
+- Started AT-2026-05-03-019 to persist that small lockfile delta rather than carrying it forward as unrelated worktree noise.
+- Validated AT-2026-05-03-019 with `cargo check -p launcher-kernel-jobs --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`, `git diff --check`, and `git status --short`, confirming only the expected lockfile and task-record files remained before commit.
 
 ## Validation Snapshot
 
