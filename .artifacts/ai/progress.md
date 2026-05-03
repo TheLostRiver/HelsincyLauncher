@@ -1,6 +1,15 @@
 # AI Progress Log
 
-## Session: 2026-05-03
+## Current Status
+
+- Active atomic task: none active; last committed task is AT-2026-05-03-008 - Normalize AI record schema
+- Current phase: Phase 4 - Record Schema Normalization (complete)
+- Last committed task before this slice: AT-2026-05-03-007 - Add slash-command workflow entry points
+- Next validation gate: none pending for the current slice
+
+## Session Timeline
+
+### Session: 2026-05-03
 
 - Started AT-2026-05-03-002 to make the repo workflow skill prefer Chinese while supporting user-selectable zh-CN and en modes.
 - Confirmed the most user-visible entry point is session-start, so the first localization slice is the startup reminder and bootstrap prompt.
@@ -49,3 +58,30 @@
 - Chose `.github/prompts/*.prompt.md` as the local command primitive because prompts surface as slash commands in VS Code chat and can wrap the current repo workflow without creating another competing planning source.
 - Added four workspace prompt files under `.github/prompts/`: `plan-atomic-task`, `plan-backend-skeleton`, `plan-doc-review`, and `resume-from-handoff`, each pointing back to the repo's `.artifacts/ai` records and controlling docs instead of creating a second workflow state surface.
 - Validated AT-2026-05-03-007 by checking the new prompt files with `get_errors` (no diagnostics) and running `git diff --check` (clean) after the prompt and task-record edits.
+- Started AT-2026-05-03-008 to normalize the live `.artifacts/ai` record schema after user feedback that the files feel inconsistent and under-specified.
+- Compared the current live records against the planning-with-files templates, the strict-doc active-task template, and the init-session bootstrap scripts.
+- Confirmed the main source of drift: live records, repo templates, and bootstrap scripts currently use different schemas, so new sessions do not regenerate the same structure users see in existing files.
+- Normalized the live `.artifacts/ai` records into a hybrid schema: strict-doc keeps explicit atomic-task semantics, while planning-with-files contributes stable section ordering for plan, progress, and findings.
+- Aligned the repo-local planning templates and both init-session scripts to the same section order so new sessions bootstrap files that match the live workflow surface.
+- Validated AT-2026-05-03-008 by checking the touched files with `get_errors`, then rerunning `bash -n .github/skills/planning-with-files/scripts/init-session.sh` and `git diff --check` with a repo-relative path that Windows bash accepts.
+
+## Validation Snapshot
+
+- Latest completed validation: AT-2026-05-03-008 passed `get_errors` on the touched records, templates, and bootstrap scripts.
+- Latest patch validation: `bash -n .github/skills/planning-with-files/scripts/init-session.sh` and `git diff --check` both passed.
+
+## Error Log
+
+| Timestamp | Error | Attempt | Resolution |
+|-----------|-------|---------|------------|
+| 2026-05-03 | Sync terminal commands were executing without the intended repo cwd | 1 | Switched verification and commit flow to async terminal commands with explicit repo paths |
+
+## 5-Question Reboot Check
+
+| Question | Answer |
+|----------|--------|
+| Where am I? | Phase 4 is complete; no active atomic task is currently open |
+| Where am I going? | Use the normalized schema for future workflow slices and tighten reminders only if drift returns |
+| What's the goal? | Keep `.artifacts/ai` readable and consistent without reintroducing competing planning surfaces |
+| What have I learned? | The current disorder came from schema drift across live records, templates, and init-session output |
+| What have I done? | See the session timeline above |

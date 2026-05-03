@@ -1,4 +1,12 @@
-# AI Findings
+# AI Findings & Decisions
+
+## Requirements
+
+- Keep `.artifacts/ai` as the only authoritative workflow record set.
+- Preserve the repo's single-active-task protocol and compatibility with existing hook parsing.
+- Normalize the live records so they look intentional and match the repo-local planning-with-files workflow.
+
+## Research Findings
 
 - The stale startup context was caused by .github/hooks/scripts/session-start.ps1 and session-start.sh reading root task_plan.md.
 - The stricter repo instructions and workflow templates still referenced root task_plan.md, progress.md, and findings.md, which conflicted with docs/TauriAIDevelopmentTransactionProtocolDesign.md.
@@ -24,3 +32,37 @@
 - Session catchup is not protocol-aligned if it only tracks `task-plan.md`, `progress.md`, and `findings.md`; the repo's actual recovery surface also includes `active-task.md` for the current slice and `handoff.md` for suspend/resume state.
 - In VS Code chat, explicit workspace slash commands are exposed via `.github/prompts/*.prompt.md`; existing `user-invocable` skills show up under `/`, but they do not automatically create named `/plan-xxx` entry points.
 - For this repository, prompt files are the least disruptive way to expose named workflow commands because they can reference the existing strict-doc and planning-with-files protocol while keeping `.artifacts/ai` as the only authoritative task record set.
+- The current disorder is structural, not just cosmetic: live `.artifacts/ai` files, planning-with-files templates, and init-session bootstrap output currently use different schemas.
+- The task-plan schema remains compatible with the existing stop hooks as long as the numbered ledger lines keep the form `N. AT-... - status - description`, even when richer planning sections are added around them.
+
+## Technical Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| `.artifacts/ai` remains the only authoritative task record set | Prevents dual planning surfaces and stale recovery paths |
+| The task-plan keeps a numbered AT ledger | `check-complete` and stop hooks already parse that shape |
+| The repo should use one hybrid schema across live records, templates, and bootstrap output | planning-with-files readability is useful, but strict-doc semantics must stay explicit |
+
+## Issues Encountered
+
+| Issue | Resolution |
+|-------|------------|
+| Generic planning templates and repo live files drifted into different shapes | Normalize both the live records and the template/bootstrap sources together |
+| Sync terminal commands did not preserve the intended repo cwd for verification and commit flow | Use async terminal commands with explicit repo paths when git output matters |
+
+## Resources
+
+- docs/TauriRewriteArchitectureBlueprint.md
+- docs/TauriArchitecturePrinciplesDesign.md
+- docs/TauriAIDevelopmentTransactionProtocolDesign.md
+- docs/TauriTestingStrategyAndQualityGateDesign.md
+- docs/TauriAIContextManagementIntegrationDesign.md
+- .github/skills/planning-with-files/SKILL.md
+- .github/skills/planning-with-files/templates/task_plan.md
+- .github/skills/planning-with-files/templates/progress.md
+- .github/skills/planning-with-files/templates/findings.md
+- .github/skills/strict-doc-driven-development/active-atomic-task-template.md
+
+## Visual/Browser Findings
+
+- None in this slice.

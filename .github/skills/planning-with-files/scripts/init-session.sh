@@ -35,96 +35,134 @@ fi
 
 write_default_task_plan() {
     cat > "$1" <<'EOF'
-# Task Plan: [Brief Description]
+# AI Task Plan
 
 ## Goal
 [One sentence describing the end state]
 
 ## Current Phase
-Phase 1
+Phase 1 - Requirements & Discovery
+
+## Current Focus
+- [What this phase is doing right now]
 
 ## Phases
 
 ### Phase 1: Requirements & Discovery
-- [ ] Understand user intent
-- [ ] Identify constraints
-- [ ] Document in .artifacts/ai/findings.md
+- Outcome: [What this phase should produce]
+- Atomic tasks: [AT-...]
 - **Status:** in_progress
 
 ### Phase 2: Planning & Structure
-- [ ] Define approach
-- [ ] Create project structure
+- Outcome: [What this phase should produce]
+- Atomic tasks: [AT-...]
 - **Status:** pending
 
 ### Phase 3: Implementation
-- [ ] Execute the plan
-- [ ] Write to files before executing
+- Outcome: [What this phase should produce]
+- Atomic tasks: [AT-...]
 - **Status:** pending
 
 ### Phase 4: Testing & Verification
-- [ ] Verify requirements met
-- [ ] Document test results in .artifacts/ai/progress.md
+- Outcome: [What this phase should produce]
+- Atomic tasks: [AT-...]
 - **Status:** pending
 
 ### Phase 5: Delivery
-- [ ] Review outputs
-- [ ] Deliver to user
+- Outcome: [What this phase should produce]
+- Atomic tasks: [AT-...]
 - **Status:** pending
+
+## Atomic Task Ledger
+1. AT-000 - in_progress - [Describe the current atomic task]
+
+## Key Questions
+1. [Question to answer]
+2. [Question to answer]
 
 ## Decisions Made
 | Decision | Rationale |
 |----------|-----------|
+|          |           |
+
+## Follow-up Queue
+1. [Next phase or follow-up task]
 
 ## Errors Encountered
 | Error | Resolution |
 |-------|------------|
+|       |            |
+
+## Legacy Note
+1. Keep `.artifacts/ai` as the only authoritative task record set.
+2. Archive obsolete planning surfaces instead of reviving them.
 EOF
 }
 
 write_default_findings() {
     cat > "$1" <<'EOF'
-# Findings & Decisions
+# AI Findings & Decisions
 
 ## Requirements
--
+- [User requirement]
 
 ## Research Findings
--
+- [Key discovery]
 
 ## Technical Decisions
 | Decision | Rationale |
 |----------|-----------|
+|          |           |
 
 ## Issues Encountered
 | Issue | Resolution |
 |-------|------------|
+|       |            |
 
 ## Resources
--
+- [Doc, file, or URL]
+
+## Visual/Browser Findings
+- [Only when applicable]
 EOF
 }
 
 write_default_progress() {
     date_value="$1"
     cat > "$2" <<EOF
-# Progress Log
+# AI Progress Log
 
-## Session: ${date_value}
+## Current Status
+- Active atomic task: [AT-...]
+- Current phase: Phase 1 - Requirements & Discovery
+- Started: ${date_value}
+- Next validation gate: [command or check]
 
-### Current Status
-- **Phase:** 1 - Requirements & Discovery
-- **Started:** ${date_value}
+## Session Timeline
 
-### Actions Taken
--
+### Session: ${date_value}
+- [Chronological actions]
 
-### Test Results
-| Test | Expected | Actual | Status |
-|------|----------|--------|--------|
+## Validation Snapshot
+- Latest completed validation: [summary]
+- Pending validation: [summary]
 
-### Errors
-| Error | Resolution |
-|-------|------------|
+## Files Created/Modified
+- [path]
+
+## Error Log
+| Timestamp | Error | Attempt | Resolution |
+|-----------|-------|---------|------------|
+|           |       | 1       |            |
+
+## 5-Question Reboot Check
+| Question | Answer |
+|----------|--------|
+| Where am I? | |
+| Where am I going? | |
+| What's the goal? | |
+| What have I learned? | See \.artifacts/ai/findings.md |
+| What have I done? | See the session timeline above |
 EOF
 }
 
