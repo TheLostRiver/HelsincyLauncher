@@ -1,29 +1,27 @@
 # Active Task
 
-- id: AT-2026-05-03-005
-- title: Archive legacy root planning files
+- id: AT-2026-05-03-006
+- title: Repair workflow recovery control paths
 - status: committed
-- goal: Preserve the old root planning history under `.artifacts/ai/legacy-root-planning/` while removing the root `task_plan.md`, `progress.md`, and `findings.md` files from the active repo surface.
+- goal: Make the repo-local workflow surfaces respect active-task state, recover from `.artifacts/ai` consistently, and stop pointing at user-global planning-with-files copies.
 - scope:
-  - archive the legacy root `task_plan.md`, `progress.md`, and `findings.md` files under `.artifacts/ai/legacy-root-planning/`
-  - remove the root copies so they can no longer be mistaken for active workflow records
-  - record the archive decision in the repo task records and controlling workflow guidance
+  - make the pre-tool-use hooks stop injecting `.artifacts/ai/active-task.md` after the active task is already `committed` or `aborted`
+  - extend planning-with-files catchup and repo-local skill guidance so recovery covers `.artifacts/ai/active-task.md` and `.artifacts/ai/handoff.md`
+  - remove repo-local references to user-global `.claude/.../planning-with-files/...` paths and clean up stale root-style template guidance
 - out_of_scope:
-  - changing the repo hook runtime behavior
-  - tightening planning-with-files' 2-action checkpoint cadence in this slice
+  - broader checkpoint-cadence reminder design beyond the direct bug fixes in this slice
+  - any frontend or backend feature work outside the workflow surfaces
 - allowed_files:
   - .artifacts/ai/**
-  - task_plan.md
-  - progress.md
-  - findings.md
-  - .github/copilot-instructions.md
-  - docs/TauriAIContextManagementIntegrationDesign.md
+  - .github/hooks/scripts/pre-tool-use.ps1
+  - .github/hooks/scripts/pre-tool-use.sh
+  - .github/skills/planning-with-files/**
 - required_context:
   - docs/TauriAIDevelopmentTransactionProtocolDesign.md
   - docs/TauriAIContextManagementIntegrationDesign.md
   - docs/TauriArchitecturePrinciplesDesign.md
   - docs/TauriTestingStrategyAndQualityGateDesign.md
   - .github/copilot-instructions.md
-- hypothesis: If the remaining root planning files are only historical artifacts and active hooks or skills already depend exclusively on `.artifacts/ai`, then archiving them under `.artifacts/ai/legacy-root-planning/` and removing the root copies will reduce ambiguity without breaking startup or workflow recovery behavior.
-- cheap_check: Run the repo startup reminder after the archive and confirm it still restores from `.artifacts/ai`; also verify no active `.github` runtime surface depends on root `task_plan.md`, `progress.md`, or `findings.md`.
-- next_step: Start the follow-up slice that integrates planning-with-files' 2-action checkpoint cadence more explicitly into the repo reminder layer.
+- hypothesis: If the workflow surfaces treat only non-terminal active-task states as injectable current work, and both catchup and repo-local skill guidance explicitly cover `active-task.md` and `handoff.md` without falling back to user-global `.claude` copies, then the repo will stop leaking committed task scope into new work and resume from a single repo-local source of truth.
+- cheap_check: Run `pre-tool-use.ps1` against the current committed AT-005 state and confirm it no longer injects that committed task; run `session-catchup.py` and repo-local path greps to confirm recovery guidance now includes `active-task.md` / `handoff.md` and no longer references user-global `.claude/.../planning-with-files/...` paths.
+- next_step: Start the follow-up slice that decides whether planning-with-files' 2-action checkpoint cadence needs stronger repo-level reminders beyond the direct bug repairs.

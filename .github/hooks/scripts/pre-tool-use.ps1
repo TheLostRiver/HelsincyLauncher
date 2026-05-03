@@ -59,19 +59,36 @@ if (Test-Path $MessageCatalogFile) {
 $ActiveTaskLabel = Get-LocalizedMessage "ACTIVE_TASK_LABEL" "[myepiclauncher] ACTIVE TASK"
 $TaskPlanLabel = Get-LocalizedMessage "TASK_PLAN_LABEL" "[myepiclauncher] TASK PLAN"
 
+function Get-InjectedActiveTaskContext {
+    if (-not (Test-Path $ActiveTaskFile)) {
+        return ""
+    }
+
+    $activeTask = (Get-Content $ActiveTaskFile -TotalCount 80 -Encoding UTF8 -ErrorAction SilentlyContinue) -join "`n"
+    if (-not $activeTask) {
+        return ""
+    }
+
+    # Only terminal states should stop acting like the current active slice.
+    $statusMatch = [regex]::Match($activeTask, "(?mi)^\s*-\s*status:\s*([A-Za-z_-]+)")
+    if ($statusMatch.Success) {
+        $status = $statusMatch.Groups[1].Value.ToLowerInvariant()
+        if ($status -in @("committed", "aborted")) {
+            return ""
+        }
+    }
+
+    return "$ActiveTaskLabel`n$activeTask"
+}
+
 if (-not (Test-Path $ActiveTaskFile) -and -not (Test-Path $TaskPlanFile)) {
     Write-Output '{}'
     exit 0
 }
 
-$Context = ""
+$Context = Get-InjectedActiveTaskContext
 
-if (Test-Path $ActiveTaskFile) {
-    $ActiveTask = (Get-Content $ActiveTaskFile -TotalCount 80 -Encoding UTF8 -ErrorAction SilentlyContinue) -join "`n"
-    if ($ActiveTask) {
-        $Context = "$ActiveTaskLabel`n$ActiveTask"
-    }
-} elseif (Test-Path $TaskPlanFile) {
+if (-not $Context -and (Test-Path $TaskPlanFile)) {
     $TaskPlan = (Get-Content $TaskPlanFile -TotalCount 40 -Encoding UTF8 -ErrorAction SilentlyContinue) -join "`n"
     if ($TaskPlan) {
         $Context = "$TaskPlanLabel`n$TaskPlan"

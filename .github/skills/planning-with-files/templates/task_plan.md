@@ -34,7 +34,7 @@ Phase 1
 -->
 - [ ] Understand user intent
 - [ ] Identify constraints and requirements
-- [ ] Document findings in findings.md
+- [ ] Document findings in .artifacts/ai/findings.md
 - **Status:** in_progress
 <!-- 
   STATUS VALUES:
@@ -66,10 +66,10 @@ Phase 1
 ### Phase 4: Testing & Verification
 <!-- 
   WHAT: Verify everything works and meets requirements.
-  WHY: Catching issues early saves time. Document test results in progress.md.
+  WHY: Catching issues early saves time. Document test results in .artifacts/ai/progress.md.
 -->
 - [ ] Verify all requirements met
-- [ ] Document test results in progress.md
+- [ ] Document test results in .artifacts/ai/progress.md
 - [ ] Fix any issues found
 - **Status:** pending
 

@@ -89,11 +89,11 @@
   WHEN: Update periodically, especially when resuming after a break or context reset.
   
   THE 5 QUESTIONS:
-  1. Where am I? → Current phase in task_plan.md
+  1. Where am I? → Current phase in .artifacts/ai/task-plan.md
   2. Where am I going? → Remaining phases
-  3. What's the goal? → Goal statement in task_plan.md
-  4. What have I learned? → See findings.md
-  5. What have I done? → See progress.md (this file)
+  3. What's the goal? → Goal statement in .artifacts/ai/task-plan.md
+  4. What have I learned? → See .artifacts/ai/findings.md
+  5. What have I done? → See .artifacts/ai/progress.md (this file)
 -->
 <!-- If you can answer these, context is solid -->
 | Question | Answer |
@@ -101,7 +101,7 @@
 | Where am I? | Phase X |
 | Where am I going? | Remaining phases |
 | What's the goal? | [goal statement] |
-| What have I learned? | See findings.md |
+| What have I learned? | See .artifacts/ai/findings.md |
 | What have I done? | See above |
 
 ---

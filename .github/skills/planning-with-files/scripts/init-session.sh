@@ -85,13 +85,19 @@ write_default_findings() {
     cat > "$1" <<'EOF'
 # Findings & Decisions
 
-## Findings
-| Finding | Impact |
-|---------|--------|
+## Requirements
+-
 
-## Decisions
-| Decision | Rationale | Date |
-|----------|-----------|------|
+## Research Findings
+-
+
+## Technical Decisions
+| Decision | Rationale |
+|----------|-----------|
+
+## Issues Encountered
+| Issue | Resolution |
+|-------|------------|
 
 ## Resources
 -
@@ -105,14 +111,16 @@ write_default_progress() {
 
 ## Session: ${date_value}
 
-### Completed
+### Current Status
+- **Phase:** 1 - Requirements & Discovery
+- **Started:** ${date_value}
+
+### Actions Taken
 -
 
-### In Progress
--
-
-### Next Steps
--
+### Test Results
+| Test | Expected | Actual | Status |
+|------|----------|--------|--------|
 
 ### Errors
 | Error | Resolution |

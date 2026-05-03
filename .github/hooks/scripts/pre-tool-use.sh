@@ -57,8 +57,15 @@ CONTEXT=""
 if [ -f "$ACTIVE_TASK_FILE" ]; then
     ACTIVE_TASK=$(head -80 "$ACTIVE_TASK_FILE" 2>/dev/null || echo "")
     if [ -n "$ACTIVE_TASK" ]; then
-        CONTEXT="$ACTIVE_TASK_LABEL
+        STATUS=$(printf "%s\n" "$ACTIVE_TASK" | sed -n 's/^-[[:space:]]*status:[[:space:]]*//p' | head -1 | tr '[:upper:]' '[:lower:]' | tr -d '\r')
+        case "$STATUS" in
+            committed|aborted)
+                ;;
+            *)
+                CONTEXT="$ACTIVE_TASK_LABEL
 $ACTIVE_TASK"
+                ;;
+        esac
     fi
 fi
 
