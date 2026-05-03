@@ -65,6 +65,11 @@
 - When the worktree also contains unrelated user frontend changes, backend lockfile cleanup should use path-scoped `git status` checks and selective staging so the backend slice can still be committed and pushed without sweeping user UI work into the same commit.
 - For E2, the smallest host smoke slice should keep the runtime fakeable: centralize command names in `src-tauri/src/commands/mod.rs`, build a real `DesktopAppServices` handle inside the testable bootstrap surface, and let `transport_wiring_smoke` prove registration/state/handler path without needing a live Tauri runtime.
 - The host transport slice can stay fully testable without the real Tauri crate: `build_desktop_host_bootstrap()` can return registered command names plus a shared `DesktopAppServicesHandle`, and the named smoke test can call an async handler with a ready future poll helper instead of spinning up a runtime.
+- External benchmarking against Codex-Manager showed that MyEpicLauncher's main documentation weakness is not lack of deep design detail; it is the absence of a flatter contributor-facing entry layer above the strict-doc and architecture stack.
+- Codex-Manager's CONTRIBUTING document adds high-value path ownership, risk hotspots, size-threshold warnings, submit/PR expectations, and doc-maintenance boundaries that MyEpicLauncher does not currently expose in one place.
+- Codex-Manager's ARCHITECTURE document adds high-value current-repo navigation artifacts: directory duties, entrypoint indexes, request-chain summaries, current hotspots, and suggested landing zones.
+- README drift is a concrete symptom of that missing entry layer: before AT-034, the root entry surface still claimed the repo lacked `Cargo.toml` / `src-tauri/` and still referenced root `task_plan.md` / `progress.md` / `findings.md` after the repo had already moved to `.artifacts/ai/` and landed the backend skeleton baseline.
+- The most pragmatic documentation rollout after AT-034 is: keep README aligned first, then add a contributor-facing `CONTRIBUTING.md`, then add a current-repo architecture overview, then add `docs/README.md` as the docs map.
 
 ## Technical Decisions
 
@@ -74,6 +79,7 @@
 | The task-plan keeps a numbered AT ledger | `check-complete` and stop hooks already parse that shape |
 | The repo should use one hybrid schema across live records, templates, and bootstrap output | planning-with-files readability is useful, but strict-doc semantics must stay explicit |
 | Backend skeleton kickoff begins with a workspace plus a minimal `src-tauri` lib stub | Cargo metadata requires one real target-bearing member before the documented gate can pass |
+| Preserve the deep design docs and add a flatter contributor-facing entry layer above them | Lowers onboarding friction without weakening the repo's strict architecture and AI transaction constraints |
 
 ## Issues Encountered
 

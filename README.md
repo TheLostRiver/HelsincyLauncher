@@ -2,13 +2,14 @@
 
 MyEpicLauncher 是一个面向桌面端的启动器重写仓库。
 
-当前仓库状态不是“已经有完整 Tauri/Rust 应用”，而是：
+当前仓库状态不是“只有文档、没有后端”，而是：
 
 1. 根目录已有可运行的 Next.js 前端原型。
 2. `docs/` 下已经建立了较完整的 Tauri 重写架构文档基线。
-3. 真实的 Rust workspace、`src-tauri/` 宿主和 backend crates 还没有开始落盘。
+3. 根目录已经落地 Rust workspace、`src-tauri/` 宿主和第一批 backend crates 骨架。
+4. 当前重点从“能否起骨架”转到“继续推进后端集成切片，并补平协作者文档入口”。
 
-换句话说，**这个仓库现在处于 docs-first、frontend-prototype-first 的阶段**。
+换句话说，**这个仓库现在处于 docs-driven、frontend-prototype-plus-backend-skeleton 的阶段**。
 
 ---
 
@@ -18,14 +19,14 @@ MyEpicLauncher 是一个面向桌面端的启动器重写仓库。
 
 1. 前端原型技术栈是 Next.js 14 + React 18 + TypeScript + Tailwind。
 2. 目标架构是 Tauri 2 + Rust stable + typed IPC + backend-owned business truth。
-3. 后端骨架的落地顺序、测试门槛、安全边界、环境前提、发布/更新边界都已经写成独立文档。
-4. 真实后端代码还未开始，因此目前能直接运行的是前端原型，而不是桌面宿主。
+3. 后端骨架的落地顺序、测试门槛、安全边界、环境前提、发布/更新边界都已经写成独立文档并完成第一批落盘。
+4. 当前仓库已经具备 `Cargo.toml`、`Cargo.lock`、`src-tauri/` 和 `crates/`，且核心 smoke baseline 已验证通过。
 
 ---
 
 ## Quick Start
 
-当前阶段只需要前端运行环境：
+前端原型运行：
 
 ```powershell
 npm install
@@ -41,11 +42,19 @@ npm run lint
 
 说明：
 
-1. 当前仓库还没有根 `Cargo.toml`。
-2. 当前仓库还没有 `src-tauri/`。
-3. 因此现在不要期待 `cargo check --workspace` 或 `cargo tauri dev` 已经可用。
+1. 在 Windows PowerShell 5.1 下如果遇到 `npm.ps1` 执行策略限制，使用 `npm.cmd run build` 或 `npm.cmd run dev`。
+2. 当前仓库前端仍然是原型层，后端真相和长任务逻辑不应回流到 UI。
 
 如果要为后续 Tauri/Rust 开工准备本机环境，先看 [docs/TauriDevelopmentEnvironmentBootstrapDesign.md](docs/TauriDevelopmentEnvironmentBootstrapDesign.md)。
+
+后端 baseline 验证：
+
+```powershell
+cargo check --workspace
+cargo test -p launcher-kernel-foundation foundation_contract_smoke
+cargo test -p launcher-composition-root bootstrap_wiring_smoke
+cargo test -p my-epic-launcher-desktop transport_wiring_smoke
+```
 
 ---
 
@@ -54,20 +63,22 @@ npm run lint
 如果你刚进入这个仓库，建议按下面顺序阅读：
 
 1. [docs/TauriRewriteArchitectureBlueprint.md](docs/TauriRewriteArchitectureBlueprint.md)
-2. [docs/TauriBackendSkeletonImplementationDesign.md](docs/TauriBackendSkeletonImplementationDesign.md)
-3. [docs/TauriDevelopmentEnvironmentBootstrapDesign.md](docs/TauriDevelopmentEnvironmentBootstrapDesign.md)
+2. [docs/TauriArchitecturePrinciplesDesign.md](docs/TauriArchitecturePrinciplesDesign.md)
+3. [docs/TauriBackendSkeletonImplementationDesign.md](docs/TauriBackendSkeletonImplementationDesign.md)
 4. [docs/TauriTestingStrategyAndQualityGateDesign.md](docs/TauriTestingStrategyAndQualityGateDesign.md)
-5. [docs/TauriSecurityCredentialsAndPermissionsDesign.md](docs/TauriSecurityCredentialsAndPermissionsDesign.md)
-6. [docs/TauriReleasePackagingAndUpdateDesign.md](docs/TauriReleasePackagingAndUpdateDesign.md)
+5. [docs/TauriAIDevelopmentTransactionProtocolDesign.md](docs/TauriAIDevelopmentTransactionProtocolDesign.md)
+6. [docs/TauriDevelopmentEnvironmentBootstrapDesign.md](docs/TauriDevelopmentEnvironmentBootstrapDesign.md)
+7. [docs/TauriDocumentationBenchmarkAgainstCodexManager.md](docs/TauriDocumentationBenchmarkAgainstCodexManager.md)
 
 这几份文档分别回答：
 
 1. 总体架构边界是什么。
-2. 当前仓库里的第一版后端骨架应该怎么落。
-3. 本地 Windows 开发环境要准备什么。
+2. 判断设计是否越界的原则是什么。
+3. 当前仓库里的后端骨架是如何落地的。
 4. 测试门槛是什么。
-5. 安全、凭据和权限边界是什么。
-6. 发布、打包和应用更新边界是什么。
+5. 复杂任务执行和恢复协议是什么。
+6. 本地 Windows 开发环境要准备什么。
+7. 当前文档体系相对外部同类项目还缺哪些入口层能力。
 
 ---
 
@@ -95,6 +106,12 @@ npm run lint
 - [docs/TauriDevelopmentEnvironmentBootstrapDesign.md](docs/TauriDevelopmentEnvironmentBootstrapDesign.md)
 - [docs/TauriReleasePackagingAndUpdateDesign.md](docs/TauriReleasePackagingAndUpdateDesign.md)
 
+### Workflow And Governance
+
+- [docs/TauriAIDevelopmentTransactionProtocolDesign.md](docs/TauriAIDevelopmentTransactionProtocolDesign.md)
+- [docs/TauriDocumentationBenchmarkAgainstCodexManager.md](docs/TauriDocumentationBenchmarkAgainstCodexManager.md)
+- [.artifacts/ai/README.md](.artifacts/ai/README.md)
+
 ### Module Docs
 
 - [docs/ModuleDocumentationStandard.md](docs/ModuleDocumentationStandard.md)
@@ -114,35 +131,27 @@ npm run lint
 
 ```text
 MyEpicLauncher/
+├─ .artifacts/ai/    # 本地任务协议与过程记录
 ├─ app/              # Next.js app router
+├─ Cargo.toml        # Rust workspace manifest
+├─ Cargo.lock        # Rust workspace lockfile
 ├─ components/       # 前端原型组件
+├─ crates/           # backend kernel / module / adapter / composition crates
 ├─ docs/             # Tauri 重写架构与模块文档
 ├─ package.json      # 当前前端脚本入口
-├─ task_plan.md      # 任务规划记录
-├─ findings.md       # 研究发现与决策记录
-└─ progress.md       # 过程与验证记录
+├─ README.md         # 仓库第一入口
+└─ src-tauri/        # 桌面宿主与 transport wiring
 ```
-
-后续进入后端骨架阶段后，仓库预计会新增：
-
-```text
-Cargo.toml
-src-tauri/
-crates/
-```
-
-但这些目录目前还不存在。
 
 ---
 
 ## Near-term Roadmap
 
-短期最明确的下一步不是继续抽象架构，而是按 [docs/TauriBackendSkeletonImplementationDesign.md](docs/TauriBackendSkeletonImplementationDesign.md) 的 Phase A 开始落第一版后端骨架：
+短期最明确的下一步不是继续扩写大蓝图，而是：
 
-1. 根 `Cargo.toml`
-2. `src-tauri/`
-3. 最薄宿主 bootstrap surface
-4. 第一批 kernel / module / adapter / composition-root crates
+1. 在已经通过 smoke gate 的 backend skeleton 基线上继续推进更窄的集成切片。
+2. 把 contributor-facing 的协作入口和 current-repo 导航补平。
+3. 保持 README、`.artifacts/ai` 协议和深度设计文档之间的一致性。
 
 在这之前，README 的职责是让任何人一眼分清：
 
@@ -154,6 +163,7 @@ crates/
 
 ## Notes
 
-1. 当前仓库文档较多，但这不是为了堆文档，而是为了先把重写边界钉死，再开始写后端代码。
-2. 如果你准备开始写 Rust/Tauri 代码，先不要跳过 [docs/TauriBackendSkeletonImplementationDesign.md](docs/TauriBackendSkeletonImplementationDesign.md) 和 [docs/TauriDevelopmentEnvironmentBootstrapDesign.md](docs/TauriDevelopmentEnvironmentBootstrapDesign.md)。
-3. 如果你准备改前端原型，先确认自己没有把后端职责重新塞回 UI。
+1. 当前仓库文档较多，但核心策略不是“文档越多越好”，而是“深度设计文档和扁平入口文档都要各司其职”。
+2. 如果你准备开始写 Rust/Tauri 代码，先不要跳过 [docs/TauriBackendSkeletonImplementationDesign.md](docs/TauriBackendSkeletonImplementationDesign.md)、[docs/TauriTestingStrategyAndQualityGateDesign.md](docs/TauriTestingStrategyAndQualityGateDesign.md) 和 [docs/TauriAIDevelopmentTransactionProtocolDesign.md](docs/TauriAIDevelopmentTransactionProtocolDesign.md)。
+3. 如果你想理解本仓库文档体系相对同类项目还缺什么入口层能力，先看 [docs/TauriDocumentationBenchmarkAgainstCodexManager.md](docs/TauriDocumentationBenchmarkAgainstCodexManager.md)。
+4. 如果你准备改前端原型，先确认自己没有把后端职责重新塞回 UI。

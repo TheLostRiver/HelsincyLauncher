@@ -2,16 +2,16 @@
 
 ## Goal
 
-Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skeleton bootstrap without regressing the single-source-of-truth task protocol.
+Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skeleton work and adjacent documentation-governance improvements without regressing the single-source-of-truth task protocol.
 
 ## Current Phase
 
-Phase 5 - Backend Skeleton Bootstrap
+Phase 6 - Documentation Governance Benchmark
 
 ## Current Focus
 
-- Use the validated post-E2 host baseline to choose the next cross-slice validation or integration step.
-- Keep unrelated user frontend worktree changes untouched while backend work continues.
+- AT-2026-05-03-034 benchmarked the repo docs against Codex-Manager and recorded the missing contributor-facing entry-layer work.
+- Choose whether the next atomic slice should implement the benchmark's P1/P2 doc additions or return to backend integration on top of the validated post-E2 baseline.
 
 ## Phases
 
@@ -43,7 +43,13 @@ Phase 5 - Backend Skeleton Bootstrap
 
 - Outcome: establish the current-repo Rust/Tauri scaffold in atomic slices A1-A3 without disturbing the existing Next.js frontend prototype.
 - Atomic tasks: AT-2026-05-03-009, AT-2026-05-03-010, AT-2026-05-03-011
-- **Status:** in_progress
+- **Status:** complete
+
+### Phase 6: Documentation Governance Benchmark
+
+- Outcome: compare the repo's collaboration and architecture docs against Codex-Manager, record the main gaps, and repair the README entry surface to match the real repo state.
+- Atomic tasks: AT-2026-05-03-034
+- **Status:** complete
 
 ## Atomic Task Ledger
 
@@ -80,6 +86,7 @@ Phase 5 - Backend Skeleton Bootstrap
 31. AT-2026-05-03-031 - committed - added the minimal host transport command shell for Fab and Downloads.
 32. AT-2026-05-03-032 - committed - persisted the adjacent desktop-host `Cargo.lock` delta.
 33. AT-2026-05-03-033 - committed - registered the host bootstrap smoke shell and added the named transport wiring smoke test.
+34. AT-2026-05-03-034 - committed - benchmarked the repo documentation against Codex-Manager, recorded the optimization plan, and repaired the README entry surface to match the current repo state.
 
 ## Key Questions
 
@@ -97,8 +104,9 @@ Phase 5 - Backend Skeleton Bootstrap
 
 ## Follow-up Queue
 
-1. Integrate planning-with-files' 2-action checkpoint cadence more explicitly into repo-level reminders if the adapter slice alone is not enough.
-2. After AT-2026-05-03-033 passes, choose the next validation or integration step from the validated host transport baseline while leaving user frontend edits untouched.
+1. Decide whether to implement the benchmark's P1 recommendation by adding a contributor-facing `CONTRIBUTING.md` that complements rather than replaces the AI transaction protocol.
+2. Decide whether to implement the benchmark's P2 recommendation by adding a current-repo architecture overview with entrypoint indexes, risk hotspots, and suggested landing zones.
+3. If docs entrance work pauses here, resume the next backend validation or integration step from the validated host transport baseline while leaving user frontend edits untouched.
 
 ## Legacy Note
 

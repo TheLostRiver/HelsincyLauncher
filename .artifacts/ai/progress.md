@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-033 - Register transport bootstrap smoke shell
-- Current phase: Phase 5 - Backend Skeleton Bootstrap
-- Last committed task before this slice: AT-2026-05-03-032 - Persist desktop host lockfile
-- Next validation gate: none pending for AT-2026-05-03-033
+- Active atomic task: none active; last committed task is AT-2026-05-03-034 - Benchmark documentation against Codex-Manager
+- Current phase: Phase 6 - Documentation Governance Benchmark
+- Last committed task before this slice: AT-2026-05-03-033 - Register transport bootstrap smoke shell
+- Next validation gate: none pending for AT-2026-05-03-034
 
 ## Session Timeline
 
@@ -152,12 +152,18 @@
 - Started AT-2026-05-03-033 after the user explicitly selected E2, constraining the slice to the host bootstrap/state/commands-mod path plus the named `transport_wiring_smoke` test.
 - Implemented AT-2026-05-03-033 by moving shared command exports into `src-tauri/src/commands/mod.rs`, replacing the placeholder host state with a real `DesktopAppServices` handle, routing the testable bootstrap through `build_desktop_services()`, and keeping `main.rs` limited to the bootstrap entry point.
 - Validated AT-2026-05-03-033 with `cargo test -p my-epic-launcher-desktop transport_wiring_smoke --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`, then `git diff --check` and `git status --short -- .artifacts/ai src-tauri`; the named smoke test passed and no extra lockfile cleanup slice was needed.
+- Started AT-2026-05-03-034 after the user redirected work from backend execution to comparing MyEpicLauncher's collaboration and architecture docs against Codex-Manager.
+- Re-read the project instructions, strict-doc skill, task records, README, and the main architecture/protocol/testing docs, then fetched Codex-Manager's CONTRIBUTING and ARCHITECTURE baselines.
+- Confirmed the main documentation gap is not missing deep design docs; it is the lack of a flatter contributor-facing entry layer for quick routing, risk hotspots, and current-repo navigation.
+- Detected a concrete entry-surface drift during AT-034: `README.md` still described the pre-backend state and root planning files even though the repo already contains `Cargo.toml`, `Cargo.lock`, `src-tauri/`, `crates/`, and `.artifacts/ai/`.
+- Added `docs/TauriDocumentationBenchmarkAgainstCodexManager.md` with detailed comparison matrices, concrete repo findings, and a prioritized documentation rollout plan.
+- Updated `README.md` to reflect the current backend skeleton baseline, the `.artifacts/ai` protocol location, the Windows PowerShell `npm.cmd` note, and the new workflow/governance entry points.
+- Validated AT-2026-05-03-034 with root-README grep checks, `git diff --check`, and a repo-scoped changed-file review limited to `README.md`, `docs/`, and `.artifacts/ai/`.
 
 ## Validation Snapshot
 
-- Latest completed validation: AT-2026-05-03-008 passed `get_errors` on the touched records, templates, and bootstrap scripts.
-- Latest patch validation: `bash -n .github/skills/planning-with-files/scripts/init-session.sh` and `git diff --check` both passed.
-- Latest completed validation: `cargo metadata --format-version 1 --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` passed for AT-2026-05-03-009.
+- Latest completed validation: AT-2026-05-03-034 passed root-README grep checks, `git diff --check`, and a repo-scoped changed-file review for `README.md`, `docs/`, and `.artifacts/ai/`.
+- Latest repo-wide backend validation remains the previously completed `cargo check --workspace` plus the named host/composition/foundation smoke tests from the post-E2 baseline.
 
 ## Error Log
 

@@ -2,41 +2,33 @@
 
 ## Identity
 
-- task id: AT-2026-05-03-033
-- title: Register transport bootstrap smoke shell
+- task id: AT-2026-05-03-034
+- title: Benchmark documentation against Codex-Manager
 - status: committed
 
 ## Goal
 
-- exact local outcome: Implement the minimal E2 host bootstrap shell by replacing the placeholder host state with real `DesktopAppServices` wiring, moving shared command exports into `src-tauri/src/commands/mod.rs`, updating the testable bootstrap path in `lib.rs` and `main.rs`, and adding the named `transport_wiring_smoke` test.
+- exact local outcome: Compare MyEpicLauncher's collaboration-constraint docs and architecture docs against Codex-Manager's CONTRIBUTING and ARCHITECTURE documents, write a detailed local benchmark and optimization record, and repair the smallest discoverability drift in `README.md` so the new benchmark is not isolated.
 
 ## Scope
 
 - in scope:
-  - update `src-tauri/src/lib.rs`
-  - update `src-tauri/src/bootstrap.rs`
-  - update `src-tauri/src/main.rs`
-  - update `src-tauri/src/state.rs`
-  - add `src-tauri/src/commands/mod.rs`
-  - add `src-tauri/tests/transport_wiring_smoke.rs`
-  - update `.artifacts/ai` records for the E2 slice
+  - add `docs/TauriDocumentationBenchmarkAgainstCodexManager.md`
+  - update `README.md` for current-state accuracy and benchmark discoverability
+  - update `.artifacts/ai` records for the AT-034 docs slice
 - out of scope:
-  - touching the user-owned frontend worktree changes
-  - adding real Tauri runtime registration or window startup
-  - modifying composition-root or module crates beyond consuming their public APIs
+  - changing backend Rust/Tauri code
+  - rewriting the deep design docs under `docs/`
+  - touching user-owned frontend worktree changes
 
 ## Allowed Files
 
-1. src-tauri/src/lib.rs
-2. src-tauri/src/bootstrap.rs
-3. src-tauri/src/main.rs
-4. src-tauri/src/state.rs
-5. src-tauri/src/commands/mod.rs
-6. src-tauri/tests/transport_wiring_smoke.rs
-7. .artifacts/ai/active-task.md
-8. .artifacts/ai/task-plan.md
-9. .artifacts/ai/progress.md
-10. .artifacts/ai/findings.md
+1. docs/TauriDocumentationBenchmarkAgainstCodexManager.md
+2. README.md
+3. .artifacts/ai/active-task.md
+4. .artifacts/ai/task-plan.md
+5. .artifacts/ai/progress.md
+6. .artifacts/ai/findings.md
 
 ## 已读取的本地任务记录
 
@@ -47,60 +39,54 @@
 
 ## 控制性文档
 
-1. docs/TauriRewriteArchitectureBlueprint.md
-2. docs/TauriArchitecturePrinciplesDesign.md
-3. docs/TauriAIDevelopmentTransactionProtocolDesign.md
-4. docs/TauriTestingStrategyAndQualityGateDesign.md
-5. docs/TauriBackendSkeletonImplementationDesign.md
-6. docs/TauriBackendCrateLayoutAndUseCaseStubDesign.md
-7. docs/TauriCompositionRootWiringDesign.md
-8. docs/TauriFirstCrateApiDrafts.md
-9. .github/copilot-instructions.md
-10. .github/skills/strict-doc-driven-development/SKILL.md
+1. .github/copilot-instructions.md
+2. .github/skills/strict-doc-driven-development/SKILL.md
+3. docs/TauriRewriteArchitectureBlueprint.md
+4. docs/TauriArchitecturePrinciplesDesign.md
+5. docs/TauriAIDevelopmentTransactionProtocolDesign.md
+6. docs/TauriTestingStrategyAndQualityGateDesign.md
+7. README.md
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If `src-tauri` routes `build_desktop_host_bootstrap()` through real `build_desktop_services()`, exposes a shared host state handle around `DesktopAppServices`, centralizes command names in `commands/mod.rs`, and adds a host smoke test that inspects registration plus calls one command handler, then `cargo test -p my-epic-launcher-desktop transport_wiring_smoke --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` will pass without requiring a real Tauri runtime.
+- falsifiable local hypothesis: MyEpicLauncher already has stronger deep architecture and AI workflow rules than Codex-Manager, but it lacks a flatter contributor-facing overview layer; if this slice adds one benchmark document and repairs the README entry surface to point at the real repo state plus the new benchmark, then the main comparison gaps will be captured without weakening the existing strict-doc stack.
 
 ## Cheap Check
 
-- narrowest check that can disconfirm the hypothesis: Run `cargo test -p my-epic-launcher-desktop transport_wiring_smoke --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`.
+- narrowest check that can disconfirm the hypothesis: Verify the new benchmark doc exists, `README.md` no longer claims the repo lacks `Cargo.toml` or `src-tauri/`, and no stale root planning file paths remain in the edited entry surface.
 
 ## Validation Gate
 
-1. `cargo test -p my-epic-launcher-desktop transport_wiring_smoke --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`
+1. grep search for the new benchmark link and stale README claims
 2. `git -C q:\DEV\MyEpicLauncher diff --check`
-3. `git -C q:\DEV\MyEpicLauncher status --short -- .artifacts/ai src-tauri`
+3. `git -C q:\DEV\MyEpicLauncher status --short -- .artifacts/ai README.md docs`
 
 ## Validation Result
 
-- `cargo test -p my-epic-launcher-desktop transport_wiring_smoke --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` passed with one named host smoke test proving the bootstrap surface wires registered command names, shared state, and a real handler call path.
-- `git diff --check` surfaced only the existing CRLF warnings from untouched user frontend files, and `git status --short -- .artifacts/ai src-tauri` confirmed this slice contains only the expected E2 host files plus AT-033 record updates.
+- Root `README.md` grep checks passed: the new benchmark entry exists and the stale pre-backend / root-planning claims no longer appear in the root entry surface.
+- `git -C q:\DEV\MyEpicLauncher diff --check` produced no output for the docs slice.
+- Repo-scoped changed-file review shows the AT-034 slice is limited to `README.md`, `docs/TauriDocumentationBenchmarkAgainstCodexManager.md`, and `.artifacts/ai` record updates.
 
 ## 需要更新的文档和日志
 
-1. src-tauri/src/lib.rs
-2. src-tauri/src/bootstrap.rs
-3. src-tauri/src/main.rs
-4. src-tauri/src/state.rs
-5. src-tauri/src/commands/mod.rs
-6. src-tauri/tests/transport_wiring_smoke.rs
-7. .artifacts/ai/active-task.md
-8. .artifacts/ai/task-plan.md
-9. .artifacts/ai/progress.md
-10. .artifacts/ai/findings.md
+1. docs/TauriDocumentationBenchmarkAgainstCodexManager.md
+2. README.md
+3. .artifacts/ai/active-task.md
+4. .artifacts/ai/task-plan.md
+5. .artifacts/ai/progress.md
+6. .artifacts/ai/findings.md
 
 ## 验证后的 Git 动作
 
-1. commit message plan: Register transport bootstrap smoke shell
-2. push command plan: git push
+1. commit message plan: deferred; no git commit unless explicitly requested by the user
+2. push command plan: deferred
 
 ## 停止条件
 
-1. E2 requires touching unrelated frontend files or adding real Tauri runtime machinery to pass the smoke test
-2. `cargo test -p my-epic-launcher-desktop transport_wiring_smoke` fails for reasons outside the E2 host file set
+1. the comparison requires rewriting multiple existing design docs instead of recording a bounded benchmark
+2. the README repair would require broad repo-wide documentation rewrites outside the allowed files
 3. same blocker still failing after 5 repair attempts
 
 ## 安全恢复点
 
-- exact next step if execution is interrupted: stage the validated E2 host files plus the AT-033 records, commit the slice, then choose the next post-E2 validation or integration step while leaving user frontend edits untouched.
+- exact next step if execution is interrupted: choose whether the next docs slice should implement P1 (`CONTRIBUTING.md`) or P2 (current-repo architecture overview), or resume backend integration from the validated post-E2 baseline.
