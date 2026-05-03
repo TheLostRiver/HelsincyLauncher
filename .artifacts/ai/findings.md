@@ -12,3 +12,6 @@
 - The remaining repo-specific hook messages can share one bilingual message catalog per language instead of duplicating workflow logic in each script.
 - error-occurred.ps1 was still fragile even before localization because using the automatic $input variable made stdin JSON parsing unreliable; reading into a dedicated local string fixes the hook and keeps the localized error reminder working.
 - The legacy strict-doc session-start.txt and session-bootstrap.txt files are already gone, so the bilingual locale-specific assets are the only active startup reminder sources.
+- planning-with-files and strict-doc-driven-development are not competing at the responsibility level; the conflict appears only when both are allowed to own active planning files or hook injection surfaces.
+- docs/TauriAIDevelopmentTransactionProtocolDesign.md already expects a layered design across project instructions, on-demand skills, and hooks, so integrating planning-with-files as a context-management layer is consistent with the existing protocol.
+- The critical integration rule is not "pick one skill" but "preserve a single authoritative task record set under `.artifacts/ai` while borrowing planning-with-files' context checkpoint and recovery discipline."

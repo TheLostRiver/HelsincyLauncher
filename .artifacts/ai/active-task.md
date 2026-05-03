@@ -1,26 +1,27 @@
 # Active Task
 
-- id: AT-2026-05-03-002
-- title: Add bilingual workflow skill mode
+- id: AT-2026-05-03-003
+- title: Define planning-with-files integration mapping
 - status: committed
-- goal: Make the repo workflow skill and startup reminders prefer Chinese while supporting user-selectable Chinese and English modes.
+- goal: Define how planning-with-files should act as the repo's context-management layer without competing with the `.artifacts/ai` transaction protocol.
 - scope:
-  - update repository workflow instructions, templates, and hooks to use .artifacts/ai records
-  - add language mode selection and bilingual workflow reminder assets
-  - keep the repo-specific workflow behavior unchanged while localizing user-facing text
+  - define the role split between strict-doc-driven-development and planning-with-files
+  - define the authoritative `.artifacts/ai` file mapping for planning, progress, findings, and handoff semantics
+  - keep this slice docs-only and avoid changing hook runtime behavior
 - out_of_scope:
-  - rewriting third-party planning-with-files skill internals
-  - changing the underlying doc-driven workflow semantics
+  - rewriting the third-party planning-with-files skill itself
+  - implementing repo-local adapters or automatic persistence behavior in this slice
 - allowed_files:
-  - .github/copilot-instructions.md
-  - .github/skills/strict-doc-driven-development/**
-  - .github/hooks/scripts/**
   - .artifacts/ai/**
+  - docs/TauriRewriteArchitectureBlueprint.md
+  - docs/TauriAIContextManagementIntegrationDesign.md
 - required_context:
   - docs/TauriRewriteArchitectureBlueprint.md
   - docs/TauriArchitecturePrinciplesDesign.md
   - docs/TauriAIDevelopmentTransactionProtocolDesign.md
   - docs/TauriTestingStrategyAndQualityGateDesign.md
-- hypothesis: If session-start and the repo workflow read a user-selectable language mode, the skill can default to Chinese while still supporting English without duplicating workflow logic.
-- cheap_check: Run session-start twice, once with the default zh-CN mode and once with MYEPIC_WORKFLOW_LANG=en, and confirm the reminder language switches cleanly.
-- next_step: Start the next atomic task, or wait for user direction on whether to retire or archive the legacy root planning files.
+  - .github/skills/planning-with-files/SKILL.md
+  - .github/skills/strict-doc-driven-development/SKILL.md
+- hypothesis: If planning-with-files is constrained to act as a context-management layer that writes into `.artifacts/ai`, the repo can reuse its disk-based context recovery without reintroducing competing planning files or breaking the single-active-task rule.
+- cheap_check: Validate the new docs-only slice with `git diff --check`, then confirm the mapping doc explicitly preserves `.artifacts/ai` as the only authoritative task record set.
+- next_step: Start the repo-local adapter slice that moves planning-with-files persistence and catchup semantics onto `.artifacts/ai`.

@@ -23,3 +23,9 @@
 - Verified bash -n still passes for the localized session-start.sh, pre-tool-use.sh, post-tool-use.sh, error-occurred.sh, and agent-stop.sh.
 - Fixed error-occurred.ps1 to parse stdin JSON reliably by avoiding PowerShell's automatic $input variable and using ConvertFrom-Json with an explicit input object.
 - Confirmed the legacy strict-doc session-start.txt and session-bootstrap.txt files are no longer present; only locale-specific assets remain in .github/skills/strict-doc-driven-development/.
+- Started AT-2026-05-03-003 to define how planning-with-files should be reused as a context-management layer without competing with the `.artifacts/ai` transaction protocol.
+- Re-read the baseline architecture, principles, AI transaction protocol, and testing gate docs to keep the integration slice doc-driven and docs-only.
+- Confirmed the protocol already allows layered responsibilities across instructions, on-demand skills, and hooks; the remaining gap is a stable mapping between planning-with-files concepts and the `.artifacts/ai` record set.
+- Added docs/TauriAIContextManagementIntegrationDesign.md to define the role split, single-source-of-truth rule, concept mapping table, integration rules, and migration phases for reusing planning-with-files inside the repo protocol.
+- Registered the new integration design draft in docs/TauriRewriteArchitectureBlueprint.md so it becomes part of the discoverable companion architecture set.
+- Validated the docs-only slice with `git diff --check` and a direct mapping readback, confirming the new design keeps `.artifacts/ai` as the only authoritative task record set while preserving planning-with-files as the context-management layer.
