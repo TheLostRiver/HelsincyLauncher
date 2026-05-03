@@ -41,6 +41,7 @@ Add task-specific docs when relevant:
 5. If that gate passes, update the relevant docs and task records, create a git commit, and attempt to push.
 6. If push fails, persist the pending push state and the failure details into the local task records so the commits can be pushed later.
 7. If the same blocker cannot be repaired after 5 attempts, persist the bug details and current state, then stop and wait for user direction.
+8. When needed, use the workspace skill templates .github/skills/strict-doc-driven-development/pending-push-template.md and .github/skills/strict-doc-driven-development/blocked-bug-template.md to keep those records structured.
 
 ## Skill Usage
 

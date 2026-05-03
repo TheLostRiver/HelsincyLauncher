@@ -87,6 +87,16 @@ Before delegating, verify all of the following:
 6. The subtask names which task records and docs must be updated before commit.
 7. The subtask states whether a successful validation must be followed by git commit and push.
 
+## Persistence Templates
+
+Use the bundled templates when the workflow cannot complete cleanly:
+
+1. pending-push-template.md: record commits that are ready but not yet pushed, including the reason push failed and the exact follow-up command.
+2. blocked-bug-template.md: record a blocker that still fails after 5 repair attempts, including attempted fixes, latest error, affected files, and the exact point where work stopped.
+
+Do not leave push failures or 5-attempt blockers only in transient chat context.
+Persist them in the task records using these templates.
+
 ## Prohibited Behavior
 
 - Do not move business truth into the frontend because the prototype happens to be UI-first today.
