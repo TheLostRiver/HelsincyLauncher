@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-025 - Persist sqlite adapter lockfile
+- Active atomic task: none active; last committed task is AT-2026-05-03-026 - Bootstrap fab provider adapter crate
 - Current phase: Phase 5 - Backend Skeleton Bootstrap
-- Last committed task before this slice: AT-2026-05-03-024 - Bootstrap sqlite adapter crate
-- Next validation gate: none pending for AT-2026-05-03-025
+- Last committed task before this slice: AT-2026-05-03-025 - Persist sqlite adapter lockfile
+- Next validation gate: none pending for AT-2026-05-03-026
 
 ## Session Timeline
 
@@ -121,6 +121,11 @@
 - Committed and pushed AT-2026-05-03-024 as `2cf2a61` (`Bootstrap sqlite adapter crate`) without widening the code slice to include the adjacent lockfile noise.
 - Started AT-2026-05-03-025 to persist that small lockfile delta rather than carrying it forward as unrelated worktree noise.
 - Validated AT-2026-05-03-025 with `cargo check -p launcher-adapter-storage-sqlite --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`, `git diff --check`, and `git status --short`, confirming only the expected `Cargo.lock` and task-record files remained before commit.
+- Committed and pushed AT-2026-05-03-025 as `3e110e7` (`Persist sqlite adapter lockfile`), returning the repo to a clean post-C3 baseline.
+- Started AT-2026-05-03-026 after the user-directed sequence moved on to C4, targeting `launcher-adapter-provider-fab` as the second adapter boundary because C4 follows C3 in the controlling task table.
+- Confirmed the C4 slice can stay narrow: the current docs require only a provider adapter constructor surface and correct compile-time dependency direction, while remote auth, HTTP transport, and payload mapping remain out of scope for this first Fab provider adapter stub.
+- Validated AT-2026-05-03-026 with `cargo check -p launcher-adapter-provider-fab --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` and `git diff --check`, confirming the provider adapter shell compiles without pulling in auth or transport behavior.
+- Detected one adjacent cleanup artifact after AT-2026-05-03-026: adding the new workspace member updated `Cargo.lock`, so the repo needs one tiny follow-up slice before the next crate starts cleanly.
 
 ## Validation Snapshot
 

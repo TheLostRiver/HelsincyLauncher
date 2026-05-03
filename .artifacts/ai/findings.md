@@ -54,6 +54,7 @@
 - The `launcher-module-downloads` C2 lockfile delta should remain a separate cleanup slice as well; the package reuses already-resolved workspace dependencies, so the adjacent `Cargo.lock` change is expected and should not be folded back into the code task.
 - For C3, `launcher-adapter-storage-sqlite` should stay shell-first as well: expose only adapter config plus minimal repository constructor surfaces, while schema design, migrations, connection strategy, and actual SQL remain deferred to later slices.
 - The `launcher-adapter-storage-sqlite` C3 lockfile delta should remain a separate cleanup slice as well; the package reuses already-resolved workspace dependencies, so the adjacent `Cargo.lock` change is expected and should not be folded back into the code task.
+- For C4, `launcher-adapter-provider-fab` should stay shell-first too: expose only provider adapter config plus the `EpicFabCatalogProviderAdapter` constructor surface, while remote auth, HTTP wiring, and payload mapping remain deferred to later slices.
 
 ## Technical Decisions
 

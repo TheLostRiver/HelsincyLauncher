@@ -1,5 +1,5 @@
 [workspace]
-members = ["src-tauri", "crates/kernel-foundation", "crates/kernel-jobs", "crates/module-fab", "crates/module-downloads", "crates/adapter-storage-sqlite"]
+members = ["src-tauri", "crates/kernel-foundation", "crates/kernel-jobs", "crates/module-fab", "crates/module-downloads", "crates/adapter-storage-sqlite", "crates/adapter-provider-fab"]
 resolver = "2"
 
 [workspace.package]
