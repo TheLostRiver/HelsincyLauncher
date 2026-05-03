@@ -84,6 +84,8 @@
 - The first real Fab behavior can stay very small: `FabFacade::list_inventory()` can delegate to a projection repository while the current SQLite adapter still returns a cold-start empty page, which upgrades the path from `FAB_NOT_WIRED` without pulling in provider sync.
 - AT-040 confirmed that the next narrow Fab slice after `list_inventory` is `get_asset_detail`, not startup prewarm; moving placeholder ownership into the backend facade is still local enough to avoid cursor/provider/runtime work.
 - The current SQLite detail stub can safely return `None` while `FabFacade::get_asset_detail()` owns the cold-start placeholder, which removes another transport-owned fallback without forcing real provider detail hydration yet.
+- AT-041 confirmed that after `get_asset_detail`, the next narrow Fab command slice is `sync_inventory`, not startup prewarm, because startup prewarm is still explicitly tied to startup stage-3 orchestration and a later runtime bundle.
+- The current Fab `job_runtime` placeholder can be wrapped behind a narrow sync-job acceptance boundary so `FabFacade::sync_inventory()` returns a backend-owned `AcceptedJob` now, while real enqueue/runtime wiring remains deferred to a later slice.
 
 ## Technical Decisions
 

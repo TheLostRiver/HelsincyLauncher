@@ -6,12 +6,12 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 12 - Fab Asset Detail Query Wiring
+Phase 13 - Fab Sync Job Acceptance
 
 ## Current Focus
 
 - No active atomic task is currently open.
-- AT-2026-05-03-040 wired the Fab asset-detail query so placeholder ownership now lives in the backend facade/projection path; next decide whether to continue with Fab startup-prewarm/sync or move to another backend slice.
+- AT-2026-05-03-041 moved the Fab sync-inventory command to a backend-owned accepted-job response; next decide whether to open startup prewarm, a real runtime bundle, or another backend slice.
 
 ## Phases
 
@@ -87,6 +87,12 @@ Phase 12 - Fab Asset Detail Query Wiring
 - Atomic tasks: AT-2026-05-03-040
 - **Status:** complete
 
+### Phase 13: Fab Sync Job Acceptance
+
+- Outcome: make the Fab sync-inventory command return a backend-owned accepted job while keeping real runtime/provider execution deferred.
+- Atomic tasks: AT-2026-05-03-041
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -129,6 +135,7 @@ Phase 12 - Fab Asset Detail Query Wiring
 38. AT-2026-05-03-038 - committed - repaired the focused review drift in `.artifacts/ai` and the current-repo architecture overview.
 39. AT-2026-05-03-039 - committed - wired the Fab inventory list query through the projection-repository path and retired the `FAB_NOT_WIRED` fallback for that query.
 40. AT-2026-05-03-040 - committed - wired the Fab asset-detail query through the local projection path and retired the transport-owned `FAB_NOT_WIRED` fallback for that detail route.
+41. AT-2026-05-03-041 - committed - made the Fab sync-inventory command return a backend-owned accepted job without opening startup prewarm or real runtime wiring.
 
 ## Key Questions
 
@@ -146,7 +153,7 @@ Phase 12 - Fab Asset Detail Query Wiring
 
 ## Follow-up Queue
 
-1. After AT-2026-05-03-040, decide whether the next backend slice should stay on Fab startup-prewarm/sync wiring or move to another narrow backend path such as downloads.
+1. After AT-2026-05-03-041, decide whether the next backend slice should open Fab startup prewarm, a real job-runtime bundle, or another narrow backend path such as downloads.
 2. If backend work pauses after this query slice, resume from the validated host transport baseline while leaving user frontend edits untouched.
 
 ## Legacy Note

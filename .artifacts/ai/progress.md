@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-040 - Wire fab asset detail query
-- Current phase: Phase 12 - Fab Asset Detail Query Wiring
-- Last committed task before this slice: AT-2026-05-03-039 - Wire fab list inventory query
-- Next validation gate: none pending for AT-2026-05-03-040
+- Active atomic task: none active; last committed task is AT-2026-05-03-041 - Accept fab sync inventory job
+- Current phase: Phase 13 - Fab Sync Job Acceptance
+- Last committed task before this slice: AT-2026-05-03-040 - Wire fab asset detail query
+- Next validation gate: none pending for AT-2026-05-03-041
 
 ## Session Timeline
 
@@ -186,10 +186,14 @@
 - Re-read the Fab inventory loading design, crate API drafts, current transport fallback, and current facade code, then confirmed `fab_get_asset_detail` still routes through a transport-owned placeholder because `FabFacade::get_asset_detail()` remains `FAB_NOT_WIRED`.
 - Wired `FabFacade::get_asset_detail()` through the local projection path, added a named module-fab unit test for the cold-start placeholder behavior, and taught the current SQLite projection adapter to return `None` so the backend facade owns the placeholder instead of the transport layer.
 - Validated AT-2026-05-03-040 with `cargo test -p launcher-module-fab get_asset_detail_returns_cold_start_placeholder_when_projection_is_empty`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, and a scoped `git diff --check`.
+- Started AT-2026-05-03-041 after the user selected “继续 Fab prewarm/sync” and the controlling docs plus current wiring showed `sync_inventory` is the narrower next slice because startup prewarm is still constrained by startup-stage orchestration and a missing runtime bundle.
+- Confirmed the current composition root still injects `()` for Fab `job_runtime`, so the sync slice must stop at backend-owned accepted-job behavior rather than widening into real runtime enqueue wiring.
+- Wired `FabFacade::sync_inventory()` through a narrow sync-job acceptance boundary, implemented the current `()` dependency as a backend-owned placeholder acceptance path, and added a named module-fab unit test to prove the command now returns an accepted job instead of `FAB_NOT_WIRED`.
+- Validated AT-2026-05-03-041 with `cargo test -p launcher-module-fab sync_inventory_returns_backend_owned_accepted_job_with_placeholder_runtime`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, and a scoped `git diff --check`.
 
 ## Validation Snapshot
 
-- Latest completed validation: AT-2026-05-03-040 passed `cargo test -p launcher-module-fab get_asset_detail_returns_cold_start_placeholder_when_projection_is_empty`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, and the scoped `git diff --check` for the detail-query slice.
+- Latest completed validation: AT-2026-05-03-041 passed `cargo test -p launcher-module-fab sync_inventory_returns_backend_owned_accepted_job_with_placeholder_runtime`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, and the scoped `git diff --check` for the sync-job slice.
 - Latest repo-wide backend validation remains the previously completed `cargo check --workspace` plus the named host/composition/foundation smoke tests from the post-E2 baseline.
 
 ## Error Log
@@ -202,8 +206,8 @@
 
 | Question | Answer |
 |----------|--------|
-| Where am I? | Phase 12 Fab asset-detail query wiring is complete and no active atomic task is currently open |
-| Where am I going? | Decide whether the next Fab/backend slice should open startup prewarm/sync or switch to another narrow backend path |
-| What's the goal? | Keep turning the remaining transport-owned Fab fallbacks into backend-owned local behavior one narrow route at a time |
-| What have I learned? | After `list_inventory`, `get_asset_detail` was still narrow enough to keep placeholder ownership in the backend without pulling in provider/startup orchestration |
+| Where am I? | Phase 13 Fab sync job acceptance is complete and no active atomic task is currently open |
+| Where am I going? | Decide whether the next Fab/backend slice should open startup prewarm, a real runtime bundle, or another narrow backend path |
+| What's the goal? | Keep turning the remaining transport-owned or facade-level Fab command gaps into backend-owned local behavior one narrow route at a time |
+| What have I learned? | `sync_inventory` was still narrow enough to become backend-owned locally, but startup prewarm still belongs to the later startup/runtime wiring surface |
 | What have I done? | See the session timeline above |

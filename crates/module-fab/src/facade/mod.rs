@@ -1,5 +1,5 @@
 use launcher_kernel_foundation::{
-    AppError, AppErrorSeverity, AppResult, AssetId, CorrelationId,
+    AppError, AppErrorSeverity, AppResult, AssetId, CorrelationId, IsoDateTime, JobId,
 };
 use launcher_kernel_jobs::AcceptedJob;
 
@@ -28,6 +28,17 @@ pub trait FabInventoryProjectionRepository {
     fn get_asset_detail_snapshot(&self, asset_id: &AssetId) -> AppResult<Option<FabAssetDetailDto>>;
 }
 
+pub trait FabSyncJobAcceptance {
+    fn accept_sync_job(&self, request: FabInventorySyncRequestDto) -> AppResult<AcceptedJob>;
+}
+
+impl FabSyncJobAcceptance for () {
+    fn accept_sync_job(&self, request: FabInventorySyncRequestDto) -> AppResult<AcceptedJob> {
+        let _ = request;
+        Ok(cold_start_sync_job())
+    }
+}
+
 impl<P, C, M, J, K> FabFacade<P, C, M, J, K> {
     pub fn new(deps: FabModuleDeps<P, C, M, J, K>) -> Self {
         Self { deps }
@@ -45,15 +56,12 @@ impl<P, C, M, J, K> FabFacade<P, C, M, J, K> {
         Err(not_wired("run_startup_prewarm"))
     }
 
-    pub fn sync_inventory(&self, request: FabInventorySyncRequestDto) -> AppResult<AcceptedJob> {
-        let _ = request;
-        Err(not_wired("sync_inventory"))
-    }
 }
 
 impl<P, C, M, J, K> FabFacade<P, C, M, J, K>
 where
     P: FabInventoryProjectionRepository,
+    J: FabSyncJobAcceptance,
 {
     pub fn list_inventory(&self, query: FabInventoryListQueryDto) -> AppResult<FabInventoryPageDto> {
         self.deps.projection_repo.list_page(query)
@@ -65,6 +73,10 @@ where
             .projection_repo
             .get_asset_detail_snapshot(&query.asset_id)?
             .unwrap_or_else(|| cold_start_asset_detail(query.asset_id)))
+    }
+
+    pub fn sync_inventory(&self, request: FabInventorySyncRequestDto) -> AppResult<AcceptedJob> {
+        self.deps.job_runtime.accept_sync_job(request)
     }
 }
 
@@ -89,15 +101,28 @@ fn cold_start_asset_detail(asset_id: AssetId) -> FabAssetDetailDto {
     }
 }
 
+fn cold_start_sync_job() -> AcceptedJob {
+    AcceptedJob {
+        job_id: JobId::generate(),
+        module: "fab".into(),
+        kind: "inventory_sync".into(),
+        queued_at: IsoDateTime::now(),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::sync::Mutex;
 
     use launcher_kernel_foundation::{AssetId, PageCursor, PageRequest, PageSlice};
 
-    use super::{FabFacade, FabInventoryProjectionPage, FabInventoryProjectionRepository, FabModuleDeps};
+    use super::{
+        FabFacade, FabInventoryProjectionPage, FabInventoryProjectionRepository,
+        FabModuleDeps,
+    };
     use crate::contracts::{
-        FabAssetDetailDto, FabAssetDetailQueryDto, FabInventoryItemDto, FabInventoryListQueryDto,
+        FabAssetDetailDto, FabAssetDetailQueryDto, FabInventoryItemDto,
+        FabInventoryListQueryDto, FabInventorySyncRequestDto,
     };
 
     #[derive(Debug)]
@@ -190,5 +215,27 @@ mod tests {
         assert_eq!(detail.seller_name, "unknown");
         assert!(detail.compatibility_notes.is_empty());
         assert_eq!(detail.dependency_warnings.len(), 1);
+    }
+
+    #[test]
+    fn sync_inventory_returns_backend_owned_accepted_job_with_placeholder_runtime() {
+        let facade = FabFacade::new(FabModuleDeps {
+            projection_repo: RecordingProjectionRepository::new(PageSlice::new(Vec::new(), None)),
+            cursor_repo: (),
+            media_repo: (),
+            job_runtime: (),
+            catalog_provider: (),
+        });
+
+        let accepted_job = facade
+            .sync_inventory(FabInventorySyncRequestDto {
+                trigger: "manual-refresh".into(),
+                force_full_sync: false,
+            })
+            .expect("sync_inventory should return a backend-owned accepted job when the current runtime dependency is still a placeholder");
+
+        assert_eq!(accepted_job.module, "fab");
+        assert_eq!(accepted_job.kind, "inventory_sync");
+        assert!(!accepted_job.job_id.as_str().is_empty());
     }
 }
