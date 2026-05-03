@@ -10,8 +10,8 @@ Phase 5 - Backend Skeleton Bootstrap
 
 ## Current Focus
 
-- Use the committed workspace baseline and lockfile as the starting point for the next host bootstrap slice.
-- Prepare the next host bootstrap slice that fills in `tauri.conf.json`, `main.rs`, `bootstrap.rs`, and `state.rs`.
+- Use the committed host shell as the new `src-tauri` baseline for Phase 5.
+- Choose the next smallest slice between host-side smoke wiring and `kernel-foundation` bootstrap.
 
 ## Phases
 
@@ -57,11 +57,12 @@ Phase 5 - Backend Skeleton Bootstrap
 8. AT-2026-05-03-008 - committed - normalized the live `.artifacts/ai` records plus repo-local planning templates and bootstrap output into one section-based schema that remains compatible with the existing AT ledger and hooks.
 9. AT-2026-05-03-009 - committed - created the root Rust workspace manifest plus the smallest valid `src-tauri` member stub so backend skeleton Phase A can pass the documented metadata gate.
 10. AT-2026-05-03-010 - committed - persisted the generated `Cargo.lock` so the validated workspace baseline is fully recorded and the worktree returns to clean.
+11. AT-2026-05-03-011 - committed - added the thin host bootstrap surface under `src-tauri` so the desktop host crate can pass `cargo check` without composition-root yet.
 
 ## Key Questions
 
 1. What is the smallest valid Phase A slice that creates a Rust workspace entry point without dragging in nonexistent packages?
-2. Which exact files should the next host bootstrap slice own so it stays smaller than a full Tauri host implementation?
+2. Which exact host surfaces are enough to make `cargo check -p my-epic-launcher-desktop` meaningful without pulling in real backend wiring too early?
 
 ## Decisions Made
 
@@ -75,7 +76,7 @@ Phase 5 - Backend Skeleton Bootstrap
 ## Follow-up Queue
 
 1. Integrate planning-with-files' 2-action checkpoint cadence more explicitly into repo-level reminders if the adapter slice alone is not enough.
-2. Start the next host bootstrap slice after the lockfile cleanup, adding `tauri.conf.json`, `main.rs`, `bootstrap.rs`, and `state.rs` on top of the validated `src-tauri` stub.
+2. Decide whether the next slice should add host smoke tests or begin `kernel-foundation`.
 
 ## Legacy Note
 

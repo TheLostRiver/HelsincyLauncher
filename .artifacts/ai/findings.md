@@ -38,6 +38,8 @@
 - The backend skeleton implementation doc explicitly fixes A1 as the smallest safe slice: create only the root workspace manifest and do not pre-register nonexistent member paths.
 - Cargo metadata rejects a purely virtual workspace with zero members, and it also rejects a member manifest that has no target file. The smallest passing shape is a workspace plus at least one real member with `src/lib.rs` or an equivalent target.
 - The smallest current-repo member that satisfies the metadata gate without overcommitting to full host wiring is `src-tauri/Cargo.toml` plus `src-tauri/src/lib.rs`.
+- The next safe host slice can stay crate-local: a placeholder service handle plus thin bootstrap/main surfaces are enough to make `cargo check -p my-epic-launcher-desktop` meaningful before composition-root exists.
+- A crate-local host shell with `bootstrap.rs`, `state.rs`, `main.rs`, and an explicit bin target is sufficient to make the `my-epic-launcher-desktop` package compile before any real Tauri transport or composition-root wiring exists.
 
 ## Technical Decisions
 

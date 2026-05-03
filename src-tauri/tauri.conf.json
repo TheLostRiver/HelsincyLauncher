@@ -1,0 +1,27 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "MyEpicLauncher",
+  "version": "0.1.0",
+  "identifier": "com.thelostriver.myepiclauncher",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",
+    "devUrl": "http://localhost:3000",
+    "frontendDist": "../.next"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "MyEpicLauncher",
+        "width": 1440,
+        "height": 900,
+        "resizable": true
+      }
+    ]
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": []
+  }
+}

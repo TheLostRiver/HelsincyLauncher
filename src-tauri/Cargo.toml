@@ -9,4 +9,8 @@ publish.workspace = true
 name = "my_epic_launcher_desktop"
 path = "src/lib.rs"
 
+[[bin]]
+name = "my-epic-launcher-desktop"
+path = "src/main.rs"
+
 [dependencies]

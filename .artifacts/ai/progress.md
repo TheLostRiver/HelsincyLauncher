@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-010 - Persist initial Cargo lockfile
+- Active atomic task: none active; last committed task is AT-2026-05-03-011 - Add host bootstrap surface
 - Current phase: Phase 5 - Backend Skeleton Bootstrap
-- Last committed task before this slice: AT-2026-05-03-008 - Normalize AI record schema
-- Next validation gate: post-commit clean worktree check
+- Last committed task before this slice: AT-2026-05-03-010 - Persist initial Cargo lockfile
+- Next validation gate: none pending for AT-2026-05-03-011
 
 ## Session Timeline
 
@@ -74,6 +74,8 @@
 - Detected one adjacent follow-up artifact after commit/push: `cargo metadata` had generated `Cargo.lock`, so the repo still needs a tiny cleanup slice before Phase 5 is truly clean.
 - Started AT-2026-05-03-010 to persist the generated lockfile rather than leaving the workspace baseline dirty.
 - Re-ran `cargo metadata --format-version 1 --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` and confirmed the workspace baseline remained valid before persisting `Cargo.lock`.
+- Continued directly into the next user-approved slice, AT-2026-05-03-011, to turn the validated `src-tauri` member into a thin host shell with config, bootstrap, state, and binary entry surfaces.
+- Validated AT-2026-05-03-011 with `cargo check -p my-epic-launcher-desktop --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`, confirming the host shell compiles without composition-root yet.
 
 ## Validation Snapshot
 
