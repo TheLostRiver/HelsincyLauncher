@@ -2,16 +2,16 @@
 
 ## Goal
 
-Keep the repo-local workflow records structurally consistent, recoverable, and explicitly commandable while preserving `.artifacts/ai` as the only authoritative task record set.
+Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skeleton bootstrap without regressing the single-source-of-truth task protocol.
 
 ## Current Phase
 
-Phase 4 - Record Schema Normalization (complete)
+Phase 5 - Backend Skeleton Bootstrap
 
 ## Current Focus
 
-- Use the normalized `.artifacts/ai` schema as the default shape for future workflow slices.
-- Keep the numbered AT ledger intact so existing hooks and `check-complete` remain compatible.
+- Use the validated root workspace plus minimal `src-tauri` stub as the new baseline for Phase 5.
+- Prepare the next host bootstrap slice that fills in `tauri.conf.json`, `main.rs`, `bootstrap.rs`, and `state.rs`.
 
 ## Phases
 
@@ -39,6 +39,12 @@ Phase 4 - Record Schema Normalization (complete)
 - Atomic tasks: AT-2026-05-03-008
 - **Status:** complete
 
+### Phase 5: Backend Skeleton Bootstrap
+
+- Outcome: establish the current-repo Rust/Tauri scaffold in atomic slices A1-A3 without disturbing the existing Next.js frontend prototype.
+- Atomic tasks: AT-2026-05-03-009, AT-2026-05-03-010, AT-2026-05-03-011
+- **Status:** in_progress
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -49,11 +55,12 @@ Phase 4 - Record Schema Normalization (complete)
 6. AT-2026-05-03-006 - committed - repaired the workflow control surfaces so committed tasks stop injecting as current work and repo-local recovery now covers `active-task.md` and `handoff.md` without pointing at user-global `.claude` copies.
 7. AT-2026-05-03-007 - committed - added workspace slash-command prompt entry points that wrap the repo's strict-doc and planning-with-files workflow without introducing a second planning source.
 8. AT-2026-05-03-008 - committed - normalized the live `.artifacts/ai` records plus repo-local planning templates and bootstrap output into one section-based schema that remains compatible with the existing AT ledger and hooks.
+9. AT-2026-05-03-009 - committed - created the root Rust workspace manifest plus the smallest valid `src-tauri` member stub so backend skeleton Phase A can pass the documented metadata gate.
 
 ## Key Questions
 
-1. Which sections must remain stable across live records, templates, and bootstrap output so future sessions stop drifting?
-2. How much planning-with-files structure can we adopt without weakening the repo's strict-doc active-task protocol?
+1. What is the smallest valid Phase A slice that creates a Rust workspace entry point without dragging in nonexistent packages?
+2. Which exact files should the next host bootstrap slice own so it stays smaller than a full Tauri host implementation?
 
 ## Decisions Made
 
@@ -62,10 +69,12 @@ Phase 4 - Record Schema Normalization (complete)
 | `.artifacts/ai` remains the only authoritative task record set | Prevents competing planning surfaces and stale recovery paths |
 | The task-plan keeps a numbered AT ledger | Preserves compatibility with stop-hook and `check-complete` parsing |
 | Record files should use a hybrid schema | planning-with-files contributes readable sections, while strict-doc keeps explicit atomic-task semantics |
+| Backend skeleton kickoff needs a real first member | Cargo metadata rejects an empty virtual workspace, so the first valid slice must include a minimal target-bearing member |
 
 ## Follow-up Queue
 
 1. Integrate planning-with-files' 2-action checkpoint cadence more explicitly into repo-level reminders if the adapter slice alone is not enough.
+2. Start AT-2026-05-03-010 for the next host bootstrap slice, adding `tauri.conf.json`, `main.rs`, `bootstrap.rs`, and `state.rs` on top of the validated `src-tauri` stub.
 
 ## Legacy Note
 

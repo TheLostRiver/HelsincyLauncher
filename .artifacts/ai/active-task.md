@@ -2,31 +2,33 @@
 
 ## Identity
 
-- task id: AT-2026-05-03-008
-- title: Normalize AI record schema
+- task id: AT-2026-05-03-009
+- title: Bootstrap first Cargo workspace member
 - status: committed
 
 ## Goal
 
-- exact local outcome: Normalize the repo's live `.artifacts/ai` records plus repo-local planning templates and bootstrap output into one planning-with-files-inspired schema that still preserves strict-doc atomic-task semantics.
+- exact local outcome: Create the first valid Rust workspace entry for the current repo by pairing the root `Cargo.toml` with a minimal `src-tauri` member stub that makes the documented metadata gate real.
 
 ## Scope
 
 - in scope:
-  - restructure `.artifacts/ai/active-task.md`, `task-plan.md`, `progress.md`, and `findings.md` into clearer section-based documents
-  - align planning-with-files default templates and init-session output to the same schema
-  - preserve the numbered atomic-task ledger that repo hooks and `check-complete` already parse
+  - add the root `Cargo.toml` workspace manifest for backend skeleton Phase A kickoff
+  - add the smallest `src-tauri` package stub needed for `cargo metadata` to treat the workspace as valid
+  - update `.artifacts/ai` records so the repo workflow explicitly tracks the backend skeleton kickoff
+  - surface the A1 documentation gap exposed by Cargo's validation behavior
 - out of scope:
-  - changing hook recovery logic, stop-hook parsing rules, or slash-command behavior beyond schema alignment
-  - reintroducing root planning files or any second planning directory
-  - backend feature work
+  - adding `tauri.conf.json`, `main.rs`, `bootstrap.rs`, or `state.rs`
+  - adding any crate under `crates/`
+  - implementing any backend service, module, or adapter code
 
 ## Allowed Files
 
-1. .artifacts/ai/**
-2. .github/skills/planning-with-files/templates/**
-3. .github/skills/planning-with-files/scripts/init-session.ps1
-4. .github/skills/planning-with-files/scripts/init-session.sh
+1. Cargo.toml
+2. src-tauri/Cargo.toml
+3. src-tauri/src/lib.rs
+4. docs/TauriBackendSkeletonImplementationDesign.md
+5. .artifacts/ai/**
 
 ## 已读取的本地任务记录
 
@@ -41,52 +43,54 @@
 2. docs/TauriArchitecturePrinciplesDesign.md
 3. docs/TauriAIDevelopmentTransactionProtocolDesign.md
 4. docs/TauriTestingStrategyAndQualityGateDesign.md
-5. docs/TauriAIContextManagementIntegrationDesign.md
-6. .github/copilot-instructions.md
-7. .github/skills/planning-with-files/SKILL.md
-8. .github/skills/strict-doc-driven-development/active-atomic-task-template.md
+5. docs/TauriBackendSkeletonImplementationDesign.md
+6. docs/TauriBackendCrateLayoutAndUseCaseStubDesign.md
+7. docs/TauriCompositionRootWiringDesign.md
+8. docs/TauriDevelopmentEnvironmentBootstrapDesign.md
+9. .github/copilot-instructions.md
+10. .github/skills/strict-doc-driven-development/SKILL.md
+11. .github/skills/planning-with-files/SKILL.md
 
 ## Hypothesis
 
-- falsifiable local hypothesis: The disorder comes from live records, planning templates, and bootstrap scripts using different schemas; if those three surfaces share one hybrid format, the files will become predictable without breaking the repo's single-active-task protocol.
+- falsifiable local hypothesis: Cargo requires at least one real workspace member with a target for the documented metadata gate to pass, so pairing the root workspace manifest with a minimal `src-tauri` library stub should make `cargo metadata --format-version 1` succeed without dragging in broader Tauri host wiring.
 
 ## Cheap Check
 
-- narrowest check that can disconfirm the hypothesis: Confirm the new task-plan schema still preserves numbered AT status lines, then run `get_errors` on the touched markdown/template files and `git diff --check`.
+- narrowest check that can disconfirm the hypothesis: Run `cargo metadata --format-version 1 --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` after creating the root manifest.
 
 ## Validation Gate
 
-1. `get_errors` on the touched markdown/template files
+1. `cargo metadata --format-version 1 --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`
 2. `git diff --check`
 
 ## Validation Result
 
-- `get_errors` reported no diagnostics for the normalized markdown, template, and bootstrap-script files.
-- `bash -n .github/skills/planning-with-files/scripts/init-session.sh` and `git diff --check` both passed after correcting the Windows bash path form used during validation.
+- `cargo metadata --format-version 1 --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` passed after the root workspace was bridged to a minimal `src-tauri` lib stub.
+- The repair also confirmed the doc gap: the metadata gate is not valid for a zero-member virtual workspace.
 
 ## 需要更新的文档和日志
 
-1. .artifacts/ai/active-task.md
-2. .artifacts/ai/task-plan.md
-3. .artifacts/ai/progress.md
-4. .artifacts/ai/findings.md
-5. .github/skills/planning-with-files/templates/task_plan.md
-6. .github/skills/planning-with-files/templates/progress.md
-7. .github/skills/planning-with-files/templates/findings.md
-8. .github/skills/planning-with-files/scripts/init-session.ps1
-9. .github/skills/planning-with-files/scripts/init-session.sh
+1. Cargo.toml
+2. src-tauri/Cargo.toml
+3. src-tauri/src/lib.rs
+4. docs/TauriBackendSkeletonImplementationDesign.md
+5. .artifacts/ai/active-task.md
+6. .artifacts/ai/task-plan.md
+7. .artifacts/ai/progress.md
+8. .artifacts/ai/findings.md
 
 ## 验证后的 Git 动作
 
-1. commit message plan: Normalize AI record schema
+1. commit message plan: Bootstrap first Cargo workspace member
 2. push command plan: git push
 
 ## 停止条件
 
-1. missing or conflicting docs
-2. any schema change that would break the task ledger or single-active-task protocol
+1. missing or conflicting docs about A1 workspace shape
+2. `cargo metadata` still fails after adding the minimal `src-tauri` member stub
 3. same blocker still failing after 5 repair attempts
 
 ## 安全恢复点
 
-- exact next step if execution is interrupted: use the normalized schema as the default for the next workflow slice and only revisit it if a hook, template, or bootstrap surface drifts again.
+- exact next step if execution is interrupted: open the next host bootstrap slice to add `tauri.conf.json`, `main.rs`, `bootstrap.rs`, and `state.rs` on top of the validated `src-tauri` member stub.

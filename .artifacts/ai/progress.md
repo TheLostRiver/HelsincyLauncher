@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-008 - Normalize AI record schema
-- Current phase: Phase 4 - Record Schema Normalization (complete)
-- Last committed task before this slice: AT-2026-05-03-007 - Add slash-command workflow entry points
-- Next validation gate: none pending for the current slice
+- Active atomic task: none active; last committed task is AT-2026-05-03-009 - Bootstrap first Cargo workspace member
+- Current phase: Phase 5 - Backend Skeleton Bootstrap
+- Last committed task before this slice: AT-2026-05-03-008 - Normalize AI record schema
+- Next validation gate: none pending for AT-2026-05-03-009
 
 ## Session Timeline
 
@@ -64,11 +64,19 @@
 - Normalized the live `.artifacts/ai` records into a hybrid schema: strict-doc keeps explicit atomic-task semantics, while planning-with-files contributes stable section ordering for plan, progress, and findings.
 - Aligned the repo-local planning templates and both init-session scripts to the same section order so new sessions bootstrap files that match the live workflow surface.
 - Validated AT-2026-05-03-008 by checking the touched files with `get_errors`, then rerunning `bash -n .github/skills/planning-with-files/scripts/init-session.sh` and `git diff --check` with a repo-relative path that Windows bash accepts.
+- Reloaded the repo-local strict-doc and planning-with-files skill surfaces before starting backend work, per user instruction that the project skill must run first.
+- Re-read the backend skeleton, crate layout, composition root, environment bootstrap, and testing-gate docs, then confirmed the current repo still has no `Cargo.toml` and no `src-tauri/` directory.
+- Started AT-2026-05-03-009 for Phase A A1 after confirming the backend skeleton doc fixes the smallest safe slice as a root workspace manifest with no nonexistent members.
+- Added the root `Cargo.toml` manifest for AT-2026-05-03-009, then hit a falsifying validation result: Cargo rejects an empty virtual workspace for `cargo metadata`.
+- Ran a repo-external Cargo probe and confirmed the minimal valid shape is a workspace with at least one real member that also has a target file; a member manifest alone is still insufficient.
+- Repaired AT-2026-05-03-009 in place by bridging the workspace root to the smallest `src-tauri` library stub and recording the A1 doc gap.
+- Re-ran the exact A1 validation gate and confirmed `cargo metadata --format-version 1 --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` now passes with the minimal `src-tauri` workspace member in place.
 
 ## Validation Snapshot
 
 - Latest completed validation: AT-2026-05-03-008 passed `get_errors` on the touched records, templates, and bootstrap scripts.
 - Latest patch validation: `bash -n .github/skills/planning-with-files/scripts/init-session.sh` and `git diff --check` both passed.
+- Latest completed validation: `cargo metadata --format-version 1 --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` passed for AT-2026-05-03-009.
 
 ## Error Log
 
@@ -81,7 +89,7 @@
 | Question | Answer |
 |----------|--------|
 | Where am I? | Phase 4 is complete; no active atomic task is currently open |
-| Where am I going? | Use the normalized schema for future workflow slices and tighten reminders only if drift returns |
-| What's the goal? | Keep `.artifacts/ai` readable and consistent without reintroducing competing planning surfaces |
-| What have I learned? | The current disorder came from schema drift across live records, templates, and init-session output |
+| Where am I going? | Into backend skeleton Phase A, starting with the root workspace manifest |
+| What's the goal? | Bootstrap the current-repo Rust/Tauri skeleton without regressing the workflow protocol |
+| What have I learned? | Cargo metadata also requires at least one real workspace member with a target file |
 | What have I done? | See the session timeline above |

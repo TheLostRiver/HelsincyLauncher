@@ -1,0 +1,12 @@
+[package]
+name = "my-epic-launcher-desktop"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "my_epic_launcher_desktop"
+path = "src/lib.rs"
+
+[dependencies]

@@ -34,6 +34,10 @@
 - For this repository, prompt files are the least disruptive way to expose named workflow commands because they can reference the existing strict-doc and planning-with-files protocol while keeping `.artifacts/ai` as the only authoritative task record set.
 - The current disorder is structural, not just cosmetic: live `.artifacts/ai` files, planning-with-files templates, and init-session bootstrap output currently use different schemas.
 - The task-plan schema remains compatible with the existing stop hooks as long as the numbered ledger lines keep the form `N. AT-... - status - description`, even when richer planning sections are added around them.
+- The repo still has no root `Cargo.toml` and no `src-tauri/` directory, so backend skeleton Phase A must truly start from A1 rather than pretending a host scaffold already exists.
+- The backend skeleton implementation doc explicitly fixes A1 as the smallest safe slice: create only the root workspace manifest and do not pre-register nonexistent member paths.
+- Cargo metadata rejects a purely virtual workspace with zero members, and it also rejects a member manifest that has no target file. The smallest passing shape is a workspace plus at least one real member with `src/lib.rs` or an equivalent target.
+- The smallest current-repo member that satisfies the metadata gate without overcommitting to full host wiring is `src-tauri/Cargo.toml` plus `src-tauri/src/lib.rs`.
 
 ## Technical Decisions
 
@@ -42,6 +46,16 @@
 | `.artifacts/ai` remains the only authoritative task record set | Prevents dual planning surfaces and stale recovery paths |
 | The task-plan keeps a numbered AT ledger | `check-complete` and stop hooks already parse that shape |
 | The repo should use one hybrid schema across live records, templates, and bootstrap output | planning-with-files readability is useful, but strict-doc semantics must stay explicit |
+| Backend skeleton kickoff begins with a workspace plus a minimal `src-tauri` lib stub | Cargo metadata requires one real target-bearing member before the documented gate can pass |
+
+## Issues Encountered
+
+| Issue | Resolution |
+|-------|------------|
+| Generic planning templates and repo live files drifted into different shapes | Normalize both the live records and the template/bootstrap sources together |
+| Sync terminal commands did not preserve the intended repo cwd for verification and commit flow | Use async terminal commands with explicit repo paths when git output matters |
+| The backend skeleton doc's A1 assumption conflicted with actual Cargo behavior | Surface the gap in findings/progress and bridge the workspace root to the smallest valid `src-tauri` stub |
+
 
 ## Issues Encountered
 

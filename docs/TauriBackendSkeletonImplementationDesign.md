@@ -265,6 +265,13 @@ MyEpicLauncher/
 
 1. Cargo workspace 的成员路径必须和当前真实存在的 package 对齐。
 2. 后续每个包级 `cargo check -p ...` 都依赖它已经在 root workspace 中被真实接入。
+3. 仅有空 virtual workspace 不能通过 `cargo metadata --format-version 1`；最早的 metadata gate 必须在至少一个真实 member 且该 member 已有 target 文件时执行。
+
+补充说明：
+
+1. 这意味着当前文档里把 A1 写成“只改根 `Cargo.toml` 且立刻跑 metadata”在 Cargo 行为上并不成立。
+2. 当前仓库第一次真正跑通 metadata gate 时，必须至少桥接到一个最小 host member stub，例如 `src-tauri/Cargo.toml` 加 `src-tauri/src/lib.rs`。
+3. 仍然不要预写不存在的 future crate path；只是把第一个真实 member 创建与 root workspace 建立放进同一最小闭环里。
 
 ### 7.2 Atomic Task Table
 

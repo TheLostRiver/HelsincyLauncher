@@ -1,0 +1,1 @@
+pub fn desktop_workspace_anchor() {}
