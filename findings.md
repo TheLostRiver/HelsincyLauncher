@@ -46,6 +46,18 @@
 - 当后端骨架实现文档进一步用于开工时，还必须继续拆到原子任务级别：每个任务只碰少量文件，并绑定一个最小 `cargo` 验证命令。
 - 仅把原子任务拆细还不够；若某个任务第一次引入新的 workspace member，就必须把根 `Cargo.toml` 也列入该任务文件范围。
 - E 阶段如果只写成 `cargo check --workspace`，并不能证明宿主层 wiring 真正打通；至少需要一条验证 commands 注册、shared state 注入和 facade 调用路径的 host smoke test。
+- 第二轮 review 进一步确认：若宿主没有从第一天抽出 `src-tauri/src/lib.rs` 与 `src-tauri/src/bootstrap.rs` 这类可测试入口，A3 会和 D1 的责任分界打架，E2 的 smoke test 也会被迫复制 main.rs 中的注册逻辑。
+- 第二轮 review 也确认：B2 与 D2 这类写成 `cargo test -p ...` 的任务，必须在任务定义里绑定明确的测试文件和命名测试，否则验证强度仍然只是编译检查。
+- 当前 docs 里并非完全没有测试内容；测试章节已经散落在 blueprint、kernel-jobs、composition-root、crate drafts 和 backend skeleton 文档里。
+- 当前真正缺的是独立的仓库级测试总文档，因此已新增 `docs/TauriTestingStrategyAndQualityGateDesign.md` 来统一测试分层、测试落点和质量门槛。
+- 当前 docs 里也并非完全没有日志设计；日志内容已经散落在 blueprint、composition-root、storage/database、downloads、engines、fab-inventory 等文档里。
+- 当前真正缺的是独立的仓库级日志总文档，因此已新增 `docs/TauriLoggingAndObservabilityDesign.md` 来统一 correlationId、log sink、observability 边界和 diagnostics 规则。
+- 当前 docs 里同样并非完全没有 startup 设计；startup 阶段、blocking 原则和 `StartupPipelineFacade` 的想法已经散落在 blueprint 与 composition-root 文档里。
+- 当前真正缺的是独立的仓库级 startup pipeline 总文档，因此已新增 `docs/TauriStartupPipelineDesign.md` 来统一 Stage 0-3、blocking policy、restore policy 和 warmup boundary。
+- 当前 docs 里同样并非完全没有错误模型设计；`AppErrorDto`、error envelope、错误 code 前缀和 `retryable` / `severity` 语义已经散落在 blueprint、IPC/schema、downloads、engines 等文档里。
+- 当前真正缺的是独立的仓库级错误处理总文档，因此已新增 `docs/TauriErrorHandlingAndProjectionDesign.md` 来统一错误模型、错误投影和 retry ownership。
+- 当前 docs 里同样并非完全没有架构原则；前后端边界、contract first、ports/adapters、composition root、job runtime 等原则已经散落在 blueprint 和多份专题文档里。
+- 当前真正缺的是独立的仓库级架构原则总文档，因此已新增 `docs/TauriArchitecturePrinciplesDesign.md` 来统一原则层约束和评审 checklist。
 
 ## Issues Encountered
 | Issue | Resolution |

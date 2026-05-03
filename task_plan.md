@@ -84,6 +84,42 @@ Phase 5
 - [x] Add a host-level smoke-test gate for E-phase transport wiring proof
 - **Status:** complete
 
+### Phase 15: Backend Skeleton Review Round Two
+- [x] Add a testable host bootstrap surface to the target layout and early host phase
+- [x] Make A3 self-consistent before composition-root wiring exists
+- [x] Require explicit named smoke tests for B2 and D2
+- **Status:** complete
+
+### Phase 16: Testing Documentation Baseline
+- [x] Verify whether standalone testing documentation already exists
+- [x] Add a repository-level testing strategy and quality-gate document
+- [x] Wire the new testing document into the architecture blueprint companion list
+- **Status:** complete
+
+### Phase 17: Logging Documentation Baseline
+- [x] Verify whether standalone logging / observability documentation already exists
+- [x] Add a repository-level logging and observability document
+- [x] Wire the new logging document into the architecture blueprint companion list
+- **Status:** complete
+
+### Phase 18: Startup Documentation Baseline
+- [x] Verify whether standalone startup pipeline documentation already exists
+- [x] Add a repository-level startup pipeline document
+- [x] Wire the new startup document into the architecture blueprint companion list
+- **Status:** complete
+
+### Phase 19: Error Documentation Baseline
+- [x] Verify whether standalone error handling documentation already exists
+- [x] Add a repository-level error handling and projection document
+- [x] Wire the new error document into the architecture blueprint companion list
+- **Status:** complete
+
+### Phase 20: Architecture Principles Documentation Baseline
+- [x] Verify whether standalone architecture-principles documentation already exists
+- [x] Add a repository-level architecture principles document
+- [x] Wire the new architecture-principles document into the architecture blueprint companion list
+- **Status:** complete
+
 ## Decisions Made
 | Decision | Rationale |
 |----------|-----------|
@@ -100,6 +136,13 @@ Phase 5
 | 后端骨架文档需要继续拆到原子任务级别 | 真正开始 scaffolding 前，每一步都应限定文件范围和最小验证，避免大块不可回退施工 |
 | 后端骨架原子任务中，首次引入某个包路径的任务必须同步更新根 Cargo.toml | 否则后续包级 cargo check 无法成立，workspace 规则与任务表会互相矛盾 |
 | E 阶段的链路打通必须由宿主级 smoke test 证明 | 单纯 cargo check 只能证明可编译，不能证明 commands 注册和 shared state 注入真的生效 |
+| 宿主 crate 从第一天就应抽出可测试的 bootstrap / app-builder surface | 否则 A3 和 E2 都会被迫把逻辑塞进 main.rs，测试只能复制启动路径而不是验证 wiring |
+| 写成 cargo test 门槛的原子任务必须显式绑定命名测试文件 | 否则 B2、D2 这类任务会退化成“零测试也能通过”的伪验证 |
+| 当前仓库需要一份独立的仓库级测试总文档 | 测试内容虽然散落在多份 Tauri 设计文档里，但缺少统一入口会让后续实现时丢失测试边界和质量门槛 |
+| 当前仓库也需要一份独立的仓库级日志总文档 | 日志、correlationId、diagnostics 和 log sink 规则虽然散落存在，但缺少统一入口会让实现阶段再次各写各的 |
+| 当前仓库还需要一份独立的 startup pipeline 总文档 | 启动阶段、阻塞规则、restore 和 warmup 边界虽然散落存在，但缺少统一入口会让实现阶段重新把启动职责打散 |
+| 当前仓库还需要一份独立的错误处理总文档 | `AppError`、error envelope、severity、retryable 和用户态错误投影虽然散落存在，但缺少统一入口会让实现阶段重新各自发明错误语义 |
+| 当前仓库还需要一份独立的架构原则总文档 | 前后端边界、contract first、composition root、job runtime 等原则如果只留在大蓝图里，后续实现和文档扩展都会缺少统一引用锚点 |
 
 ## Errors Encountered
 | Error | Resolution |

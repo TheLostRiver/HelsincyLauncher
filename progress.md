@@ -42,6 +42,17 @@
 - 根据后续 review 结论，已修正 docs/TauriBackendSkeletonImplementationDesign.md 中的 workspace member 接入规则，并把 E 阶段升级为宿主级 smoke test 验证门槛。
 - 已创建提交 `docs: tighten backend skeleton rollout guide`。
 - 当前再次回到仅剩 planning 三件套待独立提交的状态。
+- 根据第二轮 review，已继续修正 docs/TauriBackendSkeletonImplementationDesign.md：补出可测试的宿主 bootstrap surface，修正 A3 在 D1 之前的自洽性，并把 B2/D2 绑定到明确命名的 smoke tests。
+- 检查 docs 后确认测试内容此前分散存在，但缺少独立的仓库级测试总文档。
+- 新增 docs/TauriTestingStrategyAndQualityGateDesign.md，并把它接入 docs/TauriRewriteArchitectureBlueprint.md 的 companion drafts。
+- 检查 docs 后确认日志相关内容此前也分散存在，但缺少独立的仓库级日志/observability 总文档。
+- 新增 docs/TauriLoggingAndObservabilityDesign.md，并把它接入 docs/TauriRewriteArchitectureBlueprint.md 的 companion drafts。
+- 检查 docs 后确认 startup 相关内容此前也分散存在，但缺少独立的仓库级 startup pipeline 总文档。
+- 新增 docs/TauriStartupPipelineDesign.md，并把它接入 docs/TauriRewriteArchitectureBlueprint.md 的 companion drafts。
+- 检查 docs 后确认 error handling 相关内容此前也分散存在，但缺少独立的仓库级错误处理总文档。
+- 新增 docs/TauriErrorHandlingAndProjectionDesign.md，并把它接入 docs/TauriRewriteArchitectureBlueprint.md 的 companion drafts。
+- 检查 docs 后确认 architecture principles 相关内容此前也分散存在，但缺少独立的仓库级架构原则总文档。
+- 新增 docs/TauriArchitecturePrinciplesDesign.md，并把它接入 docs/TauriRewriteArchitectureBlueprint.md 的 companion drafts。
 
 ### Test Results
 | Test | Expected | Actual | Status |
@@ -60,6 +71,17 @@
 | git status after backend skeleton doc commit | 仅剩 planning 三件套未提交 | 结果符合预期 | PASS |
 | inspect backend skeleton doc after review repairs | 应显式写出 workspace member 接入规则与宿主 smoke test gate | 结果符合预期 | PASS |
 | git status after backend skeleton review-fix doc commit | 仅剩 planning 三件套未提交 | 结果符合预期 | PASS |
+| inspect backend skeleton doc after second review repairs | 应显式补出 host bootstrap surface、A3 自洽规则和 B2/D2 命名测试门槛 | 结果符合预期 | PASS |
+| inspect docs for standalone testing documentation | 应确认此前缺的是独立测试总文档，而不是零散测试章节 | 结果符合预期 | PASS |
+| inspect blueprint companion drafts after testing-doc addition | 新测试总文档应被接入 companion drafts | 结果符合预期 | PASS |
+| inspect docs for standalone logging documentation | 应确认此前缺的是独立日志总文档，而不是零散日志章节 | 结果符合预期 | PASS |
+| inspect blueprint companion drafts after logging-doc addition | 新日志总文档应被接入 companion drafts | 结果符合预期 | PASS |
+| inspect docs for standalone startup documentation | 应确认此前缺的是独立 startup 总文档，而不是零散 startup 阶段章节 | 结果符合预期 | PASS |
+| inspect blueprint companion drafts after startup-doc addition | 新 startup 总文档应被接入 companion drafts | 结果符合预期 | PASS |
+| inspect docs for standalone error documentation | 应确认此前缺的是独立错误处理总文档，而不是零散错误章节 | 结果符合预期 | PASS |
+| inspect blueprint companion drafts after error-doc addition | 新错误处理总文档应被接入 companion drafts | 结果符合预期 | PASS |
+| inspect docs for standalone architecture-principles documentation | 应确认此前缺的是独立原则层总文档，而不是零散原则章节 | 结果符合预期 | PASS |
+| inspect blueprint companion drafts after architecture-principles-doc addition | 新架构原则总文档应被接入 companion drafts | 结果符合预期 | PASS |
 
 ### Errors
 | Error | Resolution |
