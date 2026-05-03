@@ -2,16 +2,16 @@
 
 ## Goal
 
-Converge the repository AI workflow to the .artifacts/ai protocol records defined in docs/TauriAIDevelopmentTransactionProtocolDesign.md.
+Add bilingual language mode support to the repository workflow skill while keeping Chinese as the default experience.
 
 ## Active Atomic Task
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to .artifacts/ai and bootstrapped the new task records.
+2. AT-2026-05-03-002 - committed - added zh-CN and en language modes for the repo workflow skill, translated the strict-doc skill assets to Chinese-first wording, and localized the repo-specific hook messages.
 
 ## Follow-up Queue
 
-1. Use the new .artifacts/ai workflow records as the source of truth for the next non-trivial task.
-2. Decide whether to retire or archive the legacy root planning files once they are no longer needed for historical reference.
+1. Decide whether to retire or archive the legacy root planning files once they are no longer needed for historical reference.
 
 ## Legacy Note
 

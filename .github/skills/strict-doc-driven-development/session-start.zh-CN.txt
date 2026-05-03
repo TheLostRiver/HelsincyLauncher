@@ -1,0 +1,11 @@
+[myepiclauncher] 严格文档驱动模式
+将仓库文档视为强约束，而不是可选参考。
+
+在规划、编码、评审或拆分子任务前：
+1. 先读取本地任务记录：.artifacts/ai/active-task.md、.artifacts/ai/task-plan.md、.artifacts/ai/progress.md、.artifacts/ai/findings.md。
+2. 先读取控制性文档：docs/TauriRewriteArchitectureBlueprint.md、docs/TauriArchitecturePrinciplesDesign.md、docs/TauriAIDevelopmentTransactionProtocolDesign.md、docs/TauriTestingStrategyAndQualityGateDesign.md。
+3. 按任务类型补充专项文档：security、startup、error handling、release、backend skeleton、environment bootstrap，以及 docs/modules/<module-name>/README_*.md。
+4. 一次只推进一个原子任务。单个原子任务成功后，先跑最窄验证，再更新文档和日志，然后提交并尝试 push。
+5. 如果 push 失败，就持久化 pending push 状态；如果同一阻塞修了 5 次仍失败，就持久化 bug 详情并停止。
+6. 需要结构化记录时，使用 active-atomic-task-template.md、docs-update-log-template.md、pending-push-template.md、blocked-bug-template.md。
+7. 拆分子任务时，必须写清精确文档路径、作用域、允许文件和验证门槛。

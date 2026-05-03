@@ -1,7 +1,7 @@
-# Active Atomic Task Template
+# 活跃原子任务模板
 
-Use this to define the current atomic task before implementation starts.
-Suggested file path: .artifacts/ai/active-task.md.
+在实现开始前，用它定义当前原子任务。
+建议文件路径：.artifacts/ai/active-task.md。
 
 ## Identity
 
@@ -23,14 +23,14 @@ Suggested file path: .artifacts/ai/active-task.md.
 1. path/to/file-or-directory
 2. path/to/file-or-directory
 
-## Local Task Records Read
+## 已读取的本地任务记录
 
 1. .artifacts/ai/active-task.md
 2. .artifacts/ai/task-plan.md
 3. .artifacts/ai/progress.md
 4. .artifacts/ai/findings.md
 
-## Controlling Docs
+## 控制性文档
 
 1. docs/...
 2. docs/...
@@ -47,22 +47,22 @@ Suggested file path: .artifacts/ai/active-task.md.
 
 1. focused compile, test, or validation command
 
-## Docs And Logs To Update
+## 需要更新的文档和日志
 
 1. docs to refresh after success
 2. task records to update after success
 
-## Post-validation Git Action
+## 验证后的 Git 动作
 
 1. commit message plan
 2. push command plan
 
-## Stop Conditions
+## 停止条件
 
 1. missing or conflicting docs
 2. out-of-scope change request
 3. same blocker still failing after 5 repair attempts
 
-## Safe Resume Point
+## 安全恢复点
 
 - exact next step if execution is interrupted:

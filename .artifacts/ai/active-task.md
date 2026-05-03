@@ -1,15 +1,16 @@
 # Active Task
 
-- id: AT-2026-05-03-001
-- title: Converge AI workflow to .artifacts/ai protocol
+- id: AT-2026-05-03-002
+- title: Add bilingual workflow skill mode
 - status: committed
-- goal: Move the repository workflow from legacy root planning files to .artifacts/ai records and stop stale startup context injection.
+- goal: Make the repo workflow skill and startup reminders prefer Chinese while supporting user-selectable Chinese and English modes.
 - scope:
   - update repository workflow instructions, templates, and hooks to use .artifacts/ai records
-  - initialize .artifacts/ai task records for the new workflow
+  - add language mode selection and bilingual workflow reminder assets
+  - keep the repo-specific workflow behavior unchanged while localizing user-facing text
 - out_of_scope:
   - rewriting third-party planning-with-files skill internals
-  - migrating historical root task_plan.md, progress.md, and findings.md contents
+  - changing the underlying doc-driven workflow semantics
 - allowed_files:
   - .github/copilot-instructions.md
   - .github/skills/strict-doc-driven-development/**
@@ -20,6 +21,6 @@
   - docs/TauriArchitecturePrinciplesDesign.md
   - docs/TauriAIDevelopmentTransactionProtocolDesign.md
   - docs/TauriTestingStrategyAndQualityGateDesign.md
-- hypothesis: If the repo workflow reads .artifacts/ai/active-task.md and related records instead of root task_plan.md, stale legacy task context will stop leaking into new sessions.
-- cheap_check: Run the session-start hook and confirm it no longer injects the old Fix Docs Parent Paths root plan.
-- next_step: Start the next atomic task from .artifacts/ai/task-plan.md or create a new .artifacts/ai/active-task.md entry.
+- hypothesis: If session-start and the repo workflow read a user-selectable language mode, the skill can default to Chinese while still supporting English without duplicating workflow logic.
+- cheap_check: Run session-start twice, once with the default zh-CN mode and once with MYEPIC_WORKFLOW_LANG=en, and confirm the reminder language switches cleanly.
+- next_step: Start the next atomic task, or wait for user direction on whether to retire or archive the legacy root planning files.

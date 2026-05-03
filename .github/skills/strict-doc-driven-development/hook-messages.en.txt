@@ -1,0 +1,12 @@
+ACTIVE_TASK_LABEL=[myepiclauncher] ACTIVE TASK
+TASK_PLAN_LABEL=[myepiclauncher] TASK PLAN
+RECENT_PROGRESS_LABEL=[myepiclauncher] RECENT PROGRESS
+HANDOFF_LABEL=[myepiclauncher] HANDOFF
+POST_TOOL_USE=[myepiclauncher] Update .artifacts/ai/progress.md with what you just did. If the active task changed state, update .artifacts/ai/active-task.md. If the task is pausing, refresh .artifacts/ai/handoff.md.
+ERROR_OCCURRED=[myepiclauncher] Error detected: {{ERROR}}. Log this in .artifacts/ai/progress.md. If this is the 5th failed repair attempt for the same blocker, persist the blocker in .artifacts/ai/handoff.md using blocked-bug-template.md and stop.
+AGENT_STOP_COMMITTED=[myepiclauncher] Active task is committed. Safe to stop or start the next .artifacts/ai/active-task.md entry.
+AGENT_STOP_BLOCKED_WITH_HANDOFF=[myepiclauncher] Active task is blocked and .artifacts/ai/handoff.md exists. Safe to stop until the next resume.
+AGENT_STOP_BLOCKED_NO_HANDOFF=[myepiclauncher] Active task is blocked. Write .artifacts/ai/handoff.md before stopping so the next session has a safe resume point.
+AGENT_STOP_IN_PROGRESS=[myepiclauncher] Active task is still in progress. Refresh .artifacts/ai/handoff.md before stopping, or mark .artifacts/ai/active-task.md as committed if the task is done.
+AGENT_STOP_VALIDATING=[myepiclauncher] Active task is still validating. Refresh .artifacts/ai/handoff.md before stopping, or mark .artifacts/ai/active-task.md as committed if validation is complete.
+AGENT_STOP_UNKNOWN=[myepiclauncher] Active task status is unclear. Review .artifacts/ai/active-task.md before stopping.

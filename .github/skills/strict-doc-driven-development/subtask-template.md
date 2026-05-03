@@ -1,10 +1,10 @@
-# Strict Doc-Driven Subtask Template
+# 严格文档驱动子任务模板
 
-Use this template when splitting work for a subtask, subagent, or follow-up implementation slice.
+在拆分子任务、subagent 工作，或后续实现切片时使用这个模板。
 
 ## Goal
 
-State the exact local outcome.
+写清精确的局部结果。
 
 ## Scope
 
@@ -15,44 +15,44 @@ State the exact local outcome.
 
 - path/to/file-or-directory
 
-## Local Task Records To Read First
+## 优先读取的本地任务记录
 
 - .artifacts/ai/active-task.md
 - .artifacts/ai/task-plan.md
 - .artifacts/ai/progress.md
 - .artifacts/ai/findings.md
 
-## Controlling Docs
+## 控制性文档
 
 1. docs/...
 2. docs/...
 
-## Task-specific Constraints
+## 任务约束
 
-1. State the boundary rules that must not be violated.
-2. State who owns the business truth.
-3. State any forbidden shortcuts.
+1. 写清不能打破的边界规则。
+2. 写清谁拥有业务真相。
+3. 写清禁止的捷径。
 
 ## Cheap Check
 
-State the narrowest validation that can disconfirm the current hypothesis.
+写清最窄、最能证伪当前假设的验证动作。
 
 ## Validation Gates
 
 1. command or focused check
 2. command or focused check
 
-## Task Records And Docs To Update
+## 需要更新的任务记录和文档
 
 1. .artifacts/ai/task-plan.md / .artifacts/ai/progress.md / .artifacts/ai/findings.md / .artifacts/ai/handoff.md updates as needed
 2. repository or module docs to refresh
 
-## Post-validation Git Action
+## 验证后的 Git 动作
 
 1. commit message plan
 2. push immediately after validation, or record pending push details if push fails
 
 ## Done When
 
-1. Concrete observable result
-2. Concrete validation result
+1. 具体且可观察的结果
+2. 具体的验证结果

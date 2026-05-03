@@ -1,0 +1,12 @@
+ACTIVE_TASK_LABEL=[myepiclauncher] 当前活跃任务
+TASK_PLAN_LABEL=[myepiclauncher] 任务计划
+RECENT_PROGRESS_LABEL=[myepiclauncher] 最近进展
+HANDOFF_LABEL=[myepiclauncher] 交接记录
+POST_TOOL_USE=[myepiclauncher] 请更新 .artifacts/ai/progress.md 记录本轮动作；如果原子任务状态变了，也同步更新 .artifacts/ai/active-task.md；如果任务准备暂停，请刷新 .artifacts/ai/handoff.md。
+ERROR_OCCURRED=[myepiclauncher] 检测到错误：{{ERROR}}。请先把这次失败记录到 .artifacts/ai/progress.md；如果这是同一阻塞的第 5 次修复失败，请用 blocked-bug-template.md 把阻塞详情持久化到 .artifacts/ai/handoff.md，然后停止等待用户决断。
+AGENT_STOP_COMMITTED=[myepiclauncher] 当前活跃任务已经 committed。现在可以停止，或开始下一条 .artifacts/ai/active-task.md 记录。
+AGENT_STOP_BLOCKED_WITH_HANDOFF=[myepiclauncher] 当前活跃任务处于 blocked，且 .artifacts/ai/handoff.md 已存在。可以安全停止，等待下次恢复。
+AGENT_STOP_BLOCKED_NO_HANDOFF=[myepiclauncher] 当前活跃任务处于 blocked。停止前先写入 .artifacts/ai/handoff.md，确保下次有安全恢复点。
+AGENT_STOP_IN_PROGRESS=[myepiclauncher] 当前活跃任务仍在进行中。停止前请刷新 .artifacts/ai/handoff.md，或者如果任务已完成，就把 .artifacts/ai/active-task.md 标记为 committed。
+AGENT_STOP_VALIDATING=[myepiclauncher] 当前活跃任务仍在 validating。停止前请刷新 .artifacts/ai/handoff.md，或者如果验证已经完成，就把 .artifacts/ai/active-task.md 标记为 committed。
+AGENT_STOP_UNKNOWN=[myepiclauncher] 当前活跃任务状态不明确。停止前请先检查 .artifacts/ai/active-task.md。

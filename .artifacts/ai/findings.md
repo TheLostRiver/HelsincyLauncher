@@ -6,3 +6,9 @@
 - New sessions should bootstrap .artifacts/ai records instead of falling back to the legacy root planning workflow.
 - The repo-specific workflow is now aligned to .artifacts/ai across session-start, pre-tool-use, post-tool-use, error handling, agent-stop, instructions, and strict-doc templates.
 - .sh hooks need LF preservation at the git layer; without .gitattributes, future git operations can reintroduce CRLF and break bash parsing.
+- The clearest place to offer user language choice is the repo-local workflow records under .artifacts/ai/, because hooks can read a language preference file there without changing the workflow semantics.
+- Session-start is the highest-value first localization target because it is the first user-visible reminder and the current strict-doc skill already anchors there.
+- Windows PowerShell 5.1 is safer when scripts stay ASCII-only and localized Chinese text lives in external asset files instead of inline literals inside .ps1.
+- The remaining repo-specific hook messages can share one bilingual message catalog per language instead of duplicating workflow logic in each script.
+- error-occurred.ps1 was still fragile even before localization because using the automatic $input variable made stdin JSON parsing unreliable; reading into a dedicated local string fixes the hook and keeps the localized error reminder working.
+- The legacy strict-doc session-start.txt and session-bootstrap.txt files are already gone, so the bilingual locale-specific assets are the only active startup reminder sources.

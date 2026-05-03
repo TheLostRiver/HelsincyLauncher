@@ -1,0 +1,8 @@
+[myepiclauncher] AI 工作流初始化提示
+在 .artifacts/ai/ 下还没有找到活跃任务记录。
+
+在开始非平凡任务前：
+1. 初始化 .artifacts/ai/active-task.md、.artifacts/ai/task-plan.md、.artifacts/ai/progress.md、.artifacts/ai/findings.md。
+2. 先读取控制性文档：docs/TauriRewriteArchitectureBlueprint.md、docs/TauriArchitecturePrinciplesDesign.md、docs/TauriAIDevelopmentTransactionProtocolDesign.md、docs/TauriTestingStrategyAndQualityGateDesign.md。
+3. 在编辑前先定义一个活跃原子任务、一条可证伪假设，以及一个最便宜的验证动作。
+4. 新任务不要回退到根目录 legacy task_plan.md / progress.md / findings.md 工作流。

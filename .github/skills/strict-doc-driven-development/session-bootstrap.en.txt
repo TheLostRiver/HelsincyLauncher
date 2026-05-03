@@ -5,4 +5,4 @@ Before starting non-trivial work:
 1. Initialize .artifacts/ai/active-task.md, .artifacts/ai/task-plan.md, .artifacts/ai/progress.md, and .artifacts/ai/findings.md.
 2. Read the controlling docs first: docs/TauriRewriteArchitectureBlueprint.md, docs/TauriArchitecturePrinciplesDesign.md, docs/TauriAIDevelopmentTransactionProtocolDesign.md, and docs/TauriTestingStrategyAndQualityGateDesign.md.
 3. Define one active atomic task, one falsifiable hypothesis, and one cheap validation gate before editing.
-4. Do not fall back to legacy root task_plan.md / progress.md / findings.md workflow for new tasks.
+4. Do not fall back to the legacy root task_plan.md / progress.md / findings.md workflow for new tasks.

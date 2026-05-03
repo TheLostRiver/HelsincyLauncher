@@ -9,13 +9,54 @@
 INPUT=$(cat)
 
 STRICT_SKILL_DIR=".github/skills/strict-doc-driven-development"
-STRICT_REMINDER_FILE="$STRICT_SKILL_DIR/session-start.txt"
-BOOTSTRAP_REMINDER_FILE="$STRICT_SKILL_DIR/session-bootstrap.txt"
 ARTIFACTS_DIR=".artifacts/ai"
 ACTIVE_TASK_FILE="$ARTIFACTS_DIR/active-task.md"
 TASK_PLAN_FILE="$ARTIFACTS_DIR/task-plan.md"
 PROGRESS_FILE="$ARTIFACTS_DIR/progress.md"
 HANDOFF_FILE="$ARTIFACTS_DIR/handoff.md"
+LANGUAGE_MODE_FILE="$ARTIFACTS_DIR/language-mode.txt"
+MESSAGE_CATALOG_FILE=""
+
+lookup_message() {
+    local key="$1"
+    local fallback="$2"
+    local line=""
+
+    if [ -n "$MESSAGE_CATALOG_FILE" ] && [ -f "$MESSAGE_CATALOG_FILE" ]; then
+        line=$(grep -m1 "^${key}=" "$MESSAGE_CATALOG_FILE" 2>/dev/null || true)
+    fi
+
+    if [ -n "$line" ]; then
+        printf '%s' "${line#*=}"
+    else
+        printf '%s' "$fallback"
+    fi
+}
+
+if [ -n "$MYEPIC_WORKFLOW_LANG" ]; then
+    LANGUAGE_MODE="$MYEPIC_WORKFLOW_LANG"
+elif [ -f "$LANGUAGE_MODE_FILE" ]; then
+    LANGUAGE_MODE=$(head -1 "$LANGUAGE_MODE_FILE" 2>/dev/null | tr -d '\r')
+else
+    LANGUAGE_MODE="zh-CN"
+fi
+
+if [ "$LANGUAGE_MODE" = "en" ]; then
+    STRICT_REMINDER_FILE="$STRICT_SKILL_DIR/session-start.en.txt"
+    BOOTSTRAP_REMINDER_FILE="$STRICT_SKILL_DIR/session-bootstrap.en.txt"
+    MESSAGE_CATALOG_FILE="$STRICT_SKILL_DIR/hook-messages.en.txt"
+else
+    LANGUAGE_MODE="zh-CN"
+    STRICT_REMINDER_FILE="$STRICT_SKILL_DIR/session-start.zh-CN.txt"
+    BOOTSTRAP_REMINDER_FILE="$STRICT_SKILL_DIR/session-bootstrap.zh-CN.txt"
+    MESSAGE_CATALOG_FILE="$STRICT_SKILL_DIR/hook-messages.zh-CN.txt"
+fi
+
+ACTIVE_TASK_LABEL=$(lookup_message "ACTIVE_TASK_LABEL" "[myepiclauncher] ACTIVE TASK")
+HANDOFF_LABEL=$(lookup_message "HANDOFF_LABEL" "[myepiclauncher] HANDOFF")
+TASK_PLAN_LABEL=$(lookup_message "TASK_PLAN_LABEL" "[myepiclauncher] TASK PLAN")
+PROGRESS_LABEL=$(lookup_message "RECENT_PROGRESS_LABEL" "[myepiclauncher] RECENT PROGRESS")
+
 STRICT_CONTEXT=$(cat "$STRICT_REMINDER_FILE" 2>/dev/null || echo "")
 BOOTSTRAP_CONTEXT=$(cat "$BOOTSTRAP_REMINDER_FILE" 2>/dev/null || echo "")
 
@@ -38,19 +79,19 @@ $2"
 }
 
 if [ -f "$ACTIVE_TASK_FILE" ]; then
-    append_context "[myepiclauncher] ACTIVE TASK" "$(cat "$ACTIVE_TASK_FILE" 2>/dev/null)"
+    append_context "$ACTIVE_TASK_LABEL" "$(cat "$ACTIVE_TASK_FILE" 2>/dev/null)"
 fi
 
 if [ -f "$HANDOFF_FILE" ]; then
-    append_context "[myepiclauncher] HANDOFF" "$(cat "$HANDOFF_FILE" 2>/dev/null)"
+    append_context "$HANDOFF_LABEL" "$(cat "$HANDOFF_FILE" 2>/dev/null)"
 fi
 
 if [ -z "$CONTEXT_PARTS" ] && [ -f "$TASK_PLAN_FILE" ]; then
-    append_context "[myepiclauncher] TASK PLAN" "$(head -40 "$TASK_PLAN_FILE" 2>/dev/null)"
+    append_context "$TASK_PLAN_LABEL" "$(head -40 "$TASK_PLAN_FILE" 2>/dev/null)"
 fi
 
 if [ -f "$PROGRESS_FILE" ]; then
-    append_context "[myepiclauncher] RECENT PROGRESS" "$(tail -20 "$PROGRESS_FILE" 2>/dev/null)"
+    append_context "$PROGRESS_LABEL" "$(tail -20 "$PROGRESS_FILE" 2>/dev/null)"
 fi
 
 if [ -n "$CONTEXT_PARTS" ]; then
