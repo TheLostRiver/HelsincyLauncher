@@ -1,4 +1,4 @@
-﻿# Task Plan: Fix Docs Parent Paths
+# Task Plan: Fix Docs Parent Paths
 
 ## Goal
 修正 docs 目录下文档元数据中的 Parent 路径，使其指向实际的 docs 目录位置。

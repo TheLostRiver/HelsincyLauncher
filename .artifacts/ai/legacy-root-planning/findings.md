@@ -1,4 +1,4 @@
-﻿# Findings & Decisions
+# Findings & Decisions
 
 ## Requirements
 - 修正 docs 目录下文档里的 Parent 所指目录。

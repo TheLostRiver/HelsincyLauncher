@@ -1,4 +1,4 @@
-﻿# Progress Log
+# Progress Log
 
 ## Session: 2026-05-03
 

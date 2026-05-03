@@ -17,3 +17,5 @@
 - The critical integration rule is not "pick one skill" but "preserve a single authoritative task record set under `.artifacts/ai` while borrowing planning-with-files' context checkpoint and recovery discipline."
 - `check-complete` cannot be pointed at the repo's `.artifacts/ai/task-plan.md` unchanged because the repo records atomic task status as numbered `AT-... - in_progress|committed` lines instead of Manus-style `### Phase` blocks.
 - Shell validation on Windows is sensitive to `.sh` line endings even when the PowerShell side works, so repo-local shell adapters need explicit LF preservation and syntax checks.
+- Once hooks, instructions, and planning-with-files scripts are fully retargeted to `.artifacts/ai`, leaving historical `task_plan.md`, `progress.md`, and `findings.md` at repo root only preserves ambiguity rather than compatibility.
+- The least risky B5 decision is to archive the legacy root planning files under `.artifacts/ai/legacy-root-planning/` and remove the root copies, because git history and the archive both preserve recoverability without exposing a second active-looking workflow surface.

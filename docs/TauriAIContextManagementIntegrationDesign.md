@@ -198,6 +198,12 @@ planning-with-files 的安全边界仍然保留：
 
 在适配层稳定后，再决定根目录 legacy planning 文件是归档保留还是显式退役。
 
+当前仓库的决策是：
+
+1. 将根目录 legacy `task_plan.md` / `progress.md` / `findings.md` 归档到 `.artifacts/ai/legacy-root-planning/`。
+2. 从仓库根目录移除这些文件，避免它们再次被误判为活跃事实源。
+3. 后续如果需要查旧历史，应从归档目录或 git 历史读取，而不是恢复 root planning 工作流。
+
 ---
 
 ## 10. Validation And Exit Criteria

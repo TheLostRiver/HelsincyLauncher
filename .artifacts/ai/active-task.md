@@ -1,27 +1,29 @@
 # Active Task
 
-- id: AT-2026-05-03-004
-- title: Adapt planning-with-files to artifacts
+- id: AT-2026-05-03-005
+- title: Archive legacy root planning files
 - status: committed
-- goal: Retarget the repo-local planning-with-files skill copy so its hooks, init flow, and catchup flow operate on `.artifacts/ai` instead of legacy root planning files.
+- goal: Preserve the old root planning history under `.artifacts/ai/legacy-root-planning/` while removing the root `task_plan.md`, `progress.md`, and `findings.md` files from the active repo surface.
 - scope:
-  - repoint planning-with-files hooks and helper scripts to `.artifacts/ai/task-plan.md`, `.artifacts/ai/progress.md`, and `.artifacts/ai/findings.md`
-  - keep the repo on a single active task path and avoid reintroducing root `task_plan.md` ownership
-  - add minimal repo-level usage guidance so strict-doc and planning-with-files are used together instead of separately
+  - archive the legacy root `task_plan.md`, `progress.md`, and `findings.md` files under `.artifacts/ai/legacy-root-planning/`
+  - remove the root copies so they can no longer be mistaken for active workflow records
+  - record the archive decision in the repo task records and controlling workflow guidance
 - out_of_scope:
-  - changing the strict-doc repo hook runtime behavior
-  - retiring legacy root planning files in this slice
+  - changing the repo hook runtime behavior
+  - tightening planning-with-files' 2-action checkpoint cadence in this slice
 - allowed_files:
   - .artifacts/ai/**
+  - task_plan.md
+  - progress.md
+  - findings.md
   - .github/copilot-instructions.md
-  - .github/skills/planning-with-files/**
+  - docs/TauriAIContextManagementIntegrationDesign.md
 - required_context:
   - docs/TauriAIDevelopmentTransactionProtocolDesign.md
   - docs/TauriAIContextManagementIntegrationDesign.md
   - docs/TauriArchitecturePrinciplesDesign.md
   - docs/TauriTestingStrategyAndQualityGateDesign.md
-  - .github/skills/planning-with-files/SKILL.md
-  - .github/skills/strict-doc-driven-development/SKILL.md
-- hypothesis: If the repo-local planning-with-files copy is retargeted to `.artifacts/ai` at the skill-hook and helper-script level, the workspace can reuse its context checkpoint and catchup discipline without reviving root planning files or violating the single-active-task rule.
-- cheap_check: Run `init-session.ps1`, `check-complete.ps1`, and `session-catchup.py` against the current repo after the patch, and confirm they operate on `.artifacts/ai` instead of `task_plan.md` / `progress.md` / `findings.md` at repo root.
-- next_step: Start the follow-up slice for legacy root planning file retirement or for tightening planning-with-files checkpoint cadence inside the repo reminder layer.
+  - .github/copilot-instructions.md
+- hypothesis: If the remaining root planning files are only historical artifacts and active hooks or skills already depend exclusively on `.artifacts/ai`, then archiving them under `.artifacts/ai/legacy-root-planning/` and removing the root copies will reduce ambiguity without breaking startup or workflow recovery behavior.
+- cheap_check: Run the repo startup reminder after the archive and confirm it still restores from `.artifacts/ai`; also verify no active `.github` runtime surface depends on root `task_plan.md`, `progress.md`, or `findings.md`.
+- next_step: Start the follow-up slice that integrates planning-with-files' 2-action checkpoint cadence more explicitly into the repo reminder layer.
