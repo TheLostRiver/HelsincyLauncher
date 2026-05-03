@@ -239,24 +239,40 @@ MyEpicLauncher/
 
 上面的 Phase A-E 仍然偏阶段视角。真正开工时，应该继续压缩成**原子任务**：每个任务只碰少量文件，只解决一个明确目标，并绑定一个最小验证动作。
 
+### 7.1 Workspace Membership Rule
+
+这里必须先固定一个实现约束：
+
+1. 根 `Cargo.toml` 不能预先写入不存在的 package path，否则最早几步就会让 workspace 失效。
+2. 因此，**凡是第一次引入某个 workspace member 的任务，都必须同时更新根 `Cargo.toml`**。
+3. 这意味着 A2、B1、B3、C1、C2、C3、C4、D1 都要把根 `Cargo.toml` 视为共享修改文件，而不是只有 A1 改它一次。
+4. A1 只负责建立 workspace root 和共享依赖策略，不假装第一天就把所有 future crate 路径都注册完成。
+
+这样做的原因是：
+
+1. Cargo workspace 的成员路径必须和当前真实存在的 package 对齐。
+2. 后续每个包级 `cargo check -p ...` 都依赖它已经在 root workspace 中被真实接入。
+
+### 7.2 Atomic Task Table
+
 建议拆成下面这 14 个原子任务：
 
 | Task | Files | Goal | Minimal Validation |
 |------|-------|------|--------------------|
-| A1 | `Cargo.toml` | 建立 workspace 根清单，但先只接最小成员 | `cargo metadata --format-version 1` |
-| A2 | `src-tauri/Cargo.toml`, `src-tauri/tauri.conf.json` | 建立桌面宿主 manifest 和配置壳 | `cargo metadata --format-version 1` |
+| A1 | `Cargo.toml` | 建立 workspace root、统一依赖版本和 member 接入规则，不预写不存在的 package path | `cargo metadata --format-version 1` |
+| A2 | `Cargo.toml`, `src-tauri/Cargo.toml`, `src-tauri/tauri.conf.json` | 建立桌面宿主 manifest 和配置壳，并把 `src-tauri` 第一次接入 workspace | `cargo metadata --format-version 1` |
 | A3 | `src-tauri/src/main.rs`, `src-tauri/src/state.rs` | 建立桌面入口和共享 state 类型 | `cargo check -p my-epic-launcher-desktop` |
-| B1 | `crates/kernel-foundation/Cargo.toml`, `crates/kernel-foundation/src/lib.rs` | 建立 foundation crate 外壳并加入 workspace | `cargo check -p launcher-kernel-foundation` |
+| B1 | `Cargo.toml`, `crates/kernel-foundation/Cargo.toml`, `crates/kernel-foundation/src/lib.rs` | 建立 foundation crate 外壳，并把它第一次接入 workspace | `cargo check -p launcher-kernel-foundation` |
 | B2 | `crates/kernel-foundation/src/error.rs`, `clock.rs`, `ids.rs`, `paging.rs`, `time.rs` | 补齐最小基础类型和导出面 | `cargo test -p launcher-kernel-foundation` |
-| B3 | `crates/kernel-jobs/Cargo.toml`, `crates/kernel-jobs/src/lib.rs`, `model.rs`, `runtime.rs` | 建立通用 job 协议壳 | `cargo check -p launcher-kernel-jobs` |
-| C1 | `crates/module-fab/Cargo.toml`, `crates/module-fab/src/lib.rs`, `contracts/*`, `facade/*` | 建立 Fab 模块公共边界 | `cargo check -p launcher-module-fab` |
-| C2 | `crates/module-downloads/Cargo.toml`, `crates/module-downloads/src/lib.rs`, `contracts/*`, `facade/*` | 建立 Downloads 模块公共边界 | `cargo check -p launcher-module-downloads` |
-| C3 | `crates/adapter-storage-sqlite/Cargo.toml`, `crates/adapter-storage-sqlite/src/lib.rs` | 建立 SQLite adapter stub | `cargo check -p launcher-adapter-storage-sqlite` |
-| C4 | `crates/adapter-provider-fab/Cargo.toml`, `crates/adapter-provider-fab/src/lib.rs` | 建立 Fab provider adapter stub | `cargo check -p launcher-adapter-provider-fab` |
-| D1 | `crates/composition-root/Cargo.toml`, `crates/composition-root/src/lib.rs` | 建立 composition root 公共 API 壳 | `cargo check -p launcher-composition-root` |
+| B3 | `Cargo.toml`, `crates/kernel-jobs/Cargo.toml`, `crates/kernel-jobs/src/lib.rs`, `model.rs`, `runtime.rs` | 建立通用 job 协议壳，并把它第一次接入 workspace | `cargo check -p launcher-kernel-jobs` |
+| C1 | `Cargo.toml`, `crates/module-fab/Cargo.toml`, `crates/module-fab/src/lib.rs`, `contracts/*`, `facade/*` | 建立 Fab 模块公共边界，并把它第一次接入 workspace | `cargo check -p launcher-module-fab` |
+| C2 | `Cargo.toml`, `crates/module-downloads/Cargo.toml`, `crates/module-downloads/src/lib.rs`, `contracts/*`, `facade/*` | 建立 Downloads 模块公共边界，并把它第一次接入 workspace | `cargo check -p launcher-module-downloads` |
+| C3 | `Cargo.toml`, `crates/adapter-storage-sqlite/Cargo.toml`, `crates/adapter-storage-sqlite/src/lib.rs` | 建立 SQLite adapter stub，并把它第一次接入 workspace | `cargo check -p launcher-adapter-storage-sqlite` |
+| C4 | `Cargo.toml`, `crates/adapter-provider-fab/Cargo.toml`, `crates/adapter-provider-fab/src/lib.rs` | 建立 Fab provider adapter stub，并把它第一次接入 workspace | `cargo check -p launcher-adapter-provider-fab` |
+| D1 | `Cargo.toml`, `crates/composition-root/Cargo.toml`, `crates/composition-root/src/lib.rs` | 建立 composition root 公共 API 壳，并把它第一次接入 workspace | `cargo check -p launcher-composition-root` |
 | D2 | `crates/composition-root/src/bootstrap.rs`, `startup.rs` | 接出 `build_desktop_services()` 和 startup facade | `cargo test -p launcher-composition-root` |
 | E1 | `src-tauri/src/commands/fab.rs`, `src-tauri/src/commands/downloads.rs` | 建立 transport -> facade 的最小命令面 | `cargo check -p my-epic-launcher-desktop` |
-| E2 | `src-tauri/src/main.rs`, `src-tauri/src/commands/mod.rs` | 注册 commands 和 shared state，收掉第一版骨架 | `cargo check --workspace` |
+| E2 | `src-tauri/src/main.rs`, `src-tauri/src/commands/mod.rs`, `src-tauri/tests/transport_wiring_smoke.rs` | 注册 commands 和 shared state，并补一条宿主级 smoke test 来证明 wiring 已真正打通 | `cargo test -p my-epic-launcher-desktop transport_wiring_smoke` |
 
 原子任务规则：
 
@@ -264,6 +280,7 @@ MyEpicLauncher/
 2. 一个任务默认不同时改 module、adapter、host 三层。
 3. 一个任务完成后立即跑对应的最小验证，不等到最后一起检查。
 4. 如果某个任务自然会扩成十几个文件，说明任务拆分还不够原子。
+5. E 阶段要证明的是“host wiring 生效”，因此不能只靠 `cargo check`；至少要有一条不依赖真实 provider IO 的宿主 smoke test。
 
 推荐的执行节奏：
 
@@ -286,6 +303,7 @@ MyEpicLauncher/
 | `src-tauri/tauri.conf.json` | Tauri 桌面配置 |
 | `src-tauri/src/main.rs` | 创建 app 并注册 commands |
 | `src-tauri/src/state.rs` | 存放共享 `DesktopAppServices` 挂载类型 |
+| `src-tauri/tests/transport_wiring_smoke.rs` | 验证 commands 注册、shared state 注入和 facade 调用路径 |
 | `crates/kernel-foundation/src/lib.rs` | 导出基础错误、时间、ID、分页类型 |
 | `crates/kernel-jobs/src/lib.rs` | 导出 job 协议和 runtime traits |
 | `crates/module-fab/src/lib.rs` | 导出 Fab facade 和 contracts |
@@ -322,9 +340,10 @@ MyEpicLauncher/
 1. `cargo check --workspace`
 2. `cargo test -p launcher-kernel-foundation`
 3. `cargo test -p launcher-composition-root`
-4. `npm run build` 仍然不被新增 Rust/Tauri 文件破坏
+4. `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`
+5. `npm run build` 仍然不被新增 Rust/Tauri 文件破坏
 
-如果当时还没有装好 Tauri CLI，也至少要满足前四项中的前三项。
+这五项都不依赖 Tauri CLI，因此都应作为第一版骨架的硬门槛。
 
 额外可选验证：
 
@@ -367,11 +386,12 @@ MyEpicLauncher/
 
 ## 13. Exit Criteria
 
-当满足下面四条时，可以认为“后端骨架已经真正出现”：
+当满足下面五条时，可以认为“后端骨架已经真正出现”：
 
 1. 仓库里已经存在 `Cargo.toml`、`src-tauri/`、`crates/`
 2. `src-tauri` 只通过 `DesktopAppServices` 消费后端能力
 3. `module-*` 与 `adapter-*` 依赖方向满足既有文档规则
-4. 至少 `cargo check --workspace` 可以稳定通过
+4. 至少有一条宿主级 smoke test 能验证 command 注册和 shared state 注入
+5. 至少 `cargo check --workspace` 可以稳定通过
 
 在这之前，都只能说“我们有后端架构设计”，不能说“我们有后端骨架实现”。
