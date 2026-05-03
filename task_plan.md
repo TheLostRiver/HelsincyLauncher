@@ -68,6 +68,17 @@ Phase 5
 - [x] Keep task_plan.md, findings.md, and progress.md together for the follow-up planning commit
 - **Status:** complete
 
+### Phase 12: Backend Skeleton Documentation
+- [x] Confirm whether backend skeleton code already exists in the repo
+- [x] Confirm whether a current-repo backend skeleton implementation doc already exists
+- [x] Add a backend skeleton implementation design for the current repo layout
+- **Status:** complete
+
+### Phase 13: Backend Skeleton Atomic Breakdown
+- [x] Decompose the backend skeleton implementation doc into atomic tasks
+- [x] Bind each atomic task to a minimal validation step
+- **Status:** complete
+
 ## Decisions Made
 | Decision | Rationale |
 |----------|-----------|
@@ -80,6 +91,8 @@ Phase 5
 | 在未指定 settings 前先补 projects | 现有模块优先顺序里 projects 在 settings 之前，且用户只选择继续该方向 |
 | 选择继续时补 settings | 用户在上一步明确选择了继续补 settings 模块文档 |
 | 选择继续时补 account-auth | 用户随后明确选择继续补 account-auth 模块文档 |
+| 当前仓库的第一版后端骨架先采用 root frontend + src-tauri + crates 方案 | 现有工作区仍是根目录 Next.js 原型，先落可编译骨架比先做目录大迁移更稳 |
+| 后端骨架文档需要继续拆到原子任务级别 | 真正开始 scaffolding 前，每一步都应限定文件范围和最小验证，避免大块不可回退施工 |
 
 ## Errors Encountered
 | Error | Resolution |

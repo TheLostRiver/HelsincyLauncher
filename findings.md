@@ -40,6 +40,10 @@
 - 当前 account-auth 模块由 components/AccountLogin.tsx 单独承载，语义集中在登录入口、同步价值说明和组织许可证状态摘要。
 - account-auth 模块最关键的边界是“前端只展示认证摘要与登录意图，真实 OAuth、token 生命周期和安全存储仍应在后端或独立认证层”。
 - 当前 account-auth 文档的最自然 git 拆分是一组 account-auth 三件套，再单独跟一个 planning 三件套提交。
+- 当前仓库仍是纯 Next.js 前端原型：根目录只有 `package.json`、`app/`、`components/` 等前端文件，不存在根 `Cargo.toml`、`src-tauri/` 或 `crates/`。
+- 现有 `docs/TauriBackendCrateLayoutAndUseCaseStubDesign.md`、`docs/TauriCompositionRootWiringDesign.md` 和 `docs/TauriFirstCrateApiDrafts.md` 已经定义了后端目标结构，但仍缺一个“基于当前仓库如何真正落骨架”的实现文档。
+- 对当前仓库而言，第一版后端骨架最合理的落地路径不是先迁移到 `apps/desktop/`，而是先保留根目录 Next.js 前端，在根目录新增 `Cargo.toml`、`src-tauri/` 和 `crates/`。
+- 当后端骨架实现文档进一步用于开工时，还必须继续拆到原子任务级别：每个任务只碰少量文件，并绑定一个最小 `cargo` 验证命令。
 
 ## Issues Encountered
 | Issue | Resolution |

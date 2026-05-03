@@ -34,6 +34,11 @@
 - 新增 docs/modules/account-auth/ 下的 README_ARCH.md、README_API.md、README_FLOW.md。
 - 已创建提交 `docs: add account auth module guides`。
 - 当前再次回到仅剩 planning 三件套待独立提交的状态。
+- 读取 package.json 和后端相关设计文档，确认当前仓库仍是纯 Next.js 前端原型，尚无真实后端骨架代码。
+- 新增 docs/TauriBackendSkeletonImplementationDesign.md，定义当前仓库下 `Cargo.toml`、`src-tauri/`、`crates/` 的第一版后端骨架落地顺序、文件清单和验收门槛。
+- 根据用户后续确认，将 docs/TauriBackendSkeletonImplementationDesign.md 进一步拆成原子任务表，为后续逐步 scaffolding 做准备。
+- 已创建提交 `docs: add backend skeleton implementation guide`。
+- 当前再次回到仅剩 planning 三件套待独立提交的状态。
 
 ### Test Results
 | Test | Expected | Actual | Status |
@@ -46,6 +51,10 @@
 | inspect projects docs presence and status boundary | 仅 projects 文档待提交 | 结果符合预期 | PASS |
 | inspect settings docs presence and status boundary | 仅 settings 文档待提交 | 结果符合预期 | PASS |
 | inspect account-auth docs presence and status boundary | 仅 account-auth 文档待提交 | 结果符合预期 | PASS |
+| inspect workspace for backend skeleton anchors | 当前仓库应仍无 `Cargo.toml`、`src-tauri/`、`crates/` 后端骨架 | 结果符合预期 | PASS |
+| inspect backend design docs for current-repo implementation gap | 应确认现有文档仍偏结构设计而非当前仓库实现文档 | 结果符合预期 | PASS |
+| inspect backend skeleton doc for atomic execution granularity | 应进一步拆成原子任务并绑定最小验证 | 结果符合预期 | PASS |
+| git status after backend skeleton doc commit | 仅剩 planning 三件套未提交 | 结果符合预期 | PASS |
 
 ### Errors
 | Error | Resolution |
