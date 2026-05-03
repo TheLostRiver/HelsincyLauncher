@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-019 - Persist kernel jobs lockfile
+- Active atomic task: none active; last committed task is AT-2026-05-03-020 - Bootstrap module fab crate
 - Current phase: Phase 5 - Backend Skeleton Bootstrap
-- Last committed task before this slice: AT-2026-05-03-018 - Bootstrap kernel jobs crate
-- Next validation gate: none pending for AT-2026-05-03-019
+- Last committed task before this slice: AT-2026-05-03-019 - Persist kernel jobs lockfile
+- Next validation gate: none pending for AT-2026-05-03-020
 
 ## Session Timeline
 
@@ -98,6 +98,10 @@
 - Detected one adjacent cleanup artifact after AT-2026-05-03-018: adding the new workspace member updated `Cargo.lock`, so the repo needs one tiny follow-up slice before the next crate starts cleanly.
 - Started AT-2026-05-03-019 to persist that small lockfile delta rather than carrying it forward as unrelated worktree noise.
 - Validated AT-2026-05-03-019 with `cargo check -p launcher-kernel-jobs --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`, `git diff --check`, and `git status --short`, confirming only the expected lockfile and task-record files remained before commit.
+- Started AT-2026-05-03-020 after the user selected the first module stub, choosing `launcher-module-fab` as the first module boundary because C1 is the earliest module task in the controlling backend skeleton table.
+- Confirmed the C1 slice can stay narrow: the current docs require only `contracts` plus `FabFacade`, while real projection repositories, provider ports, and sync orchestration remain out of scope for this first module shell.
+- Validated AT-2026-05-03-020 with `cargo check -p launcher-module-fab --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` and `git diff --check`, confirming the public module shell compiles without pulling provider or storage internals into the boundary.
+- Detected one adjacent cleanup artifact after AT-2026-05-03-020: adding the new workspace member updated `Cargo.lock`, so the repo needs one tiny follow-up slice before the next crate starts cleanly.
 
 ## Validation Snapshot
 

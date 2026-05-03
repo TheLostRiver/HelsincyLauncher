@@ -10,8 +10,8 @@ Phase 5 - Backend Skeleton Bootstrap
 
 ## Current Focus
 
-- Use the clean post-B3 baseline as the starting point for the first module stub slice.
-- Keep the next slice focused on one module boundary at a time.
+- Use the validated `launcher-module-fab` shell as the first module boundary baseline.
+- Persist the workspace-member `Cargo.lock` delta before moving on to the next slice.
 
 ## Phases
 
@@ -66,6 +66,7 @@ Phase 5 - Backend Skeleton Bootstrap
 17. AT-2026-05-03-017 - committed - persisted the dependency-expanded `Cargo.lock` produced by the validated foundation B2 slice.
 18. AT-2026-05-03-018 - committed - bootstrapped the `launcher-kernel-jobs` crate shell and minimal shared runtime surface.
 19. AT-2026-05-03-019 - committed - persisted the `Cargo.lock` delta produced by the validated kernel-jobs B3 slice.
+20. AT-2026-05-03-020 - committed - bootstrapped the `launcher-module-fab` crate shell and public contracts/facade boundary.
 
 ## Key Questions
 
@@ -84,7 +85,7 @@ Phase 5 - Backend Skeleton Bootstrap
 ## Follow-up Queue
 
 1. Integrate planning-with-files' 2-action checkpoint cadence more explicitly into repo-level reminders if the adapter slice alone is not enough.
-2. After AT-2026-05-03-019 passes, open the first module stub slice.
+2. After AT-2026-05-03-020 passes, persist the new `Cargo.lock` delta before moving on to the next module or adapter.
 
 ## Legacy Note
 

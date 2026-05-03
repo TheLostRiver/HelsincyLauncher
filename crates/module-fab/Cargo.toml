@@ -1,0 +1,15 @@
+[package]
+name = "launcher-module-fab"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "launcher_module_fab"
+path = "src/lib.rs"
+
+[dependencies]
+launcher-kernel-foundation = { path = "../kernel-foundation" }
+launcher-kernel-jobs = { path = "../kernel-jobs" }
+serde.workspace = true
