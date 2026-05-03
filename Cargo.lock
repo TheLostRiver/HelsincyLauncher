@@ -227,6 +227,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "launcher-module-fab"
+version = "0.1.0"
+dependencies = [
+ "launcher-kernel-foundation",
+ "launcher-kernel-jobs",
+ "serde",
+]
+
+[[package]]
 name = "leb128fmt"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

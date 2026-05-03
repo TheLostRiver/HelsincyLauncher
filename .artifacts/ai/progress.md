@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-020 - Bootstrap module fab crate
+- Active atomic task: none active; last committed task is AT-2026-05-03-021 - Persist module fab lockfile
 - Current phase: Phase 5 - Backend Skeleton Bootstrap
-- Last committed task before this slice: AT-2026-05-03-019 - Persist kernel jobs lockfile
-- Next validation gate: none pending for AT-2026-05-03-020
+- Last committed task before this slice: AT-2026-05-03-020 - Bootstrap module fab crate
+- Next validation gate: none pending for AT-2026-05-03-021
 
 ## Session Timeline
 
@@ -102,6 +102,9 @@
 - Confirmed the C1 slice can stay narrow: the current docs require only `contracts` plus `FabFacade`, while real projection repositories, provider ports, and sync orchestration remain out of scope for this first module shell.
 - Validated AT-2026-05-03-020 with `cargo check -p launcher-module-fab --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` and `git diff --check`, confirming the public module shell compiles without pulling provider or storage internals into the boundary.
 - Detected one adjacent cleanup artifact after AT-2026-05-03-020: adding the new workspace member updated `Cargo.lock`, so the repo needs one tiny follow-up slice before the next crate starts cleanly.
+- Committed and pushed AT-2026-05-03-020 as `8807d41` (`Bootstrap module fab crate`) without widening the code slice to include the adjacent lockfile noise.
+- Started AT-2026-05-03-021 to persist that small lockfile delta rather than carrying it forward as unrelated worktree noise.
+- Validated AT-2026-05-03-021 with `cargo check -p launcher-module-fab --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`, `git diff --check`, and `git status --short`, confirming only the expected `Cargo.lock` and task-record files remained before commit.
 
 ## Validation Snapshot
 
