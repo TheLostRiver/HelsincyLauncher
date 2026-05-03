@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-021 - Persist module fab lockfile
+- Active atomic task: none active; last committed task is AT-2026-05-03-022 - Bootstrap module downloads crate
 - Current phase: Phase 5 - Backend Skeleton Bootstrap
-- Last committed task before this slice: AT-2026-05-03-020 - Bootstrap module fab crate
-- Next validation gate: none pending for AT-2026-05-03-021
+- Last committed task before this slice: AT-2026-05-03-021 - Persist module fab lockfile
+- Next validation gate: none pending for AT-2026-05-03-022
 
 ## Session Timeline
 
@@ -105,6 +105,11 @@
 - Committed and pushed AT-2026-05-03-020 as `8807d41` (`Bootstrap module fab crate`) without widening the code slice to include the adjacent lockfile noise.
 - Started AT-2026-05-03-021 to persist that small lockfile delta rather than carrying it forward as unrelated worktree noise.
 - Validated AT-2026-05-03-021 with `cargo check -p launcher-module-fab --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`, `git diff --check`, and `git status --short`, confirming only the expected `Cargo.lock` and task-record files remained before commit.
+- Committed and pushed AT-2026-05-03-021 as `57dbe3d` (`Persist module fab lockfile`), returning the repo to a clean post-C1 baseline.
+- Started AT-2026-05-03-022 after the user chose the next documented slice, targeting `launcher-module-downloads` as the second module boundary because C2 follows C1 in the controlling task table.
+- Confirmed the C2 slice can stay narrow: the current docs require only `contracts` plus `DownloadFacade`, while scheduler, checkpoint, manifest-provider, and staging-store internals remain out of scope for this first downloads module shell.
+- Validated AT-2026-05-03-022 with `cargo check -p launcher-module-downloads --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` and `git diff --check`, confirming the public module shell compiles without pulling scheduler or checkpoint internals into the boundary.
+- Detected one adjacent cleanup artifact after AT-2026-05-03-022: adding the new workspace member updated `Cargo.lock`, so the repo needs one tiny follow-up slice before the next crate starts cleanly.
 
 ## Validation Snapshot
 
