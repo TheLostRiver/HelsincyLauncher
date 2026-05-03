@@ -10,8 +10,8 @@ Phase 5 - Backend Skeleton Bootstrap
 
 ## Current Focus
 
-- Use the validated B2 foundation surface as the new clean kernel baseline.
-- Persist the dependency-driven `Cargo.lock` delta before moving on to `kernel-jobs` B3.
+- Use the clean post-B2 kernel baseline as the starting point for `kernel-jobs` B3.
+- Keep the next slice focused on creating the `launcher-kernel-jobs` shell and first runtime surface.
 
 ## Phases
 
@@ -63,6 +63,7 @@ Phase 5 - Backend Skeleton Bootstrap
 14. AT-2026-05-03-014 - committed - bootstrapped the `launcher-kernel-foundation` crate shell and connected it to the root workspace.
 15. AT-2026-05-03-015 - committed - persisted the generated `Cargo.lock` entry for `launcher-kernel-foundation` so the repo returns to a clean post-B1 baseline.
 16. AT-2026-05-03-016 - committed - implemented the first real foundation contract surface and the named `foundation_contract_smoke` test.
+17. AT-2026-05-03-017 - committed - persisted the dependency-expanded `Cargo.lock` produced by the validated foundation B2 slice.
 
 ## Key Questions
 
@@ -81,7 +82,7 @@ Phase 5 - Backend Skeleton Bootstrap
 ## Follow-up Queue
 
 1. Integrate planning-with-files' 2-action checkpoint cadence more explicitly into repo-level reminders if the adapter slice alone is not enough.
-2. After AT-2026-05-03-016 passes, persist the new `Cargo.lock` delta before moving on to `kernel-jobs` B3.
+2. After AT-2026-05-03-017 passes, open `kernel-jobs` B3.
 
 ## Legacy Note
 

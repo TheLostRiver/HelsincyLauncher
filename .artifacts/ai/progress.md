@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-016 - Implement foundation contract surface
+- Active atomic task: none active; last committed task is AT-2026-05-03-017 - Persist foundation dependency lockfile
 - Current phase: Phase 5 - Backend Skeleton Bootstrap
-- Last committed task before this slice: AT-2026-05-03-015 - Persist kernel foundation lockfile
-- Next validation gate: none pending for AT-2026-05-03-016
+- Last committed task before this slice: AT-2026-05-03-016 - Implement foundation contract surface
+- Next validation gate: none pending for AT-2026-05-03-017
 
 ## Session Timeline
 
@@ -90,6 +90,8 @@
 - Confirmed a local doc drift before editing code: the B2 task table omits `crates/kernel-foundation/Cargo.toml`, `src/lib.rs`, and `src/result.rs` even though the current B1 baseline requires them to make the documented B2 surface compile and export correctly.
 - Validated AT-2026-05-03-016 with `cargo test -p launcher-kernel-foundation foundation_contract_smoke --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` and `git diff --check`, confirming the foundation surface and named smoke test now exist and pass.
 - Detected one adjacent cleanup artifact after AT-2026-05-03-016: adding chrono/serde-json-backed foundation dependencies updated `Cargo.lock`, so the repo needs one tiny follow-up slice before B3 can start cleanly.
+- Started AT-2026-05-03-017 to persist that dependency-expanded lockfile rather than carrying it forward as unrelated worktree noise.
+- Validated AT-2026-05-03-017 with `cargo test -p launcher-kernel-foundation foundation_contract_smoke --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`, `git diff --check`, and `git status --short`, confirming only the expected lockfile and task-record files remained before commit.
 
 ## Validation Snapshot
 
