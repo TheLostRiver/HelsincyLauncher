@@ -51,6 +51,7 @@
 - For C1, `launcher-module-fab` only needs small public contracts and a placeholder `FabFacade` over generic dependencies; the actual repository/provider port traits and use case implementations belong to later slices and should not be pulled into the first module shell.
 - The `launcher-module-fab` C1 lockfile delta should remain a separate cleanup slice as well; the package reuses already-resolved workspace dependencies, so the adjacent `Cargo.lock` change is expected and should not be folded back into the code task.
 - For C2, `launcher-module-downloads` should mirror the same shell-first pattern: expose only small public contracts and a placeholder `DownloadFacade`, while download scheduler, checkpoint, manifest-provider, staging-store, and transport details stay deferred to later slices.
+- The `launcher-module-downloads` C2 lockfile delta should remain a separate cleanup slice as well; the package reuses already-resolved workspace dependencies, so the adjacent `Cargo.lock` change is expected and should not be folded back into the code task.
 
 ## Technical Decisions
 

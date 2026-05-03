@@ -227,6 +227,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "launcher-module-downloads"
+version = "0.1.0"
+dependencies = [
+ "launcher-kernel-foundation",
+ "launcher-kernel-jobs",
+ "serde",
+]
+
+[[package]]
 name = "launcher-module-fab"
 version = "0.1.0"
 dependencies = [
