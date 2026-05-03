@@ -78,6 +78,8 @@
 - The architecture overview should stay narrowly scoped to “where things live and how they connect today”; if it starts re-explaining all non-goals and principles from the blueprint, it will drift into a duplicate source.
 - AT-037 confirmed that the docs-map layer is most useful when it is opinionated about ownership and routing: which docs are first-entry docs, which are principles, which describe the current repo, which are topic docs, and which are module docs.
 - `docs/README.md` should not become a second README; its value is in telling contributors where to go next and what does not belong back in the root README.
+- AT-038 confirmed that post-review repair slices must reset both `task-plan.md` current-focus text and `progress.md` current-status text together; fixing only one surface recreates recovery drift immediately.
+- Once an entry-layer document is exposed from the root README, it should not keep draft-status wording unless the repo explicitly wants users to treat it as non-authoritative.
 
 ## Technical Decisions
 
@@ -96,14 +98,6 @@
 | Generic planning templates and repo live files drifted into different shapes | Normalize both the live records and the template/bootstrap sources together |
 | Sync terminal commands did not preserve the intended repo cwd for verification and commit flow | Use async terminal commands with explicit repo paths when git output matters |
 | The backend skeleton doc's A1 assumption conflicted with actual Cargo behavior | Surface the gap in findings/progress and bridge the workspace root to the smallest valid `src-tauri` stub |
-
-
-## Issues Encountered
-
-| Issue | Resolution |
-|-------|------------|
-| Generic planning templates and repo live files drifted into different shapes | Normalize both the live records and the template/bootstrap sources together |
-| Sync terminal commands did not preserve the intended repo cwd for verification and commit flow | Use async terminal commands with explicit repo paths when git output matters |
 
 ## Resources
 

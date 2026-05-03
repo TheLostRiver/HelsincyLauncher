@@ -1,6 +1,6 @@
 # Tauri Current-repo Architecture Overview
 
-> Status: local draft v1
+> Status: published current-state guide
 > Date: 2026-05-03
 > Parent: `docs/TauriRewriteArchitectureBlueprint.md`
 > Depends on: `docs/TauriArchitecturePrinciplesDesign.md`, `docs/TauriBackendSkeletonImplementationDesign.md`, `docs/TauriDocumentationBenchmarkAgainstCodexManager.md`

@@ -6,12 +6,12 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 9 - Docs Map Overview
+Phase 10 - Review Drift Cleanup
 
 ## Current Focus
 
-- AT-2026-05-03-037 is implementing benchmark P3 by adding `docs/README.md` as the docs map.
-- Keep the new map focused on ownership and routing, not on repeating deep doc content.
+- No active atomic task is currently open.
+- AT-2026-05-03-038 repaired the focused review drift across `.artifacts/ai` and the current-repo architecture overview; next decide whether to continue governance review or return to backend integration.
 
 ## Phases
 
@@ -69,6 +69,12 @@ Phase 9 - Docs Map Overview
 - Atomic tasks: AT-2026-05-03-037
 - **Status:** complete
 
+### Phase 10: Review Drift Cleanup
+
+- Outcome: repair the post-review drift between live task records and published entry-layer documents.
+- Atomic tasks: AT-2026-05-03-038
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -108,6 +114,7 @@ Phase 9 - Docs Map Overview
 35. AT-2026-05-03-035 - committed - added a root contributor collaboration guide and exposed it from README as the benchmarked P1 entry layer.
 36. AT-2026-05-03-036 - committed - added a current-repo architecture overview and exposed it from README as the benchmarked P2 entry layer.
 37. AT-2026-05-03-037 - committed - added `docs/README.md` as the benchmarked P3 docs map and exposed it from README.
+38. AT-2026-05-03-038 - committed - repaired the focused review drift in `.artifacts/ai` and the current-repo architecture overview.
 
 ## Key Questions
 
@@ -125,8 +132,8 @@ Phase 9 - Docs Map Overview
 
 ## Follow-up Queue
 
-1. After AT-2026-05-03-037, decide whether to continue broader documentation governance or return to backend integration.
-2. If docs entrance work pauses after P3, resume the next backend validation or integration step from the validated host transport baseline while leaving user frontend edits untouched.
+1. After AT-2026-05-03-038, decide whether to continue broader documentation governance review or return to backend integration.
+2. If documentation cleanup pauses after this review-repair slice, resume the next backend validation or integration step from the validated host transport baseline while leaving user frontend edits untouched.
 
 ## Legacy Note
 
