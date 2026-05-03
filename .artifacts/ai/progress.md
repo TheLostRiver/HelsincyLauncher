@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-009 - Bootstrap first Cargo workspace member
+- Active atomic task: none active; last committed task is AT-2026-05-03-010 - Persist initial Cargo lockfile
 - Current phase: Phase 5 - Backend Skeleton Bootstrap
 - Last committed task before this slice: AT-2026-05-03-008 - Normalize AI record schema
-- Next validation gate: none pending for AT-2026-05-03-009
+- Next validation gate: post-commit clean worktree check
 
 ## Session Timeline
 
@@ -71,6 +71,9 @@
 - Ran a repo-external Cargo probe and confirmed the minimal valid shape is a workspace with at least one real member that also has a target file; a member manifest alone is still insufficient.
 - Repaired AT-2026-05-03-009 in place by bridging the workspace root to the smallest `src-tauri` library stub and recording the A1 doc gap.
 - Re-ran the exact A1 validation gate and confirmed `cargo metadata --format-version 1 --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` now passes with the minimal `src-tauri` workspace member in place.
+- Detected one adjacent follow-up artifact after commit/push: `cargo metadata` had generated `Cargo.lock`, so the repo still needs a tiny cleanup slice before Phase 5 is truly clean.
+- Started AT-2026-05-03-010 to persist the generated lockfile rather than leaving the workspace baseline dirty.
+- Re-ran `cargo metadata --format-version 1 --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` and confirmed the workspace baseline remained valid before persisting `Cargo.lock`.
 
 ## Validation Snapshot
 

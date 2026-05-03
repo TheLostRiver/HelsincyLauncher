@@ -10,7 +10,7 @@ Phase 5 - Backend Skeleton Bootstrap
 
 ## Current Focus
 
-- Use the validated root workspace plus minimal `src-tauri` stub as the new baseline for Phase 5.
+- Use the committed workspace baseline and lockfile as the starting point for the next host bootstrap slice.
 - Prepare the next host bootstrap slice that fills in `tauri.conf.json`, `main.rs`, `bootstrap.rs`, and `state.rs`.
 
 ## Phases
@@ -56,6 +56,7 @@ Phase 5 - Backend Skeleton Bootstrap
 7. AT-2026-05-03-007 - committed - added workspace slash-command prompt entry points that wrap the repo's strict-doc and planning-with-files workflow without introducing a second planning source.
 8. AT-2026-05-03-008 - committed - normalized the live `.artifacts/ai` records plus repo-local planning templates and bootstrap output into one section-based schema that remains compatible with the existing AT ledger and hooks.
 9. AT-2026-05-03-009 - committed - created the root Rust workspace manifest plus the smallest valid `src-tauri` member stub so backend skeleton Phase A can pass the documented metadata gate.
+10. AT-2026-05-03-010 - committed - persisted the generated `Cargo.lock` so the validated workspace baseline is fully recorded and the worktree returns to clean.
 
 ## Key Questions
 
@@ -74,7 +75,7 @@ Phase 5 - Backend Skeleton Bootstrap
 ## Follow-up Queue
 
 1. Integrate planning-with-files' 2-action checkpoint cadence more explicitly into repo-level reminders if the adapter slice alone is not enough.
-2. Start AT-2026-05-03-010 for the next host bootstrap slice, adding `tauri.conf.json`, `main.rs`, `bootstrap.rs`, and `state.rs` on top of the validated `src-tauri` stub.
+2. Start the next host bootstrap slice after the lockfile cleanup, adding `tauri.conf.json`, `main.rs`, `bootstrap.rs`, and `state.rs` on top of the validated `src-tauri` stub.
 
 ## Legacy Note
 
