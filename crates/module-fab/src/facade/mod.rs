@@ -1,6 +1,4 @@
-use launcher_kernel_foundation::{
-    AppError, AppErrorSeverity, AppResult, AssetId, CorrelationId, IsoDateTime, JobId,
-};
+use launcher_kernel_foundation::{AppResult, AssetId, IsoDateTime, JobId};
 use launcher_kernel_jobs::AcceptedJob;
 
 use crate::contracts::{
@@ -32,10 +30,27 @@ pub trait FabSyncJobAcceptance {
     fn accept_sync_job(&self, request: FabInventorySyncRequestDto) -> AppResult<AcceptedJob>;
 }
 
+pub trait FabStartupPrewarmJobAcceptance {
+    fn accept_startup_prewarm_job(
+        &self,
+        request: FabInventoryPrewarmRequestDto,
+    ) -> AppResult<AcceptedJob>;
+}
+
 impl FabSyncJobAcceptance for () {
     fn accept_sync_job(&self, request: FabInventorySyncRequestDto) -> AppResult<AcceptedJob> {
         let _ = request;
         Ok(cold_start_sync_job())
+    }
+}
+
+impl FabStartupPrewarmJobAcceptance for () {
+    fn accept_startup_prewarm_job(
+        &self,
+        request: FabInventoryPrewarmRequestDto,
+    ) -> AppResult<AcceptedJob> {
+        let _ = request;
+        Ok(cold_start_startup_prewarm_job())
     }
 }
 
@@ -48,14 +63,18 @@ impl<P, C, M, J, K> FabFacade<P, C, M, J, K> {
         &self.deps
     }
 
+}
+
+impl<P, C, M, J, K> FabFacade<P, C, M, J, K>
+where
+    J: FabStartupPrewarmJobAcceptance,
+{
     pub fn run_startup_prewarm(
         &self,
         request: FabInventoryPrewarmRequestDto,
     ) -> AppResult<AcceptedJob> {
-        let _ = request;
-        Err(not_wired("run_startup_prewarm"))
+        self.deps.job_runtime.accept_startup_prewarm_job(request)
     }
-
 }
 
 impl<P, C, M, J, K> FabFacade<P, C, M, J, K>
@@ -80,16 +99,6 @@ where
     }
 }
 
-fn not_wired(operation: &str) -> AppError {
-    AppError::new(
-        "FAB_NOT_WIRED",
-        format!("fab facade operation `{operation}` is not wired in C1"),
-        false,
-        AppErrorSeverity::Warning,
-        CorrelationId::generate(),
-    )
-}
-
 fn cold_start_asset_detail(asset_id: AssetId) -> FabAssetDetailDto {
     FabAssetDetailDto {
         asset_id,
@@ -110,6 +119,15 @@ fn cold_start_sync_job() -> AcceptedJob {
     }
 }
 
+fn cold_start_startup_prewarm_job() -> AcceptedJob {
+    AcceptedJob {
+        job_id: JobId::generate(),
+        module: "fab".into(),
+        kind: "inventory_startup_prewarm".into(),
+        queued_at: IsoDateTime::now(),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::sync::Mutex;
@@ -122,7 +140,7 @@ mod tests {
     };
     use crate::contracts::{
         FabAssetDetailDto, FabAssetDetailQueryDto, FabInventoryItemDto,
-        FabInventoryListQueryDto, FabInventorySyncRequestDto,
+        FabInventoryListQueryDto, FabInventoryPrewarmRequestDto, FabInventorySyncRequestDto,
     };
 
     #[derive(Debug)]
@@ -236,6 +254,27 @@ mod tests {
 
         assert_eq!(accepted_job.module, "fab");
         assert_eq!(accepted_job.kind, "inventory_sync");
+        assert!(!accepted_job.job_id.as_str().is_empty());
+    }
+
+    #[test]
+    fn run_startup_prewarm_returns_backend_owned_accepted_job_with_placeholder_runtime() {
+        let facade = FabFacade::new(FabModuleDeps {
+            projection_repo: RecordingProjectionRepository::new(PageSlice::new(Vec::new(), None)),
+            cursor_repo: (),
+            media_repo: (),
+            job_runtime: (),
+            catalog_provider: (),
+        });
+
+        let accepted_job = facade
+            .run_startup_prewarm(FabInventoryPrewarmRequestDto {
+                reason: "startup-stage-3".into(),
+            })
+            .expect("run_startup_prewarm should return a backend-owned accepted job when the current runtime dependency is still a placeholder");
+
+        assert_eq!(accepted_job.module, "fab");
+        assert_eq!(accepted_job.kind, "inventory_startup_prewarm");
         assert!(!accepted_job.job_id.as_str().is_empty());
     }
 }

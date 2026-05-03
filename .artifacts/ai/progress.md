@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-041 - Accept fab sync inventory job
-- Current phase: Phase 13 - Fab Sync Job Acceptance
-- Last committed task before this slice: AT-2026-05-03-040 - Wire fab asset detail query
-- Next validation gate: none pending for AT-2026-05-03-041
+- Active atomic task: none active; last committed task is AT-2026-05-03-042 - Accept fab startup prewarm job
+- Current phase: Phase 14 - Fab Startup Prewarm Job Acceptance
+- Last committed task before this slice: AT-2026-05-03-041 - Accept fab sync inventory job
+- Next validation gate: none pending for AT-2026-05-03-042
 
 ## Session Timeline
 
@@ -190,10 +190,14 @@
 - Confirmed the current composition root still injects `()` for Fab `job_runtime`, so the sync slice must stop at backend-owned accepted-job behavior rather than widening into real runtime enqueue wiring.
 - Wired `FabFacade::sync_inventory()` through a narrow sync-job acceptance boundary, implemented the current `()` dependency as a backend-owned placeholder acceptance path, and added a named module-fab unit test to prove the command now returns an accepted job instead of `FAB_NOT_WIRED`.
 - Validated AT-2026-05-03-041 with `cargo test -p launcher-module-fab sync_inventory_returns_backend_owned_accepted_job_with_placeholder_runtime`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, and a scoped `git diff --check`.
+- Started AT-2026-05-03-042 after the user selected “继续 Fab startup prewarm” in the confirmation UI and the controlling docs plus current code showed the real stage-3 startup pipeline remains a composition-root concern with a still-empty startup facade.
+- Confirmed the current startup pipeline is still a no-op and the composition root still injects `()` for Fab `job_runtime`, so this prewarm slice must stay at backend-owned facade acceptance rather than widening into startup-stage orchestration or real runtime enqueue wiring.
+- Wired `FabFacade::run_startup_prewarm()` through a narrow prewarm-job acceptance boundary, implemented the current `()` dependency as a backend-owned placeholder acceptance path, and added a named module-fab unit test to prove the command now returns an accepted job instead of `FAB_NOT_WIRED`.
+- Validated AT-2026-05-03-042 with `cargo test -p launcher-module-fab run_startup_prewarm_returns_backend_owned_accepted_job_with_placeholder_runtime`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, and a scoped `git diff --check`.
 
 ## Validation Snapshot
 
-- Latest completed validation: AT-2026-05-03-041 passed `cargo test -p launcher-module-fab sync_inventory_returns_backend_owned_accepted_job_with_placeholder_runtime`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, and the scoped `git diff --check` for the sync-job slice.
+- Latest completed validation: AT-2026-05-03-042 passed `cargo test -p launcher-module-fab run_startup_prewarm_returns_backend_owned_accepted_job_with_placeholder_runtime`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, and the scoped `git diff --check` for the prewarm-job slice.
 - Latest repo-wide backend validation remains the previously completed `cargo check --workspace` plus the named host/composition/foundation smoke tests from the post-E2 baseline.
 
 ## Error Log
@@ -206,8 +210,8 @@
 
 | Question | Answer |
 |----------|--------|
-| Where am I? | Phase 13 Fab sync job acceptance is complete and no active atomic task is currently open |
-| Where am I going? | Decide whether the next Fab/backend slice should open startup prewarm, a real runtime bundle, or another narrow backend path |
+| Where am I? | Phase 14 Fab startup-prewarm job acceptance is complete and no active atomic task is currently open |
+| Where am I going? | Decide whether the next Fab/backend slice should open startup stage-3 orchestration, a real runtime bundle, or another narrow backend path |
 | What's the goal? | Keep turning the remaining transport-owned or facade-level Fab command gaps into backend-owned local behavior one narrow route at a time |
-| What have I learned? | `sync_inventory` was still narrow enough to become backend-owned locally, but startup prewarm still belongs to the later startup/runtime wiring surface |
+| What have I learned? | `run_startup_prewarm` was still narrow enough to become backend-owned locally, but real startup stage-3 orchestration still belongs to the later startup/runtime wiring surface |
 | What have I done? | See the session timeline above |

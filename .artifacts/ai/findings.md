@@ -86,6 +86,8 @@
 - The current SQLite detail stub can safely return `None` while `FabFacade::get_asset_detail()` owns the cold-start placeholder, which removes another transport-owned fallback without forcing real provider detail hydration yet.
 - AT-041 confirmed that after `get_asset_detail`, the next narrow Fab command slice is `sync_inventory`, not startup prewarm, because startup prewarm is still explicitly tied to startup stage-3 orchestration and a later runtime bundle.
 - The current Fab `job_runtime` placeholder can be wrapped behind a narrow sync-job acceptance boundary so `FabFacade::sync_inventory()` returns a backend-owned `AcceptedJob` now, while real enqueue/runtime wiring remains deferred to a later slice.
+- AT-042 confirmed that a facade-level startup-prewarm acceptance slice is still possible before stage-3 orchestration lands: `FabFacade::run_startup_prewarm()` can return a backend-owned `AcceptedJob` locally while the startup pipeline remains a no-op.
+- The current doc set still implies that real startup prewarm execution belongs to the later startup facade and runtime bundle, so the safe narrow move is to stop at facade acceptance and leave `StartupPipelineFacade::run_stage3_background_prewarm()` untouched for now.
 
 ## Technical Decisions
 

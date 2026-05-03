@@ -6,12 +6,12 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 13 - Fab Sync Job Acceptance
+Phase 14 - Fab Startup Prewarm Job Acceptance
 
 ## Current Focus
 
 - No active atomic task is currently open.
-- AT-2026-05-03-041 moved the Fab sync-inventory command to a backend-owned accepted-job response; next decide whether to open startup prewarm, a real runtime bundle, or another backend slice.
+- AT-2026-05-03-042 moved the Fab startup-prewarm command to a backend-owned accepted-job response; next decide whether to open startup stage-3 orchestration, a real runtime bundle, or another backend slice.
 
 ## Phases
 
@@ -93,6 +93,12 @@ Phase 13 - Fab Sync Job Acceptance
 - Atomic tasks: AT-2026-05-03-041
 - **Status:** complete
 
+### Phase 14: Fab Startup Prewarm Job Acceptance
+
+- Outcome: make the Fab startup-prewarm command return a backend-owned accepted job while keeping stage-3 startup orchestration and real runtime/provider execution deferred.
+- Atomic tasks: AT-2026-05-03-042
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -136,6 +142,7 @@ Phase 13 - Fab Sync Job Acceptance
 39. AT-2026-05-03-039 - committed - wired the Fab inventory list query through the projection-repository path and retired the `FAB_NOT_WIRED` fallback for that query.
 40. AT-2026-05-03-040 - committed - wired the Fab asset-detail query through the local projection path and retired the transport-owned `FAB_NOT_WIRED` fallback for that detail route.
 41. AT-2026-05-03-041 - committed - made the Fab sync-inventory command return a backend-owned accepted job without opening startup prewarm or real runtime wiring.
+42. AT-2026-05-03-042 - committed - made the Fab startup-prewarm command return a backend-owned accepted job without opening startup stage-3 orchestration or real runtime wiring.
 
 ## Key Questions
 
@@ -153,7 +160,7 @@ Phase 13 - Fab Sync Job Acceptance
 
 ## Follow-up Queue
 
-1. After AT-2026-05-03-041, decide whether the next backend slice should open Fab startup prewarm, a real job-runtime bundle, or another narrow backend path such as downloads.
+1. After AT-2026-05-03-042, decide whether the next backend slice should open startup stage-3 orchestration, a real job-runtime bundle, or another narrow backend path such as downloads.
 2. If backend work pauses after this query slice, resume from the validated host transport baseline while leaving user frontend edits untouched.
 
 ## Legacy Note
