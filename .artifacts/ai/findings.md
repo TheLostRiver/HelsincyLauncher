@@ -60,6 +60,8 @@
 - The `launcher-composition-root` D1 lockfile delta should remain a separate cleanup slice as well; the package reuses already-resolved workspace dependencies, so the adjacent `Cargo.lock` change is expected and should not be folded back into the code task.
 - For D2, the first composition-root wiring slice should stay smoke-test oriented: assemble the already-created adapter stubs into Fab and Downloads facades, keep startup stage methods explicit and side-effect free, and let the named `bootstrap_wiring_smoke` test prove only that `build_desktop_services()` returns the three facade handles.
 - A thin D2 builder layout is enough for the first composition-root wiring slice: `build_storage_adapters`-style config validation can live in helper functions, the startup facade can expose async stage methods as explicit no-ops, and the integration smoke test can verify assembly by inspecting facade deps instead of requiring real runtime execution.
+- For E1, the smallest host transport slice should stay command-shell only: add Fab and Downloads handler modules that consume `DesktopAppServices`, keep result mapping thin and local to `src-tauri`, and defer actual command registration plus shared-state injection to E2.
+- The E1 host slice can safely stub read-only query responses on `*_NOT_WIRED` facade errors while still routing commands through `DesktopAppServices`; adding these host crate dependencies also produces a tiny `Cargo.lock` adjacency that should be persisted in a separate cleanup slice, without touching unrelated user frontend worktree edits.
 
 ## Technical Decisions
 

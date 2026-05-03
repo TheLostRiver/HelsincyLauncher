@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-030 - Wire composition root smoke shell
+- Active atomic task: none active; last committed task is AT-2026-05-03-031 - Add transport facade command shell
 - Current phase: Phase 5 - Backend Skeleton Bootstrap
-- Last committed task before this slice: AT-2026-05-03-029 - Persist composition root lockfile
-- Next validation gate: none pending for AT-2026-05-03-030
+- Last committed task before this slice: AT-2026-05-03-030 - Wire composition root smoke shell
+- Next validation gate: none pending for AT-2026-05-03-031
 
 ## Session Timeline
 
@@ -141,6 +141,10 @@
 - Started AT-2026-05-03-030 after the user explicitly selected D2, keeping the next slice inside `launcher-composition-root` to implement the minimal assembly shell plus the required `bootstrap_wiring_smoke` test.
 - Implemented AT-2026-05-03-030 by splitting `launcher-composition-root` into `bootstrap.rs` and `startup.rs`, wiring the existing storage/provider stubs into the Fab and Downloads facades, and keeping startup stage methods explicit no-ops so `build_desktop_services()` stays side-effect free.
 - Validated AT-2026-05-03-030 with `cargo test -p launcher-composition-root bootstrap_wiring_smoke --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`, then `git diff --check` and `git status --short`; the smoke test passed and no extra lockfile cleanup slice was needed.
+- Committed and pushed AT-2026-05-03-030 as `5036b09` (`Wire composition root smoke shell`), then confirmed the repo returned to a clean post-D2 baseline.
+- Started AT-2026-05-03-031 after the user explicitly selected E1, constraining the slice to host command modules and the minimum compile plumbing needed to consume `DesktopAppServices` from `src-tauri`.
+- Implemented AT-2026-05-03-031 by adding `src-tauri` Fab and Downloads command modules, thin command/query envelopes, and local result mappers so host transport code can compile against `DesktopAppServices` before E2 registration.
+- Validated AT-2026-05-03-031 with `cargo check -p my-epic-launcher-desktop --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`, then `git diff --check` and `git status --short`; the host crate passed, one adjacent desktop-host `Cargo.lock` delta appeared, and unrelated user frontend edits remained in the worktree untouched.
 
 ## Validation Snapshot
 

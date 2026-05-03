@@ -14,3 +14,8 @@ name = "my-epic-launcher-desktop"
 path = "src/main.rs"
 
 [dependencies]
+launcher-composition-root = { path = "../crates/composition-root" }
+launcher-kernel-foundation = { path = "../crates/kernel-foundation" }
+launcher-kernel-jobs = { path = "../crates/kernel-jobs" }
+launcher-module-downloads = { path = "../crates/module-downloads" }
+launcher-module-fab = { path = "../crates/module-fab" }
