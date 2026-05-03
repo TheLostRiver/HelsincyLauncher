@@ -1,16 +1,33 @@
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+use std::ops::Deref;
+use std::sync::Arc;
+
+use crate::commands::DesktopServices;
+
+#[derive(Clone)]
 pub struct DesktopAppServicesHandle {
-    wired_to_composition_root: bool,
+    services: Arc<DesktopServices>,
 }
 
 impl DesktopAppServicesHandle {
-    pub fn placeholder() -> Self {
+    pub fn from_services(services: DesktopServices) -> Self {
         Self {
-            wired_to_composition_root: false,
+            services: Arc::new(services),
         }
     }
 
+    pub fn services(&self) -> &DesktopServices {
+        self.services.as_ref()
+    }
+
     pub fn is_wired_to_composition_root(&self) -> bool {
-        self.wired_to_composition_root
+        true
+    }
+}
+
+impl Deref for DesktopAppServicesHandle {
+    type Target = DesktopServices;
+
+    fn deref(&self) -> &Self::Target {
+        self.services.as_ref()
     }
 }

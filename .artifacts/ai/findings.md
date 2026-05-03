@@ -63,6 +63,8 @@
 - For E1, the smallest host transport slice should stay command-shell only: add Fab and Downloads handler modules that consume `DesktopAppServices`, keep result mapping thin and local to `src-tauri`, and defer actual command registration plus shared-state injection to E2.
 - The E1 host slice can safely stub read-only query responses on `*_NOT_WIRED` facade errors while still routing commands through `DesktopAppServices`; adding these host crate dependencies also produces a tiny `Cargo.lock` adjacency that should be persisted in a separate cleanup slice, without touching unrelated user frontend worktree edits.
 - When the worktree also contains unrelated user frontend changes, backend lockfile cleanup should use path-scoped `git status` checks and selective staging so the backend slice can still be committed and pushed without sweeping user UI work into the same commit.
+- For E2, the smallest host smoke slice should keep the runtime fakeable: centralize command names in `src-tauri/src/commands/mod.rs`, build a real `DesktopAppServices` handle inside the testable bootstrap surface, and let `transport_wiring_smoke` prove registration/state/handler path without needing a live Tauri runtime.
+- The host transport slice can stay fully testable without the real Tauri crate: `build_desktop_host_bootstrap()` can return registered command names plus a shared `DesktopAppServicesHandle`, and the named smoke test can call an async handler with a ready future poll helper instead of spinning up a runtime.
 
 ## Technical Decisions
 

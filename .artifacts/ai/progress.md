@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-032 - Persist desktop host lockfile
+- Active atomic task: none active; last committed task is AT-2026-05-03-033 - Register transport bootstrap smoke shell
 - Current phase: Phase 5 - Backend Skeleton Bootstrap
-- Last committed task before this slice: AT-2026-05-03-031 - Add transport facade command shell
-- Next validation gate: none pending for AT-2026-05-03-032
+- Last committed task before this slice: AT-2026-05-03-032 - Persist desktop host lockfile
+- Next validation gate: none pending for AT-2026-05-03-033
 
 ## Session Timeline
 
@@ -148,6 +148,10 @@
 - Committed and pushed AT-2026-05-03-031 as `42bea72` (`Add transport facade command shell`) without staging the adjacent `Cargo.lock` delta or unrelated user frontend edits.
 - Started AT-2026-05-03-032 to persist that small desktop-host lockfile delta while explicitly leaving the user-owned frontend worktree changes alone.
 - Validated AT-2026-05-03-032 with `cargo check -p my-epic-launcher-desktop --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`, `git diff --check`, and a path-scoped `git status --short -- .artifacts/ai Cargo.lock src-tauri`, confirming the cleanup slice contains only `Cargo.lock` plus AT-032 records.
+- Committed and pushed AT-2026-05-03-032 as `9e2461e` (`Persist desktop host lockfile`), leaving only the user-owned frontend files dirty in the worktree.
+- Started AT-2026-05-03-033 after the user explicitly selected E2, constraining the slice to the host bootstrap/state/commands-mod path plus the named `transport_wiring_smoke` test.
+- Implemented AT-2026-05-03-033 by moving shared command exports into `src-tauri/src/commands/mod.rs`, replacing the placeholder host state with a real `DesktopAppServices` handle, routing the testable bootstrap through `build_desktop_services()`, and keeping `main.rs` limited to the bootstrap entry point.
+- Validated AT-2026-05-03-033 with `cargo test -p my-epic-launcher-desktop transport_wiring_smoke --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`, then `git diff --check` and `git status --short -- .artifacts/ai src-tauri`; the named smoke test passed and no extra lockfile cleanup slice was needed.
 
 ## Validation Snapshot
 
