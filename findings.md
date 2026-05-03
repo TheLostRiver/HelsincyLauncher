@@ -60,6 +60,8 @@
 - 当前真正缺的是独立的仓库级架构原则总文档，因此已新增 `docs/TauriArchitecturePrinciplesDesign.md` 来统一原则层约束和评审 checklist。
 - 当前 docs 里同样并非完全没有安全、凭据和权限规则；secure storage、token 生命周期、session restore、host 权限面和日志脱敏要求已经散落在 blueprint、storage、ports、startup、logging 与 account-auth 文档里。
 - 当前真正缺的是独立的仓库级安全、凭据与权限总文档，因此已新增 `docs/TauriSecurityCredentialsAndPermissionsDesign.md` 来统一 secret ownership、permission surface 和 redaction 边界。
+- 当前 docs 里同样并非完全没有开发环境前提；前端命令存在于 package.json，Tauri/Rust/Windows 前提存在于蓝图、后端骨架文档和官方 prerequisites 页面里。
+- 当前真正缺的是独立的仓库级开发环境 bootstrap 总文档，因此已新增 `docs/TauriDevelopmentEnvironmentBootstrapDesign.md` 来统一 Windows 下的 Node、Rust、Build Tools、WebView2 与分阶段验证命令。
 
 ## Issues Encountered
 | Issue | Resolution |

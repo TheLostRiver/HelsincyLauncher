@@ -126,6 +126,12 @@ Phase 5
 - [x] Wire the new security document into the architecture blueprint companion list
 - **Status:** complete
 
+### Phase 22: Environment Documentation Baseline
+- [x] Verify whether standalone development-environment bootstrap documentation already exists
+- [x] Add a repository-level development-environment bootstrap document
+- [x] Wire the new environment document into the architecture blueprint companion list
+- **Status:** complete
+
 ## Decisions Made
 | Decision | Rationale |
 |----------|-----------|
@@ -150,6 +156,7 @@ Phase 5
 | 当前仓库还需要一份独立的错误处理总文档 | `AppError`、error envelope、severity、retryable 和用户态错误投影虽然散落存在，但缺少统一入口会让实现阶段重新各自发明错误语义 |
 | 当前仓库还需要一份独立的架构原则总文档 | 前后端边界、contract first、composition root、job runtime 等原则如果只留在大蓝图里，后续实现和文档扩展都会缺少统一引用锚点 |
 | 当前仓库还需要一份独立的安全、凭据与权限总文档 | secure storage、token 生命周期、host permission surface 和日志脱敏规则虽然散落存在，但缺少统一入口会让实现阶段再次把 secret 边界打穿 |
+| 当前仓库还需要一份独立的开发环境 bootstrap 总文档 | Node、Rust、Windows Build Tools、WebView2 和“哪些命令当前应成功”虽然能从仓库与外部文档拼出来，但缺少统一入口会让环境问题和代码问题混在一起 |
 
 ## Errors Encountered
 | Error | Resolution |
