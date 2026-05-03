@@ -2,13 +2,13 @@
 
 ## Identity
 
-- task id: AT-2026-05-03-039
-- title: Wire fab list inventory query
+- task id: AT-2026-05-03-040
+- title: Wire fab asset detail query
 - status: committed
 
 ## Goal
 
-- exact local outcome: Replace the `FAB_NOT_WIRED` fallback on `FabFacade::list_inventory()` with a real projection-repository delegation path, keep the SQLite projection adapter on a cold-start empty-page stub, and prove the query path with one named module-level test while leaving detail, sync, and prewarm work for later slices.
+- exact local outcome: Replace the `FAB_NOT_WIRED` fallback on `FabFacade::get_asset_detail()` with a projection-first detail path that consults the local projection repository and returns a backend-owned cold-start detail placeholder when no local snapshot exists, while leaving provider-backed detail hydration and startup prewarm for later slices.
 
 ## Scope
 
@@ -20,8 +20,8 @@
   - update `crates/module-fab/src/facade/mod.rs`
   - update `crates/adapter-storage-sqlite/src/lib.rs`
 - out of scope:
-  - wiring `get_asset_detail`, `run_startup_prewarm`, or `sync_inventory`
-  - introducing provider IO or real SQLite queries
+  - wiring `run_startup_prewarm` or `sync_inventory`
+  - introducing provider IO, media-cache IO, or real SQLite queries
   - changing downloads, startup, or frontend code
   - touching user-owned frontend worktree changes
 
@@ -57,23 +57,23 @@
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If `FabFacade::list_inventory()` delegates to a `FabInventoryProjectionRepository` and the current SQLite projection adapter returns a cold-start empty page instead of `FAB_NOT_WIRED`, then the already-wired host transport path becomes the first real backend-owned Fab inventory query without requiring provider sync or broader startup work.
+- falsifiable local hypothesis: If `FabFacade::get_asset_detail()` consults the local projection repository first and returns a backend-owned cold-start placeholder when the projection is empty, then the Fab detail path stops depending on the transport-layer fallback without pulling in provider sync or startup-prewarm architecture.
 
 ## Cheap Check
 
-- narrowest check that can disconfirm the hypothesis: Verify a named module-fab test can prove `list_inventory()` delegates to the projection repository, then rerun the existing host `transport_wiring_smoke` to confirm the transport path still compiles and executes through the real query chain.
+- narrowest check that can disconfirm the hypothesis: Verify a named module-fab test can prove `get_asset_detail()` consults the projection repository and returns the cold-start detail placeholder when no snapshot exists, then rerun the existing host `transport_wiring_smoke` to confirm the broader host baseline still compiles.
 
 ## Validation Gate
 
-1. `cargo test -p launcher-module-fab list_inventory_delegates_to_projection_repository --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`
+1. `cargo test -p launcher-module-fab get_asset_detail_returns_cold_start_placeholder_when_projection_is_empty --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`
 2. `cargo test -p my-epic-launcher-desktop transport_wiring_smoke --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`
 3. `git -C q:\DEV\MyEpicLauncher diff --check`
 
 ## Validation Result
 
-- `cargo test -p launcher-module-fab list_inventory_delegates_to_projection_repository --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` passed and proved `FabFacade::list_inventory()` delegates to the projection repository.
-- `cargo test -p my-epic-launcher-desktop transport_wiring_smoke --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` passed and confirmed the existing host transport baseline still executes through the updated Fab query path.
-- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md crates/module-fab/src/facade/mod.rs crates/adapter-storage-sqlite/src/lib.rs` produced no blocking output for the AT-039 query-wiring slice.
+- `cargo test -p launcher-module-fab get_asset_detail_returns_cold_start_placeholder_when_projection_is_empty --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` passed and proved the Fab detail path returns a backend-owned cold-start placeholder when the local projection is empty.
+- `cargo test -p my-epic-launcher-desktop transport_wiring_smoke --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` passed and confirmed the existing host transport baseline still compiles and executes after the Fab detail change.
+- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md crates/module-fab/src/facade/mod.rs crates/adapter-storage-sqlite/src/lib.rs` produced no blocking output for the AT-040 detail-query slice.
 
 ## 需要更新的文档和日志
 
@@ -86,15 +86,15 @@
 
 ## 验证后的 Git 动作
 
-1. commit message plan: Wire fab list inventory query
+1. commit message plan: Wire fab asset detail query
 2. push command plan: git push
 
 ## 停止条件
 
-1. wiring `list_inventory` requires reopening broader Fab sync/provider/startup architecture instead of a local query slice
+1. wiring `get_asset_detail` requires reopening broader Fab provider/startup architecture instead of a local detail-query slice
 2. the current module/adpater surfaces cannot express a projection-query path without changing files outside the allowed set
 3. same blocker still failing after 5 repair attempts
 
 ## 安全恢复点
 
-- exact next step if execution is interrupted: stage the AT-039 record and query-wiring files, commit the slice, then decide whether the next backend task stays on Fab or moves to another narrow runtime path.
+- exact next step if execution is interrupted: stage the AT-040 record and detail-query files, commit the slice, then decide whether the next Fab/backend task should move to startup prewarm, sync, or another narrow backend path.

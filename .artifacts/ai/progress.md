@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-039 - Wire fab list inventory query
-- Current phase: Phase 11 - Fab Inventory Query Wiring
-- Last committed task before this slice: AT-2026-05-03-038 - Repair documentation drift after review
-- Next validation gate: none pending for AT-2026-05-03-039
+- Active atomic task: none active; last committed task is AT-2026-05-03-040 - Wire fab asset detail query
+- Current phase: Phase 12 - Fab Asset Detail Query Wiring
+- Last committed task before this slice: AT-2026-05-03-039 - Wire fab list inventory query
+- Next validation gate: none pending for AT-2026-05-03-040
 
 ## Session Timeline
 
@@ -182,10 +182,14 @@
 - Re-read the Fab inventory loading design, repository port design, crate API drafts, current transport command, and current module/adapter code, then confirmed the concrete gap is still the `FAB_NOT_WIRED` fallback inside `FabFacade::list_inventory()`.
 - Wired `FabFacade::list_inventory()` through a new `FabInventoryProjectionRepository` trait, added a named module-fab unit test for delegation, and taught the current SQLite projection adapter to return a cold-start empty page instead of `FAB_NOT_WIRED` for that query.
 - Validated AT-2026-05-03-039 with `cargo test -p launcher-module-fab list_inventory_delegates_to_projection_repository`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, and a scoped `git diff --check`.
+- Started AT-2026-05-03-040 after the user selected “继续 Fab” in the confirmation UI and the narrower post-list query candidate proved to be `get_asset_detail`, not startup prewarm.
+- Re-read the Fab inventory loading design, crate API drafts, current transport fallback, and current facade code, then confirmed `fab_get_asset_detail` still routes through a transport-owned placeholder because `FabFacade::get_asset_detail()` remains `FAB_NOT_WIRED`.
+- Wired `FabFacade::get_asset_detail()` through the local projection path, added a named module-fab unit test for the cold-start placeholder behavior, and taught the current SQLite projection adapter to return `None` so the backend facade owns the placeholder instead of the transport layer.
+- Validated AT-2026-05-03-040 with `cargo test -p launcher-module-fab get_asset_detail_returns_cold_start_placeholder_when_projection_is_empty`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, and a scoped `git diff --check`.
 
 ## Validation Snapshot
 
-- Latest completed validation: AT-2026-05-03-039 passed `cargo test -p launcher-module-fab list_inventory_delegates_to_projection_repository`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, and the scoped `git diff --check` for the query-wiring slice.
+- Latest completed validation: AT-2026-05-03-040 passed `cargo test -p launcher-module-fab get_asset_detail_returns_cold_start_placeholder_when_projection_is_empty`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, and the scoped `git diff --check` for the detail-query slice.
 - Latest repo-wide backend validation remains the previously completed `cargo check --workspace` plus the named host/composition/foundation smoke tests from the post-E2 baseline.
 
 ## Error Log
@@ -198,8 +202,8 @@
 
 | Question | Answer |
 |----------|--------|
-| Where am I? | Phase 11 Fab inventory query wiring is complete and no active atomic task is currently open |
-| Where am I going? | Decide whether the next backend slice should stay on Fab detail/prewarm or move to another narrow runtime path |
-| What's the goal? | Keep turning validated transport shells into real backend-owned paths one narrow query/use-case at a time |
-| What have I learned? | The most practical post-E2 backend slices are now module-specific: the first missing behavior was the module-fab projection-query delegation behind `FabFacade::list_inventory()` |
+| Where am I? | Phase 12 Fab asset-detail query wiring is complete and no active atomic task is currently open |
+| Where am I going? | Decide whether the next Fab/backend slice should open startup prewarm/sync or switch to another narrow backend path |
+| What's the goal? | Keep turning the remaining transport-owned Fab fallbacks into backend-owned local behavior one narrow route at a time |
+| What have I learned? | After `list_inventory`, `get_asset_detail` was still narrow enough to keep placeholder ownership in the backend without pulling in provider/startup orchestration |
 | What have I done? | See the session timeline above |

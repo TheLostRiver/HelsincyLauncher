@@ -1,8 +1,8 @@
 use std::path::{Path, PathBuf};
 
-use launcher_kernel_foundation::{AppResult, PageSlice};
+use launcher_kernel_foundation::{AppResult, AssetId, PageSlice};
 use launcher_module_fab::{
-    contracts::FabInventoryListQueryDto,
+    contracts::{FabAssetDetailDto, FabInventoryListQueryDto},
     facade::{FabInventoryProjectionPage, FabInventoryProjectionRepository},
 };
 
@@ -41,6 +41,10 @@ impl SqliteFabInventoryProjectionRepository {
 impl FabInventoryProjectionRepository for SqliteFabInventoryProjectionRepository {
     fn list_page(&self, _query: FabInventoryListQueryDto) -> AppResult<FabInventoryProjectionPage> {
         Ok(PageSlice::new(Vec::new(), None))
+    }
+
+    fn get_asset_detail_snapshot(&self, _asset_id: &AssetId) -> AppResult<Option<FabAssetDetailDto>> {
+        Ok(None)
     }
 }
 

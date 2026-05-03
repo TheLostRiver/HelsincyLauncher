@@ -82,6 +82,8 @@
 - Once an entry-layer document is exposed from the root README, it should not keep draft-status wording unless the repo explicitly wants users to treat it as non-authoritative.
 - AT-039 confirmed that the narrowest useful post-E2 backend slice is no longer another host-wiring task; it is a module-specific behavior slice on an already-validated transport chain.
 - The first real Fab behavior can stay very small: `FabFacade::list_inventory()` can delegate to a projection repository while the current SQLite adapter still returns a cold-start empty page, which upgrades the path from `FAB_NOT_WIRED` without pulling in provider sync.
+- AT-040 confirmed that the next narrow Fab slice after `list_inventory` is `get_asset_detail`, not startup prewarm; moving placeholder ownership into the backend facade is still local enough to avoid cursor/provider/runtime work.
+- The current SQLite detail stub can safely return `None` while `FabFacade::get_asset_detail()` owns the cold-start placeholder, which removes another transport-owned fallback without forcing real provider detail hydration yet.
 
 ## Technical Decisions
 

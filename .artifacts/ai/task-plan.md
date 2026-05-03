@@ -6,12 +6,12 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 11 - Fab Inventory Query Wiring
+Phase 12 - Fab Asset Detail Query Wiring
 
 ## Current Focus
 
 - No active atomic task is currently open.
-- AT-2026-05-03-039 wired the first real Fab inventory query path; next decide whether to continue with Fab detail/prewarm or move to another narrow backend path.
+- AT-2026-05-03-040 wired the Fab asset-detail query so placeholder ownership now lives in the backend facade/projection path; next decide whether to continue with Fab startup-prewarm/sync or move to another backend slice.
 
 ## Phases
 
@@ -81,6 +81,12 @@ Phase 11 - Fab Inventory Query Wiring
 - Atomic tasks: AT-2026-05-03-039
 - **Status:** complete
 
+### Phase 12: Fab Asset Detail Query Wiring
+
+- Outcome: wire the Fab asset-detail query through the local projection path while keeping the current adapter on a cold-start placeholder stub.
+- Atomic tasks: AT-2026-05-03-040
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -122,6 +128,7 @@ Phase 11 - Fab Inventory Query Wiring
 37. AT-2026-05-03-037 - committed - added `docs/README.md` as the benchmarked P3 docs map and exposed it from README.
 38. AT-2026-05-03-038 - committed - repaired the focused review drift in `.artifacts/ai` and the current-repo architecture overview.
 39. AT-2026-05-03-039 - committed - wired the Fab inventory list query through the projection-repository path and retired the `FAB_NOT_WIRED` fallback for that query.
+40. AT-2026-05-03-040 - committed - wired the Fab asset-detail query through the local projection path and retired the transport-owned `FAB_NOT_WIRED` fallback for that detail route.
 
 ## Key Questions
 
@@ -139,7 +146,7 @@ Phase 11 - Fab Inventory Query Wiring
 
 ## Follow-up Queue
 
-1. After AT-2026-05-03-039, decide whether the next backend slice should stay on Fab detail/prewarm wiring or move to another narrow backend path such as downloads or startup.
+1. After AT-2026-05-03-040, decide whether the next backend slice should stay on Fab startup-prewarm/sync wiring or move to another narrow backend path such as downloads.
 2. If backend work pauses after this query slice, resume from the validated host transport baseline while leaving user frontend edits untouched.
 
 ## Legacy Note
