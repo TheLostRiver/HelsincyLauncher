@@ -53,6 +53,8 @@
 - 新增 docs/TauriErrorHandlingAndProjectionDesign.md，并把它接入 docs/TauriRewriteArchitectureBlueprint.md 的 companion drafts。
 - 检查 docs 后确认 architecture principles 相关内容此前也分散存在，但缺少独立的仓库级架构原则总文档。
 - 新增 docs/TauriArchitecturePrinciplesDesign.md，并把它接入 docs/TauriRewriteArchitectureBlueprint.md 的 companion drafts。
+- 检查 docs 后确认 security / credentials / permissions 相关内容此前也分散存在，但缺少独立的仓库级总文档。
+- 新增 docs/TauriSecurityCredentialsAndPermissionsDesign.md，并把它接入 docs/TauriRewriteArchitectureBlueprint.md 的 companion drafts。
 
 ### Test Results
 | Test | Expected | Actual | Status |
@@ -82,6 +84,8 @@
 | inspect blueprint companion drafts after error-doc addition | 新错误处理总文档应被接入 companion drafts | 结果符合预期 | PASS |
 | inspect docs for standalone architecture-principles documentation | 应确认此前缺的是独立原则层总文档，而不是零散原则章节 | 结果符合预期 | PASS |
 | inspect blueprint companion drafts after architecture-principles-doc addition | 新架构原则总文档应被接入 companion drafts | 结果符合预期 | PASS |
+| inspect docs for standalone security documentation | 应确认此前缺的是独立安全/凭据/权限总文档，而不是零散安全章节 | 结果符合预期 | PASS |
+| inspect blueprint companion drafts after security-doc addition | 新安全总文档应被接入 companion drafts | 结果符合预期 | PASS |
 
 ### Errors
 | Error | Resolution |

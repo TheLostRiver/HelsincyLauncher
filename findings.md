@@ -58,6 +58,8 @@
 - 当前真正缺的是独立的仓库级错误处理总文档，因此已新增 `docs/TauriErrorHandlingAndProjectionDesign.md` 来统一错误模型、错误投影和 retry ownership。
 - 当前 docs 里同样并非完全没有架构原则；前后端边界、contract first、ports/adapters、composition root、job runtime 等原则已经散落在 blueprint 和多份专题文档里。
 - 当前真正缺的是独立的仓库级架构原则总文档，因此已新增 `docs/TauriArchitecturePrinciplesDesign.md` 来统一原则层约束和评审 checklist。
+- 当前 docs 里同样并非完全没有安全、凭据和权限规则；secure storage、token 生命周期、session restore、host 权限面和日志脱敏要求已经散落在 blueprint、storage、ports、startup、logging 与 account-auth 文档里。
+- 当前真正缺的是独立的仓库级安全、凭据与权限总文档，因此已新增 `docs/TauriSecurityCredentialsAndPermissionsDesign.md` 来统一 secret ownership、permission surface 和 redaction 边界。
 
 ## Issues Encountered
 | Issue | Resolution |
