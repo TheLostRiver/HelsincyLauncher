@@ -47,6 +47,34 @@ Add the relevant docs based on the task shape:
 4. Validate with the doc-defined gate for the touched slice.
 5. If code and docs disagree, do not silently pick one. Call out the conflict and resolve it explicitly.
 
+## Subtask Briefing Contract
+
+When you split work into subtasks, do not hand off a vague goal.
+Every subtask must carry repository-specific constraints.
+
+Required subtask fields:
+
+1. goal
+2. scope and non-goals
+3. allowed files
+4. controlling docs
+5. task-specific constraints
+6. validation gates
+7. done-when criteria
+
+Use the bundled template in subtask-template.md.
+If a subtask cannot name controlling docs and a cheap validation gate, it is not ready to execute.
+
+## Delegation Checklist
+
+Before delegating, verify all of the following:
+
+1. The subtask names the exact docs that govern the change.
+2. The subtask limits file scope so the executor does not roam.
+3. The subtask names the narrowest validation to run immediately after editing.
+4. The subtask states which architectural moves are forbidden.
+5. The subtask does not assume frontend-only shortcuts when the docs assign ownership to backend, host, or composition root.
+
 ## Prohibited Behavior
 
 - Do not move business truth into the frontend because the prototype happens to be UI-first today.
