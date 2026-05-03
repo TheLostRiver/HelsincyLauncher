@@ -25,6 +25,9 @@
 - 新增 docs/modules/downloads/ 下的 README_ARCH.md、README_API.md、README_FLOW.md。
 - 已创建提交 `docs: add downloads module guides`。
 - 当前再次回到仅剩 planning 三件套待独立提交的状态。
+- 新增 docs/modules/projects/ 下的 README_ARCH.md、README_API.md、README_FLOW.md。
+- 已创建提交 `docs: add projects module guides`。
+- 当前再次回到仅剩 planning 三件套待独立提交的状态。
 
 ### Test Results
 | Test | Expected | Actual | Status |
@@ -34,6 +37,7 @@
 | git status after second docs commit | 仅剩 planning 三件套未提交 | 结果符合预期 | PASS |
 | inspect engines docs presence and status boundary | 仅 engines 文档待提交 | 结果符合预期 | PASS |
 | inspect downloads docs presence and status boundary | 仅 downloads 文档待提交 | 结果符合预期 | PASS |
+| inspect projects docs presence and status boundary | 仅 projects 文档待提交 | 结果符合预期 | PASS |
 
 ### Errors
 | Error | Resolution |

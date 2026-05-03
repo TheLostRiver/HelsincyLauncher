@@ -31,6 +31,9 @@
 - 当前 downloads 模块在前端只有 components/Downloads.tsx 这一个入口，但其未来边界已被 docs/TauriDownloadRuntimeDesign.md 中的 facade、scheduler、checkpoint 模型约束。
 - engines 与 downloads 都仍然是静态摘要组件，因此文档应强调“前端只表达意图，后端拥有真实长任务与状态机”。
 - 当前这两组模块文档最自然的 git 拆分就是一组 engines、一组 downloads，分别独立提交。
+- 当前 projects 模块由 components/MyProjectsContent.tsx 单独承载，已经包含工程列表、选中详情、健康状态和操作入口四类语义。
+- projects 模块与 engines、fab-inventory 的关系更适合通过稳定摘要字段表达，而不是直接依赖其他模块内部状态。
+- 当前用户只选择继续该方向，因此最自然的下一步是按既定优先级先补 projects，而不是跳到 settings。
 
 ## Issues Encountered
 | Issue | Resolution |

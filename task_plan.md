@@ -50,6 +50,12 @@ Phase 5
 - [x] Commit downloads module guides separately
 - **Status:** complete
 
+### Phase 9: Projects Rollout
+- [x] Instantiate projects module docs
+- [x] Commit projects module guides separately
+- [x] Keep task_plan.md, findings.md, and progress.md together for the follow-up planning commit
+- **Status:** complete
+
 ## Decisions Made
 | Decision | Rationale |
 |----------|-----------|
@@ -59,6 +65,7 @@ Phase 5
 | 模块文档按业务切片建档，不按每个小组件建档 | 当前仓库更适合围绕 shell、fab-inventory 等边界模块建立三件套文档 |
 | 新增模块文档按三组提交拆分 | 先提交规范与模板，再提交实例模块文档，最后单独提交 planning 三件套，边界更清晰 |
 | 继续补 engines 后再补 downloads | 用户明确要求优先顺序，且两者都应各自独立提交 |
+| 在未指定 settings 前先补 projects | 现有模块优先顺序里 projects 在 settings 之前，且用户只选择继续该方向 |
 
 ## Errors Encountered
 | Error | Resolution |
