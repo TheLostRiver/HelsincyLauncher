@@ -46,6 +46,7 @@
 - Introducing a new workspace package can dirty `Cargo.lock` even when the B1 code slice is correct, so the repo should continue treating lockfile persistence as a tiny adjacent cleanup slice instead of silently widening the crate bootstrap task.
 - The current B2 task-table row is slightly stale against the committed B1 baseline: implementing the documented foundation surface also requires `crates/kernel-foundation/Cargo.toml`, `crates/kernel-foundation/src/lib.rs`, and `crates/kernel-foundation/src/result.rs`, so the controlling doc should be corrected before continuing.
 - The first dependency-bearing foundation slice can expand `Cargo.lock` substantially because the repo had not resolved `chrono` and `serde_json` trees before; this is still a lockfile cleanup concern, not a reason to widen the B2 code task.
+- The B3 `launcher-kernel-jobs` slice does not need the full later runtime directory tree yet; the current controlling docs already permit a narrower shell with `lib.rs`, `model.rs`, and `runtime.rs` as long as it exposes only shared job state, snapshot, and runtime traits.
 
 ## Technical Decisions
 

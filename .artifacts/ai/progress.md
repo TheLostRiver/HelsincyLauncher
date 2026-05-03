@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-017 - Persist foundation dependency lockfile
+- Active atomic task: none active; last committed task is AT-2026-05-03-018 - Bootstrap kernel jobs crate
 - Current phase: Phase 5 - Backend Skeleton Bootstrap
-- Last committed task before this slice: AT-2026-05-03-016 - Implement foundation contract surface
-- Next validation gate: none pending for AT-2026-05-03-017
+- Last committed task before this slice: AT-2026-05-03-017 - Persist foundation dependency lockfile
+- Next validation gate: none pending for AT-2026-05-03-018
 
 ## Session Timeline
 
@@ -92,6 +92,10 @@
 - Detected one adjacent cleanup artifact after AT-2026-05-03-016: adding chrono/serde-json-backed foundation dependencies updated `Cargo.lock`, so the repo needs one tiny follow-up slice before B3 can start cleanly.
 - Started AT-2026-05-03-017 to persist that dependency-expanded lockfile rather than carrying it forward as unrelated worktree noise.
 - Validated AT-2026-05-03-017 with `cargo test -p launcher-kernel-foundation foundation_contract_smoke --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`, `git diff --check`, and `git status --short`, confirming only the expected lockfile and task-record files remained before commit.
+- Started AT-2026-05-03-018 after the user selected “继续 B3”, targeting the first `launcher-kernel-jobs` shell and minimal shared runtime surface.
+- Confirmed the B3 slice can stay narrower than the full runtime design: the controlling docs already align on `Cargo.toml`, `crates/kernel-jobs/Cargo.toml`, `src/lib.rs`, `model.rs`, and `runtime.rs` plus the package-scoped `cargo check` gate.
+- Validated AT-2026-05-03-018 with `cargo check -p launcher-kernel-jobs --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` and `git diff --check`, confirming the minimal job shell compiles without leaking module-specific runtime logic.
+- Detected one adjacent cleanup artifact after AT-2026-05-03-018: adding the new workspace member updated `Cargo.lock`, so the repo needs one tiny follow-up slice before the next crate starts cleanly.
 
 ## Validation Snapshot
 
