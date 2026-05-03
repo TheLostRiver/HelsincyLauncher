@@ -1,5 +1,11 @@
 use std::path::{Path, PathBuf};
 
+use launcher_kernel_foundation::{AppResult, PageSlice};
+use launcher_module_fab::{
+    contracts::FabInventoryListQueryDto,
+    facade::{FabInventoryProjectionPage, FabInventoryProjectionRepository},
+};
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SqliteStorageAdapterConfig {
     database_path: PathBuf,
@@ -29,6 +35,12 @@ impl SqliteFabInventoryProjectionRepository {
 
     pub fn config(&self) -> &SqliteStorageAdapterConfig {
         &self.config
+    }
+}
+
+impl FabInventoryProjectionRepository for SqliteFabInventoryProjectionRepository {
+    fn list_page(&self, _query: FabInventoryListQueryDto) -> AppResult<FabInventoryProjectionPage> {
+        Ok(PageSlice::new(Vec::new(), None))
     }
 }
 

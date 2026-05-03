@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-038 - Repair documentation drift after review
-- Current phase: Phase 10 - Review Drift Cleanup
-- Last committed task before this slice: AT-2026-05-03-037 - Add docs map overview
-- Next validation gate: none pending for AT-2026-05-03-038
+- Active atomic task: none active; last committed task is AT-2026-05-03-039 - Wire fab list inventory query
+- Current phase: Phase 11 - Fab Inventory Query Wiring
+- Last committed task before this slice: AT-2026-05-03-038 - Repair documentation drift after review
+- Next validation gate: none pending for AT-2026-05-03-039
 
 ## Session Timeline
 
@@ -178,10 +178,14 @@
 - Validated AT-2026-05-03-037 with README grep checks for the docs-map link, docs-map grep checks for the required headings, and `git diff --check -- README.md docs/README.md .artifacts/ai`.
 - Started AT-2026-05-03-038 after a focused review found three local drift points: stale AT-037 in-progress text in `task-plan.md`, draft-status wording in `docs/TauriCurrentRepoArchitectureOverview.md`, and a duplicated `## Issues Encountered` heading in `findings.md`.
 - Validated AT-2026-05-03-038 with grep checks for the repaired AT-038 focus text, the published overview status line, the single `## Issues Encountered` heading, and `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md docs/TauriCurrentRepoArchitectureOverview.md`.
+- Started AT-2026-05-03-039 after the user selected “回到后端” in the confirmation UI and the code/doc review converged on `FabFacade::list_inventory()` as the narrowest post-E2 real backend query path.
+- Re-read the Fab inventory loading design, repository port design, crate API drafts, current transport command, and current module/adapter code, then confirmed the concrete gap is still the `FAB_NOT_WIRED` fallback inside `FabFacade::list_inventory()`.
+- Wired `FabFacade::list_inventory()` through a new `FabInventoryProjectionRepository` trait, added a named module-fab unit test for delegation, and taught the current SQLite projection adapter to return a cold-start empty page instead of `FAB_NOT_WIRED` for that query.
+- Validated AT-2026-05-03-039 with `cargo test -p launcher-module-fab list_inventory_delegates_to_projection_repository`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, and a scoped `git diff --check`.
 
 ## Validation Snapshot
 
-- Latest completed validation: AT-2026-05-03-038 passed grep checks for the repaired AT-038 focus text, the published overview status line, the single `## Issues Encountered` heading, and `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md docs/TauriCurrentRepoArchitectureOverview.md`.
+- Latest completed validation: AT-2026-05-03-039 passed `cargo test -p launcher-module-fab list_inventory_delegates_to_projection_repository`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, and the scoped `git diff --check` for the query-wiring slice.
 - Latest repo-wide backend validation remains the previously completed `cargo check --workspace` plus the named host/composition/foundation smoke tests from the post-E2 baseline.
 
 ## Error Log
@@ -194,8 +198,8 @@
 
 | Question | Answer |
 |----------|--------|
-| Where am I? | Phase 10 review drift cleanup is complete and no active atomic task is currently open |
-| Where am I going? | Close the documentation-drift repair slice, then decide whether to continue governance review or return to backend integration |
-| What's the goal? | Realign the live task records and the published current-repo overview so recovery and entry surfaces stop contradicting each other |
-| What have I learned? | Entry-layer docs and recovery records can still drift after successful commits if status text is not normalized across all surfaces |
+| Where am I? | Phase 11 Fab inventory query wiring is complete and no active atomic task is currently open |
+| Where am I going? | Decide whether the next backend slice should stay on Fab detail/prewarm or move to another narrow runtime path |
+| What's the goal? | Keep turning validated transport shells into real backend-owned paths one narrow query/use-case at a time |
+| What have I learned? | The most practical post-E2 backend slices are now module-specific: the first missing behavior was the module-fab projection-query delegation behind `FabFacade::list_inventory()` |
 | What have I done? | See the session timeline above |

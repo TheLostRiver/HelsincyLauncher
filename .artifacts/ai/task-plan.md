@@ -6,12 +6,12 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 10 - Review Drift Cleanup
+Phase 11 - Fab Inventory Query Wiring
 
 ## Current Focus
 
 - No active atomic task is currently open.
-- AT-2026-05-03-038 repaired the focused review drift across `.artifacts/ai` and the current-repo architecture overview; next decide whether to continue governance review or return to backend integration.
+- AT-2026-05-03-039 wired the first real Fab inventory query path; next decide whether to continue with Fab detail/prewarm or move to another narrow backend path.
 
 ## Phases
 
@@ -75,6 +75,12 @@ Phase 10 - Review Drift Cleanup
 - Atomic tasks: AT-2026-05-03-038
 - **Status:** complete
 
+### Phase 11: Fab Inventory Query Wiring
+
+- Outcome: wire the first real backend-owned Fab inventory query through the projection repository path while keeping the current adapter on a cold-start empty-page stub.
+- Atomic tasks: AT-2026-05-03-039
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -115,6 +121,7 @@ Phase 10 - Review Drift Cleanup
 36. AT-2026-05-03-036 - committed - added a current-repo architecture overview and exposed it from README as the benchmarked P2 entry layer.
 37. AT-2026-05-03-037 - committed - added `docs/README.md` as the benchmarked P3 docs map and exposed it from README.
 38. AT-2026-05-03-038 - committed - repaired the focused review drift in `.artifacts/ai` and the current-repo architecture overview.
+39. AT-2026-05-03-039 - committed - wired the Fab inventory list query through the projection-repository path and retired the `FAB_NOT_WIRED` fallback for that query.
 
 ## Key Questions
 
@@ -132,8 +139,8 @@ Phase 10 - Review Drift Cleanup
 
 ## Follow-up Queue
 
-1. After AT-2026-05-03-038, decide whether to continue broader documentation governance review or return to backend integration.
-2. If documentation cleanup pauses after this review-repair slice, resume the next backend validation or integration step from the validated host transport baseline while leaving user frontend edits untouched.
+1. After AT-2026-05-03-039, decide whether the next backend slice should stay on Fab detail/prewarm wiring or move to another narrow backend path such as downloads or startup.
+2. If backend work pauses after this query slice, resume from the validated host transport baseline while leaving user frontend edits untouched.
 
 ## Legacy Note
 

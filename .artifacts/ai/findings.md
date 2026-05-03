@@ -80,6 +80,8 @@
 - `docs/README.md` should not become a second README; its value is in telling contributors where to go next and what does not belong back in the root README.
 - AT-038 confirmed that post-review repair slices must reset both `task-plan.md` current-focus text and `progress.md` current-status text together; fixing only one surface recreates recovery drift immediately.
 - Once an entry-layer document is exposed from the root README, it should not keep draft-status wording unless the repo explicitly wants users to treat it as non-authoritative.
+- AT-039 confirmed that the narrowest useful post-E2 backend slice is no longer another host-wiring task; it is a module-specific behavior slice on an already-validated transport chain.
+- The first real Fab behavior can stay very small: `FabFacade::list_inventory()` can delegate to a projection repository while the current SQLite adapter still returns a cold-start empty page, which upgrades the path from `FAB_NOT_WIRED` without pulling in provider sync.
 
 ## Technical Decisions
 
