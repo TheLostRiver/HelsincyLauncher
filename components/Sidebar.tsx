@@ -9,7 +9,7 @@ import {
   Settings,
 } from "lucide-react";
 
-export type PageId = "home" | "my-projects" | "fab";
+export type PageId = "home" | "my-projects" | "fab" | "engine";
 
 const navItems: {
   icon: typeof Home;
@@ -19,7 +19,7 @@ const navItems: {
   { icon: Home, label: "首页", activeOn: "home" },
   { icon: FolderKanban, label: "我的工程", activeOn: "my-projects" },
   { icon: PackageOpen, label: "Fab 库存", activeOn: "fab" },
-  { icon: Box, label: "引擎管理", activeOn: null },
+  { icon: Box, label: "引擎管理", activeOn: "engine" },
   { icon: Download, label: "下载队列", activeOn: null },
 ];
 

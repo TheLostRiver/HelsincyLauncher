@@ -6,11 +6,13 @@ import TopBar from "@/components/TopBar";
 import HomeContent from "@/components/HomeContent";
 import MyProjectsContent from "@/components/MyProjectsContent";
 import FabInventoryContent from "@/components/FabInventoryContent";
+import EngineManagementContent from "@/components/EngineManagementContent";
 
 const pageMeta: Record<PageId, { kicker: string; title: string }> = {
   home: { kicker: "UNREAL WORKSPACE", title: "首页" },
   "my-projects": { kicker: "PROJECT LIBRARY", title: "我的工程" },
   fab: { kicker: "FAB INVENTORY", title: "Fab 库存" },
+  engine: { kicker: "ENGINE MANAGER", title: "引擎管理" },
 };
 
 export default function Home() {
@@ -60,6 +62,7 @@ export default function Home() {
             {activePage === "home" && <HomeContent />}
             {activePage === "my-projects" && <MyProjectsContent />}
             {activePage === "fab" && <FabInventoryContent />}
+            {activePage === "engine" && <EngineManagementContent />}
           </div>
         </div>
       </div>
