@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-029 - Persist composition root lockfile
+- Active atomic task: none active; last committed task is AT-2026-05-03-030 - Wire composition root smoke shell
 - Current phase: Phase 5 - Backend Skeleton Bootstrap
-- Last committed task before this slice: AT-2026-05-03-028 - Bootstrap composition root crate
-- Next validation gate: none pending for AT-2026-05-03-029
+- Last committed task before this slice: AT-2026-05-03-029 - Persist composition root lockfile
+- Next validation gate: none pending for AT-2026-05-03-030
 
 ## Session Timeline
 
@@ -137,6 +137,10 @@
 - Committed and pushed AT-2026-05-03-028 as `fdf27f7` (`Bootstrap composition root crate`) without widening the code slice to include the adjacent lockfile noise.
 - Started AT-2026-05-03-029 to persist that small lockfile delta rather than carrying it forward as unrelated worktree noise.
 - Validated AT-2026-05-03-029 with `cargo check -p launcher-composition-root --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`, `git diff --check`, and `git status --short`, confirming only the expected `Cargo.lock` and task-record files remained before commit.
+- Committed and pushed AT-2026-05-03-029 as `d1faf8c` (`Persist composition root lockfile`), restoring a clean post-D1 baseline.
+- Started AT-2026-05-03-030 after the user explicitly selected D2, keeping the next slice inside `launcher-composition-root` to implement the minimal assembly shell plus the required `bootstrap_wiring_smoke` test.
+- Implemented AT-2026-05-03-030 by splitting `launcher-composition-root` into `bootstrap.rs` and `startup.rs`, wiring the existing storage/provider stubs into the Fab and Downloads facades, and keeping startup stage methods explicit no-ops so `build_desktop_services()` stays side-effect free.
+- Validated AT-2026-05-03-030 with `cargo test -p launcher-composition-root bootstrap_wiring_smoke --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`, then `git diff --check` and `git status --short`; the smoke test passed and no extra lockfile cleanup slice was needed.
 
 ## Validation Snapshot
 

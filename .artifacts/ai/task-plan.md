@@ -10,8 +10,8 @@ Phase 5 - Backend Skeleton Bootstrap
 
 ## Current Focus
 
-- Use the clean post-D1 baseline as the starting point for the next documented backend slice.
-- Keep the next slice focused on one documented boundary at a time.
+- Use the validated post-D2 composition-root baseline to begin Phase E transport wiring.
+- Keep the next slice on the host transport boundary only.
 
 ## Phases
 
@@ -76,6 +76,7 @@ Phase 5 - Backend Skeleton Bootstrap
 27. AT-2026-05-03-027 - committed - persisted the `Cargo.lock` delta produced by the validated Fab provider adapter C4 slice.
 28. AT-2026-05-03-028 - committed - bootstrapped the `launcher-composition-root` crate shell and public API surface.
 29. AT-2026-05-03-029 - committed - persisted the `Cargo.lock` delta produced by the validated composition-root D1 slice.
+30. AT-2026-05-03-030 - committed - wired the composition-root smoke shell and added the named bootstrap wiring smoke test.
 
 ## Key Questions
 
@@ -94,7 +95,7 @@ Phase 5 - Backend Skeleton Bootstrap
 ## Follow-up Queue
 
 1. Integrate planning-with-files' 2-action checkpoint cadence more explicitly into repo-level reminders if the adapter slice alone is not enough.
-2. After AT-2026-05-03-029 passes, choose the next documented backend slice from a clean post-D1 baseline.
+2. After AT-2026-05-03-030 passes, move to Phase E transport work from the validated composition-root baseline.
 
 ## Legacy Note
 

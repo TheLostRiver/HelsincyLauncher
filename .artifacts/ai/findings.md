@@ -58,6 +58,8 @@
 - The `launcher-adapter-provider-fab` C4 lockfile delta should remain a separate cleanup slice as well; the package reuses already-resolved workspace dependencies, so the adjacent `Cargo.lock` change is expected and should not be folded back into the code task.
 - For D1, `launcher-composition-root` should start as a pure public API shell: expose `DesktopBootstrapConfig`, `DesktopAppServices`, `StartupPipelineFacade`, and `build_desktop_services()`, while the actual wiring implementation and bootstrap smoke test remain deferred to D2.
 - The `launcher-composition-root` D1 lockfile delta should remain a separate cleanup slice as well; the package reuses already-resolved workspace dependencies, so the adjacent `Cargo.lock` change is expected and should not be folded back into the code task.
+- For D2, the first composition-root wiring slice should stay smoke-test oriented: assemble the already-created adapter stubs into Fab and Downloads facades, keep startup stage methods explicit and side-effect free, and let the named `bootstrap_wiring_smoke` test prove only that `build_desktop_services()` returns the three facade handles.
+- A thin D2 builder layout is enough for the first composition-root wiring slice: `build_storage_adapters`-style config validation can live in helper functions, the startup facade can expose async stage methods as explicit no-ops, and the integration smoke test can verify assembly by inspecting facade deps instead of requiring real runtime execution.
 
 ## Technical Decisions
 
