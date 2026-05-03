@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-011 - Add host bootstrap surface
+- Active atomic task: none active; last committed task is AT-2026-05-03-012 - Ignore Rust target artifacts
 - Current phase: Phase 5 - Backend Skeleton Bootstrap
-- Last committed task before this slice: AT-2026-05-03-010 - Persist initial Cargo lockfile
-- Next validation gate: none pending for AT-2026-05-03-011
+- Last committed task before this slice: AT-2026-05-03-011 - Add host bootstrap surface
+- Next validation gate: none pending for AT-2026-05-03-012
 
 ## Session Timeline
 
@@ -76,6 +76,9 @@
 - Re-ran `cargo metadata --format-version 1 --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` and confirmed the workspace baseline remained valid before persisting `Cargo.lock`.
 - Continued directly into the next user-approved slice, AT-2026-05-03-011, to turn the validated `src-tauri` member into a thin host shell with config, bootstrap, state, and binary entry surfaces.
 - Validated AT-2026-05-03-011 with `cargo check -p my-epic-launcher-desktop --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`, confirming the host shell compiles without composition-root yet.
+- Detected one adjacent cleanup gap after the AT-011 closeout: the repo root did not ignore Rust `target/`, so `cargo check` left untracked build artifacts in the worktree.
+- Started AT-2026-05-03-012 to patch the missing ignore rule rather than leaving backend validation dirty by default.
+- Validated AT-2026-05-03-012 with `cargo check -p my-epic-launcher-desktop --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`, `git diff --check`, and `git status --short`; only the intended `.gitignore` and record updates remained visible.
 
 ## Validation Snapshot
 

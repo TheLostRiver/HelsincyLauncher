@@ -10,8 +10,8 @@ Phase 5 - Backend Skeleton Bootstrap
 
 ## Current Focus
 
-- Use the committed host shell as the new `src-tauri` baseline for Phase 5.
-- Choose the next smallest slice between host-side smoke wiring and `kernel-foundation` bootstrap.
+- Use the cleaned validation baseline to choose the next backend slice.
+- Decide between host-side smoke wiring and `kernel-foundation` bootstrap.
 
 ## Phases
 
@@ -58,6 +58,7 @@ Phase 5 - Backend Skeleton Bootstrap
 9. AT-2026-05-03-009 - committed - created the root Rust workspace manifest plus the smallest valid `src-tauri` member stub so backend skeleton Phase A can pass the documented metadata gate.
 10. AT-2026-05-03-010 - committed - persisted the generated `Cargo.lock` so the validated workspace baseline is fully recorded and the worktree returns to clean.
 11. AT-2026-05-03-011 - committed - added the thin host bootstrap surface under `src-tauri` so the desktop host crate can pass `cargo check` without composition-root yet.
+12. AT-2026-05-03-012 - committed - ignored Rust `target/` artifacts so backend validation no longer leaves the repo dirty.
 
 ## Key Questions
 
@@ -76,7 +77,7 @@ Phase 5 - Backend Skeleton Bootstrap
 ## Follow-up Queue
 
 1. Integrate planning-with-files' 2-action checkpoint cadence more explicitly into repo-level reminders if the adapter slice alone is not enough.
-2. Decide whether the next slice should add host smoke tests or begin `kernel-foundation`.
+2. After the cleanup slice passes, decide whether the next slice should add host smoke tests or begin `kernel-foundation`.
 
 ## Legacy Note
 
