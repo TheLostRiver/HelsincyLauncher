@@ -10,8 +10,8 @@ Phase 5 - Backend Skeleton Bootstrap
 
 ## Current Focus
 
-- Persist the small desktop-host `Cargo.lock` delta introduced by E1, then move to E2 transport registration.
-- Leave unrelated user frontend worktree changes untouched while backend slices continue.
+- Use the validated post-E1 baseline to open E2 transport registration.
+- Keep unrelated user frontend worktree changes untouched while backend slices continue.
 
 ## Phases
 
@@ -78,6 +78,7 @@ Phase 5 - Backend Skeleton Bootstrap
 29. AT-2026-05-03-029 - committed - persisted the `Cargo.lock` delta produced by the validated composition-root D1 slice.
 30. AT-2026-05-03-030 - committed - wired the composition-root smoke shell and added the named bootstrap wiring smoke test.
 31. AT-2026-05-03-031 - committed - added the minimal host transport command shell for Fab and Downloads.
+32. AT-2026-05-03-032 - committed - persisted the adjacent desktop-host `Cargo.lock` delta.
 
 ## Key Questions
 
@@ -96,7 +97,7 @@ Phase 5 - Backend Skeleton Bootstrap
 ## Follow-up Queue
 
 1. Integrate planning-with-files' 2-action checkpoint cadence more explicitly into repo-level reminders if the adapter slice alone is not enough.
-2. After the adjacent E1 lockfile cleanup passes, open E2 to register commands and shared state with a host smoke test.
+2. After AT-2026-05-03-032 passes, open E2 to register commands and shared state with a host smoke test.
 
 ## Legacy Note
 

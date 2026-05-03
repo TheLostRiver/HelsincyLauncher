@@ -62,6 +62,7 @@
 - A thin D2 builder layout is enough for the first composition-root wiring slice: `build_storage_adapters`-style config validation can live in helper functions, the startup facade can expose async stage methods as explicit no-ops, and the integration smoke test can verify assembly by inspecting facade deps instead of requiring real runtime execution.
 - For E1, the smallest host transport slice should stay command-shell only: add Fab and Downloads handler modules that consume `DesktopAppServices`, keep result mapping thin and local to `src-tauri`, and defer actual command registration plus shared-state injection to E2.
 - The E1 host slice can safely stub read-only query responses on `*_NOT_WIRED` facade errors while still routing commands through `DesktopAppServices`; adding these host crate dependencies also produces a tiny `Cargo.lock` adjacency that should be persisted in a separate cleanup slice, without touching unrelated user frontend worktree edits.
+- When the worktree also contains unrelated user frontend changes, backend lockfile cleanup should use path-scoped `git status` checks and selective staging so the backend slice can still be committed and pushed without sweeping user UI work into the same commit.
 
 ## Technical Decisions
 

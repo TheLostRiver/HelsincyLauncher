@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-031 - Add transport facade command shell
+- Active atomic task: none active; last committed task is AT-2026-05-03-032 - Persist desktop host lockfile
 - Current phase: Phase 5 - Backend Skeleton Bootstrap
-- Last committed task before this slice: AT-2026-05-03-030 - Wire composition root smoke shell
-- Next validation gate: none pending for AT-2026-05-03-031
+- Last committed task before this slice: AT-2026-05-03-031 - Add transport facade command shell
+- Next validation gate: none pending for AT-2026-05-03-032
 
 ## Session Timeline
 
@@ -145,6 +145,9 @@
 - Started AT-2026-05-03-031 after the user explicitly selected E1, constraining the slice to host command modules and the minimum compile plumbing needed to consume `DesktopAppServices` from `src-tauri`.
 - Implemented AT-2026-05-03-031 by adding `src-tauri` Fab and Downloads command modules, thin command/query envelopes, and local result mappers so host transport code can compile against `DesktopAppServices` before E2 registration.
 - Validated AT-2026-05-03-031 with `cargo check -p my-epic-launcher-desktop --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`, then `git diff --check` and `git status --short`; the host crate passed, one adjacent desktop-host `Cargo.lock` delta appeared, and unrelated user frontend edits remained in the worktree untouched.
+- Committed and pushed AT-2026-05-03-031 as `42bea72` (`Add transport facade command shell`) without staging the adjacent `Cargo.lock` delta or unrelated user frontend edits.
+- Started AT-2026-05-03-032 to persist that small desktop-host lockfile delta while explicitly leaving the user-owned frontend worktree changes alone.
+- Validated AT-2026-05-03-032 with `cargo check -p my-epic-launcher-desktop --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`, `git diff --check`, and a path-scoped `git status --short -- .artifacts/ai Cargo.lock src-tauri`, confirming the cleanup slice contains only `Cargo.lock` plus AT-032 records.
 
 ## Validation Snapshot
 

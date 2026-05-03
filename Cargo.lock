@@ -300,6 +300,13 @@ checksum = "f8ca58f447f06ed17d5fc4043ce1b10dd205e060fb3ce5b979b8ed8e59ff3f79"
 [[package]]
 name = "my-epic-launcher-desktop"
 version = "0.1.0"
+dependencies = [
+ "launcher-composition-root",
+ "launcher-kernel-foundation",
+ "launcher-kernel-jobs",
+ "launcher-module-downloads",
+ "launcher-module-fab",
+]
 
 [[package]]
 name = "num-traits"
