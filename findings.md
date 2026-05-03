@@ -37,6 +37,9 @@
 - 当前 settings 模块由 components/Settings.tsx 单独承载，语义集中在两个高频设置开关和一个本地库路径摘要。
 - settings 模块最关键的边界是“前端只展示配置摘要与修改意图，真实配置读写和迁移仍应在后端或独立配置层”。
 - 当前 settings 文档的最自然 git 拆分是一组 settings 三件套，再单独跟一个 planning 三件套提交。
+- 当前 account-auth 模块由 components/AccountLogin.tsx 单独承载，语义集中在登录入口、同步价值说明和组织许可证状态摘要。
+- account-auth 模块最关键的边界是“前端只展示认证摘要与登录意图，真实 OAuth、token 生命周期和安全存储仍应在后端或独立认证层”。
+- 当前 account-auth 文档的最自然 git 拆分是一组 account-auth 三件套，再单独跟一个 planning 三件套提交。
 
 ## Issues Encountered
 | Issue | Resolution |

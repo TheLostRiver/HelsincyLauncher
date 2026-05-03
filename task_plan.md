@@ -62,6 +62,12 @@ Phase 5
 - [x] Keep task_plan.md, findings.md, and progress.md together for the follow-up planning commit
 - **Status:** complete
 
+### Phase 11: Account Auth Rollout
+- [x] Instantiate account-auth module docs
+- [x] Commit account-auth module guides separately
+- [x] Keep task_plan.md, findings.md, and progress.md together for the follow-up planning commit
+- **Status:** complete
+
 ## Decisions Made
 | Decision | Rationale |
 |----------|-----------|
@@ -73,6 +79,7 @@ Phase 5
 | 继续补 engines 后再补 downloads | 用户明确要求优先顺序，且两者都应各自独立提交 |
 | 在未指定 settings 前先补 projects | 现有模块优先顺序里 projects 在 settings 之前，且用户只选择继续该方向 |
 | 选择继续时补 settings | 用户在上一步明确选择了继续补 settings 模块文档 |
+| 选择继续时补 account-auth | 用户随后明确选择继续补 account-auth 模块文档 |
 
 ## Errors Encountered
 | Error | Resolution |
