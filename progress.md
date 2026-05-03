@@ -14,11 +14,19 @@
 - 继续扫描后，确认正文里仅剩 3 处 `.artifacts/docs/` 路径残留，全部位于 TauriAIDevelopmentTransactionProtocolDesign.md。
 - 已将这 3 处正文路径统一改为 `docs/` 前缀，并将说明文字改成与当前仓库布局一致的表述。
 - 使用 grep 验证后，docs/*.md 中已无 `.artifacts/docs/` 残留。
+- 新增 docs/ModuleDocumentationStandard.md，明确模块文档应优先覆盖业务切片与壳层边界。
+- 新增 docs/modules/shell/ 下的 README_ARCH.md、README_API.md、README_FLOW.md。
+- 新增 docs/modules/fab-inventory/ 下的 README_ARCH.md、README_API.md、README_FLOW.md。
+- 已创建提交 `docs: add module documentation standard and templates`。
+- 已创建提交 `docs: add shell and fab inventory module guides`。
+- 当前仅剩 planning 三件套待独立提交。
 
 ### Test Results
 | Test | Expected | Actual | Status |
 |------|----------|--------|--------|
 | grep `.artifacts/docs/` in docs/*.md | 无残留错误路径 | 无匹配 | PASS |
+| inspect shell and fab-inventory module docs presence | 文档目录与三件套已落地 | 文件已创建 | PASS |
+| git status after second docs commit | 仅剩 planning 三件套未提交 | 结果符合预期 | PASS |
 
 ### Errors
 | Error | Resolution |

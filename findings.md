@@ -18,6 +18,15 @@
 | 先验证 docs 目录中 Parent 字段的分布再统一修正 | 避免只改当前文件而漏掉同类文档 |
 | 只继续修正文档正文中的 `.artifacts/docs/` 路径 | 用户明确要求把正文路径错误也一起改掉 |
 | 保留 `.artifacts/ai/` 协议设计 | 这是文档正文里的协议目录约定，不属于错误的 docs 路径引用 |
+| 模块文档优先面向业务模块和壳层边界 | 当前组件树里真正有独立职责和演进风险的是 shell、fab-inventory 这类切片 |
+
+## Additional Findings
+- 当前 shell 模块的核心边界由 app/page.tsx、components/Sidebar.tsx、components/TopBar.tsx 组成。
+- shell 当前只拥有页面级视图状态：activePage、transitioning、pageMeta。
+- fab-inventory 当前由两个前端入口组成：首页概览卡片 components/FabInventory.tsx 和独立库存页 components/FabInventoryContent.tsx。
+- fab-inventory 目前仍是静态展示模块，搜索、筛选、同步、导入工程都还是 UI 意图入口，尚未接入真实副作用。
+- 对当前仓库而言，给每个小组件单独写文档的收益低于围绕业务切片写 README_ARCH.md、README_API.md、README_FLOW.md。
+- 当前工作区中新生成的模块文档最自然的提交拆分是：规范与模板一组、实例化模块文档一组、planning 三件套一组。
 
 ## Issues Encountered
 | Issue | Resolution |
