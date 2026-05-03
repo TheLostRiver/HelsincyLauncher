@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-035 - Add contributor collaboration guide
-- Current phase: Phase 7 - Contributor Collaboration Guide
-- Last committed task before this slice: AT-2026-05-03-034 - Benchmark documentation against Codex-Manager
-- Next validation gate: none pending for AT-2026-05-03-035
+- Active atomic task: none active; last committed task is AT-2026-05-03-036 - Add current-repo architecture overview
+- Current phase: Phase 8 - Current-repo Architecture Overview
+- Last committed task before this slice: AT-2026-05-03-035 - Add contributor collaboration guide
+- Next validation gate: none pending for AT-2026-05-03-036
 
 ## Session Timeline
 
@@ -165,10 +165,16 @@
 - Added `CONTRIBUTING.md` with current-repo boundaries, common commands, validation matrix, landing guide, high-risk files, size thresholds, documentation ownership, and commit rules.
 - Updated `README.md` to expose `CONTRIBUTING.md` from the workflow/governance entry surface and contributor-facing notes.
 - Validated AT-2026-05-03-035 with README grep checks for the new guide link, `CONTRIBUTING.md` grep checks for the required headings, and `git diff --check -- CONTRIBUTING.md README.md .artifacts/ai`.
+- Committed AT-2026-05-03-035 as `b83646b` (`Add contributor collaboration guide`) and pushed it to `main`.
+- Started AT-2026-05-03-036 after the user selected “继续 P2” in the confirmation UI, targeting the missing current-repo architecture navigation layer from the benchmark.
+- Re-read the live repo entrypoints under `src-tauri`, `crates/composition-root`, and `src-tauri/tests/transport_wiring_smoke.rs` to anchor the overview on the real host/composition/runtime chain instead of generic architecture prose.
+- Added `docs/TauriCurrentRepoArchitectureOverview.md` with the live repo shape, directory duties, key entrypoint index, host/composition bootstrap chain, validation entrypoints, structure hotspots, and suggested landing zones.
+- Updated `README.md` to expose the new overview from the architecture section.
+- Validated AT-2026-05-03-036 with README grep checks for the new architecture link, overview-doc grep checks for the required headings, and `git diff --check -- README.md docs/TauriCurrentRepoArchitectureOverview.md .artifacts/ai`.
 
 ## Validation Snapshot
 
-- Latest completed validation: AT-2026-05-03-035 passed README grep checks for the new guide link, `CONTRIBUTING.md` grep checks for the required headings, and `git diff --check -- CONTRIBUTING.md README.md .artifacts/ai`.
+- Latest completed validation: AT-2026-05-03-036 passed README grep checks for the architecture-overview link, overview-doc grep checks for the required headings, and `git diff --check -- README.md docs/TauriCurrentRepoArchitectureOverview.md .artifacts/ai`.
 - Latest repo-wide backend validation remains the previously completed `cargo check --workspace` plus the named host/composition/foundation smoke tests from the post-E2 baseline.
 
 ## Error Log

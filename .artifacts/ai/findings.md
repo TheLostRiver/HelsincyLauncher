@@ -73,6 +73,9 @@
 - AT-035 confirmed that a root `CONTRIBUTING.md` can close the main P1 gap without duplicating the deep architecture stack, as long as it stays focused on current-repo boundaries, commands, validation, hotspots, and docs ownership.
 - The contributor guide should link forward to the AI transaction protocol and deep design docs rather than restating their full content; otherwise the new entry layer will drift into a second architecture source of truth.
 - In this repo, contributor-facing hotspots are not only large files; they are also control-surface files such as `README.md`, `.github/copilot-instructions.md`, `.github/skills/strict-doc-driven-development/SKILL.md`, `src-tauri/src/lib.rs`, and `crates/composition-root/src/bootstrap.rs`.
+- AT-036 confirmed that the missing P2 layer is not another principles doc; it is a current-state map of the live repo shape, key entrypoints, validation entrypoints, and landing zones.
+- The most useful current-repo architecture content is concrete and file-anchored: `src-tauri/src/bootstrap.rs`, `src-tauri/src/commands/mod.rs`, `crates/composition-root/src/bootstrap.rs`, and `src-tauri/tests/transport_wiring_smoke.rs` explain more about today's repo than repeating high-level boundaries.
+- The architecture overview should stay narrowly scoped to “where things live and how they connect today”; if it starts re-explaining all non-goals and principles from the blueprint, it will drift into a duplicate source.
 
 ## Technical Decisions
 

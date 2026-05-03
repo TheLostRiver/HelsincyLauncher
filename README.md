@@ -89,6 +89,7 @@ cargo test -p my-epic-launcher-desktop transport_wiring_smoke
 
 - [docs/TauriRewriteArchitectureBlueprint.md](docs/TauriRewriteArchitectureBlueprint.md)
 - [docs/TauriArchitecturePrinciplesDesign.md](docs/TauriArchitecturePrinciplesDesign.md)
+- [docs/TauriCurrentRepoArchitectureOverview.md](docs/TauriCurrentRepoArchitectureOverview.md)
 - [docs/TauriIPCAndStateContractsDesign.md](docs/TauriIPCAndStateContractsDesign.md)
 
 ### Backend Rollout
