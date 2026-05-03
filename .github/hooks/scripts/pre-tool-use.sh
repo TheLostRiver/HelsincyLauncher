@@ -1,20 +1,37 @@
 #!/bin/bash
-# planning-with-files: Pre-tool-use hook for GitHub Copilot
-# Reads the first 30 lines of task_plan.md to keep goals in context.
+# strict-doc-driven-development: Pre-tool-use hook for GitHub Copilot
+# Reads the active atomic task first, then falls back to the .artifacts/ai task plan.
 # Always allows tool execution — this hook never blocks tools.
 # Always exits 0 — outputs JSON to stdout.
 
 # Read stdin (required — Copilot pipes JSON to stdin)
 INPUT=$(cat)
 
-PLAN_FILE="task_plan.md"
+ACTIVE_TASK_FILE=".artifacts/ai/active-task.md"
+TASK_PLAN_FILE=".artifacts/ai/task-plan.md"
 
-if [ ! -f "$PLAN_FILE" ]; then
+if [ ! -f "$ACTIVE_TASK_FILE" ] && [ ! -f "$TASK_PLAN_FILE" ]; then
     echo '{}'
     exit 0
 fi
 
-CONTEXT=$(head -30 "$PLAN_FILE" 2>/dev/null || echo "")
+CONTEXT=""
+
+if [ -f "$ACTIVE_TASK_FILE" ]; then
+    ACTIVE_TASK=$(head -80 "$ACTIVE_TASK_FILE" 2>/dev/null || echo "")
+    if [ -n "$ACTIVE_TASK" ]; then
+        CONTEXT="[myepiclauncher] ACTIVE TASK
+$ACTIVE_TASK"
+    fi
+fi
+
+if [ -z "$CONTEXT" ] && [ -f "$TASK_PLAN_FILE" ]; then
+    TASK_PLAN=$(head -40 "$TASK_PLAN_FILE" 2>/dev/null || echo "")
+    if [ -n "$TASK_PLAN" ]; then
+        CONTEXT="[myepiclauncher] TASK PLAN
+$TASK_PLAN"
+    fi
+fi
 
 if [ -z "$CONTEXT" ]; then
     echo '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow"}}'

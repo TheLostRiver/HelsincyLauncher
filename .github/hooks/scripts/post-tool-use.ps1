@@ -1,5 +1,5 @@
-# planning-with-files: Post-tool-use hook for GitHub Copilot (PowerShell)
-# Reminds the agent to update task_plan.md after tool use.
+# strict-doc-driven-development: Post-tool-use hook for GitHub Copilot (PowerShell)
+# Reminds the agent to update the .artifacts/ai workflow records after tool use.
 # Always exits 0 — outputs JSON to stdout.
 
 # Read stdin (required — Copilot pipes JSON to stdin)
@@ -10,7 +10,7 @@ $InputData = [Console]::In.ReadToEnd()
 $output = @{
     hookSpecificOutput = @{
         hookEventName = "PostToolUse"
-        additionalContext = "[planning-with-files] Update progress.md with what you just did. If a phase is now complete, update task_plan.md status."
+        additionalContext = "[myepiclauncher] Update .artifacts/ai/progress.md with what you just did. If the active task changed state, update .artifacts/ai/active-task.md. If the task is pausing, refresh .artifacts/ai/handoff.md."
     }
 }
 $output | ConvertTo-Json -Depth 3 -Compress

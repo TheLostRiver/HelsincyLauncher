@@ -34,14 +34,15 @@ Add task-specific docs when relevant:
 
 ## Atomic Task Execution
 
-1. For non-trivial work, read the local task records first: task_plan.md, progress.md, and findings.md.
+1. For non-trivial work, read the local task records first: .artifacts/ai/active-task.md, .artifacts/ai/task-plan.md, .artifacts/ai/progress.md, and .artifacts/ai/findings.md.
 2. Do not start writing code until you have read the relevant task record plus the controlling architecture or module docs.
 3. Work one atomic task at a time. Do not blur multiple unfinished atomic tasks together.
 4. After each completed atomic task, run the narrowest compile, test, or validation gate that the docs require for that slice.
-5. If that gate passes, update the relevant docs and task records, create a git commit, and attempt to push.
-6. If push fails, persist the pending push state and the failure details into the local task records so the commits can be pushed later.
+5. If that gate passes, update the relevant docs and task records under .artifacts/ai/, create a git commit, and attempt to push.
+6. If push fails, persist the pending push state and the failure details into the .artifacts/ai/ task records so the commits can be pushed later.
 7. If the same blocker cannot be repaired after 5 attempts, persist the bug details and current state, then stop and wait for user direction.
 8. When needed, use the workspace skill templates .github/skills/strict-doc-driven-development/active-atomic-task-template.md, .github/skills/strict-doc-driven-development/docs-update-log-template.md, .github/skills/strict-doc-driven-development/pending-push-template.md, and .github/skills/strict-doc-driven-development/blocked-bug-template.md to keep those records structured.
+9. Legacy root task_plan.md, progress.md, and findings.md are not the source of truth for new tasks.
 
 ## Skill Usage
 

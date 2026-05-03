@@ -1,6 +1,7 @@
 # Active Atomic Task Template
 
 Use this to define the current atomic task before implementation starts.
+Suggested file path: .artifacts/ai/active-task.md.
 
 ## Identity
 
@@ -24,9 +25,10 @@ Use this to define the current atomic task before implementation starts.
 
 ## Local Task Records Read
 
-1. task_plan.md
-2. progress.md
-3. findings.md
+1. .artifacts/ai/active-task.md
+2. .artifacts/ai/task-plan.md
+3. .artifacts/ai/progress.md
+4. .artifacts/ai/findings.md
 
 ## Controlling Docs
 

@@ -1,14 +1,15 @@
 #!/bin/bash
-# planning-with-files: Error hook for GitHub Copilot
-# Logs errors to task_plan.md when the agent encounters an error.
+# strict-doc-driven-development: Error hook for GitHub Copilot
+# Reminds the agent to record errors in the .artifacts/ai workflow files.
 # Always exits 0 — outputs JSON to stdout.
 
 # Read stdin (required — Copilot pipes JSON to stdin)
 INPUT=$(cat)
 
-PLAN_FILE="task_plan.md"
+ACTIVE_TASK_FILE=".artifacts/ai/active-task.md"
+PROGRESS_FILE=".artifacts/ai/progress.md"
 
-if [ ! -f "$PLAN_FILE" ]; then
+if [ ! -f "$ACTIVE_TASK_FILE" ] && [ ! -f "$PROGRESS_FILE" ]; then
     echo '{}'
     exit 0
 fi
@@ -30,7 +31,7 @@ except:
 " <<< "$INPUT" 2>/dev/null || echo "")
 
 if [ -n "$ERROR_MSG" ]; then
-    CONTEXT="[planning-with-files] Error detected: ${ERROR_MSG}. Log this error in task_plan.md under Errors Encountered with the attempt number and resolution."
+    CONTEXT="[myepiclauncher] Error detected: ${ERROR_MSG}. Log this in .artifacts/ai/progress.md. If this is the 5th failed repair attempt for the same blocker, persist the blocker in .artifacts/ai/handoff.md using blocked-bug-template.md and stop."
     ESCAPED=$($PYTHON -c "import sys,json; print(json.dumps(sys.stdin.read(), ensure_ascii=False))" <<< "$CONTEXT" 2>/dev/null || echo "\"\"")
     echo "{\"hookSpecificOutput\":{\"hookEventName\":\"ErrorOccurred\",\"additionalContext\":$ESCAPED}}"
 else

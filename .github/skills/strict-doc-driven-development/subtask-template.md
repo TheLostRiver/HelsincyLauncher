@@ -17,9 +17,10 @@ State the exact local outcome.
 
 ## Local Task Records To Read First
 
-- task_plan.md
-- progress.md
-- findings.md
+- .artifacts/ai/active-task.md
+- .artifacts/ai/task-plan.md
+- .artifacts/ai/progress.md
+- .artifacts/ai/findings.md
 
 ## Controlling Docs
 
@@ -43,7 +44,7 @@ State the narrowest validation that can disconfirm the current hypothesis.
 
 ## Task Records And Docs To Update
 
-1. task_plan.md / progress.md / findings.md updates
+1. .artifacts/ai/task-plan.md / .artifacts/ai/progress.md / .artifacts/ai/findings.md / .artifacts/ai/handoff.md updates as needed
 2. repository or module docs to refresh
 
 ## Post-validation Git Action

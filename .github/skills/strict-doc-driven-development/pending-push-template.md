@@ -22,9 +22,10 @@ Use this when a commit is ready but push did not succeed.
 
 ## Task Record Updates
 
-1. task_plan.md changes made:
-2. progress.md changes made:
-3. findings.md changes made:
+1. .artifacts/ai/task-plan.md changes made:
+2. .artifacts/ai/progress.md changes made:
+3. .artifacts/ai/findings.md changes made:
+4. .artifacts/ai/handoff.md changes made if any:
 
 ## Next Push Attempt
 

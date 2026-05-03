@@ -1,0 +1,25 @@
+# Active Task
+
+- id: AT-2026-05-03-001
+- title: Converge AI workflow to .artifacts/ai protocol
+- status: committed
+- goal: Move the repository workflow from legacy root planning files to .artifacts/ai records and stop stale startup context injection.
+- scope:
+  - update repository workflow instructions, templates, and hooks to use .artifacts/ai records
+  - initialize .artifacts/ai task records for the new workflow
+- out_of_scope:
+  - rewriting third-party planning-with-files skill internals
+  - migrating historical root task_plan.md, progress.md, and findings.md contents
+- allowed_files:
+  - .github/copilot-instructions.md
+  - .github/skills/strict-doc-driven-development/**
+  - .github/hooks/scripts/**
+  - .artifacts/ai/**
+- required_context:
+  - docs/TauriRewriteArchitectureBlueprint.md
+  - docs/TauriArchitecturePrinciplesDesign.md
+  - docs/TauriAIDevelopmentTransactionProtocolDesign.md
+  - docs/TauriTestingStrategyAndQualityGateDesign.md
+- hypothesis: If the repo workflow reads .artifacts/ai/active-task.md and related records instead of root task_plan.md, stale legacy task context will stop leaking into new sessions.
+- cheap_check: Run the session-start hook and confirm it no longer injects the old Fix Docs Parent Paths root plan.
+- next_step: Start the next atomic task from .artifacts/ai/task-plan.md or create a new .artifacts/ai/active-task.md entry.

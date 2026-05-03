@@ -1,7 +1,7 @@
-# planning-with-files: Session start hook for GitHub Copilot (PowerShell)
+# strict-doc-driven-development: Session start hook for GitHub Copilot (PowerShell)
 # Always injects the repository strict doc-driven reminder first.
-# Then, when task_plan.md exists: runs session-catchup or reads plan header.
-# When task_plan.md doesn't exist: injects SKILL.md so Copilot knows the planning workflow.
+# Then reads the .artifacts/ai/ task records when they exist.
+# When no .artifacts/ai/ task record exists yet, injects a workflow bootstrap reminder.
 # Always exits 0 — outputs JSON to stdout.
 
 # Read stdin (required — Copilot pipes JSON to stdin)
@@ -9,38 +9,56 @@ $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
 [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
 $InputData = [Console]::In.ReadToEnd()
 
-$PlanFile = "task_plan.md"
-$SkillDir = ".github/skills/planning-with-files"
 $StrictSkillDir = ".github/skills/strict-doc-driven-development"
 $StrictReminderFile = "$StrictSkillDir/session-start.txt"
+$BootstrapReminderFile = "$StrictSkillDir/session-bootstrap.txt"
+$ArtifactsDir = ".artifacts/ai"
+$ActiveTaskFile = "$ArtifactsDir/active-task.md"
+$TaskPlanFile = "$ArtifactsDir/task-plan.md"
+$ProgressFile = "$ArtifactsDir/progress.md"
+$HandoffFile = "$ArtifactsDir/handoff.md"
 $StrictContext = ""
+$BootstrapContext = ""
 
 if (Test-Path $StrictReminderFile) {
     $StrictContext = Get-Content $StrictReminderFile -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
 }
 
-if (Test-Path $PlanFile) {
-    # Plan exists — try session catchup, fall back to reading plan header
-    $Catchup = ""
-    if (Test-Path "$SkillDir/scripts/session-catchup.py") {
-        try {
-            $PythonCmd = if (Get-Command python3 -ErrorAction SilentlyContinue) { "python3" } else { "python" }
-            $Catchup = & $PythonCmd "$SkillDir/scripts/session-catchup.py" (Get-Location).Path 2>$null
-        } catch {
-            $Catchup = ""
-        }
-    }
+if (Test-Path $BootstrapReminderFile) {
+    $BootstrapContext = Get-Content $BootstrapReminderFile -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
+}
 
-    if ($Catchup) {
-        $Context = $Catchup -join "`n"
-    } else {
-        $Context = (Get-Content $PlanFile -TotalCount 5 -Encoding UTF8 -ErrorAction SilentlyContinue) -join "`n"
+$ContextParts = @()
+
+if (Test-Path $ActiveTaskFile) {
+    $ContextParts += "[myepiclauncher] ACTIVE TASK`n" + ((Get-Content $ActiveTaskFile -Raw -Encoding UTF8 -ErrorAction SilentlyContinue).Trim())
+}
+
+if (Test-Path $HandoffFile) {
+    $HandoffContext = (Get-Content $HandoffFile -Raw -Encoding UTF8 -ErrorAction SilentlyContinue).Trim()
+    if ($HandoffContext) {
+        $ContextParts += "[myepiclauncher] HANDOFF`n$HandoffContext"
     }
-} else {
-    # No plan yet — inject SKILL.md so Copilot knows the planning workflow and templates
-    if (Test-Path "$SkillDir/SKILL.md") {
-        $Context = Get-Content "$SkillDir/SKILL.md" -Raw -Encoding UTF8 -ErrorAction SilentlyContinue
+}
+
+if ((-not $ContextParts) -and (Test-Path $TaskPlanFile)) {
+    $TaskPlanContext = (Get-Content $TaskPlanFile -TotalCount 40 -Encoding UTF8 -ErrorAction SilentlyContinue) -join "`n"
+    if ($TaskPlanContext) {
+        $ContextParts += "[myepiclauncher] TASK PLAN`n$TaskPlanContext"
     }
+}
+
+if (Test-Path $ProgressFile) {
+    $ProgressTail = Get-Content $ProgressFile -Tail 20 -Encoding UTF8 -ErrorAction SilentlyContinue
+    if ($ProgressTail) {
+        $ContextParts += "[myepiclauncher] RECENT PROGRESS`n" + (($ProgressTail -join "`n").Trim())
+    }
+}
+
+if ($ContextParts.Count -gt 0) {
+    $Context = ($ContextParts -join "`n`n").Trim()
+} elseif ($BootstrapContext) {
+    $Context = $BootstrapContext.Trim()
 }
 
 if ($StrictContext -and $Context) {

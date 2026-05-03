@@ -1,5 +1,5 @@
-# planning-with-files: Pre-tool-use hook for GitHub Copilot (PowerShell)
-# Reads the first 30 lines of task_plan.md to keep goals in context.
+# strict-doc-driven-development: Pre-tool-use hook for GitHub Copilot (PowerShell)
+# Reads the active atomic task first, then falls back to the .artifacts/ai task plan.
 # Always allows tool execution — this hook never blocks tools.
 # Always exits 0 — outputs JSON to stdout.
 
@@ -8,14 +8,27 @@ $OutputEncoding = [System.Text.UTF8Encoding]::new($false)
 [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
 $InputData = [Console]::In.ReadToEnd()
 
-$PlanFile = "task_plan.md"
+$ActiveTaskFile = ".artifacts/ai/active-task.md"
+$TaskPlanFile = ".artifacts/ai/task-plan.md"
 
-if (-not (Test-Path $PlanFile)) {
+if (-not (Test-Path $ActiveTaskFile) -and -not (Test-Path $TaskPlanFile)) {
     Write-Output '{}'
     exit 0
 }
 
-$Context = (Get-Content $PlanFile -TotalCount 30 -Encoding UTF8 -ErrorAction SilentlyContinue) -join "`n"
+$Context = ""
+
+if (Test-Path $ActiveTaskFile) {
+    $ActiveTask = (Get-Content $ActiveTaskFile -TotalCount 80 -Encoding UTF8 -ErrorAction SilentlyContinue) -join "`n"
+    if ($ActiveTask) {
+        $Context = "[myepiclauncher] ACTIVE TASK`n$ActiveTask"
+    }
+} elseif (Test-Path $TaskPlanFile) {
+    $TaskPlan = (Get-Content $TaskPlanFile -TotalCount 40 -Encoding UTF8 -ErrorAction SilentlyContinue) -join "`n"
+    if ($TaskPlan) {
+        $Context = "[myepiclauncher] TASK PLAN`n$TaskPlan"
+    }
+}
 
 if (-not $Context) {
     Write-Output '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow"}}'

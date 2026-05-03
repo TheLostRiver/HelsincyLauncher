@@ -20,12 +20,12 @@ Treat the repository docs as binding engineering requirements.
 
 ## Atomic Task Loop
 
-1. Read the local task records first: task_plan.md, progress.md, and findings.md.
+1. Read the local task records first: .artifacts/ai/active-task.md, .artifacts/ai/task-plan.md, .artifacts/ai/progress.md, and .artifacts/ai/findings.md.
 2. Do not begin coding until you have read both the task record and the relevant architecture or module docs.
 3. Keep exactly one active atomic task in progress until it reaches validation, commit, or a blocked state.
 4. After each successful atomic task, run the narrowest compile, test, or validation gate required by the docs.
-5. If that gate passes, update the relevant docs and task records, create a git commit, and attempt to push immediately.
-6. If push fails, do not panic and do not discard the commit. Persist the pending push details in the task records so the outstanding commits can be pushed later.
+5. If that gate passes, update the relevant docs and task records under .artifacts/ai/, create a git commit, and attempt to push immediately.
+6. If push fails, do not panic and do not discard the commit. Persist the pending push details in the .artifacts/ai/ task records so the outstanding commits can be pushed later.
 7. If a blocker still fails after 5 repair attempts, persist the bug details, what was tried, and the current state, then stop and wait for user direction.
 
 ## Required Baseline Docs
@@ -91,13 +91,13 @@ Before delegating, verify all of the following:
 
 Use the bundled templates to keep the workflow structured:
 
-1. active-atomic-task-template.md: define the current atomic task before coding, including scope, controlling docs, cheap check, and stop conditions.
+1. active-atomic-task-template.md: define the current atomic task in .artifacts/ai/active-task.md before coding, including scope, controlling docs, cheap check, and stop conditions.
 2. docs-update-log-template.md: record which docs were updated, why they changed, and which validation or code slice they belong to.
 3. pending-push-template.md: record commits that are ready but not yet pushed, including the reason push failed and the exact follow-up command.
 4. blocked-bug-template.md: record a blocker that still fails after 5 repair attempts, including attempted fixes, latest error, affected files, and the exact point where work stopped.
 
 Do not leave active-task state, docs updates, push failures, or 5-attempt blockers only in transient chat context.
-Persist them in the task records using these templates.
+Persist them in the .artifacts/ai/ task records using these templates.
 
 ## Prohibited Behavior
 
@@ -106,3 +106,4 @@ Persist them in the task records using these templates.
 - Do not widen permissions, secret storage, or startup blocking rules without an explicit doc basis.
 - Do not skip required validation just because a broader build appears green.
 - Do not treat repository docs as optional suggestions.
+- Do not treat legacy root task_plan.md / progress.md / findings.md as the source of truth for new tasks.

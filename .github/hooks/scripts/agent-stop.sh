@@ -1,46 +1,42 @@
 #!/bin/bash
-# planning-with-files: Agent stop hook for GitHub Copilot
-# Checks if all phases in task_plan.md are complete.
-# Injects continuation context if phases are incomplete.
+# strict-doc-driven-development: Agent stop hook for GitHub Copilot
+# Checks the current .artifacts/ai active task state before the agent stops.
 # Always exits 0 — outputs JSON to stdout.
 
 # Read stdin (required — Copilot pipes JSON to stdin)
 INPUT=$(cat)
 
-PLAN_FILE="task_plan.md"
+ACTIVE_TASK_FILE=".artifacts/ai/active-task.md"
+HANDOFF_FILE=".artifacts/ai/handoff.md"
 
-if [ ! -f "$PLAN_FILE" ]; then
+if [ ! -f "$ACTIVE_TASK_FILE" ]; then
     echo '{}'
     exit 0
 fi
 
-# Count total phases
-TOTAL=$(grep -c "### Phase" "$PLAN_FILE" || true)
+STATUS=$(sed -n 's/^-[[:space:]]*status:[[:space:]]*//p' "$ACTIVE_TASK_FILE" | head -1 | tr '[:upper:]' '[:lower:]')
 
-# Check for **Status:** format first
-COMPLETE=$(grep -cF "**Status:** complete" "$PLAN_FILE" || true)
-IN_PROGRESS=$(grep -cF "**Status:** in_progress" "$PLAN_FILE" || true)
-PENDING=$(grep -cF "**Status:** pending" "$PLAN_FILE" || true)
+case "$STATUS" in
+    committed)
+        MSG="[myepiclauncher] Active task is committed. Safe to stop or start the next .artifacts/ai/active-task.md entry."
+        ;;
+    blocked)
+        if [ -f "$HANDOFF_FILE" ]; then
+            MSG="[myepiclauncher] Active task is blocked and .artifacts/ai/handoff.md exists. Safe to stop until the next resume."
+        else
+            MSG="[myepiclauncher] Active task is blocked. Write .artifacts/ai/handoff.md before stopping so the next session has a safe resume point."
+        fi
+        ;;
+    in_progress)
+        MSG="[myepiclauncher] Active task is still in progress. Refresh .artifacts/ai/handoff.md before stopping, or mark .artifacts/ai/active-task.md as committed if the task is done."
+        ;;
+    validating)
+        MSG="[myepiclauncher] Active task is still validating. Refresh .artifacts/ai/handoff.md before stopping, or mark .artifacts/ai/active-task.md as committed if validation is complete."
+        ;;
+    *)
+        MSG="[myepiclauncher] Active task status is unclear. Review .artifacts/ai/active-task.md before stopping."
+        ;;
+esac
 
-# Fallback: check for [complete] inline format
-if [ "$COMPLETE" -eq 0 ] && [ "$IN_PROGRESS" -eq 0 ] && [ "$PENDING" -eq 0 ]; then
-    COMPLETE=$(grep -c "\[complete\]" "$PLAN_FILE" || true)
-    IN_PROGRESS=$(grep -c "\[in_progress\]" "$PLAN_FILE" || true)
-    PENDING=$(grep -c "\[pending\]" "$PLAN_FILE" || true)
-fi
-
-# Default to 0 if empty
-: "${TOTAL:=0}"
-: "${COMPLETE:=0}"
-: "${IN_PROGRESS:=0}"
-: "${PENDING:=0}"
-
-if [ "$COMPLETE" -eq "$TOTAL" ] && [ "$TOTAL" -gt 0 ]; then
-    MSG="[planning-with-files] ALL PHASES COMPLETE ($COMPLETE/$TOTAL). If the user has additional work, add new phases to task_plan.md before starting."
-    echo "{\"hookSpecificOutput\":{\"hookEventName\":\"AgentStop\",\"additionalContext\":\"$MSG\"}}"
-    exit 0
-fi
-
-MSG="[planning-with-files] Task incomplete ($COMPLETE/$TOTAL phases done). Update progress.md, then read task_plan.md and continue working on the remaining phases."
 echo "{\"hookSpecificOutput\":{\"hookEventName\":\"AgentStop\",\"additionalContext\":\"$MSG\"}}"
 exit 0

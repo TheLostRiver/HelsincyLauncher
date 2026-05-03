@@ -1,9 +1,10 @@
-# planning-with-files: Error hook for GitHub Copilot (Windows PowerShell)
-# Logs errors to task_plan.md when the agent encounters an error.
+# strict-doc-driven-development: Error hook for GitHub Copilot (Windows PowerShell)
+# Reminds the agent to record errors in the .artifacts/ai workflow files.
 
-$planFile = "task_plan.md"
+$activeTaskFile = ".artifacts/ai/active-task.md"
+$progressFile = ".artifacts/ai/progress.md"
 
-if (-not (Test-Path $planFile)) {
+if (-not (Test-Path $activeTaskFile) -and -not (Test-Path $progressFile)) {
     Write-Output '{}'
     exit 0
 }
@@ -22,7 +23,7 @@ try {
 
     if ($errorMsg) {
         $truncated = $errorMsg.Substring(0, [Math]::Min(200, $errorMsg.Length))
-        $context = "[planning-with-files] Error detected: $truncated. Log this error in task_plan.md under Errors Encountered with the attempt number and resolution."
+        $context = "[myepiclauncher] Error detected: $truncated. Log this in .artifacts/ai/progress.md. If this is the 5th failed repair attempt for the same blocker, persist the blocker in .artifacts/ai/handoff.md using blocked-bug-template.md and stop."
         $escaped = $context | ConvertTo-Json
         Write-Output "{`"hookSpecificOutput`":{`"hookEventName`":`"ErrorOccurred`",`"additionalContext`":$escaped}}"
     } else {

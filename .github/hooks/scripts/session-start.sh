@@ -1,42 +1,62 @@
 #!/bin/bash
-# planning-with-files: Session start hook for GitHub Copilot
+# strict-doc-driven-development: Session start hook for GitHub Copilot
 # Always injects the repository strict doc-driven reminder first.
-# Then, when task_plan.md exists: runs session-catchup or reads plan header.
-# When task_plan.md doesn't exist: injects SKILL.md so Copilot knows the planning workflow.
+# Then reads the .artifacts/ai/ task records when they exist.
+# When no .artifacts/ai/ task record exists yet, injects a workflow bootstrap reminder.
 # Always exits 0 — outputs JSON to stdout.
 
 # Read stdin (required — Copilot pipes JSON to stdin)
 INPUT=$(cat)
 
-PLAN_FILE="task_plan.md"
-SKILL_DIR=".github/skills/planning-with-files"
 STRICT_SKILL_DIR=".github/skills/strict-doc-driven-development"
 STRICT_REMINDER_FILE="$STRICT_SKILL_DIR/session-start.txt"
+BOOTSTRAP_REMINDER_FILE="$STRICT_SKILL_DIR/session-bootstrap.txt"
+ARTIFACTS_DIR=".artifacts/ai"
+ACTIVE_TASK_FILE="$ARTIFACTS_DIR/active-task.md"
+TASK_PLAN_FILE="$ARTIFACTS_DIR/task-plan.md"
+PROGRESS_FILE="$ARTIFACTS_DIR/progress.md"
+HANDOFF_FILE="$ARTIFACTS_DIR/handoff.md"
 STRICT_CONTEXT=$(cat "$STRICT_REMINDER_FILE" 2>/dev/null || echo "")
-PYTHON=""
-for _p in /usr/bin/python3 /usr/local/bin/python3 /opt/homebrew/bin/python3; do
-    [ -x "$_p" ] && { PYTHON="$_p"; break; }
-done
-[ -z "$PYTHON" ] && PYTHON=$(command -v python3 2>/dev/null || command -v python 2>/dev/null)
+BOOTSTRAP_CONTEXT=$(cat "$BOOTSTRAP_REMINDER_FILE" 2>/dev/null || echo "")
 
-if [ -f "$PLAN_FILE" ]; then
-    # Plan exists — try session catchup, fall back to reading plan header
-    CATCHUP=""
-    if [ -n "$PYTHON" ] && [ -f "$SKILL_DIR/scripts/session-catchup.py" ]; then
-        CATCHUP=$($PYTHON "$SKILL_DIR/scripts/session-catchup.py" "$(pwd)" 2>/dev/null | head -100)
+CONTEXT_PARTS=""
+
+append_context() {
+    if [ -z "$2" ]; then
+        return
     fi
 
-    if [ -n "$CATCHUP" ]; then
-        CONTEXT="[planning-with-files] Previous session context (truncated to 100 lines):
-$CATCHUP"
+    if [ -n "$CONTEXT_PARTS" ]; then
+        CONTEXT_PARTS="$CONTEXT_PARTS
+
+$1
+$2"
     else
-        CONTEXT=$(head -5 "$PLAN_FILE" 2>/dev/null || echo "")
+        CONTEXT_PARTS="$1
+$2"
     fi
-else
-    # No plan yet — inject SKILL.md so Copilot knows the planning workflow and templates
-    if [ -f "$SKILL_DIR/SKILL.md" ]; then
-        CONTEXT=$(cat "$SKILL_DIR/SKILL.md" 2>/dev/null || echo "")
-    fi
+}
+
+if [ -f "$ACTIVE_TASK_FILE" ]; then
+    append_context "[myepiclauncher] ACTIVE TASK" "$(cat "$ACTIVE_TASK_FILE" 2>/dev/null)"
+fi
+
+if [ -f "$HANDOFF_FILE" ]; then
+    append_context "[myepiclauncher] HANDOFF" "$(cat "$HANDOFF_FILE" 2>/dev/null)"
+fi
+
+if [ -z "$CONTEXT_PARTS" ] && [ -f "$TASK_PLAN_FILE" ]; then
+    append_context "[myepiclauncher] TASK PLAN" "$(head -40 "$TASK_PLAN_FILE" 2>/dev/null)"
+fi
+
+if [ -f "$PROGRESS_FILE" ]; then
+    append_context "[myepiclauncher] RECENT PROGRESS" "$(tail -20 "$PROGRESS_FILE" 2>/dev/null)"
+fi
+
+if [ -n "$CONTEXT_PARTS" ]; then
+    CONTEXT="$CONTEXT_PARTS"
+elif [ -n "$BOOTSTRAP_CONTEXT" ]; then
+    CONTEXT="$BOOTSTRAP_CONTEXT"
 fi
 
 if [ -n "$STRICT_CONTEXT" ] && [ -n "$CONTEXT" ]; then
