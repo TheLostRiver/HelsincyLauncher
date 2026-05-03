@@ -10,8 +10,8 @@ Phase 5 - Backend Skeleton Bootstrap
 
 ## Current Focus
 
-- Use the cleaned validation baseline to choose the next backend slice.
-- Decide between host-side smoke wiring and `kernel-foundation` bootstrap.
+- Open the next backend slice for `kernel-foundation` on top of the cleaned AT-011/AT-012 baseline.
+- Keep the active/archive clarification as part of the stable repo workflow surface.
 
 ## Phases
 
@@ -59,6 +59,7 @@ Phase 5 - Backend Skeleton Bootstrap
 10. AT-2026-05-03-010 - committed - persisted the generated `Cargo.lock` so the validated workspace baseline is fully recorded and the worktree returns to clean.
 11. AT-2026-05-03-011 - committed - added the thin host bootstrap surface under `src-tauri` so the desktop host crate can pass `cargo check` without composition-root yet.
 12. AT-2026-05-03-012 - committed - ignored Rust `target/` artifacts so backend validation no longer leaves the repo dirty.
+13. AT-2026-05-03-013 - committed - added a local README under `.artifacts/ai/` that clearly separates active workflow records from the archived legacy root planning files.
 
 ## Key Questions
 
@@ -77,7 +78,7 @@ Phase 5 - Backend Skeleton Bootstrap
 ## Follow-up Queue
 
 1. Integrate planning-with-files' 2-action checkpoint cadence more explicitly into repo-level reminders if the adapter slice alone is not enough.
-2. After the cleanup slice passes, decide whether the next slice should add host smoke tests or begin `kernel-foundation`.
+2. After the clarification slice passes, begin `kernel-foundation` as the next backend bootstrap slice.
 
 ## Legacy Note
 

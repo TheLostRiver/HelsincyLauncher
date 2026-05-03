@@ -41,6 +41,7 @@
 - The next safe host slice can stay crate-local: a placeholder service handle plus thin bootstrap/main surfaces are enough to make `cargo check -p my-epic-launcher-desktop` meaningful before composition-root exists.
 - A crate-local host shell with `bootstrap.rs`, `state.rs`, `main.rs`, and an explicit bin target is sufficient to make the `my-epic-launcher-desktop` package compile before any real Tauri transport or composition-root wiring exists.
 - The repo root must ignore Rust `target/`; otherwise even a narrow package-scoped `cargo check` leaves untracked incremental artifacts and breaks the clean-worktree expectation after backend validation.
+- Even with the skill retargeted correctly, users can still misread `.artifacts/ai/legacy-root-planning/` as live state unless the active `.artifacts/ai/` directory itself carries a local README that states the source-of-truth boundary.
 
 ## Technical Decisions
 

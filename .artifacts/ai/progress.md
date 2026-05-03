@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-012 - Ignore Rust target artifacts
+- Active atomic task: none active; last committed task is AT-2026-05-03-013 - Clarify active workflow records
 - Current phase: Phase 5 - Backend Skeleton Bootstrap
-- Last committed task before this slice: AT-2026-05-03-011 - Add host bootstrap surface
-- Next validation gate: none pending for AT-2026-05-03-012
+- Last committed task before this slice: AT-2026-05-03-012 - Ignore Rust target artifacts
+- Next validation gate: none pending for AT-2026-05-03-013
 
 ## Session Timeline
 
@@ -79,6 +79,8 @@
 - Detected one adjacent cleanup gap after the AT-011 closeout: the repo root did not ignore Rust `target/`, so `cargo check` left untracked build artifacts in the worktree.
 - Started AT-2026-05-03-012 to patch the missing ignore rule rather than leaving backend validation dirty by default.
 - Validated AT-2026-05-03-012 with `cargo check -p my-epic-launcher-desktop --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`, `git diff --check`, and `git status --short`; only the intended `.gitignore` and record updates remained visible.
+- Started AT-2026-05-03-013 after user feedback that `legacy-root-planning` still looks ambiguous, so the repo now needs an explicit local explanation inside `.artifacts/ai/` itself.
+- Validated AT-2026-05-03-013 with `git -C q:\DEV\MyEpicLauncher diff --check`, confirming the new `.artifacts/ai/README.md` and task-record updates are clean.
 
 ## Validation Snapshot
 
