@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-026 - Bootstrap fab provider adapter crate
+- Active atomic task: none active; last committed task is AT-2026-05-03-027 - Persist fab provider adapter lockfile
 - Current phase: Phase 5 - Backend Skeleton Bootstrap
-- Last committed task before this slice: AT-2026-05-03-025 - Persist sqlite adapter lockfile
-- Next validation gate: none pending for AT-2026-05-03-026
+- Last committed task before this slice: AT-2026-05-03-026 - Bootstrap fab provider adapter crate
+- Next validation gate: none pending for AT-2026-05-03-027
 
 ## Session Timeline
 
@@ -126,6 +126,9 @@
 - Confirmed the C4 slice can stay narrow: the current docs require only a provider adapter constructor surface and correct compile-time dependency direction, while remote auth, HTTP transport, and payload mapping remain out of scope for this first Fab provider adapter stub.
 - Validated AT-2026-05-03-026 with `cargo check -p launcher-adapter-provider-fab --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` and `git diff --check`, confirming the provider adapter shell compiles without pulling in auth or transport behavior.
 - Detected one adjacent cleanup artifact after AT-2026-05-03-026: adding the new workspace member updated `Cargo.lock`, so the repo needs one tiny follow-up slice before the next crate starts cleanly.
+- Committed and pushed AT-2026-05-03-026 as `fb0e5cc` (`Bootstrap fab provider adapter crate`) without widening the code slice to include the adjacent lockfile noise.
+- Started AT-2026-05-03-027 to persist that small lockfile delta rather than carrying it forward as unrelated worktree noise.
+- Validated AT-2026-05-03-027 with `cargo check -p launcher-adapter-provider-fab --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`, `git diff --check`, and `git status --short`, confirming only the expected `Cargo.lock` and task-record files remained before commit.
 
 ## Validation Snapshot
 

@@ -208,6 +208,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "launcher-adapter-provider-fab"
+version = "0.1.0"
+dependencies = [
+ "launcher-kernel-foundation",
+ "launcher-module-fab",
+]
+
+[[package]]
 name = "launcher-adapter-storage-sqlite"
 version = "0.1.0"
 dependencies = [
