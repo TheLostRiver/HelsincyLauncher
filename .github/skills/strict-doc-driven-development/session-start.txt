@@ -7,5 +7,5 @@ Before planning, coding, reviewing, or splitting subtasks:
 3. Add task-specific docs as needed: security, startup, error handling, release, backend skeleton, environment bootstrap, and docs/modules/<module-name>/README_*.md.
 4. Work one atomic task at a time. After a successful atomic task, run the narrowest validation gate, update docs and logs, commit, and attempt push.
 5. If push fails, persist the pending push state. If the same blocker still fails after 5 repair attempts, persist the bug details and stop.
-Use pending-push-template.md and blocked-bug-template.md when those records are needed.
+Use active-atomic-task-template.md, docs-update-log-template.md, pending-push-template.md, and blocked-bug-template.md when those records are needed.
 6. When delegating subtasks, include exact doc paths, scope, allowed files, and validation gates.
