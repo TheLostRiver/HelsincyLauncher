@@ -10,8 +10,8 @@ Phase 5 - Backend Skeleton Bootstrap
 
 ## Current Focus
 
-- Use the committed `launcher-kernel-foundation` shell as the new backend baseline.
-- Open B2 next for real foundation modules and the named `foundation_contract_smoke` test.
+- Use the clean post-B1 baseline as the starting point for B2.
+- Open B2 next for the first real foundation modules and the named `foundation_contract_smoke` test.
 
 ## Phases
 
@@ -61,6 +61,7 @@ Phase 5 - Backend Skeleton Bootstrap
 12. AT-2026-05-03-012 - committed - ignored Rust `target/` artifacts so backend validation no longer leaves the repo dirty.
 13. AT-2026-05-03-013 - committed - added a local README under `.artifacts/ai/` that clearly separates active workflow records from the archived legacy root planning files.
 14. AT-2026-05-03-014 - committed - bootstrapped the `launcher-kernel-foundation` crate shell and connected it to the root workspace.
+15. AT-2026-05-03-015 - committed - persisted the generated `Cargo.lock` entry for `launcher-kernel-foundation` so the repo returns to a clean post-B1 baseline.
 
 ## Key Questions
 
@@ -79,7 +80,7 @@ Phase 5 - Backend Skeleton Bootstrap
 ## Follow-up Queue
 
 1. Integrate planning-with-files' 2-action checkpoint cadence more explicitly into repo-level reminders if the adapter slice alone is not enough.
-2. After B1 passes, open B2 for the first real foundation types and named smoke test.
+2. After the lockfile cleanup slice passes, open B2 for the first real foundation types and named smoke test.
 
 ## Legacy Note
 
