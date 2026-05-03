@@ -1,0 +1,15 @@
+[package]
+name = "launcher-adapter-storage-sqlite"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "launcher_adapter_storage_sqlite"
+path = "src/lib.rs"
+
+[dependencies]
+launcher-kernel-foundation = { path = "../kernel-foundation" }
+launcher-module-fab = { path = "../module-fab" }
+launcher-module-downloads = { path = "../module-downloads" }

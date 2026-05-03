@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-023 - Persist module downloads lockfile
+- Active atomic task: none active; last committed task is AT-2026-05-03-024 - Bootstrap sqlite adapter crate
 - Current phase: Phase 5 - Backend Skeleton Bootstrap
-- Last committed task before this slice: AT-2026-05-03-022 - Bootstrap module downloads crate
-- Next validation gate: none pending for AT-2026-05-03-023
+- Last committed task before this slice: AT-2026-05-03-023 - Persist module downloads lockfile
+- Next validation gate: none pending for AT-2026-05-03-024
 
 ## Session Timeline
 
@@ -113,6 +113,11 @@
 - Committed and pushed AT-2026-05-03-022 as `3366d31` (`Bootstrap module downloads crate`) without widening the code slice to include the adjacent lockfile noise.
 - Started AT-2026-05-03-023 to persist that small lockfile delta rather than carrying it forward as unrelated worktree noise.
 - Validated AT-2026-05-03-023 with `cargo check -p launcher-module-downloads --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`, `git diff --check`, and `git status --short`, confirming only the expected `Cargo.lock` and task-record files remained before commit.
+- Committed and pushed AT-2026-05-03-023 as `b0a108e` (`Persist module downloads lockfile`), returning the repo to a clean post-C2 baseline.
+- Started AT-2026-05-03-024 after the user-directed sequence moved on to C3, targeting `launcher-adapter-storage-sqlite` as the first adapter boundary because C3 follows the two module shells in the controlling task table.
+- Confirmed the C3 slice can stay narrow: the current docs require only repository constructor shells, adapter config, and correct compile-time dependency direction, while schema, migrations, and real SQL execution remain out of scope for this first SQLite adapter stub.
+- Validated AT-2026-05-03-024 with `cargo check -p launcher-adapter-storage-sqlite --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` and `git diff --check`, confirming the adapter shell compiles without pulling in schema or runtime SQL behavior.
+- Detected one adjacent cleanup artifact after AT-2026-05-03-024: adding the new workspace member updated `Cargo.lock`, so the repo needs one tiny follow-up slice before the next crate starts cleanly.
 
 ## Validation Snapshot
 

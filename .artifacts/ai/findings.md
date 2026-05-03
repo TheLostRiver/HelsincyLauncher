@@ -52,6 +52,7 @@
 - The `launcher-module-fab` C1 lockfile delta should remain a separate cleanup slice as well; the package reuses already-resolved workspace dependencies, so the adjacent `Cargo.lock` change is expected and should not be folded back into the code task.
 - For C2, `launcher-module-downloads` should mirror the same shell-first pattern: expose only small public contracts and a placeholder `DownloadFacade`, while download scheduler, checkpoint, manifest-provider, staging-store, and transport details stay deferred to later slices.
 - The `launcher-module-downloads` C2 lockfile delta should remain a separate cleanup slice as well; the package reuses already-resolved workspace dependencies, so the adjacent `Cargo.lock` change is expected and should not be folded back into the code task.
+- For C3, `launcher-adapter-storage-sqlite` should stay shell-first as well: expose only adapter config plus minimal repository constructor surfaces, while schema design, migrations, connection strategy, and actual SQL remain deferred to later slices.
 
 ## Technical Decisions
 
