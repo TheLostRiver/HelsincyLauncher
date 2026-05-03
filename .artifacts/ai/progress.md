@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-028 - Bootstrap composition root crate
+- Active atomic task: none active; last committed task is AT-2026-05-03-029 - Persist composition root lockfile
 - Current phase: Phase 5 - Backend Skeleton Bootstrap
-- Last committed task before this slice: AT-2026-05-03-027 - Persist fab provider adapter lockfile
-- Next validation gate: none pending for AT-2026-05-03-028
+- Last committed task before this slice: AT-2026-05-03-028 - Bootstrap composition root crate
+- Next validation gate: none pending for AT-2026-05-03-029
 
 ## Session Timeline
 
@@ -134,6 +134,9 @@
 - Confirmed the D1 slice can stay narrow: the current docs require only `DesktopBootstrapConfig`, `DesktopAppServices`, `StartupPipelineFacade`, and a placeholder `build_desktop_services()` surface, while real bootstrap wiring and smoke tests remain deferred to D2.
 - Validated AT-2026-05-03-028 with `cargo check -p launcher-composition-root --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` and `git diff --check`, confirming the composition-root shell compiles without pulling real wiring into D1.
 - Detected one adjacent cleanup artifact after AT-2026-05-03-028: adding the new workspace member updated `Cargo.lock`, so the repo needs one tiny follow-up slice before the next crate starts cleanly.
+- Committed and pushed AT-2026-05-03-028 as `fdf27f7` (`Bootstrap composition root crate`) without widening the code slice to include the adjacent lockfile noise.
+- Started AT-2026-05-03-029 to persist that small lockfile delta rather than carrying it forward as unrelated worktree noise.
+- Validated AT-2026-05-03-029 with `cargo check -p launcher-composition-root --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`, `git diff --check`, and `git status --short`, confirming only the expected `Cargo.lock` and task-record files remained before commit.
 
 ## Validation Snapshot
 

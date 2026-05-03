@@ -10,8 +10,8 @@ Phase 5 - Backend Skeleton Bootstrap
 
 ## Current Focus
 
-- Use the validated `launcher-composition-root` shell as the composition-root baseline.
-- Persist the workspace-member `Cargo.lock` delta before moving on to the next slice.
+- Use the clean post-D1 baseline as the starting point for the next documented backend slice.
+- Keep the next slice focused on one documented boundary at a time.
 
 ## Phases
 
@@ -75,6 +75,7 @@ Phase 5 - Backend Skeleton Bootstrap
 26. AT-2026-05-03-026 - committed - bootstrapped the `launcher-adapter-provider-fab` crate shell and minimal provider adapter constructor.
 27. AT-2026-05-03-027 - committed - persisted the `Cargo.lock` delta produced by the validated Fab provider adapter C4 slice.
 28. AT-2026-05-03-028 - committed - bootstrapped the `launcher-composition-root` crate shell and public API surface.
+29. AT-2026-05-03-029 - committed - persisted the `Cargo.lock` delta produced by the validated composition-root D1 slice.
 
 ## Key Questions
 
@@ -93,7 +94,7 @@ Phase 5 - Backend Skeleton Bootstrap
 ## Follow-up Queue
 
 1. Integrate planning-with-files' 2-action checkpoint cadence more explicitly into repo-level reminders if the adapter slice alone is not enough.
-2. After AT-2026-05-03-028 passes, persist the new `Cargo.lock` delta before moving on to the next slice.
+2. After AT-2026-05-03-029 passes, choose the next documented backend slice from a clean post-D1 baseline.
 
 ## Legacy Note
 

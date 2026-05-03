@@ -225,6 +225,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "launcher-composition-root"
+version = "0.1.0"
+dependencies = [
+ "launcher-adapter-provider-fab",
+ "launcher-adapter-storage-sqlite",
+ "launcher-kernel-foundation",
+ "launcher-kernel-jobs",
+ "launcher-module-downloads",
+ "launcher-module-fab",
+]
+
+[[package]]
 name = "launcher-kernel-foundation"
 version = "0.1.0"
 dependencies = [
