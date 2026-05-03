@@ -2,28 +2,28 @@
 
 ## Identity
 
-- task id: AT-2026-05-03-034
-- title: Benchmark documentation against Codex-Manager
+- task id: AT-2026-05-03-035
+- title: Add contributor collaboration guide
 - status: committed
 
 ## Goal
 
-- exact local outcome: Compare MyEpicLauncher's collaboration-constraint docs and architecture docs against Codex-Manager's CONTRIBUTING and ARCHITECTURE documents, write a detailed local benchmark and optimization record, and repair the smallest discoverability drift in `README.md` so the new benchmark is not isolated.
+- exact local outcome: Add a root `CONTRIBUTING.md` that gives contributors a fast current-repo entry layer for boundaries, commands, validation, risk hotspots, and documentation responsibilities, and expose that guide from `README.md`.
 
 ## Scope
 
 - in scope:
-  - add `docs/TauriDocumentationBenchmarkAgainstCodexManager.md`
-  - update `README.md` for current-state accuracy and benchmark discoverability
-  - update `.artifacts/ai` records for the AT-034 docs slice
+  - add `CONTRIBUTING.md`
+  - update `README.md` for contributor-guide discoverability
+  - update `.artifacts/ai` records for the AT-035 docs slice
 - out of scope:
-  - changing backend Rust/Tauri code
-  - rewriting the deep design docs under `docs/`
+  - changing backend Rust/Tauri implementation code
+  - adding the separate current-repo architecture overview from benchmark P2
   - touching user-owned frontend worktree changes
 
 ## Allowed Files
 
-1. docs/TauriDocumentationBenchmarkAgainstCodexManager.md
+1. CONTRIBUTING.md
 2. README.md
 3. .artifacts/ai/active-task.md
 4. .artifacts/ai/task-plan.md
@@ -41,35 +41,37 @@
 
 1. .github/copilot-instructions.md
 2. .github/skills/strict-doc-driven-development/SKILL.md
-3. docs/TauriRewriteArchitectureBlueprint.md
-4. docs/TauriArchitecturePrinciplesDesign.md
-5. docs/TauriAIDevelopmentTransactionProtocolDesign.md
-6. docs/TauriTestingStrategyAndQualityGateDesign.md
+3. docs/TauriDocumentationBenchmarkAgainstCodexManager.md
+4. docs/TauriAIDevelopmentTransactionProtocolDesign.md
+5. docs/TauriTestingStrategyAndQualityGateDesign.md
+6. docs/TauriDevelopmentEnvironmentBootstrapDesign.md
 7. README.md
+8. package.json
+9. Cargo.toml
 
 ## Hypothesis
 
-- falsifiable local hypothesis: MyEpicLauncher already has stronger deep architecture and AI workflow rules than Codex-Manager, but it lacks a flatter contributor-facing overview layer; if this slice adds one benchmark document and repairs the README entry surface to point at the real repo state plus the new benchmark, then the main comparison gaps will be captured without weakening the existing strict-doc stack.
+- falsifiable local hypothesis: If the repo adds one root `CONTRIBUTING.md` that maps current-repo boundaries, commands, validation gates, risk hotspots, and document ownership without duplicating the deep architecture docs, and if `README.md` links to it explicitly, then the benchmarked P1 gap will be materially closed without weakening the strict-doc protocol.
 
 ## Cheap Check
 
-- narrowest check that can disconfirm the hypothesis: Verify the new benchmark doc exists, `README.md` no longer claims the repo lacks `Cargo.toml` or `src-tauri/`, and no stale root planning file paths remain in the edited entry surface.
+- narrowest check that can disconfirm the hypothesis: Verify `CONTRIBUTING.md` exists, `README.md` links to it, and the guide contains explicit sections for current-repo boundaries, minimal validation, high-risk files, and documentation ownership.
 
 ## Validation Gate
 
-1. grep search for the new benchmark link and stale README claims
+1. grep search for the `CONTRIBUTING.md` link and required section headings
 2. `git -C q:\DEV\MyEpicLauncher diff --check`
-3. `git -C q:\DEV\MyEpicLauncher status --short -- .artifacts/ai README.md docs`
+3. `git -C q:\DEV\MyEpicLauncher status --short -- .artifacts/ai README.md CONTRIBUTING.md`
 
 ## Validation Result
 
-- Root `README.md` grep checks passed: the new benchmark entry exists and the stale pre-backend / root-planning claims no longer appear in the root entry surface.
-- `git -C q:\DEV\MyEpicLauncher diff --check` produced no output for the docs slice.
-- Repo-scoped changed-file review shows the AT-034 slice is limited to `README.md`, `docs/TauriDocumentationBenchmarkAgainstCodexManager.md`, and `.artifacts/ai` record updates.
+- `README.md` grep checks passed: the contributor guide is linked from the workflow/governance section and explicitly called out in the notes section for contributors.
+- `CONTRIBUTING.md` grep checks passed: the guide contains explicit sections for current-repo boundaries, minimal validation, high-risk files, and documentation ownership.
+- `git diff --check -- CONTRIBUTING.md README.md .artifacts/ai` produced no blocking output for the AT-035 docs slice.
 
 ## 需要更新的文档和日志
 
-1. docs/TauriDocumentationBenchmarkAgainstCodexManager.md
+1. CONTRIBUTING.md
 2. README.md
 3. .artifacts/ai/active-task.md
 4. .artifacts/ai/task-plan.md
@@ -78,15 +80,15 @@
 
 ## 验证后的 Git 动作
 
-1. commit message plan: deferred; no git commit unless explicitly requested by the user
-2. push command plan: deferred
+1. commit message plan: Add contributor collaboration guide
+2. push command plan: git push
 
 ## 停止条件
 
-1. the comparison requires rewriting multiple existing design docs instead of recording a bounded benchmark
-2. the README repair would require broad repo-wide documentation rewrites outside the allowed files
+1. the contributor guide requires rewriting multiple deep design docs instead of adding an entry-layer surface
+2. the guide cannot stay accurate without broad implementation edits outside the allowed files
 3. same blocker still failing after 5 repair attempts
 
 ## 安全恢复点
 
-- exact next step if execution is interrupted: choose whether the next docs slice should implement P1 (`CONTRIBUTING.md`) or P2 (current-repo architecture overview), or resume backend integration from the validated post-E2 baseline.
+- exact next step if execution is interrupted: stage `CONTRIBUTING.md`, `README.md`, and the AT-035 record updates, commit the docs slice, then decide whether to continue into benchmark P2 or return to backend integration.

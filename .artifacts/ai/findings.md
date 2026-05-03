@@ -70,6 +70,9 @@
 - Codex-Manager's ARCHITECTURE document adds high-value current-repo navigation artifacts: directory duties, entrypoint indexes, request-chain summaries, current hotspots, and suggested landing zones.
 - README drift is a concrete symptom of that missing entry layer: before AT-034, the root entry surface still claimed the repo lacked `Cargo.toml` / `src-tauri/` and still referenced root `task_plan.md` / `progress.md` / `findings.md` after the repo had already moved to `.artifacts/ai/` and landed the backend skeleton baseline.
 - The most pragmatic documentation rollout after AT-034 is: keep README aligned first, then add a contributor-facing `CONTRIBUTING.md`, then add a current-repo architecture overview, then add `docs/README.md` as the docs map.
+- AT-035 confirmed that a root `CONTRIBUTING.md` can close the main P1 gap without duplicating the deep architecture stack, as long as it stays focused on current-repo boundaries, commands, validation, hotspots, and docs ownership.
+- The contributor guide should link forward to the AI transaction protocol and deep design docs rather than restating their full content; otherwise the new entry layer will drift into a second architecture source of truth.
+- In this repo, contributor-facing hotspots are not only large files; they are also control-surface files such as `README.md`, `.github/copilot-instructions.md`, `.github/skills/strict-doc-driven-development/SKILL.md`, `src-tauri/src/lib.rs`, and `crates/composition-root/src/bootstrap.rs`.
 
 ## Technical Decisions
 

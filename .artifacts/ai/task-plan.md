@@ -6,12 +6,12 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 6 - Documentation Governance Benchmark
+Phase 7 - Contributor Collaboration Guide
 
 ## Current Focus
 
-- AT-2026-05-03-034 benchmarked the repo docs against Codex-Manager and recorded the missing contributor-facing entry-layer work.
-- Choose whether the next atomic slice should implement the benchmark's P1/P2 doc additions or return to backend integration on top of the validated post-E2 baseline.
+- AT-2026-05-03-035 is implementing benchmark P1 by adding a root `CONTRIBUTING.md` for fast contributor routing.
+- Keep the new guide complementary to the AI transaction protocol and deep architecture docs rather than duplicating them.
 
 ## Phases
 
@@ -51,6 +51,12 @@ Phase 6 - Documentation Governance Benchmark
 - Atomic tasks: AT-2026-05-03-034
 - **Status:** complete
 
+### Phase 7: Contributor Collaboration Guide
+
+- Outcome: add a contributor-facing collaboration guide that captures current-repo boundaries, validation, risk hotspots, and document ownership without replacing the strict-doc protocol.
+- Atomic tasks: AT-2026-05-03-035
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -87,6 +93,7 @@ Phase 6 - Documentation Governance Benchmark
 32. AT-2026-05-03-032 - committed - persisted the adjacent desktop-host `Cargo.lock` delta.
 33. AT-2026-05-03-033 - committed - registered the host bootstrap smoke shell and added the named transport wiring smoke test.
 34. AT-2026-05-03-034 - committed - benchmarked the repo documentation against Codex-Manager, recorded the optimization plan, and repaired the README entry surface to match the current repo state.
+35. AT-2026-05-03-035 - committed - added a root contributor collaboration guide and exposed it from README as the benchmarked P1 entry layer.
 
 ## Key Questions
 
@@ -104,9 +111,8 @@ Phase 6 - Documentation Governance Benchmark
 
 ## Follow-up Queue
 
-1. Decide whether to implement the benchmark's P1 recommendation by adding a contributor-facing `CONTRIBUTING.md` that complements rather than replaces the AI transaction protocol.
-2. Decide whether to implement the benchmark's P2 recommendation by adding a current-repo architecture overview with entrypoint indexes, risk hotspots, and suggested landing zones.
-3. If docs entrance work pauses here, resume the next backend validation or integration step from the validated host transport baseline while leaving user frontend edits untouched.
+1. Decide whether to implement the benchmark's P2 recommendation by adding a current-repo architecture overview with entrypoint indexes, risk hotspots, and suggested landing zones.
+2. If docs entrance work pauses after P1, resume the next backend validation or integration step from the validated host transport baseline while leaving user frontend edits untouched.
 
 ## Legacy Note
 

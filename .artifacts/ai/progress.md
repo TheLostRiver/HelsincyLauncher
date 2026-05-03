@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-034 - Benchmark documentation against Codex-Manager
-- Current phase: Phase 6 - Documentation Governance Benchmark
-- Last committed task before this slice: AT-2026-05-03-033 - Register transport bootstrap smoke shell
-- Next validation gate: none pending for AT-2026-05-03-034
+- Active atomic task: none active; last committed task is AT-2026-05-03-035 - Add contributor collaboration guide
+- Current phase: Phase 7 - Contributor Collaboration Guide
+- Last committed task before this slice: AT-2026-05-03-034 - Benchmark documentation against Codex-Manager
+- Next validation gate: none pending for AT-2026-05-03-035
 
 ## Session Timeline
 
@@ -159,10 +159,16 @@
 - Added `docs/TauriDocumentationBenchmarkAgainstCodexManager.md` with detailed comparison matrices, concrete repo findings, and a prioritized documentation rollout plan.
 - Updated `README.md` to reflect the current backend skeleton baseline, the `.artifacts/ai` protocol location, the Windows PowerShell `npm.cmd` note, and the new workflow/governance entry points.
 - Validated AT-2026-05-03-034 with root-README grep checks, `git diff --check`, and a repo-scoped changed-file review limited to `README.md`, `docs/`, and `.artifacts/ai/`.
+- Committed AT-2026-05-03-034 as `cfc32b4` (`Benchmark repo docs against Codex-Manager`) and pushed it to `main`.
+- Started AT-2026-05-03-035 to implement benchmark P1 by adding a root contributor-facing collaboration guide rather than widening the benchmark slice into P2.
+- Re-read the benchmark's P1 requirements plus the current repo command surfaces from `package.json`, `Cargo.toml`, `crates/`, `src-tauri/`, and `.artifacts/ai/README.md`.
+- Added `CONTRIBUTING.md` with current-repo boundaries, common commands, validation matrix, landing guide, high-risk files, size thresholds, documentation ownership, and commit rules.
+- Updated `README.md` to expose `CONTRIBUTING.md` from the workflow/governance entry surface and contributor-facing notes.
+- Validated AT-2026-05-03-035 with README grep checks for the new guide link, `CONTRIBUTING.md` grep checks for the required headings, and `git diff --check -- CONTRIBUTING.md README.md .artifacts/ai`.
 
 ## Validation Snapshot
 
-- Latest completed validation: AT-2026-05-03-034 passed root-README grep checks, `git diff --check`, and a repo-scoped changed-file review for `README.md`, `docs/`, and `.artifacts/ai/`.
+- Latest completed validation: AT-2026-05-03-035 passed README grep checks for the new guide link, `CONTRIBUTING.md` grep checks for the required headings, and `git diff --check -- CONTRIBUTING.md README.md .artifacts/ai`.
 - Latest repo-wide backend validation remains the previously completed `cargo check --workspace` plus the named host/composition/foundation smoke tests from the post-E2 baseline.
 
 ## Error Log

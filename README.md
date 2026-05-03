@@ -76,9 +76,10 @@ cargo test -p my-epic-launcher-desktop transport_wiring_smoke
 2. 判断设计是否越界的原则是什么。
 3. 当前仓库里的后端骨架是如何落地的。
 4. 测试门槛是什么。
-5. 复杂任务执行和恢复协议是什么。
-6. 本地 Windows 开发环境要准备什么。
-7. 当前文档体系相对外部同类项目还缺哪些入口层能力。
+5. 协作者该如何落点、验证和规避高风险入口。
+6. 复杂任务执行和恢复协议是什么。
+7. 本地 Windows 开发环境要准备什么。
+8. 当前文档体系相对外部同类项目还缺哪些入口层能力。
 
 ---
 
@@ -108,6 +109,7 @@ cargo test -p my-epic-launcher-desktop transport_wiring_smoke
 
 ### Workflow And Governance
 
+- [CONTRIBUTING.md](CONTRIBUTING.md)
 - [docs/TauriAIDevelopmentTransactionProtocolDesign.md](docs/TauriAIDevelopmentTransactionProtocolDesign.md)
 - [docs/TauriDocumentationBenchmarkAgainstCodexManager.md](docs/TauriDocumentationBenchmarkAgainstCodexManager.md)
 - [.artifacts/ai/README.md](.artifacts/ai/README.md)
@@ -164,6 +166,7 @@ MyEpicLauncher/
 ## Notes
 
 1. 当前仓库文档较多，但核心策略不是“文档越多越好”，而是“深度设计文档和扁平入口文档都要各司其职”。
-2. 如果你准备开始写 Rust/Tauri 代码，先不要跳过 [docs/TauriBackendSkeletonImplementationDesign.md](docs/TauriBackendSkeletonImplementationDesign.md)、[docs/TauriTestingStrategyAndQualityGateDesign.md](docs/TauriTestingStrategyAndQualityGateDesign.md) 和 [docs/TauriAIDevelopmentTransactionProtocolDesign.md](docs/TauriAIDevelopmentTransactionProtocolDesign.md)。
-3. 如果你想理解本仓库文档体系相对同类项目还缺什么入口层能力，先看 [docs/TauriDocumentationBenchmarkAgainstCodexManager.md](docs/TauriDocumentationBenchmarkAgainstCodexManager.md)。
-4. 如果你准备改前端原型，先确认自己没有把后端职责重新塞回 UI。
+2. 如果你准备开始提交改动，先读 [CONTRIBUTING.md](CONTRIBUTING.md)。
+3. 如果你准备开始写 Rust/Tauri 代码，先不要跳过 [docs/TauriBackendSkeletonImplementationDesign.md](docs/TauriBackendSkeletonImplementationDesign.md)、[docs/TauriTestingStrategyAndQualityGateDesign.md](docs/TauriTestingStrategyAndQualityGateDesign.md) 和 [docs/TauriAIDevelopmentTransactionProtocolDesign.md](docs/TauriAIDevelopmentTransactionProtocolDesign.md)。
+4. 如果你想理解本仓库文档体系相对同类项目还缺什么入口层能力，先看 [docs/TauriDocumentationBenchmarkAgainstCodexManager.md](docs/TauriDocumentationBenchmarkAgainstCodexManager.md)。
+5. 如果你准备改前端原型，先确认自己没有把后端职责重新塞回 UI。
