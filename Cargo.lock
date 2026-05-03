@@ -208,6 +208,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "launcher-adapter-storage-sqlite"
+version = "0.1.0"
+dependencies = [
+ "launcher-kernel-foundation",
+ "launcher-module-downloads",
+ "launcher-module-fab",
+]
+
+[[package]]
 name = "launcher-kernel-foundation"
 version = "0.1.0"
 dependencies = [

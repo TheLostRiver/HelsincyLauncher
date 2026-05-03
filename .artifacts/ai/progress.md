@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-024 - Bootstrap sqlite adapter crate
+- Active atomic task: none active; last committed task is AT-2026-05-03-025 - Persist sqlite adapter lockfile
 - Current phase: Phase 5 - Backend Skeleton Bootstrap
-- Last committed task before this slice: AT-2026-05-03-023 - Persist module downloads lockfile
-- Next validation gate: none pending for AT-2026-05-03-024
+- Last committed task before this slice: AT-2026-05-03-024 - Bootstrap sqlite adapter crate
+- Next validation gate: none pending for AT-2026-05-03-025
 
 ## Session Timeline
 
@@ -118,6 +118,9 @@
 - Confirmed the C3 slice can stay narrow: the current docs require only repository constructor shells, adapter config, and correct compile-time dependency direction, while schema, migrations, and real SQL execution remain out of scope for this first SQLite adapter stub.
 - Validated AT-2026-05-03-024 with `cargo check -p launcher-adapter-storage-sqlite --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` and `git diff --check`, confirming the adapter shell compiles without pulling in schema or runtime SQL behavior.
 - Detected one adjacent cleanup artifact after AT-2026-05-03-024: adding the new workspace member updated `Cargo.lock`, so the repo needs one tiny follow-up slice before the next crate starts cleanly.
+- Committed and pushed AT-2026-05-03-024 as `2cf2a61` (`Bootstrap sqlite adapter crate`) without widening the code slice to include the adjacent lockfile noise.
+- Started AT-2026-05-03-025 to persist that small lockfile delta rather than carrying it forward as unrelated worktree noise.
+- Validated AT-2026-05-03-025 with `cargo check -p launcher-adapter-storage-sqlite --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`, `git diff --check`, and `git status --short`, confirming only the expected `Cargo.lock` and task-record files remained before commit.
 
 ## Validation Snapshot
 
