@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-043 - Orchestrate startup stage-3 prewarm
-- Current phase: Phase 15 - Startup Stage-3 Fab Prewarm Orchestration
-- Last committed task before this slice: AT-2026-05-03-042 - Accept fab startup prewarm job
-- Next validation gate: none pending for AT-2026-05-03-043
+- Active atomic task: none active; last committed task is AT-2026-05-03-044 - Build shared job runtime bundle
+- Current phase: Phase 16 - Shared Job Runtime Bundle
+- Last committed task before this slice: AT-2026-05-03-043 - Orchestrate startup stage-3 prewarm
+- Next validation gate: none pending for AT-2026-05-03-044
 
 ## Session Timeline
 
@@ -198,10 +198,15 @@
 - Confirmed the current `StartupPipelineFacade` is still a full no-op while the composition-root docs explicitly place Fab prewarm in stage 3, so the narrowest next startup slice is to wire a config-gated call from stage 3 into the already-accepted `FabFacade::run_startup_prewarm()` path.
 - Wired `StartupPipelineFacade::run_stage3_background_prewarm()` to trigger the existing Fab prewarm facade path when capability gating is enabled, added focused startup unit tests for enabled/disabled behavior, and upgraded the composition-root smoke to exercise the stage-3 call path.
 - Validated AT-2026-05-03-043 with `cargo test -p launcher-composition-root run_stage3_background_prewarm_triggers_fab_prewarm_when_enabled`, `cargo test -p launcher-composition-root bootstrap_wiring_smoke`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, and a scoped `git diff --check`.
+- Started AT-2026-05-03-044 after the user selected “继续 real job runtime bundle” in the confirmation UI.
+- Confirmed the current composition root still injects `()` as the runtime dependency for both Fab and Downloads, while the runtime design and composition-root wiring docs both place a shared runtime bundle before the module layer.
+- Implemented AT-2026-05-03-044 by adding `SharedJobRuntimeHost` in `launcher-kernel-jobs`, exporting it, wiring it through composition-root, and teaching the current Fab accepted-job paths to enqueue into that host instead of returning only placeholder acceptance.
+- The first composition-root smoke run surfaced a Rust coherence conflict between the existing `()` acceptance impls and a blanket `JobRuntime` acceptance impl; narrowing the new acceptance impls to the concrete `SharedJobRuntimeHost` repaired the same slice without widening scope.
+- Validated AT-2026-05-03-044 with `cargo test -p launcher-kernel-jobs shared_job_runtime_host_records_enqueued_snapshot`, `cargo test -p launcher-composition-root bootstrap_wiring_smoke`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, and a scoped `git diff --check`.
 
 ## Validation Snapshot
 
-- Latest completed validation: AT-2026-05-03-043 passed `cargo test -p launcher-composition-root run_stage3_background_prewarm_triggers_fab_prewarm_when_enabled`, `cargo test -p launcher-composition-root bootstrap_wiring_smoke`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, and the scoped `git diff --check` for the stage-3 orchestration slice.
+- Latest completed validation: AT-2026-05-03-044 passed `cargo test -p launcher-kernel-jobs shared_job_runtime_host_records_enqueued_snapshot`, `cargo test -p launcher-composition-root bootstrap_wiring_smoke`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, and the scoped `git diff --check` for the shared runtime bundle slice.
 - Latest repo-wide backend validation remains the previously completed `cargo check --workspace` plus the named host/composition/foundation smoke tests from the post-E2 baseline.
 
 ## Error Log
@@ -214,8 +219,8 @@
 
 | Question | Answer |
 |----------|--------|
-| Where am I? | Phase 15 startup stage-3 Fab prewarm orchestration is complete and no active atomic task is currently open |
-| Where am I going? | Decide whether the next backend slice should open a real runtime bundle, richer startup gating, or another narrow backend path |
-| What's the goal? | Keep turning the remaining startup/backend gaps into explicit backend-owned orchestration one narrow route at a time |
-| What have I learned? | After AT-042, the next narrow move really was the composition-root stage-3 hook; real runtime execution and richer startup gating still remain later slices |
+| Where am I? | Phase 16 shared job runtime bundle is complete and no active atomic task is currently open |
+| Where am I going? | Decide whether the next backend slice should open runtime persistence/recovery, broader downloads runtime behavior, richer startup gating, or another narrow backend path |
+| What's the goal? | Keep turning the remaining runtime/backend gaps into explicit shared infrastructure one narrow route at a time |
+| What have I learned? | A minimal shared in-memory runtime host is enough to replace the `()` placeholder now, and Rust coherence rules require the Fab acceptance bridge to target the concrete host rather than a blanket `JobRuntime` impl |
 | What have I done? | See the session timeline above |

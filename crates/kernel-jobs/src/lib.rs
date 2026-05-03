@@ -5,4 +5,4 @@ pub use model::{
     AcceptedJob, EnqueueJobRequest, JobPriority, JobProgress, JobSnapshot, JobState,
     JobUiState,
 };
-pub use runtime::{JobRuntime, RuntimeQueuePolicy};
+pub use runtime::{JobRuntime, RuntimeQueuePolicy, SharedJobRuntimeHost};

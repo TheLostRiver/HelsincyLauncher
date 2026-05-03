@@ -12,6 +12,7 @@ use launcher_adapter_storage_sqlite::{
 use launcher_kernel_foundation::{
     AppError, AppErrorSeverity, AppResult, CorrelationId,
 };
+use launcher_kernel_jobs::{RuntimeQueuePolicy, SharedJobRuntimeHost};
 use launcher_module_downloads::{DownloadFacade, DownloadModuleDeps};
 use launcher_module_fab::{FabFacade, FabModuleDeps};
 
@@ -21,7 +22,7 @@ type DesktopFabFacade = FabFacade<
     SqliteFabInventoryProjectionRepository,
     SqliteFabSyncCursorRepository,
     SqliteFabMediaMetadataRepository,
-    (),
+    SharedJobRuntimeHost,
     EpicFabCatalogProviderAdapter,
 >;
 
@@ -30,7 +31,7 @@ type DesktopDownloadFacade = DownloadFacade<
     SqliteDownloadCheckpointRepository,
     (),
     (),
-    (),
+    SharedJobRuntimeHost,
 >;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -91,9 +92,14 @@ impl<F, D> DesktopAppServices<F, D> {
 pub fn build_desktop_services(config: DesktopBootstrapConfig) -> AppResult<DesktopAppServices> {
     let sqlite_config = build_storage_config(&config)?;
     let fab_provider = build_fab_provider_adapter()?;
+    let job_runtime = build_job_runtime(&config)?;
 
-    let fab = Arc::new(build_fab_module(sqlite_config.clone(), fab_provider));
-    let downloads = Arc::new(build_downloads_module(sqlite_config));
+    let fab = Arc::new(build_fab_module(
+        sqlite_config.clone(),
+        fab_provider,
+        job_runtime.clone(),
+    ));
+    let downloads = Arc::new(build_downloads_module(sqlite_config, job_runtime));
     let startup = Arc::new(build_startup_pipeline(&config, fab.clone()));
 
     Ok(DesktopAppServices::new(fab, downloads, startup))
@@ -129,24 +135,41 @@ fn build_fab_provider_adapter() -> AppResult<EpicFabCatalogProviderAdapter> {
 fn build_fab_module(
     sqlite_config: SqliteStorageAdapterConfig,
     fab_provider: EpicFabCatalogProviderAdapter,
+    job_runtime: SharedJobRuntimeHost,
 ) -> DesktopFabFacade {
     FabFacade::new(FabModuleDeps {
         projection_repo: SqliteFabInventoryProjectionRepository::new(sqlite_config.clone()),
         cursor_repo: SqliteFabSyncCursorRepository::new(sqlite_config.clone()),
         media_repo: SqliteFabMediaMetadataRepository::new(sqlite_config),
-        job_runtime: (),
+        job_runtime,
         catalog_provider: fab_provider,
     })
 }
 
-fn build_downloads_module(sqlite_config: SqliteStorageAdapterConfig) -> DesktopDownloadFacade {
+fn build_downloads_module(
+    sqlite_config: SqliteStorageAdapterConfig,
+    job_runtime: SharedJobRuntimeHost,
+) -> DesktopDownloadFacade {
     DownloadFacade::new(DownloadModuleDeps {
         job_repo: SqliteDownloadJobRepository::new(sqlite_config.clone()),
         checkpoint_repo: SqliteDownloadCheckpointRepository::new(sqlite_config),
         manifest_provider: (),
         staging_store: (),
-        job_runtime: (),
+        job_runtime,
     })
+}
+
+fn build_job_runtime(config: &DesktopBootstrapConfig) -> AppResult<SharedJobRuntimeHost> {
+    if config.default_download_slots == 0 {
+        return Err(invalid_builder_input(
+            "build_job_runtime",
+            "default_download_slots must not be zero",
+        ));
+    }
+
+    Ok(SharedJobRuntimeHost::new(RuntimeQueuePolicy::new(
+        usize::from(config.default_download_slots),
+    )))
 }
 
 fn build_startup_pipeline(

@@ -1,5 +1,7 @@
 use launcher_kernel_foundation::{AppResult, AssetId, IsoDateTime, JobId};
-use launcher_kernel_jobs::AcceptedJob;
+use launcher_kernel_jobs::{
+    AcceptedJob, EnqueueJobRequest, JobPriority, JobRuntime, SharedJobRuntimeHost,
+};
 
 use crate::contracts::{
     FabAssetDetailDto, FabAssetDetailQueryDto, FabInventoryListQueryDto, FabInventoryPageDto,
@@ -44,6 +46,19 @@ impl FabSyncJobAcceptance for () {
     }
 }
 
+impl FabSyncJobAcceptance for SharedJobRuntimeHost {
+    fn accept_sync_job(&self, request: FabInventorySyncRequestDto) -> AppResult<AcceptedJob> {
+        let _ = request;
+        self.enqueue(EnqueueJobRequest {
+            job_id: JobId::generate(),
+            module: "fab".into(),
+            kind: "inventory_sync".into(),
+            priority: JobPriority::Normal,
+            extension: None,
+        })
+    }
+}
+
 impl FabStartupPrewarmJobAcceptance for () {
     fn accept_startup_prewarm_job(
         &self,
@@ -51,6 +66,22 @@ impl FabStartupPrewarmJobAcceptance for () {
     ) -> AppResult<AcceptedJob> {
         let _ = request;
         Ok(cold_start_startup_prewarm_job())
+    }
+}
+
+impl FabStartupPrewarmJobAcceptance for SharedJobRuntimeHost {
+    fn accept_startup_prewarm_job(
+        &self,
+        request: FabInventoryPrewarmRequestDto,
+    ) -> AppResult<AcceptedJob> {
+        let _ = request;
+        self.enqueue(EnqueueJobRequest {
+            job_id: JobId::generate(),
+            module: "fab".into(),
+            kind: "inventory_startup_prewarm".into(),
+            priority: JobPriority::Low,
+            extension: None,
+        })
     }
 }
 

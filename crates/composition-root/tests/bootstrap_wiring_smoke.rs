@@ -4,6 +4,8 @@ use std::pin::pin;
 use std::task::{Context, Poll, RawWaker, RawWakerVTable, Waker};
 
 use launcher_composition_root::{build_desktop_services, DesktopBootstrapConfig};
+use launcher_kernel_jobs::{JobRuntime, JobState, JobUiState};
+use launcher_module_fab::contracts::FabInventoryPrewarmRequestDto;
 
 #[test]
 fn bootstrap_wiring_smoke() {
@@ -27,6 +29,25 @@ fn bootstrap_wiring_smoke() {
             .client_name(),
         "my-epic-launcher-desktop"
     );
+
+    let accepted_job = services
+        .fab
+        .run_startup_prewarm(FabInventoryPrewarmRequestDto {
+            reason: "bootstrap-smoke".into(),
+        })
+        .expect("bootstrap wiring should expose a Fab prewarm path backed by the shared runtime host");
+
+    let snapshot = services
+        .fab
+        .deps()
+        .job_runtime
+        .snapshot(&accepted_job.job_id)
+        .expect("shared runtime host should allow reading the queued snapshot")
+        .expect("shared runtime host should store the queued prewarm snapshot");
+
+    assert_eq!(snapshot.state, JobState::Queued);
+    assert_eq!(snapshot.ui_state, JobUiState::Queued);
+
     block_on_ready(services.startup.run_stage3_background_prewarm())
         .expect("startup stage-3 prewarm should stay callable in the composition-root baseline");
 }

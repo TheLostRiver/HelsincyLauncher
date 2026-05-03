@@ -90,6 +90,9 @@
 - The current doc set still implies that real startup prewarm execution belongs to the later startup facade and runtime bundle, so the safe narrow move is to stop at facade acceptance and leave `StartupPipelineFacade::run_stage3_background_prewarm()` untouched for now.
 - AT-043 confirmed that the next narrow startup slice after facade acceptance is the composition-root stage-3 orchestration hook itself: `StartupPipelineFacade::run_stage3_background_prewarm()` can call the already-wired Fab prewarm facade path without opening real runtime execution.
 - The current startup surface can safely gate stage-3 prewarm on the existing config capability flag, but richer session-availability gating and true job-runtime execution still remain later startup/runtime slices.
+- AT-044 confirmed that the next narrow post-startup slice is a shared runtime bundle, not another module-specific Fab task: a minimal `SharedJobRuntimeHost` plus composition-root injection is enough to replace the `()` runtime placeholder without opening persistence, recovery, or driver execution.
+- Rust coherence rules reject blanket Fab acceptance impls for every `J: JobRuntime<Extension = ()>` while the placeholder `()` acceptance impls still exist; the safe narrow bridge is to implement those acceptance traits only for the concrete `SharedJobRuntimeHost` currently injected by composition-root.
+- The composition-root smoke can now verify real runtime ownership directly by calling `FabFacade::run_startup_prewarm()` and asserting the injected shared runtime host stores a queued snapshot for the accepted job.
 
 ## Technical Decisions
 
@@ -100,6 +103,7 @@
 | The repo should use one hybrid schema across live records, templates, and bootstrap output | planning-with-files readability is useful, but strict-doc semantics must stay explicit |
 | Backend skeleton kickoff begins with a workspace plus a minimal `src-tauri` lib stub | Cargo metadata requires one real target-bearing member before the documented gate can pass |
 | Preserve the deep design docs and add a flatter contributor-facing entry layer above them | Lowers onboarding friction without weakening the repo's strict architecture and AI transaction constraints |
+| Bridge Fab runtime-backed acceptance through `SharedJobRuntimeHost` directly instead of a blanket `JobRuntime` impl | Avoids Rust coherence conflicts with the retained `()` placeholder acceptance path while still letting composition-root move onto a real shared runtime bundle now |
 
 ## Issues Encountered
 
@@ -108,6 +112,7 @@
 | Generic planning templates and repo live files drifted into different shapes | Normalize both the live records and the template/bootstrap sources together |
 | Sync terminal commands did not preserve the intended repo cwd for verification and commit flow | Use async terminal commands with explicit repo paths when git output matters |
 | The backend skeleton doc's A1 assumption conflicted with actual Cargo behavior | Surface the gap in findings/progress and bridge the workspace root to the smallest valid `src-tauri` stub |
+| A blanket Fab acceptance impl for all `JobRuntime` types conflicted with the existing `()` placeholder impls under Rust coherence rules | Narrow the new acceptance bridge to the concrete `SharedJobRuntimeHost` injected by composition-root and rerun the same composition-root smoke |
 
 ## Resources
 
