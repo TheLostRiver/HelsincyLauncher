@@ -43,6 +43,13 @@ Phase 5
 - [x] Keep task_plan.md, findings.md, and progress.md together for the final planning commit
 - **Status:** complete
 
+### Phase 8: Engines And Downloads Rollout
+- [x] Instantiate engines module docs
+- [x] Commit engines module guides separately
+- [x] Instantiate downloads module docs
+- [x] Commit downloads module guides separately
+- **Status:** complete
+
 ## Decisions Made
 | Decision | Rationale |
 |----------|-----------|
@@ -51,6 +58,7 @@ Phase 5
 | 正文只改实际错误的 .artifacts/docs/ 引用 | 避免误改协议文档里仍然有意保留的 .artifacts/ai/ 目录设计 |
 | 模块文档按业务切片建档，不按每个小组件建档 | 当前仓库更适合围绕 shell、fab-inventory 等边界模块建立三件套文档 |
 | 新增模块文档按三组提交拆分 | 先提交规范与模板，再提交实例模块文档，最后单独提交 planning 三件套，边界更清晰 |
+| 继续补 engines 后再补 downloads | 用户明确要求优先顺序，且两者都应各自独立提交 |
 
 ## Errors Encountered
 | Error | Resolution |

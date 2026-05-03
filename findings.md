@@ -27,6 +27,10 @@
 - fab-inventory 目前仍是静态展示模块，搜索、筛选、同步、导入工程都还是 UI 意图入口，尚未接入真实副作用。
 - 对当前仓库而言，给每个小组件单独写文档的收益低于围绕业务切片写 README_ARCH.md、README_API.md、README_FLOW.md。
 - 当前工作区中新生成的模块文档最自然的提交拆分是：规范与模板一组、实例化模块文档一组、planning 三件套一组。
+- 当前 engines 模块在前端只有 components/EngineManagement.tsx 这一个入口，但其未来职责边界已经被 docs/TauriEngineVerificationRepairDesign.md 明确约束。
+- 当前 downloads 模块在前端只有 components/Downloads.tsx 这一个入口，但其未来边界已被 docs/TauriDownloadRuntimeDesign.md 中的 facade、scheduler、checkpoint 模型约束。
+- engines 与 downloads 都仍然是静态摘要组件，因此文档应强调“前端只表达意图，后端拥有真实长任务与状态机”。
+- 当前这两组模块文档最自然的 git 拆分就是一组 engines、一组 downloads，分别独立提交。
 
 ## Issues Encountered
 | Issue | Resolution |
