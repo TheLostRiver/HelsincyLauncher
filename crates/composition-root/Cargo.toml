@@ -1,0 +1,18 @@
+[package]
+name = "launcher-composition-root"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "launcher_composition_root"
+path = "src/lib.rs"
+
+[dependencies]
+launcher-kernel-foundation = { path = "../kernel-foundation" }
+launcher-kernel-jobs = { path = "../kernel-jobs" }
+launcher-module-fab = { path = "../module-fab" }
+launcher-module-downloads = { path = "../module-downloads" }
+launcher-adapter-storage-sqlite = { path = "../adapter-storage-sqlite" }
+launcher-adapter-provider-fab = { path = "../adapter-provider-fab" }

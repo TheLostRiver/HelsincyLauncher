@@ -56,6 +56,7 @@
 - The `launcher-adapter-storage-sqlite` C3 lockfile delta should remain a separate cleanup slice as well; the package reuses already-resolved workspace dependencies, so the adjacent `Cargo.lock` change is expected and should not be folded back into the code task.
 - For C4, `launcher-adapter-provider-fab` should stay shell-first too: expose only provider adapter config plus the `EpicFabCatalogProviderAdapter` constructor surface, while remote auth, HTTP wiring, and payload mapping remain deferred to later slices.
 - The `launcher-adapter-provider-fab` C4 lockfile delta should remain a separate cleanup slice as well; the package reuses already-resolved workspace dependencies, so the adjacent `Cargo.lock` change is expected and should not be folded back into the code task.
+- For D1, `launcher-composition-root` should start as a pure public API shell: expose `DesktopBootstrapConfig`, `DesktopAppServices`, `StartupPipelineFacade`, and `build_desktop_services()`, while the actual wiring implementation and bootstrap smoke test remain deferred to D2.
 
 ## Technical Decisions
 
