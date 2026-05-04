@@ -1,6 +1,8 @@
 use launcher_kernel_foundation::{IsoDateTime, JobId};
 use serde::{Deserialize, Serialize};
 
+fn default_recoverable() -> bool { true }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum JobState {
@@ -68,6 +70,8 @@ pub struct EnqueueJobRequest<E> {
     pub module: String,
     pub kind: String,
     pub priority: JobPriority,
+    #[serde(default = "default_recoverable")]
+    pub recoverable: bool,
     pub extension: Option<E>,
 }
 
@@ -79,6 +83,8 @@ pub struct JobSnapshot<E> {
     pub state: JobState,
     pub ui_state: JobUiState,
     pub progress: JobProgress,
+    #[serde(default = "default_recoverable")]
+    pub recoverable: bool,
     pub updated_at: IsoDateTime,
     pub extension: Option<E>,
 }

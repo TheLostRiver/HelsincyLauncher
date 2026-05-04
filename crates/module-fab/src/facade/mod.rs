@@ -54,6 +54,7 @@ impl FabSyncJobAcceptance for SharedJobRuntimeHost {
             module: "fab".into(),
             kind: "inventory_sync".into(),
             priority: JobPriority::Normal,
+            recoverable: true,
             extension: None,
         })
     }
@@ -80,6 +81,7 @@ impl FabStartupPrewarmJobAcceptance for SharedJobRuntimeHost {
             module: "fab".into(),
             kind: "inventory_startup_prewarm".into(),
             priority: JobPriority::Low,
+            recoverable: true,
             extension: None,
         })
     }

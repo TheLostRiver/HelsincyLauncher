@@ -137,6 +137,7 @@ impl JobRuntime for SharedJobRuntimeHost {
             state: JobState::Queued,
             ui_state: JobUiState::Queued,
             progress: JobProgress::pending(),
+            recoverable: request.recoverable,
             updated_at: queued_at,
             extension: request.extension,
         };
@@ -202,6 +203,7 @@ mod tests {
                 module: "fab".into(),
                 kind: "inventory_sync".into(),
                 priority: JobPriority::Normal,
+                recoverable: true,
                 extension: None,
             })
             .expect("shared runtime host should accept enqueued jobs");

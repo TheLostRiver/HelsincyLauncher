@@ -120,17 +120,24 @@ impl SqliteJobSnapshotStore {
             .expect("SqliteJobSnapshotStore: failed to open sqlite database");
         conn.execute_batch(
             "CREATE TABLE IF NOT EXISTS job_snapshots (
-                job_id     TEXT PRIMARY KEY NOT NULL,
-                module     TEXT NOT NULL,
-                kind       TEXT NOT NULL,
-                state      TEXT NOT NULL,
-                ui_state   TEXT NOT NULL,
-                progress   TEXT NOT NULL,
-                updated_at TEXT NOT NULL,
-                extension  TEXT
+                job_id       TEXT    PRIMARY KEY NOT NULL,
+                module       TEXT    NOT NULL,
+                kind         TEXT    NOT NULL,
+                state        TEXT    NOT NULL,
+                ui_state     TEXT    NOT NULL,
+                progress     TEXT    NOT NULL,
+                recoverable  INTEGER NOT NULL DEFAULT 1,
+                updated_at   TEXT    NOT NULL,
+                extension    TEXT
             );",
         )
         .expect("SqliteJobSnapshotStore: failed to create job_snapshots table");
+        // Migration: add recoverable column to databases created before this column was added.
+        // SQLite does not support IF NOT EXISTS for ALTER TABLE; ignore the error if the column exists.
+        let _ = conn.execute(
+            "ALTER TABLE job_snapshots ADD COLUMN recoverable INTEGER NOT NULL DEFAULT 1",
+            [],
+        );
         Self { conn: Mutex::new(conn) }
     }
 
@@ -162,8 +169,8 @@ impl SqliteJobSnapshotStore {
         let conn = self.conn.lock().unwrap_or_else(|p| p.into_inner());
         conn.execute(
             "INSERT OR REPLACE INTO job_snapshots
-                (job_id, module, kind, state, ui_state, progress, updated_at, extension)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, NULL)",
+                (job_id, module, kind, state, ui_state, progress, recoverable, updated_at, extension)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, NULL)",
             rusqlite::params![
                 snapshot.job_id.to_string(),
                 snapshot.module,
@@ -171,6 +178,7 @@ impl SqliteJobSnapshotStore {
                 state_str,
                 ui_state_str,
                 progress_json,
+                i64::from(snapshot.recoverable),
                 snapshot.updated_at.to_string(),
             ],
         )
@@ -197,7 +205,7 @@ impl JobSnapshotStore<()> for SqliteJobSnapshotStore {
     fn get(&self, job_id: &JobId) -> AppResult<Option<JobSnapshot<()>>> {
         let conn = self.conn.lock().unwrap_or_else(|p| p.into_inner());
         let mut stmt = conn.prepare(
-            "SELECT job_id, module, kind, state, ui_state, progress, updated_at
+            "SELECT job_id, module, kind, state, ui_state, progress, recoverable, updated_at
              FROM job_snapshots WHERE job_id = ?1",
         )
         .map_err(|e| launcher_kernel_foundation::AppError::new(
@@ -230,7 +238,8 @@ impl JobSnapshotStore<()> for SqliteJobSnapshotStore {
             let state_str: String = row.get(3).unwrap();
             let ui_state_str: String = row.get(4).unwrap();
             let progress_str: String = row.get(5).unwrap();
-            let updated_at_str: String = row.get(6).unwrap();
+            let recoverable_int: i64 = row.get(6).unwrap_or(1);
+            let updated_at_str: String = row.get(7).unwrap();
 
             let state: JobState = serde_json::from_str(&state_str)
                 .map_err(|e| launcher_kernel_foundation::AppError::new(
@@ -273,6 +282,7 @@ impl JobSnapshotStore<()> for SqliteJobSnapshotStore {
                 state,
                 ui_state,
                 progress,
+                recoverable: recoverable_int != 0,
                 updated_at,
                 extension: None,
             }))
@@ -293,7 +303,7 @@ impl JobSnapshotStore<()> for SqliteJobSnapshotStore {
             .collect::<Vec<_>>()
             .join(", ");
         let sql = format!(
-            "SELECT job_id, module, kind, state, ui_state, progress, updated_at
+            "SELECT job_id, module, kind, state, ui_state, progress, recoverable, updated_at
              FROM job_snapshots WHERE state IN ({placeholders})"
         );
         let conn = self.conn.lock().unwrap_or_else(|p| p.into_inner());
@@ -328,7 +338,8 @@ impl JobSnapshotStore<()> for SqliteJobSnapshotStore {
             let state_str: String = row.get(3).unwrap();
             let ui_state_str: String = row.get(4).unwrap();
             let progress_str: String = row.get(5).unwrap();
-            let updated_at_str: String = row.get(6).unwrap();
+            let recoverable_int: i64 = row.get(6).unwrap_or(1);
+            let updated_at_str: String = row.get(7).unwrap();
 
             let state: JobState = serde_json::from_str(&state_str).map_err(|e| launcher_kernel_foundation::AppError::new("SQLITE_DESERIALIZE_ERROR", format!("state: {e}"), false, launcher_kernel_foundation::AppErrorSeverity::Warning, launcher_kernel_foundation::CorrelationId::generate()))?;
             let ui_state: JobUiState = serde_json::from_str(&ui_state_str).map_err(|e| launcher_kernel_foundation::AppError::new("SQLITE_DESERIALIZE_ERROR", format!("ui_state: {e}"), false, launcher_kernel_foundation::AppErrorSeverity::Warning, launcher_kernel_foundation::CorrelationId::generate()))?;
@@ -342,6 +353,7 @@ impl JobSnapshotStore<()> for SqliteJobSnapshotStore {
                 state,
                 ui_state,
                 progress,
+                recoverable: recoverable_int != 0,
                 updated_at,
                 extension: None,
             });

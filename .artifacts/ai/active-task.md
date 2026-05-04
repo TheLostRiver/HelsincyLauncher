@@ -2,9 +2,48 @@
 
 ## Identity
 
-- task id: AT-2026-05-03-046
-- title: Stage-2 restore runtime state summary
+- task id: AT-2026-05-04-047
+- title: Stage-2 orphaned lease reset
 - status: in_progress
+
+## Goal
+
+- exact local outcome: Add `recoverable: bool` to `JobSnapshot<E>` and `EnqueueJobRequest<E>`. In `run_stage2_restore_runtime_state()`, for each job whose state is `Running`, `ClaimingLease`, or `Restoring` (orphaned lease from crashed process): if `recoverable=true` → reset to `Queued`; if `recoverable=false` → mark `Failed`. Leave `Queued` jobs untouched. Validate with two unit tests in `startup.rs` and all three smoke gates.
+
+## Scope
+
+- in scope:
+  - update `.artifacts/ai/active-task.md`
+  - update `.artifacts/ai/progress.md`
+  - update `crates/kernel-jobs/src/model.rs`
+  - update `crates/kernel-jobs/src/runtime.rs`
+  - update `crates/module-fab/src/facade/mod.rs`
+  - update `crates/adapter-storage-sqlite/src/lib.rs`
+  - update `crates/composition-root/src/startup.rs`
+- out of scope:
+  - real job re-execution during restore
+  - driver registry or module callbacks
+  - frontend IPC changes
+  - touching user-owned frontend files
+
+## Allowed Files
+
+1. .artifacts/ai/active-task.md
+2. .artifacts/ai/progress.md
+3. crates/kernel-jobs/src/model.rs
+4. crates/kernel-jobs/src/runtime.rs
+5. crates/module-fab/src/facade/mod.rs
+6. crates/adapter-storage-sqlite/src/lib.rs
+7. crates/composition-root/src/startup.rs
+
+## Hypothesis
+
+- falsifiable local hypothesis: If `recoverable` is on `JobSnapshot` and stage-2 restore applies state-machine transitions, then a unit test that seeds a `Running/recoverable=true` snapshot will see it become `Queued`, and one seeded with `Running/recoverable=false` will see it become `Failed`.
+
+## Cheap Check
+
+- narrowest check: two new startup.rs unit tests pass; then `stage2_restore_reads_resumable_snapshots`, `bootstrap_wiring_smoke`, `transport_wiring_smoke` still pass.
+
 
 ## Goal
 
