@@ -19,3 +19,4 @@ launcher-kernel-foundation = { path = "../crates/kernel-foundation" }
 launcher-kernel-jobs = { path = "../crates/kernel-jobs" }
 launcher-module-downloads = { path = "../crates/module-downloads" }
 launcher-module-fab = { path = "../crates/module-fab" }
+launcher-module-engines = { path = "../crates/module-engines" }

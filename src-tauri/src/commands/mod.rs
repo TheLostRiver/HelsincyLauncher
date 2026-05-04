@@ -3,6 +3,7 @@ use launcher_kernel_foundation::{AppError, AppResult, IsoDateTime, JobId};
 use launcher_kernel_jobs::AcceptedJob;
 
 pub mod downloads;
+pub mod engines;
 pub mod fab;
 pub mod jobs;
 
@@ -11,6 +12,7 @@ pub const REGISTERED_COMMANDS: &[&str] = &[
     "fab_get_asset_detail",
     "fab_run_startup_prewarm",
     "fab_sync_inventory",
+    "engines_run_verification",
     "downloads_start",
     "downloads_pause",
     "downloads_resume",

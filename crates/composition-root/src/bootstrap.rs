@@ -17,7 +17,7 @@ use launcher_module_downloads::{
     DownloadCheckpointRepository, DownloadFacade, DownloadJobDriver, DownloadModuleDeps,
 };
 use launcher_module_fab::{FabFacade, FabModuleDeps, FabPrewarmJobDriver, FabSyncJobDriver};
-use launcher_module_engines::EngineJobDriver;
+use launcher_module_engines::{EngineFacade, EngineJobDriver, EngineModuleDeps};
 
 use crate::startup::StartupPipelineFacade;
 
@@ -36,6 +36,8 @@ type DesktopDownloadFacade = DownloadFacade<
     (),
     SharedJobRuntimeHost,
 >;
+
+type DesktopEngineFacade = EngineFacade<(), (), SharedJobRuntimeHost>;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DesktopBootstrapConfig {
@@ -76,23 +78,26 @@ impl Default for DesktopBootstrapConfig {
 }
 
 #[derive(Clone)]
-pub struct DesktopAppServices<F = DesktopFabFacade, D = DesktopDownloadFacade> {
+pub struct DesktopAppServices<F = DesktopFabFacade, D = DesktopDownloadFacade, E = DesktopEngineFacade> {
     pub fab: Arc<F>,
     pub downloads: Arc<D>,
+    pub engines: Arc<E>,
     pub startup: Arc<StartupPipelineFacade>,
     pub snapshot_store: Arc<dyn JobSnapshotStore<()>>,
 }
 
-impl<F, D> DesktopAppServices<F, D> {
+impl<F, D, E> DesktopAppServices<F, D, E> {
     pub fn new(
         fab: Arc<F>,
         downloads: Arc<D>,
+        engines: Arc<E>,
         startup: Arc<StartupPipelineFacade>,
         snapshot_store: Arc<dyn JobSnapshotStore<()>>,
     ) -> Self {
         Self {
             fab,
             downloads,
+            engines,
             startup,
             snapshot_store,
         }
@@ -113,13 +118,14 @@ pub fn build_desktop_services(config: DesktopBootstrapConfig) -> AppResult<Deskt
     let downloads = Arc::new(build_downloads_module(
         sqlite_config,
         download_checkpoint_repo.clone(),
-        job_runtime,
+        job_runtime.clone(),
     ));
+    let engines = Arc::new(build_engines_module(job_runtime));
     let registry = build_job_driver_registry(Arc::new(download_checkpoint_repo));
     let snapshot_store_dyn: Arc<dyn JobSnapshotStore<()>> = snapshot_store.clone();
     let startup = Arc::new(build_startup_pipeline(&config, fab.clone(), snapshot_store, registry));
 
-    Ok(DesktopAppServices::new(fab, downloads, startup, snapshot_store_dyn))
+    Ok(DesktopAppServices::new(fab, downloads, engines, startup, snapshot_store_dyn))
 }
 
 fn build_storage_config(config: &DesktopBootstrapConfig) -> AppResult<SqliteStorageAdapterConfig> {
@@ -173,6 +179,14 @@ fn build_downloads_module(
         checkpoint_repo,
         manifest_provider: (),
         staging_store: (),
+        job_runtime,
+    })
+}
+
+fn build_engines_module(job_runtime: SharedJobRuntimeHost) -> DesktopEngineFacade {
+    EngineFacade::new(EngineModuleDeps {
+        job_repo: (),
+        checkpoint_repo: (),
         job_runtime,
     })
 }

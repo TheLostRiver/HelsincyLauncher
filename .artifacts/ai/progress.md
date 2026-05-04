@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-04-053 - StartDownload request propagation and persistence - COMPLETED
-- Current phase: Phase 19 - Download intake correctness
-- Last completed slice: AT-2026-05-04-053 - persisted start_download request metadata and enqueue priority
-- Next step: AT-054 remains pending if the user wants to continue
+- Active atomic task: AT-2026-05-04-054 - Engine verification accepted-job wiring - COMPLETED
+- Current phase: Phase 20 - Engines verification intake correctness
+- Last completed slice: AT-2026-05-04-054 - wired engine verification accepted-job path through module, composition-root, and host transport
+- Next step: engines list/status/repair paths still remain deferred if the user wants to continue
 
 ## Session Timeline
 
@@ -26,6 +26,12 @@
 - Changed `start_download()` to honor `request.priority` when building `EnqueueJobRequest` instead of silently downgrading every request to normal priority.
 - Added a narrow module unit test that proves `start_download()` persists request metadata and forwards the priority into runtime enqueue, then added a composition-root integration test that proves the sqlite-backed repository persists the request metadata through the real assembled services.
 - Validated AT-053 with `cargo test -p launcher-module-downloads start_download_persists_request_metadata_and_enqueue_priority`, `cargo test -p launcher-composition-root downloads_start_persists_request_metadata`, `cargo test -p launcher-module-downloads`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, and `git diff --check`.
+- User-selected next follow-up was AT-054, and the narrowest real defect proved to be the missing accepted-job path for engine verification rather than the restore driver stub.
+- Confirmed the contract drift locally: docs require engine verification to return `AcceptedJobDto`, but `EngineFacade::run_verification()` still returned `AppResult<()>`, `DesktopAppServices` did not expose an engines facade, and host commands did not register any engines verification path.
+- Changed `launcher-module-engines` so `run_verification()` now enqueues an `engines/verification` job and returns a backend-owned `AcceptedJob`, then added a focused module test to prove that behavior.
+- Extended composition-root wiring to build and expose an engines facade backed by the shared job runtime, and added a narrow composition-root smoke test that proves engine verification enqueues a queued snapshot in the shared runtime host.
+- Added `src-tauri/src/commands/engines.rs`, registered `engines_run_verification`, updated host dependencies, and expanded `transport_wiring_smoke` to prove the transport path returns a successful accepted-job response instead of missing-command drift.
+- Validated AT-054 with `cargo test -p launcher-module-engines run_verification_returns_backend_owned_accepted_job`, `cargo test -p launcher-module-engines`, `cargo test -p launcher-composition-root engines_run_verification_enqueues_job`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, and `git diff --check`.
 
 ### Session: 2026-05-03
 

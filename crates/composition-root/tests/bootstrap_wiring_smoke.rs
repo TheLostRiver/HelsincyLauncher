@@ -7,6 +7,7 @@ use launcher_composition_root::{build_desktop_services, DesktopBootstrapConfig};
 use launcher_kernel_jobs::{EnqueueJobRequest, JobPriority, JobRuntime, JobState, JobUiState};
 use launcher_module_downloads::DownloadCheckpointRecord;
 use launcher_module_downloads::contracts::StartDownloadRequestDto;
+use launcher_module_engines::contracts::RunEngineVerificationRequestDto;
 use launcher_module_fab::contracts::FabInventoryPrewarmRequestDto;
 
 #[test]
@@ -314,6 +315,44 @@ fn downloads_start_persists_request_metadata() {
     assert_eq!(persisted.kind, request.kind);
     assert_eq!(persisted.install_intent, request.install_intent);
     assert_eq!(persisted.priority, request.priority);
+
+    let _ = std::fs::remove_file(&tmp_path);
+}
+
+#[test]
+fn engines_run_verification_enqueues_job() {
+    let tmp_path = std::env::temp_dir().join("at054_engine_verification_job.sqlite3");
+    let _ = std::fs::remove_file(&tmp_path);
+
+    let config = DesktopBootstrapConfig {
+        sqlite_path: tmp_path.clone(),
+        ..DesktopBootstrapConfig::default()
+    };
+
+    let services = build_desktop_services(config)
+        .expect("build_desktop_services should succeed for engine verification test");
+
+    let accepted = services
+        .engines
+        .run_verification(RunEngineVerificationRequestDto {
+            engine_id: "ue-5.4".into(),
+        })
+        .expect("engine verification should return an accepted job");
+
+    let snapshot = services
+        .engines
+        .deps()
+        .job_runtime
+        .snapshot(&accepted.job_id)
+        .expect("reading the engine verification snapshot should not error")
+        .expect("engine verification should be stored in the shared runtime host");
+
+    assert_eq!(accepted.module, "engines");
+    assert_eq!(accepted.kind, "verification");
+    assert_eq!(snapshot.state, JobState::Queued);
+    assert_eq!(snapshot.ui_state, JobUiState::Queued);
+    assert_eq!(snapshot.module, "engines");
+    assert_eq!(snapshot.kind, "verification");
 
     let _ = std::fs::remove_file(&tmp_path);
 }

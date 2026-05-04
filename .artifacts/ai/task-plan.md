@@ -6,12 +6,12 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 19 - Download intake correctness
+Phase 20 - Engines verification intake correctness
 
 ## Current Focus
 
-- AT-2026-05-04-053 completed the downloads start-request propagation slice.
-- AT-054 remains the next reviewed follow-up if the user chooses to continue.
+- AT-2026-05-04-054 completed the engines verification accepted-job slice.
+- Subsequent engines query/repair work remains deferred unless the user explicitly selects it.
 
 ## Phases
 
@@ -129,6 +129,12 @@ Phase 19 - Download intake correctness
 - Atomic tasks: AT-2026-05-04-053
 - **Status:** complete
 
+### Phase 20: Engines Verification Intake Correctness
+
+- Outcome: make engine verification return a backend-owned accepted job and expose that path through composition-root and host transport.
+- Atomic tasks: AT-2026-05-04-054
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -178,6 +184,7 @@ Phase 19 - Download intake correctness
 45. AT-2026-05-03-045 - in_progress - persist shared runtime snapshots to sqlite so accepted jobs survive a fresh composition-root rebuild.
 46. AT-2026-05-04-052 - completed - wired a checkpoint-backed download restore driver, added sqlite checkpoint persistence, and validated missing/present checkpoint behavior through module and composition-root tests.
 47. AT-2026-05-04-053 - completed - persisted start_download request metadata into the downloads job repository, honored request priority during runtime enqueue, and validated the behavior through module and composition-root tests.
+48. AT-2026-05-04-054 - completed - wired engine verification to return a backend-owned accepted job, exposed engines through composition-root and host transport, and validated the path through module, composition-root, and transport tests.
 
 ## Key Questions
 

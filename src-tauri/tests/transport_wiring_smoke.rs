@@ -3,6 +3,7 @@ use std::pin::pin;
 use std::task::{Context, Poll, RawWaker, RawWakerVTable, Waker};
 
 use launcher_kernel_foundation::PageRequest;
+use launcher_module_engines::contracts::RunEngineVerificationRequestDto;
 use launcher_module_fab::contracts::FabInventoryListQueryDto;
 use my_epic_launcher_desktop::{build_desktop_host_bootstrap, commands};
 
@@ -30,6 +31,24 @@ fn transport_wiring_smoke() {
         }
         commands::QueryResultDto::Failure { error } => {
             panic!("transport command path should stay callable, got {}", error.code);
+        }
+    }
+
+    let verification = block_on_ready(commands::engines::engines_run_verification(
+        bootstrap.services.services(),
+        RunEngineVerificationRequestDto {
+            engine_id: "ue-5.4".into(),
+        },
+    ));
+
+    match verification {
+        commands::CommandResultDto::Success { data } => {
+            assert!(data.accepted);
+            assert_eq!(data.module, "engines");
+            assert_eq!(data.kind, "verification");
+        }
+        commands::CommandResultDto::Failure { error } => {
+            panic!("engines verification command path should stay callable, got {}", error.code);
         }
     }
 }
