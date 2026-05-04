@@ -1,7 +1,7 @@
 use launcher_kernel_foundation::{
-    AppError, AppErrorSeverity, AppResult, CorrelationId,
+    AppError, AppErrorSeverity, AppResult, CorrelationId, JobId,
 };
-use launcher_kernel_jobs::AcceptedJob;
+use launcher_kernel_jobs::{AcceptedJob, EnqueueJobRequest, JobRuntime, JobPriority};
 
 use crate::contracts::{
     CancelDownloadRequestDto, DownloadJobListDto, DownloadJobSnapshotDto, DownloadPolicyDto,
@@ -31,10 +31,20 @@ impl<J, C, M, S, R> DownloadFacade<J, C, M, S, R> {
     pub fn deps(&self) -> &DownloadModuleDeps<J, C, M, S, R> {
         &self.deps
     }
+}
 
-    pub fn start_download(&self, request: StartDownloadRequestDto) -> AppResult<AcceptedJob> {
-        let _ = request;
-        Err(not_wired("start_download"))
+impl<J, C, M, S, R: JobRuntime<Extension = ()>> DownloadFacade<J, C, M, S, R> {
+    pub fn start_download(&self, _request: StartDownloadRequestDto) -> AppResult<AcceptedJob> {
+        let job_id = JobId::generate();
+        let enqueue_request = EnqueueJobRequest {
+            job_id,
+            module: "downloads".to_string(),
+            kind: "download".to_string(),
+            priority: JobPriority::Normal,
+            recoverable: true,
+            extension: None,
+        };
+        self.deps.job_runtime.enqueue(enqueue_request)
     }
 
     pub fn pause_download(&self, request: PauseDownloadRequestDto) -> AppResult<()> {

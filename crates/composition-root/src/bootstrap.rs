@@ -15,6 +15,7 @@ use launcher_kernel_foundation::{
 use launcher_kernel_jobs::{JobDriverRegistry, JobSnapshotStore, RuntimeQueuePolicy, SharedJobRuntimeHost};
 use launcher_module_downloads::{DownloadFacade, DownloadJobDriver, DownloadModuleDeps};
 use launcher_module_fab::{FabFacade, FabModuleDeps, FabPrewarmJobDriver, FabSyncJobDriver};
+use launcher_module_engines::EngineJobDriver;
 
 use crate::startup::StartupPipelineFacade;
 
@@ -191,6 +192,7 @@ fn build_job_driver_registry() -> Arc<JobDriverRegistry<()>> {
     registry.register(Arc::new(FabPrewarmJobDriver));
     registry.register(Arc::new(FabSyncJobDriver));
     registry.register(Arc::new(DownloadJobDriver));
+    registry.register(Arc::new(EngineJobDriver));
     Arc::new(registry)
 }
 

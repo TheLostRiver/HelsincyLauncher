@@ -2,82 +2,53 @@
 
 ## Identity
 
-- task id: AT-2026-05-04-050
-- title: IPC jobs.list_active query — JobSnapshotDto + snapshot_store exposure
+- task id: AT-2026-05-04-052
+- title: DownloadJobDriver real restore — checkpoint verification
 - status: in_progress
 
 ## Goal
 
-- exact local outcome: Add `recoverable: bool` to `JobSnapshot<E>` and `EnqueueJobRequest<E>`. In `run_stage2_restore_runtime_state()`, for each job whose state is `Running`, `ClaimingLease`, or `Restoring` (orphaned lease from crashed process): if `recoverable=true` → reset to `Queued`; if `recoverable=false` → mark `Failed`. Leave `Queued` jobs untouched. Validate with two unit tests in `startup.rs` and all three smoke gates.
+实现 `SharedJobRuntimeHost` 中的状态机方法 `pause_job()` 和 `cancel_job()`，通过 IPC 暴露两个新命令：
+- `jobs_pause_job(job_id)` → 将 Running/Queued 转移到 Paused
+- `jobs_cancel_job(job_id)` → 将 Paused/Queued/Running 转移到 Cancelled
+
+验证：两个新单元测试 + transport_wiring_smoke 和 bootstrap_wiring_smoke 继续通过。
 
 ## Scope
 
 - in scope:
   - update `.artifacts/ai/active-task.md`
   - update `.artifacts/ai/progress.md`
-  - update `crates/kernel-jobs/src/model.rs`
-  - update `crates/kernel-jobs/src/runtime.rs`
-  - update `crates/module-fab/src/facade/mod.rs`
-  - update `crates/adapter-storage-sqlite/src/lib.rs`
-  - update `crates/composition-root/src/startup.rs`
+  - add `Paused` and `Cancelled` states to `JobState` enum (if not present)
+  - implement `pause_job(&self, job_id: &JobId) -> AppResult<()>` in `SharedJobRuntimeHost`
+  - implement `cancel_job(&self, job_id: &JobId) -> AppResult<()>` in `SharedJobRuntimeHost`
+  - add two state machine unit tests in `runtime.rs`
+  - create `src-tauri/src/commands/jobs_commands/pause.rs` and `cancel.rs` (or extend jobs.rs)
+  - update `src-tauri/src/commands/mod.rs` to register both commands
 - out of scope:
-  - real job re-execution during restore
-  - driver registry or module callbacks
-  - frontend IPC changes
+  - real pause/resume execution logic (stubs are OK)
+  - pause/cancel callbacks to modules
+  - database persistence of pause/cancel state (in-memory only)
+  - frontend UI integration
   - touching user-owned frontend files
 
 ## Allowed Files
 
 1. .artifacts/ai/active-task.md
 2. .artifacts/ai/progress.md
-3. crates/kernel-jobs/src/model.rs
-4. crates/kernel-jobs/src/runtime.rs
-5. crates/module-fab/src/facade/mod.rs
-6. crates/adapter-storage-sqlite/src/lib.rs
-7. crates/composition-root/src/startup.rs
+3. crates/kernel-jobs/src/model.rs (add Paused/Cancelled states if needed)
+4. crates/kernel-jobs/src/runtime.rs (add methods + tests)
+5. src-tauri/src/commands/jobs.rs (add pause/cancel commands)
+6. src-tauri/src/commands/mod.rs (register commands)
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If `recoverable` is on `JobSnapshot` and stage-2 restore applies state-machine transitions, then a unit test that seeds a `Running/recoverable=true` snapshot will see it become `Queued`, and one seeded with `Running/recoverable=false` will see it become `Failed`.
+- falsifiable hypothesis: If `SharedJobRuntimeHost` has `pause_job()` and `cancel_job()` methods that validate state transitions and update snapshots, then a unit test seeding a Queued job can call `pause_job()` and see it transition to Paused, then `cancel_job()` and see Cancelled.
 
 ## Cheap Check
 
-- narrowest check: two new startup.rs unit tests pass; then `stage2_restore_reads_resumable_snapshots`, `bootstrap_wiring_smoke`, `transport_wiring_smoke` still pass.
+- Two new runtime.rs unit tests pass; transport_wiring_smoke and bootstrap_wiring_smoke still pass.
 
-
-## Goal
-
-- exact local outcome: Implement `run_stage2_restore_runtime_state()` in `StartupPipelineFacade` so it reads all resumable job snapshots (states: Queued, ClaimingLease, Restoring, Running) from the shared `JobSnapshotStore`, counts them, and returns `Ok(())` with a tracing log — no real re-execution, no lease acquisition, just a verified summary read so the stage-2 path is no longer a no-op stub. Add `list_resumable()` to the `JobSnapshotStore` trait and implement it in both the in-memory and sqlite adapters. Wire the store into `StartupPipelineFacade` from composition-root. Validate with a named test `stage2_restore_reads_resumable_snapshots` plus the two existing smoke tests.
-
-## Scope
-
-- in scope:
-  - update `.artifacts/ai/active-task.md`
-  - update `.artifacts/ai/task-plan.md`
-  - update `.artifacts/ai/progress.md`
-  - update `.artifacts/ai/findings.md`
-  - update `crates/kernel-jobs/src/runtime.rs`
-  - update `crates/adapter-storage-sqlite/src/lib.rs`
-  - update `crates/composition-root/src/startup.rs`
-  - update `crates/composition-root/src/bootstrap.rs`
-  - update `crates/composition-root/tests/bootstrap_wiring_smoke.rs`
-- out of scope:
-  - real job re-execution during restore
-  - lease acquisition/release
-  - driver registry or module callbacks
-  - frontend IPC changes
-  - touching user-owned frontend files
-
-## Allowed Files
-
-1. .artifacts/ai/active-task.md
-2. .artifacts/ai/task-plan.md
-3. .artifacts/ai/progress.md
-4. .artifacts/ai/findings.md
-5. crates/kernel-jobs/src/runtime.rs
-6. crates/adapter-storage-sqlite/src/lib.rs
-7. crates/composition-root/src/startup.rs
-8. crates/composition-root/src/bootstrap.rs
 9. crates/composition-root/tests/bootstrap_wiring_smoke.rs
 
 ## Hypothesis

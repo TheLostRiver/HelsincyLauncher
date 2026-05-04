@@ -14,6 +14,7 @@ launcher-kernel-foundation = { path = "../kernel-foundation" }
 launcher-kernel-jobs = { path = "../kernel-jobs" }
 launcher-module-fab = { path = "../module-fab" }
 launcher-module-downloads = { path = "../module-downloads" }
+launcher-module-engines = { path = "../module-engines" }
 launcher-adapter-storage-sqlite = { path = "../adapter-storage-sqlite" }
 launcher-adapter-provider-fab = { path = "../adapter-provider-fab" }
 tracing.workspace = true

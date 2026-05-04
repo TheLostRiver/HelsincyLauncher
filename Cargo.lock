@@ -278,6 +278,7 @@ dependencies = [
  "launcher-kernel-foundation",
  "launcher-kernel-jobs",
  "launcher-module-downloads",
+ "launcher-module-engines",
  "launcher-module-fab",
  "tracing",
 ]
@@ -303,6 +304,15 @@ dependencies = [
 
 [[package]]
 name = "launcher-module-downloads"
+version = "0.1.0"
+dependencies = [
+ "launcher-kernel-foundation",
+ "launcher-kernel-jobs",
+ "serde",
+]
+
+[[package]]
+name = "launcher-module-engines"
 version = "0.1.0"
 dependencies = [
  "launcher-kernel-foundation",
