@@ -8,6 +8,10 @@
 
 ## Research Findings
 
+- `src-tauri/src/commands/fab.rs` is the strongest next slice after engines because it is the remaining host transport boundary in the same folder that still lacks declaration-level comments and still owns multiple temporary `FAB_NOT_WIRED` fallback projections.
+- The comments here should focus on list/detail stub ownership and the accepted-job projection for sync/prewarm commands, not on restating the obvious mapper calls.
+- `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke` remains the narrowest executable validation for this slice and directly exercises `fab_list_inventory` today.
+
 - `src-tauri/src/commands/engines.rs` is the strongest next slice after downloads because it is a host transport boundary still missing declaration-level comments, while the adjacent `jobs.rs` file already documents its cross-module snapshot query semantics.
 - The comments here should focus on verification-intent forwarding and accepted-job envelope projection, not on restating the obvious `map_accepted_job_result` one-line wrapper.
 - `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke` is the narrowest executable validation for this slice and is stronger than the downloads-host case because the smoke test directly calls `engines_run_verification` today.

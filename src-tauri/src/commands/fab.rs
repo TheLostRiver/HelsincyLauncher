@@ -1,3 +1,10 @@
+//! Host transport handlers for the Fab module.
+//!
+//! This boundary adapts IPC-facing Fab queries and commands onto the backend
+//! Fab facade exposed through `DesktopServices`. The query handlers still own
+//! temporary `FAB_NOT_WIRED` fallback projections, while command handlers
+//! project backend-owned accepted jobs into the shared host transport envelope.
+
 use launcher_kernel_foundation::PageSlice;
 use launcher_module_fab::contracts::{
     FabAssetDetailDto, FabAssetDetailQueryDto, FabInventoryListQueryDto, FabInventoryPageDto,
@@ -9,6 +16,7 @@ use super::{
     QueryResultDto,
 };
 
+/// Lists Fab inventory summaries and falls back to an empty page on the current host stub path.
 pub async fn fab_list_inventory(
     services: &DesktopServices,
     query: FabInventoryListQueryDto,
@@ -18,6 +26,7 @@ pub async fn fab_list_inventory(
     })
 }
 
+/// Gets one Fab asset detail projection and falls back to the current transport-owned placeholder detail.
 pub async fn fab_get_asset_detail(
     services: &DesktopServices,
     query: FabAssetDetailQueryDto,
@@ -34,6 +43,7 @@ pub async fn fab_get_asset_detail(
     })
 }
 
+/// Starts startup prewarm through the backend Fab facade and projects the accepted job envelope.
 pub async fn fab_run_startup_prewarm(
     services: &DesktopServices,
     request: FabInventoryPrewarmRequestDto,
@@ -41,6 +51,7 @@ pub async fn fab_run_startup_prewarm(
     map_accepted_job_result(services.fab.run_startup_prewarm(request))
 }
 
+/// Starts inventory sync through the backend Fab facade and projects the accepted job envelope.
 pub async fn fab_sync_inventory(
     services: &DesktopServices,
     request: FabInventorySyncRequestDto,
