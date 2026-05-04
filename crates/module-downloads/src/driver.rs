@@ -55,10 +55,10 @@ impl JobDriver<()> for DownloadJobDriver {
 #[cfg(test)]
 mod tests {
     use std::collections::HashSet;
-    use std::sync::Mutex;
+    use std::sync::{Arc, Mutex};
 
     use launcher_kernel_foundation::{IsoDateTime, JobId};
-    use launcher_kernel_jobs::{JobProgress, JobState, JobUiState};
+    use launcher_kernel_jobs::{JobDriver, JobProgress, JobState, JobUiState};
 
     use super::{
         DownloadCheckpointRecord, DownloadCheckpointRepository, DownloadJobDriver,

@@ -2,15 +2,15 @@
 
 ## Identity
 
-- task id: AT-2026-05-04-052
-- title: DownloadJobDriver real restore — checkpoint verification
+- task id: AT-2026-05-04-053
+- title: StartDownload request propagation and persistence
 - status: completed
 
 ## Goal
 
-让 downloads 的 stage-2 restore 不再无条件返回 Resumed，而是显式读取持久化 checkpoint：
-- 有 checkpoint 时保持可恢复
-- 缺 checkpoint 时返回 FailedAsUnrecoverable，由 startup pipeline 落成 Failed
+让 downloads 的 start_download 不再丢弃请求内容，而是：
+- 使用 request.priority 进入 runtime enqueue
+- 把 target_id / kind / install_intent 持久化进 download job repository
 
 ## Scope
 
@@ -18,16 +18,16 @@
   - update `.artifacts/ai/active-task.md`
   - update `.artifacts/ai/task-plan.md`
   - update `.artifacts/ai/progress.md`
-  - expose a minimal `DownloadCheckpointRepository` boundary in `launcher-module-downloads`
-  - implement sqlite-backed checkpoint load/save in `launcher-adapter-storage-sqlite`
-  - wire `DownloadJobDriver` to the checkpoint repository in composition-root
-  - add narrow restore tests for missing and present download checkpoints
+  - expose a minimal `DownloadJobRepository` boundary in `launcher-module-downloads`
+  - persist start request metadata through the sqlite downloads repository
+  - honor `StartDownloadRequestDto.priority` when enqueueing the job runtime request
+  - add narrow tests for module-level request propagation and composition-root persistence
 - out of scope:
-  - full segmented checkpoint payload design
-  - real staging-file verification
-  - download execution runtime
+  - manifest resolution and real download execution
+  - download snapshot extension payload redesign
+  - pause / cancel / resume use case wiring
   - frontend UI changes
-  - AT-053 and AT-054 remediation
+  - AT-054 remediation
 
 ## Allowed Files
 
@@ -35,9 +35,9 @@
 2. .artifacts/ai/task-plan.md
 3. .artifacts/ai/progress.md
 4. crates/module-downloads/src/driver.rs
-5. crates/module-downloads/src/lib.rs
-6. crates/adapter-storage-sqlite/src/lib.rs
-7. crates/composition-root/src/bootstrap.rs
+5. crates/module-downloads/src/facade/mod.rs
+6. crates/module-downloads/src/lib.rs
+7. crates/adapter-storage-sqlite/src/lib.rs
 8. crates/composition-root/tests/bootstrap_wiring_smoke.rs
 
 ## 控制性文档
@@ -54,16 +54,16 @@
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If `DownloadJobDriver` loads a persisted checkpoint through a repository before returning `RestoreDisposition::Resumed`, then stage-2 restore will keep queued download jobs resumable only when checkpoint state exists and will otherwise mark them failed through the existing startup pipeline path.
+- falsifiable local hypothesis: If `DownloadFacade::start_download()` persists a download job record from the request before enqueueing, and forwards `request.priority` into the runtime request, then a narrow unit test and a composition-root integration test will both observe that the request is no longer silently discarded.
 
 ## Cheap Check
 
-- `cargo test -p launcher-composition-root stage2_restore_marks_download_job_failed_without_checkpoint --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`
+- `cargo test -p launcher-module-downloads start_download_persists_request_metadata_and_enqueue_priority --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`
 
 ## Validation Gate
 
 1. `cargo test -p launcher-module-downloads --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`
-2. `cargo test -p launcher-composition-root bootstrap_wiring_smoke --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`
+2. `cargo test -p launcher-composition-root downloads_start_persists_request_metadata --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`
 3. `cargo test -p my-epic-launcher-desktop transport_wiring_smoke --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`
 4. `git -C q:\DEV\MyEpicLauncher diff --check`
 
@@ -73,4 +73,4 @@
 
 ## 安全恢复点
 
-- AT-052 已完成并验证；下一步等待用户确认是否继续处理 AT-053 / AT-054。
+- AT-053 已完成并验证；下一步可继续处理 AT-054。

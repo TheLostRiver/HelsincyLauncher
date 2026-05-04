@@ -6,12 +6,12 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 18 - Download restore correctness
+Phase 19 - Download intake correctness
 
 ## Current Focus
 
-- AT-2026-05-04-052 completed the downloads restore checkpoint verification slice.
-- Wait for user confirmation before continuing with the reviewed follow-up work on AT-053 and AT-054.
+- AT-2026-05-04-053 completed the downloads start-request propagation slice.
+- AT-054 remains the next reviewed follow-up if the user chooses to continue.
 
 ## Phases
 
@@ -123,6 +123,12 @@ Phase 18 - Download restore correctness
 - Atomic tasks: AT-2026-05-04-052
 - **Status:** complete
 
+### Phase 19: Download Intake Correctness
+
+- Outcome: make `start_download` preserve request metadata and enqueue priority instead of silently dropping them.
+- Atomic tasks: AT-2026-05-04-053
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -171,6 +177,7 @@ Phase 18 - Download restore correctness
 44. AT-2026-05-03-044 - committed - built a minimal shared job runtime host, injected it through composition-root, and moved Fab accepted-job paths onto that runtime bundle.
 45. AT-2026-05-03-045 - in_progress - persist shared runtime snapshots to sqlite so accepted jobs survive a fresh composition-root rebuild.
 46. AT-2026-05-04-052 - completed - wired a checkpoint-backed download restore driver, added sqlite checkpoint persistence, and validated missing/present checkpoint behavior through module and composition-root tests.
+47. AT-2026-05-04-053 - completed - persisted start_download request metadata into the downloads job repository, honored request priority during runtime enqueue, and validated the behavior through module and composition-root tests.
 
 ## Key Questions
 

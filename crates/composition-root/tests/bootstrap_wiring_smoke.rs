@@ -6,6 +6,7 @@ use std::task::{Context, Poll, RawWaker, RawWakerVTable, Waker};
 use launcher_composition_root::{build_desktop_services, DesktopBootstrapConfig};
 use launcher_kernel_jobs::{EnqueueJobRequest, JobPriority, JobRuntime, JobState, JobUiState};
 use launcher_module_downloads::DownloadCheckpointRecord;
+use launcher_module_downloads::contracts::StartDownloadRequestDto;
 use launcher_module_fab::contracts::FabInventoryPrewarmRequestDto;
 
 #[test]
@@ -271,6 +272,48 @@ fn stage2_restore_keeps_download_job_queued_with_checkpoint() {
         JobState::Queued,
         "queued download with checkpoint should remain resumable after restore"
     );
+
+    let _ = std::fs::remove_file(&tmp_path);
+}
+
+#[test]
+fn downloads_start_persists_request_metadata() {
+    let tmp_path = std::env::temp_dir().join("at053_download_start_persists_metadata.sqlite3");
+    let _ = std::fs::remove_file(&tmp_path);
+
+    let config = DesktopBootstrapConfig {
+        sqlite_path: tmp_path.clone(),
+        ..DesktopBootstrapConfig::default()
+    };
+
+    let services = build_desktop_services(config)
+        .expect("build_desktop_services should succeed for start_download persistence test");
+
+    let request = StartDownloadRequestDto {
+        target_id: "asset-123".into(),
+        kind: "engine".into(),
+        install_intent: Some("install".into()),
+        priority: JobPriority::High,
+    };
+
+    let accepted = services
+        .downloads
+        .start_download(request.clone())
+        .expect("downloads facade should accept the start request");
+
+    let persisted = services
+        .downloads
+        .deps()
+        .job_repo
+        .get_job(&accepted.job_id)
+        .expect("reading the persisted download job should not error")
+        .expect("start_download should persist the download job metadata");
+
+    assert_eq!(persisted.job_id, accepted.job_id);
+    assert_eq!(persisted.target_id, request.target_id);
+    assert_eq!(persisted.kind, request.kind);
+    assert_eq!(persisted.install_intent, request.install_intent);
+    assert_eq!(persisted.priority, request.priority);
 
     let _ = std::fs::remove_file(&tmp_path);
 }

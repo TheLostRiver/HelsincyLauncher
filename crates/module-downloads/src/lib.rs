@@ -3,4 +3,7 @@ pub mod driver;
 pub mod facade;
 
 pub use driver::{DownloadCheckpointRecord, DownloadCheckpointRepository, DownloadJobDriver};
-pub use facade::{DownloadFacade, DownloadModuleDeps};
+pub use facade::{
+	DownloadFacade, DownloadJobRecord, DownloadJobRecordState, DownloadJobRepository,
+	DownloadModuleDeps,
+};

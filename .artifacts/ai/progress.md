@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-04-052 - DownloadJobDriver real restore checkpoint verification - COMPLETED
-- Current phase: Phase 18 - Download restore correctness
-- Last completed slice: AT-2026-05-04-052 - checkpoint-backed downloads stage-2 restore
-- Next step: wait for user confirmation before continuing with AT-053 or AT-054
+- Active atomic task: AT-2026-05-04-053 - StartDownload request propagation and persistence - COMPLETED
+- Current phase: Phase 19 - Download intake correctness
+- Last completed slice: AT-2026-05-04-053 - persisted start_download request metadata and enqueue priority
+- Next step: AT-054 remains pending if the user wants to continue
 
 ## Session Timeline
 
@@ -20,6 +20,12 @@
 - Added narrow module-level driver tests for checkpoint-present and checkpoint-missing restore outcomes.
 - Added narrow composition-root smoke tests that prove stage-2 restore marks queued download jobs Failed when checkpoint state is missing and keeps them Queued when checkpoint state exists.
 - Validated the slice with `cargo test -p launcher-composition-root stage2_restore_marks_download_job_failed_without_checkpoint`, `cargo test -p launcher-module-downloads`, `cargo test -p launcher-composition-root bootstrap_wiring_smoke`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, `get_errors` on all touched files, and `git diff --check`.
+- User-selected follow-up was AT-053, so the next slice stayed pinned to `DownloadFacade::start_download()` and the request DTO rather than widening into engines or more download runtime work.
+- Confirmed the real AT-053 defect was that `start_download()` hard-coded `JobPriority::Normal`, set `extension: None`, and never wrote request metadata anywhere, even though the module already had a dedicated downloads repository dependency and a request DTO carrying `target_id`, `kind`, `install_intent`, and `priority`.
+- Added a minimal `DownloadJobRepository` boundary plus sqlite-backed `download_jobs` persistence so the start path now records `target_id`, `kind`, `install_intent`, priority, and initial queued state before enqueueing the runtime request.
+- Changed `start_download()` to honor `request.priority` when building `EnqueueJobRequest` instead of silently downgrading every request to normal priority.
+- Added a narrow module unit test that proves `start_download()` persists request metadata and forwards the priority into runtime enqueue, then added a composition-root integration test that proves the sqlite-backed repository persists the request metadata through the real assembled services.
+- Validated AT-053 with `cargo test -p launcher-module-downloads start_download_persists_request_metadata_and_enqueue_priority`, `cargo test -p launcher-composition-root downloads_start_persists_request_metadata`, `cargo test -p launcher-module-downloads`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, and `git diff --check`.
 
 ### Session: 2026-05-03
 

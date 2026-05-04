@@ -2,8 +2,11 @@ use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
 use launcher_kernel_foundation::{AppResult, AssetId, IsoDateTime, JobId, PageSlice};
-use launcher_kernel_jobs::{JobProgress, JobSnapshot, JobSnapshotStore, JobState, JobUiState};
-use launcher_module_downloads::{DownloadCheckpointRecord, DownloadCheckpointRepository};
+use launcher_kernel_jobs::{JobPriority, JobProgress, JobSnapshot, JobSnapshotStore, JobState, JobUiState};
+use launcher_module_downloads::{
+    DownloadCheckpointRecord, DownloadCheckpointRepository, DownloadJobRecord,
+    DownloadJobRecordState, DownloadJobRepository,
+};
 use launcher_module_fab::{
     contracts::{FabAssetDetailDto, FabInventoryListQueryDto},
     facade::{FabInventoryProjectionPage, FabInventoryProjectionRepository},
@@ -88,11 +91,231 @@ pub struct SqliteDownloadJobRepository {
 
 impl SqliteDownloadJobRepository {
     pub fn new(config: SqliteStorageAdapterConfig) -> Self {
-        Self { config }
+        let repo = Self { config };
+        repo.ensure_table()
+            .expect("SqliteDownloadJobRepository: failed to create jobs table");
+        repo
     }
 
     pub fn config(&self) -> &SqliteStorageAdapterConfig {
         &self.config
+    }
+
+    fn ensure_table(&self) -> AppResult<()> {
+        let conn = self.open_connection()?;
+        conn.execute_batch(
+            "CREATE TABLE IF NOT EXISTS download_jobs (
+                job_id TEXT PRIMARY KEY NOT NULL,
+                target_id TEXT NOT NULL,
+                kind TEXT NOT NULL,
+                install_intent TEXT NULL,
+                priority TEXT NOT NULL,
+                state TEXT NOT NULL
+            );",
+        )
+        .map_err(|e| launcher_kernel_foundation::AppError::new(
+            "SQLITE_WRITE_ERROR",
+            format!("download_jobs table init failed: {e}"),
+            false,
+            launcher_kernel_foundation::AppErrorSeverity::Warning,
+            launcher_kernel_foundation::CorrelationId::generate(),
+        ))?;
+        Ok(())
+    }
+
+    fn open_connection(&self) -> AppResult<rusqlite::Connection> {
+        rusqlite::Connection::open(self.config.database_path()).map_err(|e| {
+            launcher_kernel_foundation::AppError::new(
+                "SQLITE_OPEN_ERROR",
+                format!("failed to open sqlite database: {e}"),
+                false,
+                launcher_kernel_foundation::AppErrorSeverity::Warning,
+                launcher_kernel_foundation::CorrelationId::generate(),
+            )
+        })
+    }
+
+    pub fn get_job(&self, job_id: &JobId) -> AppResult<Option<DownloadJobRecord>> {
+        let conn = self.open_connection()?;
+        let mut stmt = conn
+            .prepare(
+                "SELECT target_id, kind, install_intent, priority, state
+                 FROM download_jobs
+                 WHERE job_id = ?1",
+            )
+            .map_err(|e| launcher_kernel_foundation::AppError::new(
+                "SQLITE_READ_ERROR",
+                format!("failed to prepare download job select: {e}"),
+                false,
+                launcher_kernel_foundation::AppErrorSeverity::Warning,
+                launcher_kernel_foundation::CorrelationId::generate(),
+            ))?;
+
+        let mut rows = stmt
+            .query(rusqlite::params![job_id.to_string()])
+            .map_err(|e| launcher_kernel_foundation::AppError::new(
+                "SQLITE_READ_ERROR",
+                format!("download job query failed: {e}"),
+                false,
+                launcher_kernel_foundation::AppErrorSeverity::Warning,
+                launcher_kernel_foundation::CorrelationId::generate(),
+            ))?;
+
+        let maybe_row = rows.next().map_err(|e| launcher_kernel_foundation::AppError::new(
+            "SQLITE_READ_ERROR",
+            format!("download job row read failed: {e}"),
+            false,
+            launcher_kernel_foundation::AppErrorSeverity::Warning,
+            launcher_kernel_foundation::CorrelationId::generate(),
+        ))?;
+
+        let Some(row) = maybe_row else {
+            return Ok(None);
+        };
+
+        let target_id: String = row.get(0).map_err(|e| launcher_kernel_foundation::AppError::new(
+            "SQLITE_READ_ERROR",
+            format!("download job target_id decode failed: {e}"),
+            false,
+            launcher_kernel_foundation::AppErrorSeverity::Warning,
+            launcher_kernel_foundation::CorrelationId::generate(),
+        ))?;
+        let kind: String = row.get(1).map_err(|e| launcher_kernel_foundation::AppError::new(
+            "SQLITE_READ_ERROR",
+            format!("download job kind decode failed: {e}"),
+            false,
+            launcher_kernel_foundation::AppErrorSeverity::Warning,
+            launcher_kernel_foundation::CorrelationId::generate(),
+        ))?;
+        let install_intent: Option<String> = row.get(2).map_err(|e| launcher_kernel_foundation::AppError::new(
+            "SQLITE_READ_ERROR",
+            format!("download job install_intent decode failed: {e}"),
+            false,
+            launcher_kernel_foundation::AppErrorSeverity::Warning,
+            launcher_kernel_foundation::CorrelationId::generate(),
+        ))?;
+        let priority_raw: String = row.get(3).map_err(|e| launcher_kernel_foundation::AppError::new(
+            "SQLITE_READ_ERROR",
+            format!("download job priority decode failed: {e}"),
+            false,
+            launcher_kernel_foundation::AppErrorSeverity::Warning,
+            launcher_kernel_foundation::CorrelationId::generate(),
+        ))?;
+        let state_raw: String = row.get(4).map_err(|e| launcher_kernel_foundation::AppError::new(
+            "SQLITE_READ_ERROR",
+            format!("download job state decode failed: {e}"),
+            false,
+            launcher_kernel_foundation::AppErrorSeverity::Warning,
+            launcher_kernel_foundation::CorrelationId::generate(),
+        ))?;
+
+        Ok(Some(DownloadJobRecord {
+            job_id: job_id.clone(),
+            target_id,
+            kind,
+            install_intent,
+            priority: decode_job_priority(&priority_raw)?,
+            state: decode_download_job_state(&state_raw)?,
+        }))
+    }
+}
+
+impl DownloadJobRepository for SqliteDownloadJobRepository {
+    fn create_job(&self, job: &DownloadJobRecord) -> AppResult<()> {
+        let conn = self.open_connection()?;
+        conn.execute(
+            "INSERT OR REPLACE INTO download_jobs
+             (job_id, target_id, kind, install_intent, priority, state)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+            rusqlite::params![
+                job.job_id.to_string(),
+                job.target_id,
+                job.kind,
+                job.install_intent,
+                encode_job_priority(job.priority),
+                encode_download_job_state(job.state),
+            ],
+        )
+        .map_err(|e| launcher_kernel_foundation::AppError::new(
+            "SQLITE_WRITE_ERROR",
+            format!("download job insert failed: {e}"),
+            false,
+            launcher_kernel_foundation::AppErrorSeverity::Warning,
+            launcher_kernel_foundation::CorrelationId::generate(),
+        ))?;
+        Ok(())
+    }
+
+    fn get_job(&self, job_id: &JobId) -> AppResult<Option<DownloadJobRecord>> {
+        self.get_job(job_id)
+    }
+
+    fn update_state(&self, job_id: &JobId, state: DownloadJobRecordState) -> AppResult<()> {
+        let conn = self.open_connection()?;
+        conn.execute(
+            "UPDATE download_jobs SET state = ?2 WHERE job_id = ?1",
+            rusqlite::params![job_id.to_string(), encode_download_job_state(state)],
+        )
+        .map_err(|e| launcher_kernel_foundation::AppError::new(
+            "SQLITE_WRITE_ERROR",
+            format!("download job state update failed: {e}"),
+            false,
+            launcher_kernel_foundation::AppErrorSeverity::Warning,
+            launcher_kernel_foundation::CorrelationId::generate(),
+        ))?;
+        Ok(())
+    }
+}
+
+fn encode_job_priority(priority: JobPriority) -> &'static str {
+    match priority {
+        JobPriority::Low => "low",
+        JobPriority::Normal => "normal",
+        JobPriority::High => "high",
+    }
+}
+
+fn decode_job_priority(priority: &str) -> AppResult<JobPriority> {
+    match priority {
+        "low" => Ok(JobPriority::Low),
+        "normal" => Ok(JobPriority::Normal),
+        "high" => Ok(JobPriority::High),
+        _ => Err(launcher_kernel_foundation::AppError::new(
+            "SQLITE_READ_ERROR",
+            format!("unsupported download job priority `{priority}`"),
+            false,
+            launcher_kernel_foundation::AppErrorSeverity::Warning,
+            launcher_kernel_foundation::CorrelationId::generate(),
+        )),
+    }
+}
+
+fn encode_download_job_state(state: DownloadJobRecordState) -> &'static str {
+    match state {
+        DownloadJobRecordState::Queued => "queued",
+        DownloadJobRecordState::Running => "running",
+        DownloadJobRecordState::Paused => "paused",
+        DownloadJobRecordState::Completed => "completed",
+        DownloadJobRecordState::Failed => "failed",
+        DownloadJobRecordState::Canceled => "canceled",
+    }
+}
+
+fn decode_download_job_state(state: &str) -> AppResult<DownloadJobRecordState> {
+    match state {
+        "queued" => Ok(DownloadJobRecordState::Queued),
+        "running" => Ok(DownloadJobRecordState::Running),
+        "paused" => Ok(DownloadJobRecordState::Paused),
+        "completed" => Ok(DownloadJobRecordState::Completed),
+        "failed" => Ok(DownloadJobRecordState::Failed),
+        "canceled" => Ok(DownloadJobRecordState::Canceled),
+        _ => Err(launcher_kernel_foundation::AppError::new(
+            "SQLITE_READ_ERROR",
+            format!("unsupported download job state `{state}`"),
+            false,
+            launcher_kernel_foundation::AppErrorSeverity::Warning,
+            launcher_kernel_foundation::CorrelationId::generate(),
+        )),
     }
 }
 
