@@ -4,7 +4,7 @@
 > Date: 2026-05-04
 > Scope: repository-level code comment rules for Rust, TypeScript, TSX, JavaScript, and adjacent source files
 > Related: `CONTRIBUTING.md`, `docs/README.md`, `docs/TauriArchitecturePrinciplesDesign.md`, `docs/ModuleDocumentationStandard.md`
-> Focus: comment coverage, syntax split, selective body comments, concurrency-risk annotation, review rules
+> Focus: comment coverage, comment-language policy, syntax split, selective body comments, concurrency-risk annotation, review rules
 
 ---
 
@@ -83,6 +83,19 @@
 代码语义变了，相关注释必须在同一改动里一起更新。
 
 过期注释不是文档资产，而是缺陷。
+
+### 3.6 Comment Language Defaults To Chinese
+
+本仓库新增或改写的代码注释默认使用简体中文。
+
+规则如下：
+
+1. 没有额外指示时，代码注释、Rustdoc、JSDoc/TSDoc、文件头说明都按中文撰写。
+2. 用户明确要求英文注释，或当前会话显式触发 `/comment-en` 时，本轮后续新增或改写的注释可以切换为英文。
+3. 需要切回默认值时，使用 `/comment-zh`，或直接在当前消息里明确要求中文注释。
+4. 语言切换只影响后续新增或改写的注释，不默认批量回写未触及的旧注释。
+5. API 名、协议名、错误码、crate/package 名、第三方术语保持原文，不要为了凑中文或英文硬翻译标识符。
+6. 仓库工作流的界面语言和代码注释语言不是同一个开关；不要因为 hook 提醒切到英文，就自动把源代码注释也改成英文。
 
 ---
 
@@ -285,6 +298,7 @@ Rust 不采用“所有声明一律 Rustdoc”的做法。
 4. 是否存在明显可以删掉的废话注释。
 5. 本次改动是否已经让旧注释失效。
 6. 注释语法是否符合当前语言和可见性层级。
+7. 注释文本语言是否符合当前默认规则或本轮显式切换指令。
 
 ---
 
@@ -296,6 +310,7 @@ Rust 不采用“所有声明一律 Rustdoc”的做法。
 2. 修改旧代码时，顺手修正同一语义面的注释缺口。
 3. 高风险并发、恢复、状态机相关代码优先补齐。
 4. 明显代码不为凑覆盖率而补注释。
+5. 没有显式切换时，新增或改写的注释默认写成简体中文。
 
 一句话总结：
 

@@ -2,16 +2,18 @@
 
 ## Identity
 
-- task id: AT-2026-05-04-068
-- title: Desktop host crate entry comment slice 12
+- task id: AT-2026-05-05-069
+- title: Comment language control docs and slash commands
 - status: completed
 
 ## Goal
 
-按新的仓库注释规范，为 desktop host crate 入口边界补上第十二批高信号注释：
-- `src-tauri/src/lib.rs`
+收紧仓库注释规范，让新增或改写的代码注释默认使用简体中文，并为需要英文注释的开发者补上显式的 slash 命令入口：
+- `docs/TauriCodeCommentStandard.md`
+- `.github/prompts/comment-zh.prompt.md`
+- `.github/prompts/comment-en.prompt.md`
 
-本轮只补模块/声明级注释和少量必要的公开入口语义说明，不改动 bootstrap、命令注册、共享状态或宿主行为。
+本轮只调整注释语言规范和 prompt 入口，不改业务代码、不改现有 hook 语言模式，也不改 backend 行为。
 
 ## Scope
 
@@ -21,12 +23,14 @@
   - update `.artifacts/ai/progress.md`
   - update `.artifacts/ai/findings.md`
   - update `.artifacts/ai/handoff.md`
-  - update `src-tauri/src/lib.rs`
+  - update `docs/TauriCodeCommentStandard.md`
+  - add `.github/prompts/comment-zh.prompt.md`
+  - add `.github/prompts/comment-en.prompt.md`
 - out of scope:
-  - annotate more than this one backend file
-  - change bootstrap wiring, command registration, or crate exports behavior
-  - add lint rules or doc tooling
-  - modify frontend code or repo architecture docs
+  - change any backend or frontend runtime behavior
+  - overload `.artifacts/ai/language-mode.txt` to mean comment language
+  - add comment rewrites across existing source files
+  - modify unrelated architecture docs or hook scripts
 
 ## Allowed Files
 
@@ -35,7 +39,9 @@
 3. .artifacts/ai/progress.md
 4. .artifacts/ai/findings.md
 5. .artifacts/ai/handoff.md
-6. src-tauri/src/lib.rs
+6. docs/TauriCodeCommentStandard.md
+7. .github/prompts/comment-zh.prompt.md
+8. .github/prompts/comment-en.prompt.md
 
 ## 控制性文档
 
@@ -44,21 +50,19 @@
 3. docs/TauriAIDevelopmentTransactionProtocolDesign.md
 4. docs/TauriTestingStrategyAndQualityGateDesign.md
 5. docs/TauriCodeCommentStandard.md
-6. docs/TauriCompositionRootWiringDesign.md
-7. docs/TauriIPCAndStateContractsDesign.md
+6. .github/skills/strict-doc-driven-development/SKILL.md
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If the desktop host crate entry file receives declaration-level comments that explain it is the public host boundary re-exporting bootstrap, transport, and shared state surfaces, then this twelfth backend comment slice will satisfy the repository comment standard without adding low-signal comments to the obvious one-line `main.rs` binary entrypoint.
+- falsifiable local hypothesis: If the comment standard explicitly states that code comments default to simplified Chinese and the repo exposes prompt-based `/comment-zh` and `/comment-en` switches for future comment-authoring work, then developers can request English comments without weakening the default Chinese rule or overloading the existing workflow-language controls.
 
 ## Cheap Check
 
-- `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`
+- `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md docs/TauriCodeCommentStandard.md .github/prompts/comment-zh.prompt.md .github/prompts/comment-en.prompt.md`
 
 ## Validation Gate
 
-1. `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`
-2. `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md src-tauri/src/lib.rs`
+1. `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md docs/TauriCodeCommentStandard.md .github/prompts/comment-zh.prompt.md .github/prompts/comment-en.prompt.md`
 
 ## Validation Result
 
@@ -66,14 +70,16 @@
 
 ## Notes
 
-- `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke` passed with the host transport smoke test green.
-- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md src-tauri/src/lib.rs` produced no output.
+- `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md docs/TauriCodeCommentStandard.md .github/prompts/comment-zh.prompt.md .github/prompts/comment-en.prompt.md` produced no output.
+- VS Code diagnostics stayed clean for `docs/TauriCodeCommentStandard.md`, `.github/prompts/comment-zh.prompt.md`, and `.github/prompts/comment-en.prompt.md`.
 
 ## 安全恢复点
 
-- 第十二批后端注释切片已收敛到 desktop host crate 入口边界；若中断，恢复时直接补 `src-tauri/src/lib.rs` 的声明级注释，然后立刻跑 `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`。
+- 默认中文注释和显式英文切换约束已经收敛到 `docs/TauriCodeCommentStandard.md` 与 `.github/prompts/comment-*.prompt.md`；若中断，恢复时直接完成这三个文件并立刻跑 scoped `git diff --check`。
 
 ## Completion
 
-- completed slice: `src-tauri/src/lib.rs`
-- publication step: pending commit and push in this turn, then wait for user confirmation before opening the next 1-2 file backend slice
+- completed slice: `docs/TauriCodeCommentStandard.md`, `.github/prompts/comment-zh.prompt.md`, `.github/prompts/comment-en.prompt.md`
+- publication step: pending commit and push in this turn
+
+- pending

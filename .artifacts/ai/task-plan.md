@@ -6,12 +6,12 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 23 - Backend comment rollout
+Phase 24 - Comment language controls
 
 ## Current Focus
 
-- AT-2026-05-04-068 completed the twelfth backend comment slice in the desktop host crate entry boundary.
-- The next action is publication only in this turn; after that the workflow should stop for user confirmation before opening the next 1-2 file slice.
+- AT-2026-05-05-069 completed the comment-language control slice by making Chinese the default comment language and adding explicit prompt-based switches for English and Chinese comment authoring.
+- The remaining action in this turn is publication only; after that the repo can return to backend comment rollout or another user-selected slice.
 
 ## Phases
 
@@ -153,6 +153,12 @@ Phase 23 - Backend comment rollout
 - Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062, AT-2026-05-04-063, AT-2026-05-04-064, AT-2026-05-04-065, AT-2026-05-04-066, AT-2026-05-04-067, AT-2026-05-04-068
 - **Status:** in_progress
 
+### Phase 24: Comment Language Controls
+
+- Outcome: make the repository comment standard default to Chinese comments while exposing explicit slash-command switches for English and Chinese comment authoring.
+- Atomic tasks: AT-2026-05-05-069
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -217,6 +223,7 @@ Phase 23 - Backend comment rollout
 60. AT-2026-05-04-066 - completed - annotated the desktop host engines transport handler, then validated the slice and prepared it for publication before asking whether to continue.
 61. AT-2026-05-04-067 - completed - annotated the desktop host Fab transport handlers, then validated the slice and prepared it for publication before asking whether to continue.
 62. AT-2026-05-04-068 - completed - annotated the desktop host crate entry surface, then validated the slice and prepared it for publication before asking whether to continue.
+63. AT-2026-05-05-069 - completed - documented Chinese-by-default comment language and added prompt-based `/comment-zh` and `/comment-en` switches for future comment-authoring work.
 
 ## Key Questions
 

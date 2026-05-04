@@ -2,21 +2,22 @@
 
 ## Latest Completed Atomic Task
 
-- task id: AT-2026-05-04-068
-- title: Desktop host crate entry comment slice 12
+- task id: AT-2026-05-05-069
+- title: Comment language control docs and slash commands
 - status: completed
 
 ## Validated Slice
 
-- `src-tauri/src/lib.rs`
+- `docs/TauriCodeCommentStandard.md`
+- `.github/prompts/comment-zh.prompt.md`
+- `.github/prompts/comment-en.prompt.md`
 
 ## Validation
 
-- `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`
-- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md src-tauri/src/lib.rs`
+- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md docs/TauriCodeCommentStandard.md .github/prompts/comment-zh.prompt.md .github/prompts/comment-en.prompt.md`
+- VS Code diagnostics reported no errors for the touched comment standard and prompt files.
 
 ## Next Resume Point
 
-- Commit and push this validated slice if publication has not happened yet.
-- After publication, stop and ask the user whether to continue with the next 1-2 backend files.
-- Prefer the next slice to stay inside one backend boundary with a similarly small blast radius.
+- Commit and push this validated docs-only slice if publication has not happened yet.
+- After publication, the next natural repo path is to resume the backend comment rollout with the new Chinese-default rule in force unless the user explicitly switches to English comment mode.

@@ -2,12 +2,17 @@
 
 ## Requirements
 
+- New or revised code comments should default to simplified Chinese.
+- Other developers must be able to request English comments explicitly, ideally through a slash command instead of an implicit convention.
 - Keep `.artifacts/ai` as the only authoritative workflow record set.
 - Preserve the repo's single-active-task protocol and compatibility with existing hook parsing.
 - Normalize the live records so they look intentional and match the repo-local planning-with-files workflow.
 
 ## Research Findings
 
+- The repository already has `.artifacts/ai/language-mode.txt` plus `MYEPIC_WORKFLOW_LANG`, but those surfaces currently control workflow and hook language, not source-code comment language.
+- The repository already exposes named slash commands through `.github/prompts/*.prompt.md`, so adding `comment-zh` and `comment-en` there is the least disruptive comment-language switch surface.
+- `docs/TauriCodeCommentStandard.md` currently defines comment coverage, syntax, and concurrency expectations, but it does not yet define the language of comment text or how to switch that language per request.
 - `src-tauri/src/lib.rs` is the strongest next slice after the host command handlers because it is the desktop host crate entry boundary that re-exports bootstrap, commands, and shared state, while `src-tauri/src/main.rs` is only a trivial one-line binary handoff.
 - The comments here should focus on crate-entry ownership and the meaning of the public re-export surface, not on restating the obvious `run_desktop_host()` call in `main.rs`.
 - `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke` remains the narrowest executable validation for this slice because the smoke test builds and uses the crate-level public host surface re-exported from `lib.rs`.
@@ -151,6 +156,7 @@
 
 | Decision | Rationale |
 |----------|-----------|
+| Use prompt-based `/comment-zh` and `/comment-en` switches for comment authoring instead of reusing `.artifacts/ai/language-mode.txt` | Workflow copy language and source-comment language are related but not identical concerns; a separate prompt surface avoids surprising hook-language changes when a developer only wants English code comments |
 | `.artifacts/ai` remains the only authoritative task record set | Prevents dual planning surfaces and stale recovery paths |
 | The task-plan keeps a numbered AT ledger | `check-complete` and stop hooks already parse that shape |
 | The repo should use one hybrid schema across live records, templates, and bootstrap output | planning-with-files readability is useful, but strict-doc semantics must stay explicit |

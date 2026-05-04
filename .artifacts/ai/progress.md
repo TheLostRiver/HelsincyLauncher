@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-04-068 - Desktop host crate entry comment slice 12 - COMPLETED
-- Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-04-068 - documented the desktop host crate entry surface as the twelfth backend comment rollout slice
-- Next step: publish this slice, then wait for user confirmation before selecting the next 1-2 backend files
+- Active atomic task: AT-2026-05-05-069 - Comment language control docs and slash commands - COMPLETED
+- Current phase: Phase 24 - Comment language controls
+- Last completed slice: AT-2026-05-05-069 - documented the default Chinese comment rule and added explicit slash-command switches for English and Chinese comment authoring
+- Next step: publish this docs-only slice, then wait for the next user-selected work item
 
 ## Session Timeline
 
@@ -15,6 +15,18 @@
 - Validated AT-2026-05-04-068 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`; the host transport smoke test passed.
 - Confirmed `git diff --check` returned clean for the task-record files, handoff, and the touched desktop host crate-entry file.
 - Marked AT-2026-05-04-068 complete after validation; the remaining action in this turn is publication only.
+
+### Session: 2026-05-05
+
+- The user tightened the comment-policy requirement again: new code comments should default to simplified Chinese, while other developers should be able to switch the AI into English comment authoring explicitly through a slash command.
+- Re-read the baseline architecture, AI transaction protocol, testing-gate docs, current `.artifacts/ai` records, and the repository comment standard before opening a new docs-only atomic task.
+- Confirmed the repo already has a workflow-language mode plus prompt-based slash commands, but the comment standard still does not define the language of comment text or any explicit comment-language switch.
+- Started AT-2026-05-05-069 to document the Chinese-by-default comment rule and add prompt-based `/comment-zh` and `/comment-en` entry points without overloading the existing workflow-language controls.
+- Updated `docs/TauriCodeCommentStandard.md` to make Chinese the default language for new or revised code comments, define how `/comment-en` and `/comment-zh` switch future comment-writing work, and add review/rollout checks for comment-text language.
+- Added `.github/prompts/comment-zh.prompt.md` and `.github/prompts/comment-en.prompt.md` so the repository now exposes explicit slash-command entry points for comment-language switching.
+- Validated AT-2026-05-05-069 with scoped `git diff --check`; the docs-only slice returned no output.
+- Checked VS Code diagnostics for the touched comment standard and both new prompt files; no errors were reported.
+- Marked AT-2026-05-05-069 complete after validation; the remaining action in this turn is publication only.
 
 - The user chose to continue again after AT-2026-05-04-067, so the rollout stayed on the desktop host boundary after the command-layer files were exhausted.
 - Compared `src-tauri/src/lib.rs` and `src-tauri/src/main.rs`, then chose `src-tauri/src/lib.rs` because it is the real crate entry boundary while `main.rs` is a trivial one-line binary handoff.
