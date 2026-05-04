@@ -3,6 +3,9 @@ pub mod runtime;
 
 pub use model::{
     AcceptedJob, EnqueueJobRequest, JobPriority, JobProgress, JobSnapshot, JobState,
-    JobUiState,
+    JobUiState, RestoreDisposition,
 };
-pub use runtime::{JobRuntime, JobSnapshotStore, RuntimeQueuePolicy, SharedJobRuntimeHost};
+pub use runtime::{
+    JobDriver, JobDriverRegistry, JobRuntime, JobSnapshotStore, RuntimeQueuePolicy,
+    SharedJobRuntimeHost,
+};

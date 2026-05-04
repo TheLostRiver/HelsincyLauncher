@@ -6,6 +6,7 @@ use launcher_kernel_foundation::{AppResult, IsoDateTime, JobId};
 
 use crate::model::{
     AcceptedJob, EnqueueJobRequest, JobProgress, JobSnapshot, JobState, JobUiState,
+    RestoreDisposition,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -18,6 +19,43 @@ impl RuntimeQueuePolicy {
         Self {
             max_concurrent_jobs,
         }
+    }
+}
+
+pub trait JobDriver<E>: Send + Sync {
+    fn module(&self) -> &'static str;
+    fn kind(&self) -> &'static str;
+    fn restore(&self, snapshot: &JobSnapshot<E>) -> AppResult<RestoreDisposition>;
+}
+
+pub struct JobDriverRegistry<E> {
+    drivers: HashMap<(String, String), Arc<dyn JobDriver<E>>>,
+}
+
+impl<E: 'static> Default for JobDriverRegistry<E> {
+    fn default() -> Self {
+        Self {
+            drivers: HashMap::new(),
+        }
+    }
+}
+
+impl<E: 'static> JobDriverRegistry<E> {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    pub fn register(&mut self, driver: Arc<dyn JobDriver<E>>) {
+        self.drivers.insert(
+            (driver.module().to_string(), driver.kind().to_string()),
+            driver,
+        );
+    }
+
+    pub fn resolve(&self, module: &str, kind: &str) -> Option<&dyn JobDriver<E>> {
+        self.drivers
+            .get(&(module.to_string(), kind.to_string()))
+            .map(|d| d.as_ref())
     }
 }
 

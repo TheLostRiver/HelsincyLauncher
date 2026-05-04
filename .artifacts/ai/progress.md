@@ -2,7 +2,7 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-03-045 - Persist runtime snapshots to sqlite
+- Active atomic task: AT-2026-05-04-047 - Stage-2 orphaned lease reset — COMPLETED (commit fb97bf8)
 - Current phase: Phase 17 - Runtime Snapshot Persistence
 - Last committed task before this slice: AT-2026-05-03-044 - Build shared job runtime bundle
 - Next validation gate: `cargo test -p launcher-composition-root runtime_snapshot_persists_across_rebuilds`, then `cargo test -p launcher-composition-root bootstrap_wiring_smoke`, then `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`

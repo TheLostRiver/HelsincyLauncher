@@ -2,8 +2,8 @@
 
 ## Identity
 
-- task id: AT-2026-05-04-047
-- title: Stage-2 orphaned lease reset
+- task id: AT-2026-05-04-048
+- title: JobDriver registry + Fab stub drivers + stage-2 restore dispatch
 - status: in_progress
 
 ## Goal

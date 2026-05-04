@@ -75,6 +75,12 @@ pub struct EnqueueJobRequest<E> {
     pub extension: Option<E>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum RestoreDisposition {
+    Resumed,
+    FailedAsUnrecoverable { reason: String },
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct JobSnapshot<E> {
     pub job_id: JobId,

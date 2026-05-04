@@ -12,9 +12,9 @@ use launcher_adapter_storage_sqlite::{
 use launcher_kernel_foundation::{
     AppError, AppErrorSeverity, AppResult, CorrelationId,
 };
-use launcher_kernel_jobs::{RuntimeQueuePolicy, SharedJobRuntimeHost};
+use launcher_kernel_jobs::{JobDriverRegistry, RuntimeQueuePolicy, SharedJobRuntimeHost};
 use launcher_module_downloads::{DownloadFacade, DownloadModuleDeps};
-use launcher_module_fab::{FabFacade, FabModuleDeps};
+use launcher_module_fab::{FabFacade, FabModuleDeps, FabPrewarmJobDriver, FabSyncJobDriver};
 
 use crate::startup::StartupPipelineFacade;
 
@@ -100,7 +100,8 @@ pub fn build_desktop_services(config: DesktopBootstrapConfig) -> AppResult<Deskt
         job_runtime.clone(),
     ));
     let downloads = Arc::new(build_downloads_module(sqlite_config, job_runtime));
-    let startup = Arc::new(build_startup_pipeline(&config, fab.clone(), snapshot_store));
+    let registry = build_job_driver_registry();
+    let startup = Arc::new(build_startup_pipeline(&config, fab.clone(), snapshot_store, registry));
 
     Ok(DesktopAppServices::new(fab, downloads, startup))
 }
@@ -177,15 +178,24 @@ fn build_job_runtime(config: &DesktopBootstrapConfig) -> AppResult<(SharedJobRun
     Ok((runtime, store))
 }
 
+fn build_job_driver_registry() -> Arc<JobDriverRegistry<()>> {
+    let mut registry = JobDriverRegistry::new();
+    registry.register(Arc::new(FabPrewarmJobDriver));
+    registry.register(Arc::new(FabSyncJobDriver));
+    Arc::new(registry)
+}
+
 fn build_startup_pipeline(
     config: &DesktopBootstrapConfig,
     fab: Arc<DesktopFabFacade>,
     snapshot_store: Arc<SqliteJobSnapshotStore>,
+    driver_registry: Arc<JobDriverRegistry<()>>,
 ) -> StartupPipelineFacade {
     StartupPipelineFacade::new(
         config.enable_fab && config.enable_startup_prewarm,
         Some(fab),
         Some(snapshot_store),
+        Some(driver_registry),
     )
 }
 

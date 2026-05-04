@@ -2,7 +2,9 @@ use std::fmt::{Debug, Formatter};
 use std::sync::Arc;
 
 use launcher_kernel_foundation::{AppResult, IsoDateTime};
-use launcher_kernel_jobs::{AcceptedJob, JobSnapshotStore, JobState, JobUiState};
+use launcher_kernel_jobs::{
+    AcceptedJob, JobDriverRegistry, JobSnapshotStore, JobState, JobUiState, RestoreDisposition,
+};
 use launcher_module_fab::{
     contracts::FabInventoryPrewarmRequestDto,
     facade::FabStartupPrewarmJobAcceptance,
@@ -31,6 +33,7 @@ pub struct StartupPipelineFacade {
     enable_startup_prewarm: bool,
     fab_prewarm: Option<Arc<dyn FabStartupPrewarmPort>>,
     snapshot_store: Option<Arc<dyn JobSnapshotStore<()>>>,
+    driver_registry: Option<Arc<JobDriverRegistry<()>>>,
 }
 
 impl Debug for StartupPipelineFacade {
@@ -40,13 +43,14 @@ impl Debug for StartupPipelineFacade {
             .field("enable_startup_prewarm", &self.enable_startup_prewarm)
             .field("has_fab_prewarm", &self.fab_prewarm.is_some())
             .field("has_snapshot_store", &self.snapshot_store.is_some())
+            .field("has_driver_registry", &self.driver_registry.is_some())
             .finish()
     }
 }
 
 impl Default for StartupPipelineFacade {
     fn default() -> Self {
-        Self::new(false, None, None)
+        Self::new(false, None, None, None)
     }
 }
 
@@ -55,11 +59,13 @@ impl StartupPipelineFacade {
         enable_startup_prewarm: bool,
         fab_prewarm: Option<Arc<dyn FabStartupPrewarmPort>>,
         snapshot_store: Option<Arc<dyn JobSnapshotStore<()>>>,
+        driver_registry: Option<Arc<JobDriverRegistry<()>>>,
     ) -> Self {
         Self {
             enable_startup_prewarm,
             fab_prewarm,
             snapshot_store,
+            driver_registry,
         }
     }
 
@@ -104,6 +110,42 @@ impl StartupPipelineFacade {
                     snapshot.updated_at = IsoDateTime::now();
                     store.update(&snapshot)?;
                 }
+
+                // For Queued jobs, ask the registered driver whether they are
+                // actually resumable (e.g. their business checkpoint still exists).
+                if snapshot.state == JobState::Queued {
+                    if let Some(registry) = self.driver_registry.as_ref() {
+                        match registry.resolve(&snapshot.module, &snapshot.kind) {
+                            Some(driver) => match driver.restore(&snapshot)? {
+                                RestoreDisposition::Resumed => {
+                                    tracing::info!(
+                                        job_id = %snapshot.job_id,
+                                        "stage-2: driver confirmed job resumed"
+                                    );
+                                }
+                                RestoreDisposition::FailedAsUnrecoverable { reason } => {
+                                    tracing::info!(
+                                        job_id = %snapshot.job_id,
+                                        %reason,
+                                        "stage-2: driver marked job as unrecoverable"
+                                    );
+                                    snapshot.state = JobState::Failed;
+                                    snapshot.ui_state = JobUiState::Failed;
+                                    snapshot.updated_at = IsoDateTime::now();
+                                    store.update(&snapshot)?;
+                                }
+                            },
+                            None => {
+                                tracing::warn!(
+                                    job_id = %snapshot.job_id,
+                                    module = %snapshot.module,
+                                    kind = %snapshot.kind,
+                                    "stage-2: no driver registered for this job kind, leaving as Queued"
+                                );
+                            }
+                        }
+                    }
+                }
             }
         }
         Ok(())
@@ -134,7 +176,8 @@ mod tests {
 
     use launcher_kernel_foundation::{AppResult, IsoDateTime, JobId};
     use launcher_kernel_jobs::{
-        AcceptedJob, JobProgress, JobSnapshot, JobSnapshotStore, JobState, JobUiState,
+        AcceptedJob, JobDriver, JobDriverRegistry, JobProgress, JobSnapshot,
+        JobSnapshotStore, JobState, JobUiState, RestoreDisposition,
     };
     use launcher_module_fab::contracts::FabInventoryPrewarmRequestDto;
 
@@ -204,7 +247,7 @@ mod tests {
         let job_id = JobId::generate();
         store.create(&make_running_snapshot(job_id.clone(), true)).unwrap();
 
-        let facade = StartupPipelineFacade::new(false, None, Some(store.clone()));
+        let facade = StartupPipelineFacade::new(false, None, Some(store.clone()), None);
         block_on_ready(facade.run_stage2_restore_runtime_state())
             .expect("stage-2 should succeed");
 
@@ -221,7 +264,7 @@ mod tests {
         let job_id = JobId::generate();
         store.create(&make_running_snapshot(job_id.clone(), false)).unwrap();
 
-        let facade = StartupPipelineFacade::new(false, None, Some(store.clone()));
+        let facade = StartupPipelineFacade::new(false, None, Some(store.clone()), None);
         block_on_ready(facade.run_stage2_restore_runtime_state())
             .expect("stage-2 should succeed");
 
@@ -229,6 +272,53 @@ mod tests {
             store.get_state(&job_id),
             Some(JobState::Failed),
             "non-recoverable Running job should become Failed"
+        );
+    }
+
+    // ── driver registry test ──────────────────────────────────────────────────
+    struct AlwaysFailDriver;
+    impl JobDriver<()> for AlwaysFailDriver {
+        fn module(&self) -> &'static str { "test" }
+        fn kind(&self) -> &'static str { "test_job" }
+        fn restore(&self, _snapshot: &JobSnapshot<()>) -> AppResult<RestoreDisposition> {
+            Ok(RestoreDisposition::FailedAsUnrecoverable {
+                reason: "business checkpoint missing".into(),
+            })
+        }
+    }
+
+    #[test]
+    fn stage2_driver_marks_queued_job_failed_when_checkpoint_missing() {
+        let store = Arc::new(TestSnapshotStore::default());
+        let job_id = JobId::generate();
+        // Seed a Queued job (already in clean state, no orphan reset needed).
+        store.create(&JobSnapshot {
+            job_id: job_id.clone(),
+            module: "test".into(),
+            kind: "test_job".into(),
+            state: JobState::Queued,
+            ui_state: JobUiState::Queued,
+            progress: JobProgress::pending(),
+            recoverable: true,
+            updated_at: IsoDateTime::now(),
+            extension: None,
+        }).unwrap();
+
+        let mut registry = JobDriverRegistry::new();
+        registry.register(Arc::new(AlwaysFailDriver));
+        let facade = StartupPipelineFacade::new(
+            false,
+            None,
+            Some(store.clone()),
+            Some(Arc::new(registry)),
+        );
+        block_on_ready(facade.run_stage2_restore_runtime_state())
+            .expect("stage-2 should succeed");
+
+        assert_eq!(
+            store.get_state(&job_id),
+            Some(JobState::Failed),
+            "driver returning FailedAsUnrecoverable should mark job as Failed"
         );
     }
 
@@ -260,7 +350,7 @@ mod tests {
     #[test]
     fn run_stage3_background_prewarm_triggers_fab_prewarm_when_enabled() {
         let fab_prewarm = Arc::new(RecordingFabPrewarmPort::default());
-        let facade = StartupPipelineFacade::new(true, Some(fab_prewarm.clone()), None);
+        let facade = StartupPipelineFacade::new(true, Some(fab_prewarm.clone()), None, None);
 
         block_on_ready(facade.run_stage3_background_prewarm())
             .expect("stage-3 background prewarm should trigger the Fab prewarm path when enabled");
@@ -279,7 +369,7 @@ mod tests {
     #[test]
     fn run_stage3_background_prewarm_skips_fab_prewarm_when_disabled() {
         let fab_prewarm = Arc::new(RecordingFabPrewarmPort::default());
-        let facade = StartupPipelineFacade::new(false, Some(fab_prewarm.clone()), None);
+        let facade = StartupPipelineFacade::new(false, Some(fab_prewarm.clone()), None, None);
 
         block_on_ready(facade.run_stage3_background_prewarm())
             .expect("stage-3 background prewarm should stay a no-op when the capability gate is disabled");
