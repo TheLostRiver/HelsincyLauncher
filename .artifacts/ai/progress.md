@@ -2,14 +2,23 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-04-062 - Downloads contracts comment slice 6 - COMPLETED
+- Active atomic task: AT-2026-05-04-063 - Downloads input contracts comment slice 7 - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-04-062 - documented the downloads contracts aggregation boundary as the sixth backend comment rollout slice
+- Last completed slice: AT-2026-05-04-063 - documented the downloads command/query input contracts as the seventh backend comment rollout slice
 - Next step: publish this slice, then wait for user confirmation before selecting the next 1-2 backend files
 
 ## Session Timeline
 
 ### Session: 2026-05-04
+
+- Added the seventh backend comment slice in `crates/module-downloads/src/contracts/commands.rs` and `crates/module-downloads/src/contracts/queries.rs`, focusing on user-intent DTO semantics, query filter meaning, and the few non-obvious scheduling-policy fields.
+- Validated AT-2026-05-04-063 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority`; the targeted downloads unit test passed.
+- Confirmed `git diff --check` returned clean for the task-record files, handoff, and the two touched downloads input-contract files.
+- Marked AT-2026-05-04-063 complete after validation; the remaining action in this turn is publication only.
+
+- The user explicitly chose to continue after AT-2026-05-04-062, so the workflow stayed inside the same downloads contracts area for another small slice.
+- Started AT-2026-05-04-063 and narrowed the next files to `crates/module-downloads/src/contracts/commands.rs` and `crates/module-downloads/src/contracts/queries.rs` because they are adjacent public input-contract files with clear comment gaps and low blast radius.
+- Re-read the two files against `docs/TauriDownloadRuntimeDesign.md`, then confirmed the local hypothesis: this slice should explain the user-intent and read-filter meaning of the downloads input DTOs without adding low-value comments to trivial derives or wrappers.
 
 - Added the sixth backend comment slice in `crates/module-downloads/src/contracts/mod.rs`, focusing on the contracts entrypoint role and the four public contract families re-exported by the downloads module.
 - Validated AT-2026-05-04-062 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority`; the targeted downloads unit test passed.

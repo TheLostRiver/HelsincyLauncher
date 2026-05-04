@@ -8,6 +8,10 @@
 
 ## Research Findings
 
+- `crates/module-downloads/src/contracts/commands.rs` and `crates/module-downloads/src/contracts/queries.rs` are a good paired slice because they are adjacent public input-contract files, together define user intents and read filters, and can be validated by the same narrow module-downloads compile/test path.
+- The existing `start_download_persists_request_metadata_and_enqueue_priority` unit test is still the cheapest executable validation for this paired slice because it compiles both input-contract files through the downloads module without widening to host transport.
+- The comments here should focus on request/query semantics and policy fields, not on serde derives or the bare presence of wrapper IDs.
+
 - `crates/module-downloads/src/contracts/mod.rs` is a valid small comment slice because it is the module's public contract aggregation boundary, yet it currently exposes commands/dto/events/queries re-exports without any declaration-level explanation of that role.
 - The narrowest executable validation for this slice is `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority`, because that named unit test compiles the downloads module and exercises one of the public contract paths without reopening broader host wiring.
 - This slice should stay focused on the aggregation boundary itself rather than spilling into the underlying downloads contract submodules or facade implementation.

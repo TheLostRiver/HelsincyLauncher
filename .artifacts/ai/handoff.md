@@ -2,18 +2,19 @@
 
 ## Latest Completed Atomic Task
 
-- task id: AT-2026-05-04-062
-- title: Downloads contracts comment slice 6
+- task id: AT-2026-05-04-063
+- title: Downloads input contracts comment slice 7
 - status: completed
 
 ## Validated Slice
 
-- `crates/module-downloads/src/contracts/mod.rs`
+- `crates/module-downloads/src/contracts/commands.rs`
+- `crates/module-downloads/src/contracts/queries.rs`
 
 ## Validation
 
 - `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority`
-- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/module-downloads/src/contracts/mod.rs`
+- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/module-downloads/src/contracts/commands.rs crates/module-downloads/src/contracts/queries.rs`
 
 ## Next Resume Point
 

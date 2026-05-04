@@ -10,7 +10,7 @@ Phase 23 - Backend comment rollout
 
 ## Current Focus
 
-- AT-2026-05-04-062 completed the sixth backend comment slice in the downloads contracts boundary.
+- AT-2026-05-04-063 completed the seventh backend comment slice in the downloads input-contract boundary.
 - The next action is publication only in this turn; after that the workflow should stop for user confirmation before opening the next 1-2 file slice.
 
 ## Phases
@@ -150,7 +150,7 @@ Phase 23 - Backend comment rollout
 ### Phase 23: Backend Comment Rollout
 
 - Outcome: apply the new repository comment standard to backend Rust/Tauri files in small, commit-sized slices of one or two files.
-- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062
+- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062, AT-2026-05-04-063
 - **Status:** in_progress
 
 ## Atomic Task Ledger
@@ -211,6 +211,7 @@ Phase 23 - Backend comment rollout
 54. AT-2026-05-04-060 - completed - annotated the startup pipeline boundary in composition-root, then validated the slice and prepared it for publication before asking whether to continue.
 55. AT-2026-05-04-061 - completed - annotated the desktop host state handle boundary, then validated and prepared the slice for publication.
 56. AT-2026-05-04-062 - completed - annotated the downloads contracts aggregation boundary, then validated the slice and prepared it for publication before asking whether to continue.
+57. AT-2026-05-04-063 - completed - annotated the downloads command/query input contracts, then validated the slice and prepared it for publication before asking whether to continue.
 
 ## Key Questions
 
