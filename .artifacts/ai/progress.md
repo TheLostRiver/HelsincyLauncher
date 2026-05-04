@@ -2,14 +2,23 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-04-063 - Downloads input contracts comment slice 7 - COMPLETED
+- Active atomic task: AT-2026-05-04-064 - Downloads read-model contracts comment slice 8 - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-04-063 - documented the downloads command/query input contracts as the seventh backend comment rollout slice
+- Last completed slice: AT-2026-05-04-064 - documented the downloads read-model and event contracts as the eighth backend comment rollout slice
 - Next step: publish this slice, then wait for user confirmation before selecting the next 1-2 backend files
 
 ## Session Timeline
 
 ### Session: 2026-05-04
+
+- Added the eighth backend comment slice in `crates/module-downloads/src/contracts/dto.rs` and `crates/module-downloads/src/contracts/events.rs`, focusing on projected read-model semantics, event union meaning, and the few non-obvious progress and retry fields.
+- Validated AT-2026-05-04-064 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority`; the targeted downloads unit test passed.
+- Confirmed `git diff --check` returned clean for the task-record files, handoff, and the two touched downloads read-model/event files.
+- Marked AT-2026-05-04-064 complete after validation; the remaining action in this turn is publication only.
+
+- The user chose to continue again after AT-2026-05-04-063, so the workflow stayed inside the remaining downloads contracts files for another two-file slice.
+- Started AT-2026-05-04-064 and narrowed the next files to `crates/module-downloads/src/contracts/dto.rs` and `crates/module-downloads/src/contracts/events.rs` because they complete the public downloads contracts set with projected read models and broadcast events.
+- Re-read the two files against `docs/TauriDownloadRuntimeDesign.md`, then confirmed the local hypothesis: this slice should explain which backend facts are projected and emitted without cluttering simple type aliases or every obvious ID field.
 
 - Added the seventh backend comment slice in `crates/module-downloads/src/contracts/commands.rs` and `crates/module-downloads/src/contracts/queries.rs`, focusing on user-intent DTO semantics, query filter meaning, and the few non-obvious scheduling-policy fields.
 - Validated AT-2026-05-04-063 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority`; the targeted downloads unit test passed.

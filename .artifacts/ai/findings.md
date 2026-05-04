@@ -8,6 +8,10 @@
 
 ## Research Findings
 
+- `crates/module-downloads/src/contracts/dto.rs` and `crates/module-downloads/src/contracts/events.rs` are a good paired slice because together they finish the public downloads contracts surface with projected state snapshots and event payloads while staying inside one narrow module boundary.
+- The comments here should emphasize which backend facts are stable read models versus transient emitted events, plus the few non-obvious projection fields like throughput, progress labels, and retryability.
+- The same named downloads unit test remains the cheapest executable validation for this slice because the module compiles these contracts through the public facade without widening to transport or host startup.
+
 - `crates/module-downloads/src/contracts/commands.rs` and `crates/module-downloads/src/contracts/queries.rs` are a good paired slice because they are adjacent public input-contract files, together define user intents and read filters, and can be validated by the same narrow module-downloads compile/test path.
 - The existing `start_download_persists_request_metadata_and_enqueue_priority` unit test is still the cheapest executable validation for this paired slice because it compiles both input-contract files through the downloads module without widening to host transport.
 - The comments here should focus on request/query semantics and policy fields, not on serde derives or the bare presence of wrapper IDs.
