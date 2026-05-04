@@ -6,12 +6,12 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 21 - Composition-root documentation drift cleanup
+Phase 22 - Standalone code comment standard
 
 ## Current Focus
 
-- AT-2026-05-04-055 completed the composition-root engines documentation drift cleanup.
-- Subsequent engines query/repair work remains deferred unless the user explicitly selects it.
+- AT-2026-05-04-056 completed the standalone repository code comment standard and routed it from `docs/README.md`.
+- Repo-wide comment retrofits, lint/tooling enforcement, or per-module follow-on docs remain deferred until explicitly selected.
 
 ## Phases
 
@@ -141,6 +141,12 @@ Phase 21 - Composition-root documentation drift cleanup
 - Atomic tasks: AT-2026-05-04-055
 - **Status:** complete
 
+### Phase 22: Code Comment Governance
+
+- Outcome: publish a standalone repository comment standard that defines declaration coverage, language-specific syntax, selective body comments, and stronger concurrency-comment rules.
+- Atomic tasks: AT-2026-05-04-056
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -192,6 +198,7 @@ Phase 21 - Composition-root documentation drift cleanup
 47. AT-2026-05-04-053 - completed - persisted start_download request metadata into the downloads job repository, honored request priority during runtime enqueue, and validated the behavior through module and composition-root tests.
 48. AT-2026-05-04-054 - completed - wired engine verification to return a backend-owned accepted job, exposed engines through composition-root and host transport, and validated the path through module, composition-root, and transport tests.
 49. AT-2026-05-04-055 - completed - repaired `TauriCompositionRootWiringDesign.md` so the current wiring scope, service sketches, sequence, and smoke-test matrix acknowledge engines without implying startup orchestration already exists.
+50. AT-2026-05-04-056 - completed - published `docs/TauriCodeCommentStandard.md`, routed it from `docs/README.md`, and kept the slice docs-only without widening into repo-wide comment retrofits.
 
 ## Key Questions
 

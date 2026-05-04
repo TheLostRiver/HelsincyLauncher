@@ -8,6 +8,11 @@
 
 ## Research Findings
 
+- The repository already has `docs/ModuleDocumentationStandard.md`, but it still lacks a repository-level code comment standard that separates declaration comments from selective function-body comments.
+- `docs/README.md` is the minimal correct routing surface for a new standalone comment standard; this slice does not need to widen into root README churn if the docs map is updated.
+- The comment standard must reconcile two constraints at once: obvious code should remain uncommented, but high-risk concurrency and multi-threading logic should have stricter mandatory comments.
+- The language split should be explicit instead of pretending one syntax fits all cases: TypeScript/TSX/JavaScript can prefer Doxygen-style block comments for declarations, while Rust should keep Rustdoc mainly for module entry points and public APIs and use ordinary comments for private internals.
+
 - The stale startup context was caused by .github/hooks/scripts/session-start.ps1 and session-start.sh reading root task_plan.md.
 - The stricter repo instructions and workflow templates still referenced root task_plan.md, progress.md, and findings.md, which conflicted with docs/TauriAIDevelopmentTransactionProtocolDesign.md.
 - The protocol document defines .artifacts/ai/active-task.md, task-plan.md, progress.md, findings.md, and handoff.md as the intended local workflow records.
@@ -113,6 +118,7 @@
 | Sync terminal commands did not preserve the intended repo cwd for verification and commit flow | Use async terminal commands with explicit repo paths when git output matters |
 | The backend skeleton doc's A1 assumption conflicted with actual Cargo behavior | Surface the gap in findings/progress and bridge the workspace root to the smallest valid `src-tauri` stub |
 | A blanket Fab acceptance impl for all `JobRuntime` types conflicted with the existing `()` placeholder impls under Rust coherence rules | Narrow the new acceptance bridge to the concrete `SharedJobRuntimeHost` injected by composition-root and rerun the same composition-root smoke |
+| Sync terminal Git publication for AT-056 produced misleading no-op behavior | After five silent `run_in_terminal` variants, switched to an async terminal session plus `send_to_terminal`, verified `git status --short` there, and used that session as the working Git publish path |
 
 ## Resources
 

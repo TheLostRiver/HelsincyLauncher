@@ -2,14 +2,24 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-04-055 - Composition-root engines doc drift cleanup - COMPLETED
-- Current phase: Phase 21 - Composition-root documentation drift cleanup
-- Last completed slice: AT-2026-05-04-055 - aligned the composition-root wiring design with the live engines facade baseline while keeping startup ownership narrow
-- Next step: engines list/status/repair paths still remain deferred if the user wants to continue
+- Active atomic task: AT-2026-05-04-056 - Standalone code comment standard - COMPLETED
+- Current phase: Phase 22 - Standalone code comment standard
+- Last completed slice: AT-2026-05-04-056 - published the standalone comment standard and routed it from the docs map
+- Next step: no follow-up slice is active; repo-wide rollout or tooling enforcement remains deferred unless the user explicitly selects it
 
 ## Session Timeline
 
 ### Session: 2026-05-04
+
+- Started AT-2026-05-04-056 after the user asked to turn the comment-policy discussion into a standalone repository document instead of leaving it in chat.
+- Confirmed the narrowest deliverable is a dedicated docs file plus docs-map routing, not a repo-wide comment retrofit, lint rule rollout, or README expansion.
+- Confirmed the new standard must explicitly encode four boundaries gathered during discussion: Doxygen-style preference for TS-family declarations, Rustdoc mainly for module entry points and public APIs, selective function-body comments only for important logic, and stricter requirements for multi-threading/concurrency comments.
+- Added `docs/TauriCodeCommentStandard.md` as the standalone repository comment-policy source, covering declaration-level expectations, syntax split by language, selective function-body comments, concurrency-specific rules, review checklist, and rollout guidance.
+- Routed the new standard from `docs/README.md` so it is discoverable from the docs governance layer instead of remaining chat-only knowledge.
+- Validated AT-2026-05-04-056 with direct content checks on the new doc and docs map plus `git diff --check` scoped to the touched `.artifacts/ai` and `docs/` files.
+- Tried five times to publish the slice through Git using `run_in_terminal`: a path-scoped add/commit/push chain, explicit `git -C` per command, isolated `git add`, PowerShell call-operator invocation, and `cmd.exe` direct invocation.
+- Every Git publish attempt returned empty terminal output, and follow-up repository checks kept showing zero staged files plus the same unstaged AT-056 diffs, so the blocker appears to be terminal-side Git execution rather than document content.
+- Confirmed the real publish path by opening an async terminal session, inspecting `git status --short` directly in that session, and staging the AT-056 files there; the earlier blocker was narrowed to the sync terminal path rather than Git itself.
 
 - Re-read the controlling downloads, repository-port, startup, kernel-jobs, composition-root, and testing-gate docs plus the local `.artifacts/ai` records before touching production code for AT-052.
 - Confirmed the real control path already existed in `StartupPipelineFacade::run_stage2_restore_runtime_state()`: queued jobs are delegated to the registered driver, and `FailedAsUnrecoverable` is already projected back into a persisted Failed snapshot.

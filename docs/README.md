@@ -94,12 +94,14 @@
 1. `docs/TauriAIDevelopmentTransactionProtocolDesign.md`
 2. `docs/TauriAIContextManagementIntegrationDesign.md`
 3. `docs/TauriDocumentationBenchmarkAgainstCodexManager.md`
+4. `docs/TauriCodeCommentStandard.md`
 
 如果你需要的是：
 
 1. AI 原子任务协议
 2. `.artifacts/ai` 与 planning-with-files 的关系
 3. 文档治理改进方向
+4. 仓库级代码注释规范和并发注释要求
 
 优先看这一层。
 
@@ -154,6 +156,12 @@
 先看：
 
 1. `docs/TauriDocumentationBenchmarkAgainstCodexManager.md`
+
+### 3.6 想知道代码注释该写到什么程度
+
+先看：
+
+1. `docs/TauriCodeCommentStandard.md`
 
 ---
 
