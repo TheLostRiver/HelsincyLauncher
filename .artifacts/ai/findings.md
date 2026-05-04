@@ -2,6 +2,7 @@
 
 ## Requirements
 
+- Repository-local slash commands should use an `hsy-XXX` prefix to avoid collisions with other command surfaces.
 - New or revised code comments should default to simplified Chinese.
 - Other developers must be able to request English comments explicitly, ideally through a slash command instead of an implicit convention.
 - Keep `.artifacts/ai` as the only authoritative workflow record set.
@@ -10,8 +11,11 @@
 
 ## Research Findings
 
+- Before AT-2026-05-05-070, all six current workspace prompt commands still used unprefixed names; the normalized surface is now `hsy-plan-atomic-task`, `hsy-plan-backend-skeleton`, `hsy-plan-doc-review`, `hsy-resume-from-handoff`, `hsy-comment-zh`, and `hsy-comment-en`.
+- The live references to these command names are narrow and local: the prompt files themselves, the comment standard's comment-language section, and the current `.artifacts/ai` task records.
+- Renaming both the prompt filenames and frontmatter `name` fields to `hsy-XXX` is sufficient for a consistent repo-local command surface; hook scripts do not depend on these names.
 - The repository already has `.artifacts/ai/language-mode.txt` plus `MYEPIC_WORKFLOW_LANG`, but those surfaces currently control workflow and hook language, not source-code comment language.
-- The repository already exposes named slash commands through `.github/prompts/*.prompt.md`, so adding `comment-zh` and `comment-en` there is the least disruptive comment-language switch surface.
+- The repository already exposes named slash commands through `.github/prompts/*.prompt.md`, so the least disruptive collision-avoidance move is to keep that surface and normalize the command names under an `hsy-` prefix.
 - `docs/TauriCodeCommentStandard.md` currently defines comment coverage, syntax, and concurrency expectations, but it does not yet define the language of comment text or how to switch that language per request.
 - `src-tauri/src/lib.rs` is the strongest next slice after the host command handlers because it is the desktop host crate entry boundary that re-exports bootstrap, commands, and shared state, while `src-tauri/src/main.rs` is only a trivial one-line binary handoff.
 - The comments here should focus on crate-entry ownership and the meaning of the public re-export surface, not on restating the obvious `run_desktop_host()` call in `main.rs`.
@@ -156,7 +160,8 @@
 
 | Decision | Rationale |
 |----------|-----------|
-| Use prompt-based `/comment-zh` and `/comment-en` switches for comment authoring instead of reusing `.artifacts/ai/language-mode.txt` | Workflow copy language and source-comment language are related but not identical concerns; a separate prompt surface avoids surprising hook-language changes when a developer only wants English code comments |
+| Prefix all repository-local workspace prompts with `hsy-` | The user wants a collision-resistant repo command surface, and the prompt system only needs filename plus frontmatter-name consistency to expose the new slash commands |
+| Use prompt-based `/hsy-comment-zh` and `/hsy-comment-en` switches for comment authoring instead of reusing `.artifacts/ai/language-mode.txt` | Workflow copy language and source-comment language are related but not identical concerns; a separate prompt surface avoids surprising hook-language changes when a developer only wants English code comments |
 | `.artifacts/ai` remains the only authoritative task record set | Prevents dual planning surfaces and stale recovery paths |
 | The task-plan keeps a numbered AT ledger | `check-complete` and stop hooks already parse that shape |
 | The repo should use one hybrid schema across live records, templates, and bootstrap output | planning-with-files readability is useful, but strict-doc semantics must stay explicit |

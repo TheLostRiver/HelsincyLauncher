@@ -1,6 +1,6 @@
 ---
-name: plan-atomic-task
-description: "为当前工作创建或刷新严格文档驱动的原子任务记录。触发词：原子任务, active-task, AT, 拆任务, strict-doc."
+name: hsy-plan-atomic-task
+description: "为当前工作创建或刷新严格文档驱动的原子任务记录。触发词：hsy-plan-atomic-task, 原子任务, active-task, AT, 拆任务, strict-doc."
 argument-hint: "输入任务目标或待拆分的工作"
 agent: agent
 ---

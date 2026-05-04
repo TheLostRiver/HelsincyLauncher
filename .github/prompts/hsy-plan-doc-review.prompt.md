@@ -1,6 +1,6 @@
 ---
-name: plan-doc-review
-description: "为文档驱动的 review 或审计任务生成原子计划。触发词：review, 审计, 规范检查, workflow review, doc review."
+name: hsy-plan-doc-review
+description: "为文档驱动的 review 或审计任务生成原子计划。触发词：hsy-plan-doc-review, review, 审计, 规范检查, workflow review, doc review."
 argument-hint: "输入要审查的模块、工作流或文档范围"
 agent: agent
 ---

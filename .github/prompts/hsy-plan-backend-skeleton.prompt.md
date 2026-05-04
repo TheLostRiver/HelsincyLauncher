@@ -1,6 +1,6 @@
 ---
-name: plan-backend-skeleton
-description: "为 MyEpicLauncher 后端骨架生成下一条可执行的原子任务计划。触发词：后端骨架, backend skeleton, src-tauri, crates, cargo workspace."
+name: hsy-plan-backend-skeleton
+description: "为 MyEpicLauncher 后端骨架生成下一条可执行的原子任务计划。触发词：hsy-plan-backend-skeleton, 后端骨架, backend skeleton, src-tauri, crates, cargo workspace."
 argument-hint: "输入后端骨架目标、阶段或当前阻塞点"
 agent: agent
 ---

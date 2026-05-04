@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-05-069 - Comment language control docs and slash commands - COMPLETED
-- Current phase: Phase 24 - Comment language controls
-- Last completed slice: AT-2026-05-05-069 - documented the default Chinese comment rule and added explicit slash-command switches for English and Chinese comment authoring
-- Next step: publish this docs-only slice, then wait for the next user-selected work item
+- Active atomic task: AT-2026-05-05-070 - Prefix workspace slash commands with hsy - COMPLETED
+- Current phase: Phase 25 - Slash command prefix normalization
+- Last completed slice: AT-2026-05-05-070 - renamed the repository-local workspace prompt surface to `hsy-XXX` and updated the normative references
+- Next step: publish this docs-only slice, then continue using the new `hsy-` command names
 
 ## Session Timeline
 
@@ -18,12 +18,21 @@
 
 ### Session: 2026-05-05
 
+- The user then asked to normalize repository slash commands under an `hsy-XXX` prefix to avoid collisions with other command surfaces.
+- Re-read the live workspace prompt files plus the current task records and confirmed all six repository-local prompt commands still expose unprefixed names.
+- Started AT-2026-05-05-070 to rename the workspace prompt command surface to `hsy-XXX` and update the relevant normative references without widening into hook or behavior changes.
+- Replaced the six workspace prompt files with `hsy-plan-atomic-task`, `hsy-plan-backend-skeleton`, `hsy-plan-doc-review`, `hsy-resume-from-handoff`, `hsy-comment-zh`, and `hsy-comment-en`, while deleting the old unprefixed prompt files.
+- Updated `docs/TauriCodeCommentStandard.md` so the explicit comment-language switches now reference `/hsy-comment-en` and `/hsy-comment-zh`.
+- Validated AT-2026-05-05-070 with scoped `git diff --check`; the patch remained clean.
+- Verified `.github/prompts/*.prompt.md` now contains only the six `hsy-` prefixed prompt files.
+- Marked AT-2026-05-05-070 complete after validation; the remaining action in this turn is publication only.
+
 - The user tightened the comment-policy requirement again: new code comments should default to simplified Chinese, while other developers should be able to switch the AI into English comment authoring explicitly through a slash command.
 - Re-read the baseline architecture, AI transaction protocol, testing-gate docs, current `.artifacts/ai` records, and the repository comment standard before opening a new docs-only atomic task.
 - Confirmed the repo already has a workflow-language mode plus prompt-based slash commands, but the comment standard still does not define the language of comment text or any explicit comment-language switch.
-- Started AT-2026-05-05-069 to document the Chinese-by-default comment rule and add prompt-based `/comment-zh` and `/comment-en` entry points without overloading the existing workflow-language controls.
-- Updated `docs/TauriCodeCommentStandard.md` to make Chinese the default language for new or revised code comments, define how `/comment-en` and `/comment-zh` switch future comment-writing work, and add review/rollout checks for comment-text language.
-- Added `.github/prompts/comment-zh.prompt.md` and `.github/prompts/comment-en.prompt.md` so the repository now exposes explicit slash-command entry points for comment-language switching.
+- Started AT-2026-05-05-069 to document the Chinese-by-default comment rule and add prompt-based comment-language entry points without overloading the existing workflow-language controls; these commands were later normalized under the `hsy-` prefix.
+- Updated `docs/TauriCodeCommentStandard.md` to make Chinese the default language for new or revised code comments, define how the repo comment-language commands switch future comment-writing work, and add review/rollout checks for comment-text language.
+- Added the repository-local prompt surface for explicit comment-language switching; the current command names are now `hsy-comment-zh` and `hsy-comment-en`.
 - Validated AT-2026-05-05-069 with scoped `git diff --check`; the docs-only slice returned no output.
 - Checked VS Code diagnostics for the touched comment standard and both new prompt files; no errors were reported.
 - Marked AT-2026-05-05-069 complete after validation; the remaining action in this turn is publication only.
@@ -216,7 +225,7 @@
 - Started AT-2026-05-03-007 to add explicit workspace slash-command entry points for the repo workflow after confirming the current setup only exposes skills and hooks, not named `/plan-xxx` commands.
 - Re-read the baseline workflow docs plus the context-management integration design and the VS Code prompt-file reference to keep the new command surface aligned with `.artifacts/ai` and the existing strict-doc/planning-with-files split.
 - Chose `.github/prompts/*.prompt.md` as the local command primitive because prompts surface as slash commands in VS Code chat and can wrap the current repo workflow without creating another competing planning source.
-- Added four workspace prompt files under `.github/prompts/`: `plan-atomic-task`, `plan-backend-skeleton`, `plan-doc-review`, and `resume-from-handoff`, each pointing back to the repo's `.artifacts/ai` records and controlling docs instead of creating a second workflow state surface.
+- Added four workspace prompt files under `.github/prompts/` for planning and resume flows; these commands are now exposed under the `hsy-` prefix.
 - Validated AT-2026-05-03-007 by checking the new prompt files with `get_errors` (no diagnostics) and running `git diff --check` (clean) after the prompt and task-record edits.
 - Started AT-2026-05-03-008 to normalize the live `.artifacts/ai` record schema after user feedback that the files feel inconsistent and under-specified.
 - Compared the current live records against the planning-with-files templates, the strict-doc active-task template, and the init-session bootstrap scripts.

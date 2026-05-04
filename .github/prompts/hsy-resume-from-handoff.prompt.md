@@ -1,6 +1,6 @@
 ---
-name: resume-from-handoff
-description: "从 .artifacts/ai/handoff.md 和相关记录恢复当前工作。触发词：继续上次, resume, handoff, 恢复上下文."
+name: hsy-resume-from-handoff
+description: "从 .artifacts/ai/handoff.md 和相关记录恢复当前工作。触发词：hsy-resume-from-handoff, 继续上次, resume, handoff, 恢复上下文."
 argument-hint: "可选：输入恢复后要优先处理的方向"
 agent: agent
 ---

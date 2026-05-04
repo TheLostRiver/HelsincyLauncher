@@ -6,12 +6,12 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 24 - Comment language controls
+Phase 25 - Slash command prefix normalization
 
 ## Current Focus
 
-- AT-2026-05-05-069 completed the comment-language control slice by making Chinese the default comment language and adding explicit prompt-based switches for English and Chinese comment authoring.
-- The remaining action in this turn is publication only; after that the repo can return to backend comment rollout or another user-selected slice.
+- AT-2026-05-05-070 completed the repo-local slash command normalization, so the workspace prompt surface now consistently uses the `hsy-XXX` prefix.
+- The remaining action in this turn is publication only; after that future command references should use the `hsy-` names.
 
 ## Phases
 
@@ -159,6 +159,12 @@ Phase 24 - Comment language controls
 - Atomic tasks: AT-2026-05-05-069
 - **Status:** complete
 
+### Phase 25: Slash Command Prefix Normalization
+
+- Outcome: prefix all repository-local workspace slash commands with `hsy-` to reduce collisions with commands from other workspaces or extensions.
+- Atomic tasks: AT-2026-05-05-070
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -223,7 +229,8 @@ Phase 24 - Comment language controls
 60. AT-2026-05-04-066 - completed - annotated the desktop host engines transport handler, then validated the slice and prepared it for publication before asking whether to continue.
 61. AT-2026-05-04-067 - completed - annotated the desktop host Fab transport handlers, then validated the slice and prepared it for publication before asking whether to continue.
 62. AT-2026-05-04-068 - completed - annotated the desktop host crate entry surface, then validated the slice and prepared it for publication before asking whether to continue.
-63. AT-2026-05-05-069 - completed - documented Chinese-by-default comment language and added prompt-based `/comment-zh` and `/comment-en` switches for future comment-authoring work.
+63. AT-2026-05-05-069 - completed - documented Chinese-by-default comment language and added prompt-based comment-language switches for future comment-authoring work, later normalized under the `hsy-` prefix.
+64. AT-2026-05-05-070 - in_progress - rename all repository workspace prompts to `hsy-XXX` and update normative references so the repo command surface avoids name collisions.
 
 ## Key Questions
 
