@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: none active; last committed task is AT-2026-05-03-044 - Build shared job runtime bundle
-- Current phase: Phase 16 - Shared Job Runtime Bundle
-- Last committed task before this slice: AT-2026-05-03-043 - Orchestrate startup stage-3 prewarm
-- Next validation gate: none pending for AT-2026-05-03-044
+- Active atomic task: AT-2026-05-03-045 - Persist runtime snapshots to sqlite
+- Current phase: Phase 17 - Runtime Snapshot Persistence
+- Last committed task before this slice: AT-2026-05-03-044 - Build shared job runtime bundle
+- Next validation gate: `cargo test -p launcher-composition-root runtime_snapshot_persists_across_rebuilds`, then `cargo test -p launcher-composition-root bootstrap_wiring_smoke`, then `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`
 
 ## Session Timeline
 
@@ -203,6 +203,8 @@
 - Implemented AT-2026-05-03-044 by adding `SharedJobRuntimeHost` in `launcher-kernel-jobs`, exporting it, wiring it through composition-root, and teaching the current Fab accepted-job paths to enqueue into that host instead of returning only placeholder acceptance.
 - The first composition-root smoke run surfaced a Rust coherence conflict between the existing `()` acceptance impls and a blanket `JobRuntime` acceptance impl; narrowing the new acceptance impls to the concrete `SharedJobRuntimeHost` repaired the same slice without widening scope.
 - Validated AT-2026-05-03-044 with `cargo test -p launcher-kernel-jobs shared_job_runtime_host_records_enqueued_snapshot`, `cargo test -p launcher-composition-root bootstrap_wiring_smoke`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, and a scoped `git diff --check`.
+- Started AT-2026-05-03-045 after the continuation UI selection chose `runtime persistence / recovery` as the next backend slice.
+- Re-read the runtime, storage, ports/adapters, and composition-root wiring docs, then narrowed the next slice to snapshot persistence rather than full stage-2 recovery: the current host still owns snapshots in-process, while the docs place sqlite-backed snapshot storage below the runtime host and ahead of later restore orchestration.
 
 ## Validation Snapshot
 
@@ -219,8 +221,8 @@
 
 | Question | Answer |
 |----------|--------|
-| Where am I? | Phase 16 shared job runtime bundle is complete and no active atomic task is currently open |
-| Where am I going? | Decide whether the next backend slice should open runtime persistence/recovery, broader downloads runtime behavior, richer startup gating, or another narrow backend path |
+| Where am I? | Phase 17 runtime snapshot persistence is in progress under AT-2026-05-03-045 |
+| Where am I going? | Persist shared runtime snapshots to sqlite so accepted jobs survive a fresh composition-root rebuild without opening full stage-2 restore orchestration yet |
 | What's the goal? | Keep turning the remaining runtime/backend gaps into explicit shared infrastructure one narrow route at a time |
-| What have I learned? | A minimal shared in-memory runtime host is enough to replace the `()` placeholder now, and Rust coherence rules require the Fab acceptance bridge to target the concrete host rather than a blanket `JobRuntime` impl |
+| What have I learned? | The narrowest persistence/recovery move after AT-044 is snapshot persistence itself; full restore orchestration, lease handling, and driver registry still belong to later slices |
 | What have I done? | See the session timeline above |

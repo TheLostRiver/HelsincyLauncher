@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt::{Debug, Formatter};
 use std::sync::{Arc, Mutex};
 
 use launcher_kernel_foundation::{AppResult, IsoDateTime, JobId};
@@ -20,22 +21,73 @@ impl RuntimeQueuePolicy {
     }
 }
 
-#[derive(Debug, Clone)]
+pub trait JobSnapshotStore<E>: Send + Sync {
+    fn create(&self, snapshot: &JobSnapshot<E>) -> AppResult<()>;
+    fn update(&self, snapshot: &JobSnapshot<E>) -> AppResult<()>;
+    fn get(&self, job_id: &JobId) -> AppResult<Option<JobSnapshot<E>>>;
+}
+
+#[derive(Debug, Clone, Default)]
+struct InMemoryJobSnapshotStore {
+    snapshots: Arc<Mutex<HashMap<JobId, JobSnapshot<()>>>>,
+}
+
+impl JobSnapshotStore<()> for InMemoryJobSnapshotStore {
+    fn create(&self, snapshot: &JobSnapshot<()>) -> AppResult<()> {
+        self.snapshots
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner())
+            .insert(snapshot.job_id.clone(), snapshot.clone());
+        Ok(())
+    }
+
+    fn update(&self, snapshot: &JobSnapshot<()>) -> AppResult<()> {
+        self.snapshots
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner())
+            .insert(snapshot.job_id.clone(), snapshot.clone());
+        Ok(())
+    }
+
+    fn get(&self, job_id: &JobId) -> AppResult<Option<JobSnapshot<()>>> {
+        Ok(self
+            .snapshots
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner())
+            .get(job_id)
+            .cloned())
+    }
+}
+
+#[derive(Clone)]
 pub struct SharedJobRuntimeHost {
     policy: RuntimeQueuePolicy,
-    snapshots: Arc<Mutex<HashMap<JobId, JobSnapshot<()>>>>,
+    snapshot_store: Arc<dyn JobSnapshotStore<()>>,
 }
 
 impl SharedJobRuntimeHost {
     pub fn new(policy: RuntimeQueuePolicy) -> Self {
+        Self::with_store(policy, Arc::new(InMemoryJobSnapshotStore::default()))
+    }
+
+    pub fn with_store(policy: RuntimeQueuePolicy, snapshot_store: Arc<dyn JobSnapshotStore<()>>) -> Self {
         Self {
             policy,
-            snapshots: Arc::new(Mutex::new(HashMap::new())),
+            snapshot_store,
         }
     }
 
     pub fn policy(&self) -> RuntimeQueuePolicy {
         self.policy
+    }
+}
+
+impl Debug for SharedJobRuntimeHost {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
+        formatter
+            .debug_struct("SharedJobRuntimeHost")
+            .field("policy", &self.policy)
+            .finish_non_exhaustive()
     }
 }
 
@@ -71,60 +123,43 @@ impl JobRuntime for SharedJobRuntimeHost {
             extension: request.extension,
         };
 
-        let mut snapshots = self
-            .snapshots
-            .lock()
-            .unwrap_or_else(|poisoned| poisoned.into_inner());
-        snapshots.insert(snapshot.job_id.clone(), snapshot);
+        self.snapshot_store.create(&snapshot)?;
 
         Ok(accepted)
     }
 
     fn snapshot(&self, job_id: &JobId) -> AppResult<Option<JobSnapshot<Self::Extension>>> {
-        let snapshots = self
-            .snapshots
-            .lock()
-            .unwrap_or_else(|poisoned| poisoned.into_inner());
-        Ok(snapshots.get(job_id).cloned())
+        self.snapshot_store.get(job_id)
     }
 
     fn pause(&self, job_id: &JobId) -> AppResult<()> {
-        let mut snapshots = self
-            .snapshots
-            .lock()
-            .unwrap_or_else(|poisoned| poisoned.into_inner());
-        if let Some(snapshot) = snapshots.get_mut(job_id) {
+        if let Some(mut snapshot) = self.snapshot_store.get(job_id)? {
             snapshot.state = JobState::Paused;
             snapshot.ui_state = JobUiState::Paused;
             snapshot.updated_at = IsoDateTime::now();
+            self.snapshot_store.update(&snapshot)?;
         }
 
         Ok(())
     }
 
     fn resume(&self, job_id: &JobId) -> AppResult<()> {
-        let mut snapshots = self
-            .snapshots
-            .lock()
-            .unwrap_or_else(|poisoned| poisoned.into_inner());
-        if let Some(snapshot) = snapshots.get_mut(job_id) {
+        if let Some(mut snapshot) = self.snapshot_store.get(job_id)? {
             snapshot.state = JobState::Running;
             snapshot.ui_state = JobUiState::Running;
             snapshot.updated_at = IsoDateTime::now();
+            self.snapshot_store.update(&snapshot)?;
         }
 
         Ok(())
     }
 
     fn cancel(&self, job_id: &JobId) -> AppResult<()> {
-        let mut snapshots = self
-            .snapshots
-            .lock()
-            .unwrap_or_else(|poisoned| poisoned.into_inner());
-        if let Some(snapshot) = snapshots.get_mut(job_id) {
+        if let Some(mut snapshot) = self.snapshot_store.get(job_id)? {
             snapshot.state = JobState::Canceled;
             snapshot.ui_state = JobUiState::Canceled;
             snapshot.updated_at = IsoDateTime::now();
+            self.snapshot_store.update(&snapshot)?;
         }
 
         Ok(())

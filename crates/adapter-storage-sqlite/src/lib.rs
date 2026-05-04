@@ -1,6 +1,8 @@
 use std::path::{Path, PathBuf};
+use std::sync::Mutex;
 
-use launcher_kernel_foundation::{AppResult, AssetId, PageSlice};
+use launcher_kernel_foundation::{AppResult, AssetId, IsoDateTime, JobId, PageSlice};
+use launcher_kernel_jobs::{JobProgress, JobSnapshot, JobSnapshotStore, JobState, JobUiState};
 use launcher_module_fab::{
     contracts::{FabAssetDetailDto, FabInventoryListQueryDto},
     facade::{FabInventoryProjectionPage, FabInventoryProjectionRepository},
@@ -105,5 +107,177 @@ impl SqliteDownloadCheckpointRepository {
 
     pub fn config(&self) -> &SqliteStorageAdapterConfig {
         &self.config
+    }
+}
+
+pub struct SqliteJobSnapshotStore {
+    conn: Mutex<rusqlite::Connection>,
+}
+
+impl SqliteJobSnapshotStore {
+    pub fn new(config: SqliteStorageAdapterConfig) -> Self {
+        let conn = rusqlite::Connection::open(config.database_path())
+            .expect("SqliteJobSnapshotStore: failed to open sqlite database");
+        conn.execute_batch(
+            "CREATE TABLE IF NOT EXISTS job_snapshots (
+                job_id     TEXT PRIMARY KEY NOT NULL,
+                module     TEXT NOT NULL,
+                kind       TEXT NOT NULL,
+                state      TEXT NOT NULL,
+                ui_state   TEXT NOT NULL,
+                progress   TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                extension  TEXT
+            );",
+        )
+        .expect("SqliteJobSnapshotStore: failed to create job_snapshots table");
+        Self { conn: Mutex::new(conn) }
+    }
+
+    fn upsert(&self, snapshot: &JobSnapshot<()>) -> AppResult<()> {
+        let progress_json = serde_json::to_string(&snapshot.progress)
+            .map_err(|e| launcher_kernel_foundation::AppError::new(
+                "SQLITE_SERIALIZE_ERROR",
+                format!("failed to serialize JobProgress: {e}"),
+                false,
+                launcher_kernel_foundation::AppErrorSeverity::Warning,
+                launcher_kernel_foundation::CorrelationId::generate(),
+            ))?;
+        let state_str = serde_json::to_string(&snapshot.state)
+            .map_err(|e| launcher_kernel_foundation::AppError::new(
+                "SQLITE_SERIALIZE_ERROR",
+                format!("failed to serialize JobState: {e}"),
+                false,
+                launcher_kernel_foundation::AppErrorSeverity::Warning,
+                launcher_kernel_foundation::CorrelationId::generate(),
+            ))?;
+        let ui_state_str = serde_json::to_string(&snapshot.ui_state)
+            .map_err(|e| launcher_kernel_foundation::AppError::new(
+                "SQLITE_SERIALIZE_ERROR",
+                format!("failed to serialize JobUiState: {e}"),
+                false,
+                launcher_kernel_foundation::AppErrorSeverity::Warning,
+                launcher_kernel_foundation::CorrelationId::generate(),
+            ))?;
+        let conn = self.conn.lock().unwrap_or_else(|p| p.into_inner());
+        conn.execute(
+            "INSERT OR REPLACE INTO job_snapshots
+                (job_id, module, kind, state, ui_state, progress, updated_at, extension)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, NULL)",
+            rusqlite::params![
+                snapshot.job_id.to_string(),
+                snapshot.module,
+                snapshot.kind,
+                state_str,
+                ui_state_str,
+                progress_json,
+                snapshot.updated_at.to_string(),
+            ],
+        )
+        .map_err(|e| launcher_kernel_foundation::AppError::new(
+            "SQLITE_WRITE_ERROR",
+            format!("job_snapshots upsert failed: {e}"),
+            false,
+            launcher_kernel_foundation::AppErrorSeverity::Warning,
+            launcher_kernel_foundation::CorrelationId::generate(),
+        ))?;
+        Ok(())
+    }
+}
+
+impl JobSnapshotStore<()> for SqliteJobSnapshotStore {
+    fn create(&self, snapshot: &JobSnapshot<()>) -> AppResult<()> {
+        self.upsert(snapshot)
+    }
+
+    fn update(&self, snapshot: &JobSnapshot<()>) -> AppResult<()> {
+        self.upsert(snapshot)
+    }
+
+    fn get(&self, job_id: &JobId) -> AppResult<Option<JobSnapshot<()>>> {
+        let conn = self.conn.lock().unwrap_or_else(|p| p.into_inner());
+        let mut stmt = conn.prepare(
+            "SELECT job_id, module, kind, state, ui_state, progress, updated_at
+             FROM job_snapshots WHERE job_id = ?1",
+        )
+        .map_err(|e| launcher_kernel_foundation::AppError::new(
+            "SQLITE_READ_ERROR",
+            format!("failed to prepare job_snapshots select: {e}"),
+            false,
+            launcher_kernel_foundation::AppErrorSeverity::Warning,
+            launcher_kernel_foundation::CorrelationId::generate(),
+        ))?;
+
+        let mut rows = stmt.query(rusqlite::params![job_id.to_string()])
+            .map_err(|e| launcher_kernel_foundation::AppError::new(
+                "SQLITE_READ_ERROR",
+                format!("job_snapshots query failed: {e}"),
+                false,
+                launcher_kernel_foundation::AppErrorSeverity::Warning,
+                launcher_kernel_foundation::CorrelationId::generate(),
+            ))?;
+
+        if let Some(row) = rows.next().map_err(|e| launcher_kernel_foundation::AppError::new(
+            "SQLITE_READ_ERROR",
+            format!("job_snapshots row read failed: {e}"),
+            false,
+            launcher_kernel_foundation::AppErrorSeverity::Warning,
+            launcher_kernel_foundation::CorrelationId::generate(),
+        ))? {
+            let job_id_str: String = row.get(0).unwrap();
+            let module: String = row.get(1).unwrap();
+            let kind: String = row.get(2).unwrap();
+            let state_str: String = row.get(3).unwrap();
+            let ui_state_str: String = row.get(4).unwrap();
+            let progress_str: String = row.get(5).unwrap();
+            let updated_at_str: String = row.get(6).unwrap();
+
+            let state: JobState = serde_json::from_str(&state_str)
+                .map_err(|e| launcher_kernel_foundation::AppError::new(
+                    "SQLITE_DESERIALIZE_ERROR",
+                    format!("failed to deserialize JobState: {e}"),
+                    false,
+                    launcher_kernel_foundation::AppErrorSeverity::Warning,
+                    launcher_kernel_foundation::CorrelationId::generate(),
+                ))?;
+            let ui_state: JobUiState = serde_json::from_str(&ui_state_str)
+                .map_err(|e| launcher_kernel_foundation::AppError::new(
+                    "SQLITE_DESERIALIZE_ERROR",
+                    format!("failed to deserialize JobUiState: {e}"),
+                    false,
+                    launcher_kernel_foundation::AppErrorSeverity::Warning,
+                    launcher_kernel_foundation::CorrelationId::generate(),
+                ))?;
+            let progress: JobProgress = serde_json::from_str(&progress_str)
+                .map_err(|e| launcher_kernel_foundation::AppError::new(
+                    "SQLITE_DESERIALIZE_ERROR",
+                    format!("failed to deserialize JobProgress: {e}"),
+                    false,
+                    launcher_kernel_foundation::AppErrorSeverity::Warning,
+                    launcher_kernel_foundation::CorrelationId::generate(),
+                ))?;
+            let updated_at: IsoDateTime = serde_json::from_str(&format!(r#""{updated_at_str}""#))
+                .map_err(|e| launcher_kernel_foundation::AppError::new(
+                    "SQLITE_DESERIALIZE_ERROR",
+                    format!("failed to parse updated_at: {e}"),
+                    false,
+                    launcher_kernel_foundation::AppErrorSeverity::Warning,
+                    launcher_kernel_foundation::CorrelationId::generate(),
+                ))?;
+            let parsed_job_id = JobId::new(job_id_str);
+
+            Ok(Some(JobSnapshot {
+                job_id: parsed_job_id,
+                module,
+                kind,
+                state,
+                ui_state,
+                progress,
+                updated_at,
+                extension: None,
+            }))
+        } else {
+            Ok(None)
+        }
     }
 }

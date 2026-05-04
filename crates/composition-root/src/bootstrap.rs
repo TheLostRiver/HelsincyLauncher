@@ -7,7 +7,7 @@ use launcher_adapter_provider_fab::{
 use launcher_adapter_storage_sqlite::{
     SqliteDownloadCheckpointRepository, SqliteDownloadJobRepository,
     SqliteFabInventoryProjectionRepository, SqliteFabMediaMetadataRepository,
-    SqliteFabSyncCursorRepository, SqliteStorageAdapterConfig,
+    SqliteFabSyncCursorRepository, SqliteJobSnapshotStore, SqliteStorageAdapterConfig,
 };
 use launcher_kernel_foundation::{
     AppError, AppErrorSeverity, AppResult, CorrelationId,
@@ -167,9 +167,13 @@ fn build_job_runtime(config: &DesktopBootstrapConfig) -> AppResult<SharedJobRunt
         ));
     }
 
-    Ok(SharedJobRuntimeHost::new(RuntimeQueuePolicy::new(
-        usize::from(config.default_download_slots),
-    )))
+    let store = Arc::new(SqliteJobSnapshotStore::new(
+        SqliteStorageAdapterConfig::new(config.sqlite_path.clone()),
+    ));
+    Ok(SharedJobRuntimeHost::with_store(
+        RuntimeQueuePolicy::new(usize::from(config.default_download_slots)),
+        store,
+    ))
 }
 
 fn build_startup_pipeline(

@@ -6,12 +6,12 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 16 - Shared Job Runtime Bundle
+Phase 17 - Runtime Snapshot Persistence
 
 ## Current Focus
 
-- No active atomic task is currently open.
-- AT-2026-05-03-044 replaced the `()` runtime placeholder with a shared in-memory runtime host; next decide whether to open runtime persistence/recovery, broader downloads runtime behavior, richer startup gating, or another narrow backend path.
+- AT-2026-05-03-045 is persisting shared runtime snapshots to sqlite so accepted jobs survive a fresh `build_desktop_services()` against the same database path.
+- Keep this slice limited to a snapshot-store boundary plus sqlite-backed persistence wiring; do not open stage-2 restore orchestration, lease handling, or driver registry behavior yet.
 
 ## Phases
 
@@ -111,6 +111,12 @@ Phase 16 - Shared Job Runtime Bundle
 - Atomic tasks: AT-2026-05-03-044
 - **Status:** complete
 
+### Phase 17: Runtime Snapshot Persistence
+
+- Outcome: persist shared runtime snapshots to sqlite so accepted jobs survive a fresh composition-root rebuild.
+- Atomic tasks: AT-2026-05-03-045
+- **Status:** in_progress
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -157,6 +163,7 @@ Phase 16 - Shared Job Runtime Bundle
 42. AT-2026-05-03-042 - committed - made the Fab startup-prewarm command return a backend-owned accepted job without opening startup stage-3 orchestration or real runtime wiring.
 43. AT-2026-05-03-043 - committed - wired config-gated Fab prewarm orchestration into startup stage 3 without opening real runtime execution or host ordering changes.
 44. AT-2026-05-03-044 - committed - built a minimal shared job runtime host, injected it through composition-root, and moved Fab accepted-job paths onto that runtime bundle.
+45. AT-2026-05-03-045 - in_progress - persist shared runtime snapshots to sqlite so accepted jobs survive a fresh composition-root rebuild.
 
 ## Key Questions
 
@@ -174,7 +181,7 @@ Phase 16 - Shared Job Runtime Bundle
 
 ## Follow-up Queue
 
-1. After AT-2026-05-03-044, decide whether the next backend slice should open runtime persistence/recovery, broader downloads runtime behavior, richer startup gating, or another narrow backend path.
+1. After AT-2026-05-03-045, decide whether the next backend slice should open stage-2 restore orchestration, lease handling, broader downloads runtime behavior, or another narrow backend path.
 2. If backend work pauses after this query slice, resume from the validated host transport baseline while leaving user frontend edits untouched.
 
 ## Legacy Note

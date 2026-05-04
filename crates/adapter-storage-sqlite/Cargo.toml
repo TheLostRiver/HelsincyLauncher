@@ -11,5 +11,8 @@ path = "src/lib.rs"
 
 [dependencies]
 launcher-kernel-foundation = { path = "../kernel-foundation" }
+launcher-kernel-jobs = { path = "../kernel-jobs" }
 launcher-module-fab = { path = "../module-fab" }
 launcher-module-downloads = { path = "../module-downloads" }
+rusqlite.workspace = true
+serde_json.workspace = true

@@ -84,3 +84,60 @@ fn noop_raw_waker() -> RawWaker {
         &RawWakerVTable::new(clone, wake, wake_by_ref, drop),
     )
 }
+
+#[test]
+fn runtime_snapshot_persists_across_rebuilds() {
+    let tmp_path = std::env::temp_dir().join("at045_runtime_snapshot_test.sqlite3");
+    // Clean up any leftover file from a previous run so the test is idempotent.
+    let _ = std::fs::remove_file(&tmp_path);
+
+    let config = DesktopBootstrapConfig {
+        sqlite_path: tmp_path.clone(),
+        ..DesktopBootstrapConfig::default()
+    };
+
+    // First build: enqueue a Fab prewarm job.
+    let services1 = build_desktop_services(config.clone())
+        .expect("first build_desktop_services should succeed");
+
+    let accepted = services1
+        .fab
+        .run_startup_prewarm(FabInventoryPrewarmRequestDto {
+            reason: "at045-persist-test".into(),
+        })
+        .expect("run_startup_prewarm on first build should succeed");
+
+    let job_id = accepted.job_id.clone();
+
+    // Verify the snapshot is already readable in the first instance.
+    services1
+        .fab
+        .deps()
+        .job_runtime
+        .snapshot(&job_id)
+        .expect("snapshot call on first runtime should not error")
+        .expect("snapshot should exist in first runtime host");
+
+    // Drop the first services to release the sqlite connection.
+    drop(services1);
+
+    // Second build: rebuild with the same sqlite path.
+    let services2 = build_desktop_services(config)
+        .expect("second build_desktop_services should succeed");
+
+    let recovered = services2
+        .fab
+        .deps()
+        .job_runtime
+        .snapshot(&job_id)
+        .expect("snapshot call on second runtime should not error")
+        .expect("snapshot should still be readable after rebuild from same sqlite path");
+
+    assert_eq!(
+        recovered.job_id, job_id,
+        "recovered snapshot job_id must match the original"
+    );
+
+    // Clean up temp file.
+    let _ = std::fs::remove_file(&tmp_path);
+}
