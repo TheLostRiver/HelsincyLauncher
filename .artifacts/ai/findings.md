@@ -8,6 +8,10 @@
 
 ## Research Findings
 
+- `crates/module-fab/src/facade/mod.rs` is a strong first backend comment slice because it is the public module boundary for projection reads, cold-start placeholders, and accepted-job handoff, yet it currently lacks declaration-level comments on most public types and traits.
+- `crates/module-fab/src/driver.rs` is a good adjacent second file because it is small, backend-only, and its restore semantics are simple enough to annotate without reopening behavior changes.
+- For the first rollout slice, comments should stay concentrated on module entry, public types/traits/functions, and a few non-obvious cold-start helpers; test code in the same file should remain mostly uncommented unless a test-specific invariant is non-obvious.
+
 - The repository already has `docs/ModuleDocumentationStandard.md`, but it still lacks a repository-level code comment standard that separates declaration comments from selective function-body comments.
 - `docs/README.md` is the minimal correct routing surface for a new standalone comment standard; this slice does not need to widen into root README churn if the docs map is updated.
 - The comment standard must reconcile two constraints at once: obvious code should remain uncommented, but high-risk concurrency and multi-threading logic should have stricter mandatory comments.

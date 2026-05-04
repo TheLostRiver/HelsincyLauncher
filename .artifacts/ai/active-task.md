@@ -2,17 +2,17 @@
 
 ## Identity
 
-- task id: AT-2026-05-04-056
-- title: Standalone code comment standard
+- task id: AT-2026-05-04-057
+- title: Fab module comment slice 1
 - status: completed
 
 ## Goal
 
-把仓库级注释规范写成独立文档，并明确：
-- 哪些声明默认应有注释，哪些明显代码不应硬写注释
-- TypeScript/TSX 与 Rust 分别采用什么注释语法与边界
-- 函数体内重点注释与多线程/并发高风险注释的强制规则
-- 让这份规范可以从 `docs/README.md` 被发现，而不是只停留在对话里
+按新的仓库注释规范，为 `module-fab` 的第一批后端边界文件补上高信号注释：
+- `crates/module-fab/src/facade/mod.rs`
+- `crates/module-fab/src/driver.rs`
+
+本轮只补声明级注释和少量必要的局部重点说明，不扩展到别的后端文件。
 
 ## Scope
 
@@ -21,13 +21,13 @@
   - update `.artifacts/ai/task-plan.md`
   - update `.artifacts/ai/progress.md`
   - update `.artifacts/ai/findings.md`
-  - add `docs/TauriCodeCommentStandard.md`
-  - update `docs/README.md` to route the new standalone standard
+  - update `crates/module-fab/src/facade/mod.rs`
+  - update `crates/module-fab/src/driver.rs`
 - out of scope:
-  - retrofit comments across existing source files
-  - add lint rules, CI checks, or code generation for comment enforcement
-  - rewrite module docs to match the new comment standard
-  - update frontend or backend implementation code
+  - annotate more than these two backend files
+  - change Fab behavior, runtime wiring, or DTO contracts
+  - add lint rules or doc tooling
+  - modify frontend code or repo docs beyond task records
 
 ## Allowed Files
 
@@ -35,8 +35,8 @@
 2. .artifacts/ai/task-plan.md
 3. .artifacts/ai/progress.md
 4. .artifacts/ai/findings.md
-5. docs/TauriCodeCommentStandard.md
-6. docs/README.md
+5. crates/module-fab/src/facade/mod.rs
+6. crates/module-fab/src/driver.rs
 
 ## 控制性文档
 
@@ -44,26 +44,36 @@
 2. docs/TauriArchitecturePrinciplesDesign.md
 3. docs/TauriAIDevelopmentTransactionProtocolDesign.md
 4. docs/TauriTestingStrategyAndQualityGateDesign.md
-5. docs/README.md
-6. docs/ModuleDocumentationStandard.md
+5. docs/TauriCodeCommentStandard.md
+6. docs/TauriFabInventoryLoadingDesign.md
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If a standalone `docs/TauriCodeCommentStandard.md` is added and routed from `docs/README.md`, and that standard explicitly separates declaration comments, selective function-body comments, Rust public-surface Rustdoc usage, and stricter concurrency annotation rules, then the repository gains one discoverable comment-policy source without forcing blanket rustdoc or low-signal comment noise.
+- falsifiable local hypothesis: If the `module-fab` facade boundary and its restore drivers receive declaration-level comments that explain their responsibilities, cold-start behavior, and restore semantics, then the first backend comment slice will satisfy the new repository comment standard without adding low-signal comments across tests or obvious method bodies.
 
 ## Cheap Check
 
-- `rg "TauriCodeCommentStandard|Doxygen|Rustdoc|并发|函数体" docs/TauriCodeCommentStandard.md docs/README.md`
+- `cargo test -p launcher-module-fab --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`
 
 ## Validation Gate
 
-1. `rg "TauriCodeCommentStandard|Doxygen|Rustdoc|并发|函数体" docs/TauriCodeCommentStandard.md docs/README.md`
-2. `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md docs/TauriCodeCommentStandard.md docs/README.md`
+1. `cargo test -p launcher-module-fab --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`
+2. `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md crates/module-fab/src/facade/mod.rs crates/module-fab/src/driver.rs`
 
 ## Validation Result
 
 - passed
 
+## Notes
+
+- `cargo test -p launcher-module-fab --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` passed with 4 unit tests green.
+- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md crates/module-fab/src/facade/mod.rs crates/module-fab/src/driver.rs` produced no output.
+
 ## 安全恢复点
 
-- AT-056 已完成并通过 docs-only 窄验证；仓库现在已有独立注释规范文档和 docs 路由，Git 发布路径已缩小到可工作的异步终端会话。
+- 首批后端注释切片已收敛到 `module-fab` 的 facade 与 driver；若中断，恢复时直接补这两文件的声明级注释，然后立刻跑 `cargo test -p launcher-module-fab`。
+
+## Completion
+
+- completed slice: `crates/module-fab/src/facade/mod.rs` + `crates/module-fab/src/driver.rs`
+- publication step: pending commit and push in this turn, then wait for user confirmation before opening the next 1-2 file backend slice

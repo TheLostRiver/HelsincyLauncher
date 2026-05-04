@@ -6,12 +6,12 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 22 - Standalone code comment standard
+Phase 23 - Backend comment rollout
 
 ## Current Focus
 
-- AT-2026-05-04-056 completed the standalone repository code comment standard and routed it from `docs/README.md`.
-- Repo-wide comment retrofits, lint/tooling enforcement, or per-module follow-on docs remain deferred until explicitly selected.
+- AT-2026-05-04-057 completed the first backend comment slice in `module-fab`.
+- The next action is not another edit by default; it is to wait for user confirmation before opening the next 1-2 file backend comment slice.
 
 ## Phases
 
@@ -147,6 +147,12 @@ Phase 22 - Standalone code comment standard
 - Atomic tasks: AT-2026-05-04-056
 - **Status:** complete
 
+### Phase 23: Backend Comment Rollout
+
+- Outcome: apply the new repository comment standard to backend Rust/Tauri files in small, commit-sized slices of one or two files.
+- Atomic tasks: AT-2026-05-04-057
+- **Status:** in_progress
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -199,6 +205,7 @@ Phase 22 - Standalone code comment standard
 48. AT-2026-05-04-054 - completed - wired engine verification to return a backend-owned accepted job, exposed engines through composition-root and host transport, and validated the path through module, composition-root, and transport tests.
 49. AT-2026-05-04-055 - completed - repaired `TauriCompositionRootWiringDesign.md` so the current wiring scope, service sketches, sequence, and smoke-test matrix acknowledge engines without implying startup orchestration already exists.
 50. AT-2026-05-04-056 - completed - published `docs/TauriCodeCommentStandard.md`, routed it from `docs/README.md`, and kept the slice docs-only without widening into repo-wide comment retrofits.
+51. AT-2026-05-04-057 - completed - annotated the first backend slice in `module-fab` by documenting the facade boundary and restore drivers, then validated the slice and prepared it for publication before waiting for user confirmation.
 
 ## Key Questions
 

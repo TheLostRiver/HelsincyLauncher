@@ -1,3 +1,10 @@
+//! Fab module facade boundary for projection reads and accepted-job handoff.
+//!
+//! This surface owns the backend-facing semantics for three current Fab flows:
+//! reading inventory summaries from the local projection, returning a backend-owned
+//! cold-start detail placeholder, and accepting sync/prewarm jobs through the job
+//! runtime boundary without leaking transport or adapter details.
+
 use launcher_kernel_foundation::{AppResult, AssetId, IsoDateTime, JobId};
 use launcher_kernel_jobs::{
     AcceptedJob, EnqueueJobRequest, JobPriority, JobRuntime, SharedJobRuntimeHost,
@@ -8,30 +15,44 @@ use crate::contracts::{
     FabInventoryPrewarmRequestDto, FabInventorySyncRequestDto,
 };
 
+/// Concrete dependencies needed by the current Fab facade boundary.
 #[derive(Debug, Clone)]
 pub struct FabModuleDeps<P, C, M, J, K> {
+    /// Reads inventory summary pages and cached detail snapshots from the local projection.
     pub projection_repo: P,
+    /// Persists incremental sync cursor state for restart-safe Fab synchronization.
     pub cursor_repo: C,
+    /// Resolves thumbnail and preview metadata without pushing media concerns into the list model.
     pub media_repo: M,
+    /// Accepts Fab long-running jobs and exposes their backend-owned accepted-job result.
     pub job_runtime: J,
+    /// Talks to the upstream Fab provider behind the module boundary.
     pub catalog_provider: K,
 }
 
+/// Public Fab use-case entry point exposed to composition-root and host transport.
 pub struct FabFacade<P, C, M, J, K> {
     deps: FabModuleDeps<P, C, M, J, K>,
 }
 
+/// Projection-backed inventory page returned by the local Fab read model.
 pub type FabInventoryProjectionPage = FabInventoryPageDto;
 
+/// Reads Fab inventory summaries and cached detail snapshots from the local projection.
 pub trait FabInventoryProjectionRepository {
+    /// Returns a stable inventory page without consulting the upstream provider on the read path.
     fn list_page(&self, query: FabInventoryListQueryDto) -> AppResult<FabInventoryProjectionPage>;
+
+    /// Returns a cached detail snapshot when the local projection has already been hydrated.
     fn get_asset_detail_snapshot(&self, asset_id: &AssetId) -> AppResult<Option<FabAssetDetailDto>>;
 }
 
+/// Accepts a Fab inventory sync request and returns the backend-owned accepted job.
 pub trait FabSyncJobAcceptance {
     fn accept_sync_job(&self, request: FabInventorySyncRequestDto) -> AppResult<AcceptedJob>;
 }
 
+/// Accepts a startup prewarm request and returns the backend-owned accepted job.
 pub trait FabStartupPrewarmJobAcceptance {
     fn accept_startup_prewarm_job(
         &self,
@@ -39,6 +60,7 @@ pub trait FabStartupPrewarmJobAcceptance {
     ) -> AppResult<AcceptedJob>;
 }
 
+// The unit fallback keeps the facade callable before a real runtime host is injected.
 impl FabSyncJobAcceptance for () {
     fn accept_sync_job(&self, request: FabInventorySyncRequestDto) -> AppResult<AcceptedJob> {
         let _ = request;
@@ -60,6 +82,7 @@ impl FabSyncJobAcceptance for SharedJobRuntimeHost {
     }
 }
 
+// The unit fallback lets startup prewarm stay backend-owned before runtime wiring lands.
 impl FabStartupPrewarmJobAcceptance for () {
     fn accept_startup_prewarm_job(
         &self,
@@ -88,20 +111,22 @@ impl FabStartupPrewarmJobAcceptance for SharedJobRuntimeHost {
 }
 
 impl<P, C, M, J, K> FabFacade<P, C, M, J, K> {
+    /// Creates a Fab facade over already-assembled module dependencies.
     pub fn new(deps: FabModuleDeps<P, C, M, J, K>) -> Self {
         Self { deps }
     }
 
+    /// Exposes the assembled dependency bundle for composition-root smoke tests and wiring checks.
     pub fn deps(&self) -> &FabModuleDeps<P, C, M, J, K> {
         &self.deps
     }
-
 }
 
 impl<P, C, M, J, K> FabFacade<P, C, M, J, K>
 where
     J: FabStartupPrewarmJobAcceptance,
 {
+    /// Accepts a startup prewarm request through the configured job runtime boundary.
     pub fn run_startup_prewarm(
         &self,
         request: FabInventoryPrewarmRequestDto,
@@ -115,10 +140,12 @@ where
     P: FabInventoryProjectionRepository,
     J: FabSyncJobAcceptance,
 {
+    /// Returns an inventory page from the local Fab projection.
     pub fn list_inventory(&self, query: FabInventoryListQueryDto) -> AppResult<FabInventoryPageDto> {
         self.deps.projection_repo.list_page(query)
     }
 
+    /// Returns the cached detail snapshot or a backend-owned cold-start placeholder.
     pub fn get_asset_detail(&self, query: FabAssetDetailQueryDto) -> AppResult<FabAssetDetailDto> {
         Ok(self
             .deps
@@ -127,11 +154,13 @@ where
             .unwrap_or_else(|| cold_start_asset_detail(query.asset_id)))
     }
 
+    /// Accepts an inventory sync job without leaking runtime details to callers.
     pub fn sync_inventory(&self, request: FabInventorySyncRequestDto) -> AppResult<AcceptedJob> {
         self.deps.job_runtime.accept_sync_job(request)
     }
 }
 
+// The detail read path must stay backend-owned even when the local projection is still cold.
 fn cold_start_asset_detail(asset_id: AssetId) -> FabAssetDetailDto {
     FabAssetDetailDto {
         asset_id,
