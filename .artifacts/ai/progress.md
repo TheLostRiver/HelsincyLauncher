@@ -2,12 +2,24 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-04-047 - Stage-2 orphaned lease reset — COMPLETED (commit fb97bf8)
-- Current phase: Phase 17 - Runtime Snapshot Persistence
-- Last committed task before this slice: AT-2026-05-03-044 - Build shared job runtime bundle
-- Next validation gate: `cargo test -p launcher-composition-root runtime_snapshot_persists_across_rebuilds`, then `cargo test -p launcher-composition-root bootstrap_wiring_smoke`, then `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`
+- Active atomic task: AT-2026-05-04-052 - DownloadJobDriver real restore checkpoint verification - COMPLETED
+- Current phase: Phase 18 - Download restore correctness
+- Last completed slice: AT-2026-05-04-052 - checkpoint-backed downloads stage-2 restore
+- Next step: wait for user confirmation before continuing with AT-053 or AT-054
 
 ## Session Timeline
+
+### Session: 2026-05-04
+
+- Re-read the controlling downloads, repository-port, startup, kernel-jobs, composition-root, and testing-gate docs plus the local `.artifacts/ai` records before touching production code for AT-052.
+- Confirmed the real control path already existed in `StartupPipelineFacade::run_stage2_restore_runtime_state()`: queued jobs are delegated to the registered driver, and `FailedAsUnrecoverable` is already projected back into a persisted Failed snapshot.
+- Confirmed the actual root cause for AT-052 was local and narrow: `DownloadJobDriver::restore()` always returned `Resumed`, while `SqliteDownloadCheckpointRepository` still had no persisted checkpoint API at all.
+- Added a minimal `DownloadCheckpointRepository` boundary plus a minimal checkpoint record to `launcher-module-downloads`, then changed `DownloadJobDriver` to require a repository and fail queued downloads that do not have persisted checkpoint state.
+- Implemented sqlite-backed checkpoint table initialization plus minimal `load/save` behavior in `SqliteDownloadCheckpointRepository` without widening the slice into segmented payload design or staging verification.
+- Updated composition-root bootstrap wiring so the downloads facade and the registered `DownloadJobDriver` both receive the same sqlite-backed checkpoint capability.
+- Added narrow module-level driver tests for checkpoint-present and checkpoint-missing restore outcomes.
+- Added narrow composition-root smoke tests that prove stage-2 restore marks queued download jobs Failed when checkpoint state is missing and keeps them Queued when checkpoint state exists.
+- Validated the slice with `cargo test -p launcher-composition-root stage2_restore_marks_download_job_failed_without_checkpoint`, `cargo test -p launcher-module-downloads`, `cargo test -p launcher-composition-root bootstrap_wiring_smoke`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, `get_errors` on all touched files, and `git diff --check`.
 
 ### Session: 2026-05-03
 

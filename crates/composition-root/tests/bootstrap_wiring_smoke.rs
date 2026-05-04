@@ -4,7 +4,8 @@ use std::pin::pin;
 use std::task::{Context, Poll, RawWaker, RawWakerVTable, Waker};
 
 use launcher_composition_root::{build_desktop_services, DesktopBootstrapConfig};
-use launcher_kernel_jobs::{JobRuntime, JobState, JobUiState};
+use launcher_kernel_jobs::{EnqueueJobRequest, JobPriority, JobRuntime, JobState, JobUiState};
+use launcher_module_downloads::DownloadCheckpointRecord;
 use launcher_module_fab::contracts::FabInventoryPrewarmRequestDto;
 
 #[test]
@@ -165,6 +166,111 @@ fn stage2_restore_reads_resumable_snapshots() {
 
     block_on_ready(services.startup.run_stage2_restore_runtime_state())
         .expect("stage-2 restore should succeed when a resumable job exists in the store");
+
+    let _ = std::fs::remove_file(&tmp_path);
+}
+
+#[test]
+fn stage2_restore_marks_download_job_failed_without_checkpoint() {
+    let tmp_path = std::env::temp_dir().join("at052_download_restore_missing_checkpoint.sqlite3");
+    let _ = std::fs::remove_file(&tmp_path);
+
+    let config = DesktopBootstrapConfig {
+        sqlite_path: tmp_path.clone(),
+        ..DesktopBootstrapConfig::default()
+    };
+
+    let services = build_desktop_services(config)
+        .expect("build_desktop_services should succeed for download restore test");
+
+    let job_id = launcher_kernel_foundation::JobId::generate();
+    services
+        .downloads
+        .deps()
+        .job_runtime
+        .enqueue(EnqueueJobRequest {
+            job_id: job_id.clone(),
+            module: "downloads".into(),
+            kind: "download".into(),
+            priority: JobPriority::Normal,
+            recoverable: true,
+            extension: None,
+        })
+        .expect("seeding a queued download job should succeed");
+
+    block_on_ready(services.startup.run_stage2_restore_runtime_state())
+        .expect("stage-2 restore should succeed for queued download job");
+
+    let recovered = services
+        .downloads
+        .deps()
+        .job_runtime
+        .snapshot(&job_id)
+        .expect("reading restored download snapshot should not error")
+        .expect("queued download snapshot should still exist after restore");
+
+    assert_eq!(
+        recovered.state,
+        JobState::Failed,
+        "queued download without checkpoint should be marked Failed by the restore driver"
+    );
+
+    let _ = std::fs::remove_file(&tmp_path);
+}
+
+#[test]
+fn stage2_restore_keeps_download_job_queued_with_checkpoint() {
+    let tmp_path = std::env::temp_dir().join("at052_download_restore_with_checkpoint.sqlite3");
+    let _ = std::fs::remove_file(&tmp_path);
+
+    let config = DesktopBootstrapConfig {
+        sqlite_path: tmp_path.clone(),
+        ..DesktopBootstrapConfig::default()
+    };
+
+    let services = build_desktop_services(config)
+        .expect("build_desktop_services should succeed for checkpoint-backed restore test");
+
+    let job_id = launcher_kernel_foundation::JobId::generate();
+    services
+        .downloads
+        .deps()
+        .checkpoint_repo
+        .save_checkpoint(&DownloadCheckpointRecord {
+            job_id: job_id.clone(),
+        })
+        .expect("seeding a synthetic download checkpoint should succeed");
+
+    services
+        .downloads
+        .deps()
+        .job_runtime
+        .enqueue(EnqueueJobRequest {
+            job_id: job_id.clone(),
+            module: "downloads".into(),
+            kind: "download".into(),
+            priority: JobPriority::Normal,
+            recoverable: true,
+            extension: None,
+        })
+        .expect("seeding a queued download job should succeed");
+
+    block_on_ready(services.startup.run_stage2_restore_runtime_state())
+        .expect("stage-2 restore should succeed for checkpoint-backed download job");
+
+    let recovered = services
+        .downloads
+        .deps()
+        .job_runtime
+        .snapshot(&job_id)
+        .expect("reading restored download snapshot should not error")
+        .expect("queued download snapshot should still exist after restore");
+
+    assert_eq!(
+        recovered.state,
+        JobState::Queued,
+        "queued download with checkpoint should remain resumable after restore"
+    );
 
     let _ = std::fs::remove_file(&tmp_path);
 }

@@ -6,12 +6,12 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 17 - Runtime Snapshot Persistence
+Phase 18 - Download restore correctness
 
 ## Current Focus
 
-- AT-2026-05-03-045 is persisting shared runtime snapshots to sqlite so accepted jobs survive a fresh `build_desktop_services()` against the same database path.
-- Keep this slice limited to a snapshot-store boundary plus sqlite-backed persistence wiring; do not open stage-2 restore orchestration, lease handling, or driver registry behavior yet.
+- AT-2026-05-04-052 completed the downloads restore checkpoint verification slice.
+- Wait for user confirmation before continuing with the reviewed follow-up work on AT-053 and AT-054.
 
 ## Phases
 
@@ -115,7 +115,13 @@ Phase 17 - Runtime Snapshot Persistence
 
 - Outcome: persist shared runtime snapshots to sqlite so accepted jobs survive a fresh composition-root rebuild.
 - Atomic tasks: AT-2026-05-03-045
-- **Status:** in_progress
+- **Status:** complete
+
+### Phase 18: Download Restore Correctness
+
+- Outcome: make downloads stage-2 restore depend on persisted checkpoint facts instead of unconditional resume.
+- Atomic tasks: AT-2026-05-04-052
+- **Status:** complete
 
 ## Atomic Task Ledger
 
@@ -164,6 +170,7 @@ Phase 17 - Runtime Snapshot Persistence
 43. AT-2026-05-03-043 - committed - wired config-gated Fab prewarm orchestration into startup stage 3 without opening real runtime execution or host ordering changes.
 44. AT-2026-05-03-044 - committed - built a minimal shared job runtime host, injected it through composition-root, and moved Fab accepted-job paths onto that runtime bundle.
 45. AT-2026-05-03-045 - in_progress - persist shared runtime snapshots to sqlite so accepted jobs survive a fresh composition-root rebuild.
+46. AT-2026-05-04-052 - completed - wired a checkpoint-backed download restore driver, added sqlite checkpoint persistence, and validated missing/present checkpoint behavior through module and composition-root tests.
 
 ## Key Questions
 

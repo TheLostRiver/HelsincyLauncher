@@ -13,7 +13,9 @@ use launcher_kernel_foundation::{
     AppError, AppErrorSeverity, AppResult, CorrelationId,
 };
 use launcher_kernel_jobs::{JobDriverRegistry, JobSnapshotStore, RuntimeQueuePolicy, SharedJobRuntimeHost};
-use launcher_module_downloads::{DownloadFacade, DownloadJobDriver, DownloadModuleDeps};
+use launcher_module_downloads::{
+    DownloadCheckpointRepository, DownloadFacade, DownloadJobDriver, DownloadModuleDeps,
+};
 use launcher_module_fab::{FabFacade, FabModuleDeps, FabPrewarmJobDriver, FabSyncJobDriver};
 use launcher_module_engines::EngineJobDriver;
 
@@ -101,14 +103,19 @@ pub fn build_desktop_services(config: DesktopBootstrapConfig) -> AppResult<Deskt
     let sqlite_config = build_storage_config(&config)?;
     let fab_provider = build_fab_provider_adapter()?;
     let (job_runtime, snapshot_store) = build_job_runtime(&config)?;
+    let download_checkpoint_repo = SqliteDownloadCheckpointRepository::new(sqlite_config.clone());
 
     let fab = Arc::new(build_fab_module(
         sqlite_config.clone(),
         fab_provider,
         job_runtime.clone(),
     ));
-    let downloads = Arc::new(build_downloads_module(sqlite_config, job_runtime));
-    let registry = build_job_driver_registry();
+    let downloads = Arc::new(build_downloads_module(
+        sqlite_config,
+        download_checkpoint_repo.clone(),
+        job_runtime,
+    ));
+    let registry = build_job_driver_registry(Arc::new(download_checkpoint_repo));
     let snapshot_store_dyn: Arc<dyn JobSnapshotStore<()>> = snapshot_store.clone();
     let startup = Arc::new(build_startup_pipeline(&config, fab.clone(), snapshot_store, registry));
 
@@ -158,11 +165,12 @@ fn build_fab_module(
 
 fn build_downloads_module(
     sqlite_config: SqliteStorageAdapterConfig,
+    checkpoint_repo: SqliteDownloadCheckpointRepository,
     job_runtime: SharedJobRuntimeHost,
 ) -> DesktopDownloadFacade {
     DownloadFacade::new(DownloadModuleDeps {
         job_repo: SqliteDownloadJobRepository::new(sqlite_config.clone()),
-        checkpoint_repo: SqliteDownloadCheckpointRepository::new(sqlite_config),
+        checkpoint_repo,
         manifest_provider: (),
         staging_store: (),
         job_runtime,
@@ -187,11 +195,13 @@ fn build_job_runtime(config: &DesktopBootstrapConfig) -> AppResult<(SharedJobRun
     Ok((runtime, store))
 }
 
-fn build_job_driver_registry() -> Arc<JobDriverRegistry<()>> {
+fn build_job_driver_registry(
+    download_checkpoint_repo: Arc<dyn DownloadCheckpointRepository>,
+) -> Arc<JobDriverRegistry<()>> {
     let mut registry = JobDriverRegistry::new();
     registry.register(Arc::new(FabPrewarmJobDriver));
     registry.register(Arc::new(FabSyncJobDriver));
-    registry.register(Arc::new(DownloadJobDriver));
+    registry.register(Arc::new(DownloadJobDriver::new(download_checkpoint_repo)));
     registry.register(Arc::new(EngineJobDriver));
     Arc::new(registry)
 }

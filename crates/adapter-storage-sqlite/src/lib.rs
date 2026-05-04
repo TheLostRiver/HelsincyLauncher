@@ -3,6 +3,7 @@ use std::sync::Mutex;
 
 use launcher_kernel_foundation::{AppResult, AssetId, IsoDateTime, JobId, PageSlice};
 use launcher_kernel_jobs::{JobProgress, JobSnapshot, JobSnapshotStore, JobState, JobUiState};
+use launcher_module_downloads::{DownloadCheckpointRecord, DownloadCheckpointRepository};
 use launcher_module_fab::{
     contracts::{FabAssetDetailDto, FabInventoryListQueryDto},
     facade::{FabInventoryProjectionPage, FabInventoryProjectionRepository},
@@ -102,11 +103,104 @@ pub struct SqliteDownloadCheckpointRepository {
 
 impl SqliteDownloadCheckpointRepository {
     pub fn new(config: SqliteStorageAdapterConfig) -> Self {
-        Self { config }
+        let repo = Self { config };
+        repo.ensure_table()
+            .expect("SqliteDownloadCheckpointRepository: failed to create checkpoint table");
+        repo
     }
 
     pub fn config(&self) -> &SqliteStorageAdapterConfig {
         &self.config
+    }
+
+    fn ensure_table(&self) -> AppResult<()> {
+        let conn = self.open_connection()?;
+        conn.execute_batch(
+            "CREATE TABLE IF NOT EXISTS download_job_checkpoints (
+                job_id TEXT PRIMARY KEY NOT NULL
+            );",
+        )
+        .map_err(|e| launcher_kernel_foundation::AppError::new(
+            "SQLITE_WRITE_ERROR",
+            format!("download_job_checkpoints table init failed: {e}"),
+            false,
+            launcher_kernel_foundation::AppErrorSeverity::Warning,
+            launcher_kernel_foundation::CorrelationId::generate(),
+        ))?;
+        Ok(())
+    }
+
+    fn open_connection(&self) -> AppResult<rusqlite::Connection> {
+        rusqlite::Connection::open(self.config.database_path()).map_err(|e| {
+            launcher_kernel_foundation::AppError::new(
+                "SQLITE_OPEN_ERROR",
+                format!("failed to open sqlite database: {e}"),
+                false,
+                launcher_kernel_foundation::AppErrorSeverity::Warning,
+                launcher_kernel_foundation::CorrelationId::generate(),
+            )
+        })
+    }
+
+    pub fn load_checkpoint(&self, job_id: &JobId) -> AppResult<Option<DownloadCheckpointRecord>> {
+        let conn = self.open_connection()?;
+        let mut stmt = conn
+            .prepare("SELECT job_id FROM download_job_checkpoints WHERE job_id = ?1")
+            .map_err(|e| launcher_kernel_foundation::AppError::new(
+                "SQLITE_READ_ERROR",
+                format!("failed to prepare checkpoint select: {e}"),
+                false,
+                launcher_kernel_foundation::AppErrorSeverity::Warning,
+                launcher_kernel_foundation::CorrelationId::generate(),
+            ))?;
+
+        let mut rows = stmt
+            .query(rusqlite::params![job_id.to_string()])
+            .map_err(|e| launcher_kernel_foundation::AppError::new(
+                "SQLITE_READ_ERROR",
+                format!("checkpoint query failed: {e}"),
+                false,
+                launcher_kernel_foundation::AppErrorSeverity::Warning,
+                launcher_kernel_foundation::CorrelationId::generate(),
+            ))?;
+
+        let maybe_row = rows.next().map_err(|e| launcher_kernel_foundation::AppError::new(
+            "SQLITE_READ_ERROR",
+            format!("checkpoint row read failed: {e}"),
+            false,
+            launcher_kernel_foundation::AppErrorSeverity::Warning,
+            launcher_kernel_foundation::CorrelationId::generate(),
+        ))?;
+
+        Ok(maybe_row.map(|_| DownloadCheckpointRecord {
+            job_id: job_id.clone(),
+        }))
+    }
+
+    pub fn save_checkpoint(&self, checkpoint: &DownloadCheckpointRecord) -> AppResult<()> {
+        let conn = self.open_connection()?;
+        conn.execute(
+            "INSERT OR REPLACE INTO download_job_checkpoints (job_id) VALUES (?1)",
+            rusqlite::params![checkpoint.job_id.to_string()],
+        )
+        .map_err(|e| launcher_kernel_foundation::AppError::new(
+            "SQLITE_WRITE_ERROR",
+            format!("checkpoint upsert failed: {e}"),
+            false,
+            launcher_kernel_foundation::AppErrorSeverity::Warning,
+            launcher_kernel_foundation::CorrelationId::generate(),
+        ))?;
+        Ok(())
+    }
+}
+
+impl DownloadCheckpointRepository for SqliteDownloadCheckpointRepository {
+    fn load(&self, job_id: &JobId) -> AppResult<Option<DownloadCheckpointRecord>> {
+        self.load_checkpoint(job_id)
+    }
+
+    fn save(&self, checkpoint: &DownloadCheckpointRecord) -> AppResult<()> {
+        self.save_checkpoint(checkpoint)
     }
 }
 
