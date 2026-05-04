@@ -16,3 +16,4 @@ launcher-module-fab = { path = "../module-fab" }
 launcher-module-downloads = { path = "../module-downloads" }
 launcher-adapter-storage-sqlite = { path = "../adapter-storage-sqlite" }
 launcher-adapter-provider-fab = { path = "../adapter-provider-fab" }
+tracing.workspace = true

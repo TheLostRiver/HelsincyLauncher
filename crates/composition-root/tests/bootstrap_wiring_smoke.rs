@@ -141,3 +141,30 @@ fn runtime_snapshot_persists_across_rebuilds() {
     // Clean up temp file.
     let _ = std::fs::remove_file(&tmp_path);
 }
+
+#[test]
+fn stage2_restore_reads_resumable_snapshots() {
+    let tmp_path = std::env::temp_dir().join("at046_stage2_restore_test.sqlite3");
+    let _ = std::fs::remove_file(&tmp_path);
+
+    let config = DesktopBootstrapConfig {
+        sqlite_path: tmp_path.clone(),
+        ..DesktopBootstrapConfig::default()
+    };
+
+    // Build services, enqueue a job, then call stage-2 restore — it should not error.
+    let services = build_desktop_services(config.clone())
+        .expect("build_desktop_services should succeed for stage-2 test");
+
+    services
+        .fab
+        .run_startup_prewarm(FabInventoryPrewarmRequestDto {
+            reason: "at046-stage2-test".into(),
+        })
+        .expect("prewarm should be accepted");
+
+    block_on_ready(services.startup.run_stage2_restore_runtime_state())
+        .expect("stage-2 restore should succeed when a resumable job exists in the store");
+
+    let _ = std::fs::remove_file(&tmp_path);
+}

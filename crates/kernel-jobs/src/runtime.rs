@@ -25,6 +25,7 @@ pub trait JobSnapshotStore<E>: Send + Sync {
     fn create(&self, snapshot: &JobSnapshot<E>) -> AppResult<()>;
     fn update(&self, snapshot: &JobSnapshot<E>) -> AppResult<()>;
     fn get(&self, job_id: &JobId) -> AppResult<Option<JobSnapshot<E>>>;
+    fn list_resumable(&self) -> AppResult<Vec<JobSnapshot<E>>>;
 }
 
 #[derive(Debug, Clone, Default)]
@@ -56,6 +57,23 @@ impl JobSnapshotStore<()> for InMemoryJobSnapshotStore {
             .unwrap_or_else(|poisoned| poisoned.into_inner())
             .get(job_id)
             .cloned())
+    }
+
+    fn list_resumable(&self) -> AppResult<Vec<JobSnapshot<()>>> {
+        let resumable_states = [
+            JobState::Queued,
+            JobState::ClaimingLease,
+            JobState::Restoring,
+            JobState::Running,
+        ];
+        Ok(self
+            .snapshots
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner())
+            .values()
+            .filter(|s| resumable_states.contains(&s.state))
+            .cloned()
+            .collect())
     }
 }
 

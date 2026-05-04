@@ -2,7 +2,7 @@ use std::fmt::{Debug, Formatter};
 use std::sync::Arc;
 
 use launcher_kernel_foundation::AppResult;
-use launcher_kernel_jobs::AcceptedJob;
+use launcher_kernel_jobs::{AcceptedJob, JobSnapshotStore};
 use launcher_module_fab::{
     contracts::FabInventoryPrewarmRequestDto,
     facade::FabStartupPrewarmJobAcceptance,
@@ -30,6 +30,7 @@ where
 pub struct StartupPipelineFacade {
     enable_startup_prewarm: bool,
     fab_prewarm: Option<Arc<dyn FabStartupPrewarmPort>>,
+    snapshot_store: Option<Arc<dyn JobSnapshotStore<()>>>,
 }
 
 impl Debug for StartupPipelineFacade {
@@ -38,13 +39,14 @@ impl Debug for StartupPipelineFacade {
             .debug_struct("StartupPipelineFacade")
             .field("enable_startup_prewarm", &self.enable_startup_prewarm)
             .field("has_fab_prewarm", &self.fab_prewarm.is_some())
+            .field("has_snapshot_store", &self.snapshot_store.is_some())
             .finish()
     }
 }
 
 impl Default for StartupPipelineFacade {
     fn default() -> Self {
-        Self::new(false, None)
+        Self::new(false, None, None)
     }
 }
 
@@ -52,10 +54,12 @@ impl StartupPipelineFacade {
     pub fn new(
         enable_startup_prewarm: bool,
         fab_prewarm: Option<Arc<dyn FabStartupPrewarmPort>>,
+        snapshot_store: Option<Arc<dyn JobSnapshotStore<()>>>,
     ) -> Self {
         Self {
             enable_startup_prewarm,
             fab_prewarm,
+            snapshot_store,
         }
     }
 
@@ -64,6 +68,15 @@ impl StartupPipelineFacade {
     }
 
     pub async fn run_stage2_restore_runtime_state(&self) -> AppResult<()> {
+        if let Some(store) = self.snapshot_store.as_ref() {
+            let resumable = store.list_resumable()?;
+            tracing::info!(
+                stage = "stage2_restore",
+                resumable_count = resumable.len(),
+                "stage-2 runtime state restore: found {} resumable job(s)",
+                resumable.len()
+            );
+        }
         Ok(())
     }
 
@@ -122,7 +135,7 @@ mod tests {
     #[test]
     fn run_stage3_background_prewarm_triggers_fab_prewarm_when_enabled() {
         let fab_prewarm = Arc::new(RecordingFabPrewarmPort::default());
-        let facade = StartupPipelineFacade::new(true, Some(fab_prewarm.clone()));
+        let facade = StartupPipelineFacade::new(true, Some(fab_prewarm.clone()), None);
 
         block_on_ready(facade.run_stage3_background_prewarm())
             .expect("stage-3 background prewarm should trigger the Fab prewarm path when enabled");
@@ -141,7 +154,7 @@ mod tests {
     #[test]
     fn run_stage3_background_prewarm_skips_fab_prewarm_when_disabled() {
         let fab_prewarm = Arc::new(RecordingFabPrewarmPort::default());
-        let facade = StartupPipelineFacade::new(false, Some(fab_prewarm.clone()));
+        let facade = StartupPipelineFacade::new(false, Some(fab_prewarm.clone()), None);
 
         block_on_ready(facade.run_stage3_background_prewarm())
             .expect("stage-3 background prewarm should stay a no-op when the capability gate is disabled");

@@ -2,13 +2,13 @@
 
 ## Identity
 
-- task id: AT-2026-05-03-045
-- title: Persist runtime snapshots to sqlite
-- status: committed
+- task id: AT-2026-05-03-046
+- title: Stage-2 restore runtime state summary
+- status: in_progress
 
 ## Goal
 
-- exact local outcome: Move `SharedJobRuntimeHost` snapshot storage behind an explicit store boundary and inject a sqlite-backed snapshot store from composition-root so accepted jobs survive a fresh `build_desktop_services()` with the same sqlite path, while leaving stage-2 restore orchestration, lease handling, and driver registry work for later slices.
+- exact local outcome: Implement `run_stage2_restore_runtime_state()` in `StartupPipelineFacade` so it reads all resumable job snapshots (states: Queued, ClaimingLease, Restoring, Running) from the shared `JobSnapshotStore`, counts them, and returns `Ok(())` with a tracing log — no real re-execution, no lease acquisition, just a verified summary read so the stage-2 path is no longer a no-op stub. Add `list_resumable()` to the `JobSnapshotStore` trait and implement it in both the in-memory and sqlite adapters. Wire the store into `StartupPipelineFacade` from composition-root. Validate with a named test `stage2_restore_reads_resumable_snapshots` plus the two existing smoke tests.
 
 ## Scope
 
@@ -17,17 +17,37 @@
   - update `.artifacts/ai/task-plan.md`
   - update `.artifacts/ai/progress.md`
   - update `.artifacts/ai/findings.md`
-  - update `Cargo.toml`
-  - update `crates/adapter-storage-sqlite/Cargo.toml`
-  - update `crates/kernel-jobs/src/lib.rs`
   - update `crates/kernel-jobs/src/runtime.rs`
   - update `crates/adapter-storage-sqlite/src/lib.rs`
+  - update `crates/composition-root/src/startup.rs`
   - update `crates/composition-root/src/bootstrap.rs`
   - update `crates/composition-root/tests/bootstrap_wiring_smoke.rs`
 - out of scope:
-  - implementing `run_stage2_restore_runtime_state()` real recovery behavior
-  - adding lease acquisition/release behavior or driver registry execution
-  - changing startup host execution order in `src-tauri`
+  - real job re-execution during restore
+  - lease acquisition/release
+  - driver registry or module callbacks
+  - frontend IPC changes
+  - touching user-owned frontend files
+
+## Allowed Files
+
+1. .artifacts/ai/active-task.md
+2. .artifacts/ai/task-plan.md
+3. .artifacts/ai/progress.md
+4. .artifacts/ai/findings.md
+5. crates/kernel-jobs/src/runtime.rs
+6. crates/adapter-storage-sqlite/src/lib.rs
+7. crates/composition-root/src/startup.rs
+8. crates/composition-root/src/bootstrap.rs
+9. crates/composition-root/tests/bootstrap_wiring_smoke.rs
+
+## Hypothesis
+
+- falsifiable local hypothesis: If `StartupPipelineFacade` receives a `Arc<dyn JobSnapshotStore<()>>` and calls `list_resumable()` inside `run_stage2_restore_runtime_state`, then a named test that enqueues a job and calls stage-2 restore will see a non-empty resumable list, confirming the path is no longer a no-op.
+
+## Cheap Check
+
+- narrowest check: named test `stage2_restore_reads_resumable_snapshots` passes, then `bootstrap_wiring_smoke` and `transport_wiring_smoke` still pass.
   - changing downloads facade behavior beyond receiving persisted shared snapshots
   - introducing provider IO or media-cache IO
   - changing downloads, startup, or frontend production code

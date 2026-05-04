@@ -92,7 +92,7 @@ impl<F, D> DesktopAppServices<F, D> {
 pub fn build_desktop_services(config: DesktopBootstrapConfig) -> AppResult<DesktopAppServices> {
     let sqlite_config = build_storage_config(&config)?;
     let fab_provider = build_fab_provider_adapter()?;
-    let job_runtime = build_job_runtime(&config)?;
+    let (job_runtime, snapshot_store) = build_job_runtime(&config)?;
 
     let fab = Arc::new(build_fab_module(
         sqlite_config.clone(),
@@ -100,7 +100,7 @@ pub fn build_desktop_services(config: DesktopBootstrapConfig) -> AppResult<Deskt
         job_runtime.clone(),
     ));
     let downloads = Arc::new(build_downloads_module(sqlite_config, job_runtime));
-    let startup = Arc::new(build_startup_pipeline(&config, fab.clone()));
+    let startup = Arc::new(build_startup_pipeline(&config, fab.clone(), snapshot_store));
 
     Ok(DesktopAppServices::new(fab, downloads, startup))
 }
@@ -159,7 +159,7 @@ fn build_downloads_module(
     })
 }
 
-fn build_job_runtime(config: &DesktopBootstrapConfig) -> AppResult<SharedJobRuntimeHost> {
+fn build_job_runtime(config: &DesktopBootstrapConfig) -> AppResult<(SharedJobRuntimeHost, Arc<SqliteJobSnapshotStore>)> {
     if config.default_download_slots == 0 {
         return Err(invalid_builder_input(
             "build_job_runtime",
@@ -170,17 +170,23 @@ fn build_job_runtime(config: &DesktopBootstrapConfig) -> AppResult<SharedJobRunt
     let store = Arc::new(SqliteJobSnapshotStore::new(
         SqliteStorageAdapterConfig::new(config.sqlite_path.clone()),
     ));
-    Ok(SharedJobRuntimeHost::with_store(
+    let runtime = SharedJobRuntimeHost::with_store(
         RuntimeQueuePolicy::new(usize::from(config.default_download_slots)),
-        store,
-    ))
+        store.clone(),
+    );
+    Ok((runtime, store))
 }
 
 fn build_startup_pipeline(
     config: &DesktopBootstrapConfig,
     fab: Arc<DesktopFabFacade>,
+    snapshot_store: Arc<SqliteJobSnapshotStore>,
 ) -> StartupPipelineFacade {
-    StartupPipelineFacade::new(config.enable_fab && config.enable_startup_prewarm, Some(fab))
+    StartupPipelineFacade::new(
+        config.enable_fab && config.enable_startup_prewarm,
+        Some(fab),
+        Some(snapshot_store),
+    )
 }
 
 fn invalid_builder_input(builder: &str, detail: &str) -> AppError {

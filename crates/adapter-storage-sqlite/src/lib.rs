@@ -280,4 +280,72 @@ impl JobSnapshotStore<()> for SqliteJobSnapshotStore {
             Ok(None)
         }
     }
+
+    fn list_resumable(&self) -> AppResult<Vec<JobSnapshot<()>>> {
+        let resumable_state_jsons = [
+            r#""queued""#,
+            r#""claiming_lease""#,
+            r#""restoring""#,
+            r#""running""#,
+        ];
+        let placeholders = resumable_state_jsons.iter().enumerate()
+            .map(|(i, _)| format!("?{}", i + 1))
+            .collect::<Vec<_>>()
+            .join(", ");
+        let sql = format!(
+            "SELECT job_id, module, kind, state, ui_state, progress, updated_at
+             FROM job_snapshots WHERE state IN ({placeholders})"
+        );
+        let conn = self.conn.lock().unwrap_or_else(|p| p.into_inner());
+        let mut stmt = conn.prepare(&sql).map_err(|e| launcher_kernel_foundation::AppError::new(
+            "SQLITE_READ_ERROR",
+            format!("list_resumable prepare failed: {e}"),
+            false,
+            launcher_kernel_foundation::AppErrorSeverity::Warning,
+            launcher_kernel_foundation::CorrelationId::generate(),
+        ))?;
+
+        let mut results = Vec::new();
+        let mut rows = stmt.query(rusqlite::params_from_iter(resumable_state_jsons.iter()))
+            .map_err(|e| launcher_kernel_foundation::AppError::new(
+                "SQLITE_READ_ERROR",
+                format!("list_resumable query failed: {e}"),
+                false,
+                launcher_kernel_foundation::AppErrorSeverity::Warning,
+                launcher_kernel_foundation::CorrelationId::generate(),
+            ))?;
+
+        while let Some(row) = rows.next().map_err(|e| launcher_kernel_foundation::AppError::new(
+            "SQLITE_READ_ERROR",
+            format!("list_resumable row read failed: {e}"),
+            false,
+            launcher_kernel_foundation::AppErrorSeverity::Warning,
+            launcher_kernel_foundation::CorrelationId::generate(),
+        ))? {
+            let job_id_str: String = row.get(0).unwrap();
+            let module: String = row.get(1).unwrap();
+            let kind: String = row.get(2).unwrap();
+            let state_str: String = row.get(3).unwrap();
+            let ui_state_str: String = row.get(4).unwrap();
+            let progress_str: String = row.get(5).unwrap();
+            let updated_at_str: String = row.get(6).unwrap();
+
+            let state: JobState = serde_json::from_str(&state_str).map_err(|e| launcher_kernel_foundation::AppError::new("SQLITE_DESERIALIZE_ERROR", format!("state: {e}"), false, launcher_kernel_foundation::AppErrorSeverity::Warning, launcher_kernel_foundation::CorrelationId::generate()))?;
+            let ui_state: JobUiState = serde_json::from_str(&ui_state_str).map_err(|e| launcher_kernel_foundation::AppError::new("SQLITE_DESERIALIZE_ERROR", format!("ui_state: {e}"), false, launcher_kernel_foundation::AppErrorSeverity::Warning, launcher_kernel_foundation::CorrelationId::generate()))?;
+            let progress: JobProgress = serde_json::from_str(&progress_str).map_err(|e| launcher_kernel_foundation::AppError::new("SQLITE_DESERIALIZE_ERROR", format!("progress: {e}"), false, launcher_kernel_foundation::AppErrorSeverity::Warning, launcher_kernel_foundation::CorrelationId::generate()))?;
+            let updated_at: IsoDateTime = serde_json::from_str(&format!(r#""{updated_at_str}""#)).map_err(|e| launcher_kernel_foundation::AppError::new("SQLITE_DESERIALIZE_ERROR", format!("updated_at: {e}"), false, launcher_kernel_foundation::AppErrorSeverity::Warning, launcher_kernel_foundation::CorrelationId::generate()))?;
+
+            results.push(JobSnapshot {
+                job_id: JobId::new(job_id_str),
+                module,
+                kind,
+                state,
+                ui_state,
+                progress,
+                updated_at,
+                extension: None,
+            });
+        }
+        Ok(results)
+    }
 }
