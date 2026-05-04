@@ -13,7 +13,7 @@ use launcher_kernel_foundation::{
     AppError, AppErrorSeverity, AppResult, CorrelationId,
 };
 use launcher_kernel_jobs::{JobDriverRegistry, RuntimeQueuePolicy, SharedJobRuntimeHost};
-use launcher_module_downloads::{DownloadFacade, DownloadModuleDeps};
+use launcher_module_downloads::{DownloadFacade, DownloadJobDriver, DownloadModuleDeps};
 use launcher_module_fab::{FabFacade, FabModuleDeps, FabPrewarmJobDriver, FabSyncJobDriver};
 
 use crate::startup::StartupPipelineFacade;
@@ -182,6 +182,7 @@ fn build_job_driver_registry() -> Arc<JobDriverRegistry<()>> {
     let mut registry = JobDriverRegistry::new();
     registry.register(Arc::new(FabPrewarmJobDriver));
     registry.register(Arc::new(FabSyncJobDriver));
+    registry.register(Arc::new(DownloadJobDriver));
     Arc::new(registry)
 }
 

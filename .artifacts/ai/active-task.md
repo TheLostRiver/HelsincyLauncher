@@ -2,8 +2,8 @@
 
 ## Identity
 
-- task id: AT-2026-05-04-048
-- title: JobDriver registry + Fab stub drivers + stage-2 restore dispatch
+- task id: AT-2026-05-04-049
+- title: Downloads stub driver + stage-2 restore registration
 - status: in_progress
 
 ## Goal
