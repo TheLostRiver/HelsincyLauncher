@@ -2,9 +2,9 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-04-054 - Engine verification accepted-job wiring - COMPLETED
-- Current phase: Phase 20 - Engines verification intake correctness
-- Last completed slice: AT-2026-05-04-054 - wired engine verification accepted-job path through module, composition-root, and host transport
+- Active atomic task: AT-2026-05-04-055 - Composition-root engines doc drift cleanup - COMPLETED
+- Current phase: Phase 21 - Composition-root documentation drift cleanup
+- Last completed slice: AT-2026-05-04-055 - aligned the composition-root wiring design with the live engines facade baseline while keeping startup ownership narrow
 - Next step: engines list/status/repair paths still remain deferred if the user wants to continue
 
 ## Session Timeline
@@ -32,6 +32,11 @@
 - Extended composition-root wiring to build and expose an engines facade backed by the shared job runtime, and added a narrow composition-root smoke test that proves engine verification enqueues a queued snapshot in the shared runtime host.
 - Added `src-tauri/src/commands/engines.rs`, registered `engines_run_verification`, updated host dependencies, and expanded `transport_wiring_smoke` to prove the transport path returns a successful accepted-job response instead of missing-command drift.
 - Validated AT-054 with `cargo test -p launcher-module-engines run_verification_returns_backend_owned_accepted_job`, `cargo test -p launcher-module-engines`, `cargo test -p launcher-composition-root engines_run_verification_enqueues_job`, `cargo test -p my-epic-launcher-desktop transport_wiring_smoke`, and `git diff --check`.
+- User then selected the documentation cleanup follow-up, specifically the composition-root wiring doc drift that still recorded `module-engines` as deferred even after the AT-054 code path landed.
+- Confirmed the drift was broader than one bullet: `docs/TauriCompositionRootWiringDesign.md` still omitted engines from `DesktopAppServices`, the wiring sequence, the private module bundle sketch, and the smoke-test matrix, which understated the live baseline.
+- Updated the composition-root wiring design so the current wiring scope includes `launcher-module-engines`, the service and bundle sketches expose an engines facade, and the assembly sequence acknowledges `build_engines_module(...)`.
+- Kept the startup boundary explicit instead of overstating the implementation: the updated doc now says engines is exposed through `DesktopAppServices`, but startup-stage orchestration for engines remains a later slice rather than already-owned behavior.
+- Validated AT-055 with a targeted grep on `docs/TauriCompositionRootWiringDesign.md` for the new engines markers and `git diff --check -- docs/TauriCompositionRootWiringDesign.md`.
 
 ### Session: 2026-05-03
 

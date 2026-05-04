@@ -1,9 +1,9 @@
 # Tauri Composition Root Wiring Design
 
-> Status: local draft v1
-> Date: 2026-05-03
+> Status: local draft v2
+> Date: 2026-05-04
 > Parent: `docs/TauriRewriteArchitectureBlueprint.md`
-> Depends on: `docs/TauriBackendCrateLayoutAndUseCaseStubDesign.md`, `docs/TauriFirstCrateApiDrafts.md`, `docs/TauriFabInventoryLoadingDesign.md`, `docs/TauriDownloadRuntimeDesign.md`
+> Depends on: `docs/TauriBackendCrateLayoutAndUseCaseStubDesign.md`, `docs/TauriFirstCrateApiDrafts.md`, `docs/TauriFabInventoryLoadingDesign.md`, `docs/TauriDownloadRuntimeDesign.md`, `docs/TauriEngineVerificationRepairDesign.md`
 > Focus: composition-root crate public API, adapter injection, DesktopAppServices assembly, startup pipeline staging, tauri integration boundary
 
 ---
@@ -34,7 +34,7 @@
 | Facade-only exposure | 桌面宿主和 Tauri commands 只能拿到 facade 聚合，不拿 repository |
 | Staged startup | 启动预热必须按阶段显式运行，不藏在构造函数里 |
 | Testable wiring | `build_desktop_services()` 必须可做 smoke test 和失败路径测试 |
-| Minimal first slice | 第一阶段只装配 Fab、Downloads 和它们的最小依赖 |
+| Minimal current slice | 当前桌面基线装配 Fab、Downloads、Engines 的最小依赖，其他模块仍可后置 |
 | No hidden background boot | 模块不会在构造时偷偷启动任务 |
 
 ### 2.2 Non-goals
@@ -67,9 +67,9 @@
 
 ---
 
-## 4. First-slice Wiring Scope
+## 4. Current Wiring Scope
 
-第一批接线只覆盖以下能力：
+当前桌面宿主基线接线覆盖以下能力：
 
 ### 4.1 Included
 
@@ -77,22 +77,22 @@
 2. `launcher-kernel-jobs`
 3. `launcher-module-fab`
 4. `launcher-module-downloads`
-5. `launcher-adapter-storage-sqlite`
-6. `launcher-adapter-provider-fab`
+5. `launcher-module-engines`
+6. `launcher-adapter-storage-sqlite`
+7. `launcher-adapter-provider-fab`
 
 ### 4.2 Deferred
 
 1. `module-auth`
 2. `module-installations`
-3. `module-engines`
-4. `adapter-filesystem`
-5. `adapter-secure-storage`
-6. `adapter-platform-desktop`
+3. `adapter-filesystem`
+4. `adapter-secure-storage`
+5. `adapter-platform-desktop`
 
 说明：
 
 1. 延后不代表没有边界，只代表 wiring 顺序后置。
-2. `StartupPipelineFacade` 第一版允许为 Auth / Engines 预留空 hook，不强行装假实现。
+2. `StartupPipelineFacade` 第一版仍允许为 Auth 预留空 hook；`Engines` 已进入 `DesktopAppServices`，但更宽的 verify / repair orchestration 仍可后置。
 
 ---
 
@@ -150,6 +150,7 @@ pub struct DesktopBootstrapConfig {
 pub struct DesktopAppServices {
     pub fab: Arc<FabFacade<...>>,
     pub downloads: Arc<DownloadFacade<...>>,
+    pub engines: Arc<EngineFacade<...>>,
     pub startup: Arc<StartupPipelineFacade>,
 }
 ```
@@ -213,6 +214,7 @@ bootstrap/
 
 1. 用 adapters 构造 `FabFacade`
 2. 用 adapters 构造 `DownloadFacade`
+3. 用 runtime / placeholder deps 构造 `EngineFacade`
 
 ### 6.4 Service Aggregation Layer
 
@@ -235,6 +237,7 @@ build_desktop_services(config)
   -> build_provider_adapters(foundations)
   -> build_fab_module(storage, providers, jobs)
   -> build_download_module(storage, jobs)
+    -> build_engines_module(jobs)
   -> build_startup_pipeline(fab, downloads)
   -> return DesktopAppServices
 ```
@@ -243,8 +246,9 @@ build_desktop_services(config)
 
 1. foundation 先于一切，因为 repository / provider / runtime 都依赖它。
 2. job runtime 必须先有，Fab prewarm 和 Downloads start/resume 都需要。
-3. module facade 只能建立在 adapters 之后。
-4. startup pipeline 最后组装，因为它依赖模块 facade，而不是反过来。
+3. `Engines` 当前虽然不依赖完整 storage/provider wiring，但它的 accepted-job 路径仍依赖共享 job runtime，所以仍应在 runtime 之后组装。
+4. module facade 只能建立在 adapters 或 runtime 等已准备好的依赖之后。
+5. startup pipeline 最后组装，因为它依赖模块 facade，而不是反过来。
 
 ---
 
@@ -295,6 +299,7 @@ struct RuntimeBundle {
 struct ModuleBundle {
     fab: Arc<FabFacade<...>>,
     downloads: Arc<DownloadFacade<...>>,
+    engines: Arc<EngineFacade<...>>,
 }
 ```
 
@@ -328,6 +333,12 @@ impl StartupPipelineFacade {
     pub async fn run_stage3_background_prewarm(&self) -> AppResult<()>;
 }
 ```
+
+补充说明：
+
+1. 当前基线不要求把 `Engines` facade 纳入 `StartupPipelineFacade` 的阶段成员。
+2. `engines.verify.start` 当前通过 host command 直接进入 `EngineFacade` 和共享 job runtime。
+3. 是否把 engines repair / verification restore orchestration 纳入 startup pipeline，属于后续更宽切片。
 
 ### 9.3 Stage Ownership
 
@@ -477,7 +488,7 @@ pub async fn downloads_resume(
 验证：
 
 1. `build_desktop_services()` 能返回完整 `DesktopAppServices`
-2. `fab`、`downloads`、`startup` 三个 facade 都存在
+2. `fab`、`downloads`、`engines`、`startup` 四个 facade 都存在
 
 ### 13.2 Builder Failure Test
 

@@ -6,11 +6,11 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 20 - Engines verification intake correctness
+Phase 21 - Composition-root documentation drift cleanup
 
 ## Current Focus
 
-- AT-2026-05-04-054 completed the engines verification accepted-job slice.
+- AT-2026-05-04-055 completed the composition-root engines documentation drift cleanup.
 - Subsequent engines query/repair work remains deferred unless the user explicitly selects it.
 
 ## Phases
@@ -135,6 +135,12 @@ Phase 20 - Engines verification intake correctness
 - Atomic tasks: AT-2026-05-04-054
 - **Status:** complete
 
+### Phase 21: Composition-root Documentation Drift Cleanup
+
+- Outcome: align `docs/TauriCompositionRootWiringDesign.md` with the live engines wiring baseline without overstating startup-stage ownership.
+- Atomic tasks: AT-2026-05-04-055
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -185,6 +191,7 @@ Phase 20 - Engines verification intake correctness
 46. AT-2026-05-04-052 - completed - wired a checkpoint-backed download restore driver, added sqlite checkpoint persistence, and validated missing/present checkpoint behavior through module and composition-root tests.
 47. AT-2026-05-04-053 - completed - persisted start_download request metadata into the downloads job repository, honored request priority during runtime enqueue, and validated the behavior through module and composition-root tests.
 48. AT-2026-05-04-054 - completed - wired engine verification to return a backend-owned accepted job, exposed engines through composition-root and host transport, and validated the path through module, composition-root, and transport tests.
+49. AT-2026-05-04-055 - completed - repaired `TauriCompositionRootWiringDesign.md` so the current wiring scope, service sketches, sequence, and smoke-test matrix acknowledge engines without implying startup orchestration already exists.
 
 ## Key Questions
 
