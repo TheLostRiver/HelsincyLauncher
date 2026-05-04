@@ -2,22 +2,22 @@
 
 ## Latest Completed Atomic Task
 
-- task id: AT-2026-05-04-057
-- title: Fab module comment slice 1
+- task id: AT-2026-05-04-058
+- title: Desktop host comment slice 2
 - status: completed
 
-## Published Slice
+## Validated Slice
 
-- `crates/module-fab/src/facade/mod.rs`
-- `crates/module-fab/src/driver.rs`
+- `src-tauri/src/bootstrap.rs`
+- `src-tauri/src/commands/mod.rs`
 
 ## Validation
 
-- `cargo test -p launcher-module-fab --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`
-- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md crates/module-fab/src/facade/mod.rs crates/module-fab/src/driver.rs`
+- `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`
+- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md src-tauri/src/bootstrap.rs src-tauri/src/commands/mod.rs`
 
 ## Next Resume Point
 
 - Commit and push this validated slice if publication has not happened yet.
 - After publication, stop and ask the user whether to continue with the next 1-2 backend files.
-- Prefer the next slice to stay inside one backend area with similar blast radius.
+- Prefer the next slice to stay inside one backend boundary with a similarly small blast radius.

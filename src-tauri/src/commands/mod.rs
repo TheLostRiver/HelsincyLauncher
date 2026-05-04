@@ -1,3 +1,10 @@
+//! Shared desktop transport contracts and mapping helpers.
+//!
+//! This module is the narrow host-facing boundary between Rust backend services
+//! and the Tauri command layer: it owns registered command names, stable result
+//! envelopes, and the common mapping helpers that keep command/query handlers from
+//! leaking raw internal errors across IPC.
+
 use launcher_composition_root::DesktopAppServices;
 use launcher_kernel_foundation::{AppError, AppResult, IsoDateTime, JobId};
 use launcher_kernel_jobs::AcceptedJob;
@@ -7,6 +14,7 @@ pub mod engines;
 pub mod fab;
 pub mod jobs;
 
+/// Command names exposed by the current desktop host transport boundary.
 pub const REGISTERED_COMMANDS: &[&str] = &[
     "fab_list_inventory",
     "fab_get_asset_detail",
@@ -24,12 +32,22 @@ pub const REGISTERED_COMMANDS: &[&str] = &[
     "jobs_list_active",
 ];
 
+/// Stable error envelope projected from backend `AppError` values into IPC-safe fields.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AppErrorDto {
+    /// Stable machine-readable error code.
     pub code: String,
+
+    /// Human-readable message safe to surface at the transport boundary.
     pub message: String,
+
+    /// Whether the caller can retry the command/query without changing inputs.
     pub retryable: bool,
+
+    /// Lowercased severity label projected from backend error severity.
     pub severity: String,
+
+    /// Correlation identifier used to join frontend failures with backend logs.
     pub correlation_id: String,
 }
 
@@ -45,24 +63,36 @@ impl From<AppError> for AppErrorDto {
     }
 }
 
+/// Command result envelope used by IPC handlers that mutate backend-owned state or jobs.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CommandResultDto<T> {
     Success { data: T },
     Failure { error: AppErrorDto },
 }
 
+/// Query result envelope used by IPC handlers that return a read model snapshot.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum QueryResultDto<T> {
     Success { data: T, as_of: Option<IsoDateTime> },
     Failure { error: AppErrorDto },
 }
 
+/// Accepted-job projection exposed to transport callers after long-running work is queued.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AcceptedJobDto {
+    /// Marker that the backend accepted the request for asynchronous processing.
     pub accepted: bool,
+
+    /// Backend-generated job identifier.
     pub job_id: JobId,
+
+    /// Module that owns the accepted job.
     pub module: String,
+
+    /// Job kind within the owning module.
     pub kind: String,
+
+    /// Time when the backend queued the job.
     pub queued_at: IsoDateTime,
 }
 
@@ -78,8 +108,10 @@ impl From<AcceptedJob> for AcceptedJobDto {
     }
 }
 
+/// Shared desktop service aggregation exposed to concrete command handlers.
 pub type DesktopServices = DesktopAppServices;
 
+/// Maps a backend command result into the shared desktop command envelope.
 pub fn map_command_result<T>(result: AppResult<T>) -> CommandResultDto<T> {
     match result {
         Ok(data) => CommandResultDto::Success { data },
@@ -89,6 +121,11 @@ pub fn map_command_result<T>(result: AppResult<T>) -> CommandResultDto<T> {
     }
 }
 
+/// Maps a backend query result into the shared desktop query envelope.
+///
+/// Some transport queries remain callable before their read model is fully wired;
+/// those paths can project a temporary backend-owned stub when the error code matches
+/// the explicitly allowed `not_wired_code`.
 pub fn map_query_result_or_stub<T>(
     result: AppResult<T>,
     not_wired_code: &str,
@@ -100,6 +137,7 @@ pub fn map_query_result_or_stub<T>(
             as_of: Some(IsoDateTime::now()),
         },
         Err(error) if error.code == not_wired_code => QueryResultDto::Success {
+            // Preserve a stable transport contract while the read path is still stubbed.
             data: stub(),
             as_of: Some(IsoDateTime::now()),
         },
@@ -109,6 +147,7 @@ pub fn map_query_result_or_stub<T>(
     }
 }
 
+/// Maps an accepted backend job into the shared desktop command envelope.
 pub fn map_accepted_job_result(result: AppResult<AcceptedJob>) -> CommandResultDto<AcceptedJobDto> {
     match result {
         Ok(job) => CommandResultDto::Success { data: job.into() },

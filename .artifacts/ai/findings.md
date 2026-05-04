@@ -8,6 +8,10 @@
 
 ## Research Findings
 
+- `src-tauri/src/bootstrap.rs` is a strong second backend comment slice because it is the desktop host assembly entry point exposed by `my_epic_launcher_desktop`, yet it currently lacks comments on the bootstrap struct and the two public functions that define host startup semantics.
+- `src-tauri/src/commands/mod.rs` is the shared transport mapping surface for registered command names, error envelopes, accepted-job projection, and result wrappers; it currently exposes multiple public DTOs and helpers without declaration-level comments.
+- The narrowest executable validation for this host-facing slice is `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`, because that test exercises both bootstrap assembly and command invocation through the desktop transport boundary.
+
 - `crates/module-fab/src/facade/mod.rs` is a strong first backend comment slice because it is the public module boundary for projection reads, cold-start placeholders, and accepted-job handoff, yet it currently lacks declaration-level comments on most public types and traits.
 - `crates/module-fab/src/driver.rs` is a good adjacent second file because it is small, backend-only, and its restore semantics are simple enough to annotate without reopening behavior changes.
 - For the first rollout slice, comments should stay concentrated on module entry, public types/traits/functions, and a few non-obvious cold-start helpers; test code in the same file should remain mostly uncommented unless a test-specific invariant is non-obvious.

@@ -2,14 +2,23 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-04-057 - Fab module comment slice 1 - COMPLETED
+- Active atomic task: AT-2026-05-04-058 - Desktop host comment slice 2 - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-04-057 - documented the `module-fab` facade boundary and restore drivers as the first backend comment rollout slice
+- Last completed slice: AT-2026-05-04-058 - documented the desktop host bootstrap boundary and shared transport command/DTO mapping surface as the second backend comment rollout slice
 - Next step: publish this slice, then wait for user confirmation before selecting the next 1-2 backend files
 
 ## Session Timeline
 
 ### Session: 2026-05-04
+
+- Added the second backend comment slice in `src-tauri/src/bootstrap.rs` and `src-tauri/src/commands/mod.rs`, focusing on host bootstrap ownership, registered command exposure, transport envelopes, and the non-obvious stub-query fallback semantics.
+- Validated AT-2026-05-04-058 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`; the transport smoke test passed.
+- Confirmed `git diff --check` returned clean for the task-record files, handoff, and the two touched desktop-host files.
+- Marked AT-2026-05-04-058 complete after validation; the remaining action in this turn is publication only.
+
+- The user confirmed through the UI to continue immediately after AT-2026-05-04-057, so the workflow advanced directly into a second small backend comment slice instead of pausing.
+- Started AT-2026-05-04-058 and narrowed the next files to `src-tauri/src/bootstrap.rs` and `src-tauri/src/commands/mod.rs` because they are small desktop-host boundaries with clear comment gaps around assembly ownership and transport envelopes.
+- Re-read `docs/TauriCompositionRootWiringDesign.md` and `docs/TauriIPCAndStateContractsDesign.md`, then confirmed the local hypothesis: this slice should explain bootstrap ownership, registered command exposure, and shared command/query result envelopes without adding low-signal comments to obvious mapping branches.
 
 - Marked AT-2026-05-04-057 complete after the first backend comment slice validated cleanly; the remaining action in this turn is publication only.
 
