@@ -1,3 +1,10 @@
+//! Host transport handlers for the downloads module.
+//!
+//! This boundary adapts IPC-facing downloads commands and queries onto the
+//! backend-owned downloads facade exposed through `DesktopServices`. Until the
+//! full downloads read path is wired everywhere, the query handlers also own the
+//! temporary `DOWNLOADS_NOT_WIRED` fallback projections returned to the shell.
+
 use launcher_kernel_foundation::PageSlice;
 use launcher_module_downloads::contracts::{
     CancelDownloadRequestDto, DownloadJobListDto, DownloadJobSnapshotDto, DownloadPolicyDto,
@@ -11,6 +18,7 @@ use super::{
     DesktopServices, QueryResultDto,
 };
 
+/// Starts a backend-owned download job and projects the accepted job envelope.
 pub async fn downloads_start(
     services: &DesktopServices,
     request: StartDownloadRequestDto,
@@ -18,6 +26,7 @@ pub async fn downloads_start(
     map_accepted_job_result(services.downloads.start_download(request))
 }
 
+/// Pauses an existing backend-owned download job.
 pub async fn downloads_pause(
     services: &DesktopServices,
     request: PauseDownloadRequestDto,
@@ -25,6 +34,7 @@ pub async fn downloads_pause(
     map_command_result(services.downloads.pause_download(request))
 }
 
+/// Resumes a paused backend-owned download job and projects the accepted job envelope.
 pub async fn downloads_resume(
     services: &DesktopServices,
     request: ResumeDownloadRequestDto,
@@ -32,6 +42,7 @@ pub async fn downloads_resume(
     map_accepted_job_result(services.downloads.resume_download(request))
 }
 
+/// Cancels an existing backend-owned download job.
 pub async fn downloads_cancel(
     services: &DesktopServices,
     request: CancelDownloadRequestDto,
@@ -39,6 +50,7 @@ pub async fn downloads_cancel(
     map_command_result(services.downloads.cancel_download(request))
 }
 
+/// Lists projected download jobs and falls back to an empty page on the current host stub path.
 pub async fn downloads_list_jobs(
     services: &DesktopServices,
     query: ListDownloadJobsQueryDto,
@@ -48,6 +60,7 @@ pub async fn downloads_list_jobs(
     })
 }
 
+/// Gets one projected download job snapshot and falls back to `None` on the current host stub path.
 pub async fn downloads_get_job_snapshot(
     services: &DesktopServices,
     query: GetDownloadJobQueryDto,
@@ -59,6 +72,7 @@ pub async fn downloads_get_job_snapshot(
     )
 }
 
+/// Reads the downloads policy projection and falls back to the current host-owned placeholder policy.
 pub async fn downloads_get_policy(
     services: &DesktopServices,
     query: GetDownloadPolicyQueryDto,
@@ -72,6 +86,7 @@ pub async fn downloads_get_policy(
     })
 }
 
+/// Updates the backend-owned downloads policy.
 pub async fn downloads_update_policy(
     services: &DesktopServices,
     request: UpdateDownloadPolicyRequestDto,

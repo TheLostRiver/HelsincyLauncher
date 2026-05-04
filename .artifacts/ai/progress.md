@@ -2,14 +2,23 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-04-064 - Downloads read-model contracts comment slice 8 - COMPLETED
+- Active atomic task: AT-2026-05-04-065 - Downloads transport handlers comment slice 9 - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-04-064 - documented the downloads read-model and event contracts as the eighth backend comment rollout slice
+- Last completed slice: AT-2026-05-04-065 - documented the desktop host downloads transport handlers as the ninth backend comment rollout slice
 - Next step: publish this slice, then wait for user confirmation before selecting the next 1-2 backend files
 
 ## Session Timeline
 
 ### Session: 2026-05-04
+
+- Added the ninth backend comment slice in `src-tauri/src/commands/downloads.rs`, focusing on host transport ownership, facade forwarding semantics, and the current `DOWNLOADS_NOT_WIRED` stub-query fallbacks.
+- Validated AT-2026-05-04-065 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`; the host transport smoke test passed.
+- Confirmed `git diff --check` returned clean for the task-record files, handoff, and the touched downloads transport file.
+- Marked AT-2026-05-04-065 complete after validation; the remaining action in this turn is publication only.
+
+- The user selected the next anchored slice to continue from `src-tauri/src/commands/downloads.rs`, so the rollout moved from module contracts into the adjacent desktop-host downloads transport boundary.
+- Started AT-2026-05-04-065 and narrowed the next file to `src-tauri/src/commands/downloads.rs` because it directly owns the downloads IPC-to-facade mapping surface and still lacks declaration-level comments on its handler responsibilities and stub-query semantics.
+- Re-read the comment standard, IPC/state contracts, downloads runtime design, and host transport test boundary, then confirmed the local hypothesis: this slice should explain facade forwarding and `DOWNLOADS_NOT_WIRED` fallback ownership without adding low-value comments to the obvious one-line result mappers.
 
 - Added the eighth backend comment slice in `crates/module-downloads/src/contracts/dto.rs` and `crates/module-downloads/src/contracts/events.rs`, focusing on projected read-model semantics, event union meaning, and the few non-obvious progress and retry fields.
 - Validated AT-2026-05-04-064 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority`; the targeted downloads unit test passed.

@@ -8,6 +8,10 @@
 
 ## Research Findings
 
+- `src-tauri/src/commands/downloads.rs` is the strongest next slice because it is the host-owned downloads transport boundary that forwards IPC DTOs into the downloads facade while still owning temporary `DOWNLOADS_NOT_WIRED` fallback projections for list/detail/policy queries.
+- The comments here should focus on handler responsibility and stub fallback ownership, not on restating the obvious `map_command_result` and `map_accepted_job_result` one-line wrappers.
+- `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke` is the narrowest practical executable validation for this slice: it does not call the downloads handlers directly today, but it does compile the same host transport boundary and remains the documented host transport gate.
+
 - `crates/module-downloads/src/contracts/dto.rs` and `crates/module-downloads/src/contracts/events.rs` are a good paired slice because together they finish the public downloads contracts surface with projected state snapshots and event payloads while staying inside one narrow module boundary.
 - The comments here should emphasize which backend facts are stable read models versus transient emitted events, plus the few non-obvious projection fields like throughput, progress labels, and retryability.
 - The same named downloads unit test remains the cheapest executable validation for this slice because the module compiles these contracts through the public facade without widening to transport or host startup.

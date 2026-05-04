@@ -2,17 +2,16 @@
 
 ## Identity
 
-- task id: AT-2026-05-04-064
-- title: Downloads read-model contracts comment slice 8
+- task id: AT-2026-05-04-065
+- title: Downloads transport handlers comment slice 9
 - status: completed
 
 ## Goal
 
-按新的仓库注释规范，为 downloads 模块读模型与事件契约边界的第八批后端文件补上高信号注释：
-- `crates/module-downloads/src/contracts/dto.rs`
-- `crates/module-downloads/src/contracts/events.rs`
+按新的仓库注释规范，为 desktop host 的 downloads transport handler 边界补上第九批高信号注释：
+- `src-tauri/src/commands/downloads.rs`
 
-本轮只补模块/声明级注释和少量必要的字段语义说明，不改动 DTO 结构、序列化行为、分页形状或事件载荷格式。
+本轮只补模块/声明级注释和少量必要的 fallback 语义说明，不改动 IPC DTO、命令注册、facade 行为或下载逻辑。
 
 ## Scope
 
@@ -22,11 +21,10 @@
   - update `.artifacts/ai/progress.md`
   - update `.artifacts/ai/findings.md`
   - update `.artifacts/ai/handoff.md`
-  - update `crates/module-downloads/src/contracts/dto.rs`
-  - update `crates/module-downloads/src/contracts/events.rs`
+  - update `src-tauri/src/commands/downloads.rs`
 - out of scope:
-  - annotate more than these two backend files
-  - change downloads DTOs, module public API, or facade behavior
+  - annotate more than this one backend file
+  - change downloads DTOs, transport registration, or facade behavior
   - add lint rules or doc tooling
   - modify frontend code or repo architecture docs
 
@@ -37,8 +35,7 @@
 3. .artifacts/ai/progress.md
 4. .artifacts/ai/findings.md
 5. .artifacts/ai/handoff.md
-6. crates/module-downloads/src/contracts/dto.rs
-7. crates/module-downloads/src/contracts/events.rs
+6. src-tauri/src/commands/downloads.rs
 
 ## 控制性文档
 
@@ -52,16 +49,16 @@
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If the downloads read-model and event contracts receive declaration-level comments that explain which backend facts they project and broadcast, then this eighth backend comment slice will satisfy the repository comment standard without adding low-signal comments to every typed alias or obvious identifier field.
+- falsifiable local hypothesis: If the desktop host downloads transport handlers receive declaration-level comments that explain which backend facade calls they forward and which query handlers still own temporary `DOWNLOADS_NOT_WIRED` fallback projections, then this ninth backend comment slice will satisfy the repository comment standard without adding low-signal comments to the obvious one-line result mappers.
 
 ## Cheap Check
 
-- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority`
+- `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`
 
 ## Validation Gate
 
-1. `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority`
-2. `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/module-downloads/src/contracts/dto.rs crates/module-downloads/src/contracts/events.rs`
+1. `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`
+2. `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md src-tauri/src/commands/downloads.rs`
 
 ## Validation Result
 
@@ -69,14 +66,14 @@
 
 ## Notes
 
-- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority` passed with the targeted downloads unit test green.
-- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/module-downloads/src/contracts/dto.rs crates/module-downloads/src/contracts/events.rs` produced no output.
+- `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke` passed with the host transport smoke test green.
+- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md src-tauri/src/commands/downloads.rs` produced no output.
 
 ## 安全恢复点
 
-- 第八批后端注释切片已收敛到 downloads 模块读模型与事件契约；若中断，恢复时直接补 `crates/module-downloads/src/contracts/dto.rs` 与 `crates/module-downloads/src/contracts/events.rs` 的声明级注释，然后立刻跑 `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority`。
+- 第九批后端注释切片已收敛到 desktop host 的 downloads transport handler 边界；若中断，恢复时直接补 `src-tauri/src/commands/downloads.rs` 的声明级注释，然后立刻跑 `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`。
 
 ## Completion
 
-- completed slice: `crates/module-downloads/src/contracts/dto.rs` + `crates/module-downloads/src/contracts/events.rs`
+- completed slice: `src-tauri/src/commands/downloads.rs`
 - publication step: pending commit and push in this turn, then wait for user confirmation before opening the next 1-2 file backend slice
