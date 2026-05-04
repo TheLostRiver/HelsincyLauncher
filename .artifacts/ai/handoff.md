@@ -2,18 +2,18 @@
 
 ## Latest Completed Atomic Task
 
-- task id: AT-2026-05-04-067
-- title: Fab transport handlers comment slice 11
+- task id: AT-2026-05-04-068
+- title: Desktop host crate entry comment slice 12
 - status: completed
 
 ## Validated Slice
 
-- `src-tauri/src/commands/fab.rs`
+- `src-tauri/src/lib.rs`
 
 ## Validation
 
 - `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`
-- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md src-tauri/src/commands/fab.rs`
+- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md src-tauri/src/lib.rs`
 
 ## Next Resume Point
 

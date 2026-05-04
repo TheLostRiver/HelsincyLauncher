@@ -2,14 +2,23 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-04-067 - Fab transport handlers comment slice 11 - COMPLETED
+- Active atomic task: AT-2026-05-04-068 - Desktop host crate entry comment slice 12 - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-04-067 - documented the desktop host Fab transport handlers as the eleventh backend comment rollout slice
+- Last completed slice: AT-2026-05-04-068 - documented the desktop host crate entry surface as the twelfth backend comment rollout slice
 - Next step: publish this slice, then wait for user confirmation before selecting the next 1-2 backend files
 
 ## Session Timeline
 
 ### Session: 2026-05-04
+
+- Added the twelfth backend comment slice in `src-tauri/src/lib.rs`, focusing on crate-entry ownership, exported host surfaces, and the meaning of the public bootstrap/state re-exports.
+- Validated AT-2026-05-04-068 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`; the host transport smoke test passed.
+- Confirmed `git diff --check` returned clean for the task-record files, handoff, and the touched desktop host crate-entry file.
+- Marked AT-2026-05-04-068 complete after validation; the remaining action in this turn is publication only.
+
+- The user chose to continue again after AT-2026-05-04-067, so the rollout stayed on the desktop host boundary after the command-layer files were exhausted.
+- Compared `src-tauri/src/lib.rs` and `src-tauri/src/main.rs`, then chose `src-tauri/src/lib.rs` because it is the real crate entry boundary while `main.rs` is a trivial one-line binary handoff.
+- Started AT-2026-05-04-068 and confirmed the local hypothesis: this slice should explain the host crate's public entry exports without adding low-value comments to the obvious binary entrypoint.
 
 - Added the eleventh backend comment slice in `src-tauri/src/commands/fab.rs`, focusing on host transport ownership, Fab query fallback semantics, and accepted-job projection for sync/prewarm commands.
 - Validated AT-2026-05-04-067 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`; the host transport smoke test passed.

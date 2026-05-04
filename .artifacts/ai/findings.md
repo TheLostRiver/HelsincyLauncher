@@ -8,6 +8,10 @@
 
 ## Research Findings
 
+- `src-tauri/src/lib.rs` is the strongest next slice after the host command handlers because it is the desktop host crate entry boundary that re-exports bootstrap, commands, and shared state, while `src-tauri/src/main.rs` is only a trivial one-line binary handoff.
+- The comments here should focus on crate-entry ownership and the meaning of the public re-export surface, not on restating the obvious `run_desktop_host()` call in `main.rs`.
+- `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke` remains the narrowest executable validation for this slice because the smoke test builds and uses the crate-level public host surface re-exported from `lib.rs`.
+
 - `src-tauri/src/commands/fab.rs` is the strongest next slice after engines because it is the remaining host transport boundary in the same folder that still lacks declaration-level comments and still owns multiple temporary `FAB_NOT_WIRED` fallback projections.
 - The comments here should focus on list/detail stub ownership and the accepted-job projection for sync/prewarm commands, not on restating the obvious mapper calls.
 - `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke` remains the narrowest executable validation for this slice and directly exercises `fab_list_inventory` today.
