@@ -2,14 +2,23 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-04-065 - Downloads transport handlers comment slice 9 - COMPLETED
+- Active atomic task: AT-2026-05-04-066 - Engines transport handlers comment slice 10 - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-04-065 - documented the desktop host downloads transport handlers as the ninth backend comment rollout slice
+- Last completed slice: AT-2026-05-04-066 - documented the desktop host engines transport handler as the tenth backend comment rollout slice
 - Next step: publish this slice, then wait for user confirmation before selecting the next 1-2 backend files
 
 ## Session Timeline
 
 ### Session: 2026-05-04
+
+- Added the tenth backend comment slice in `src-tauri/src/commands/engines.rs`, focusing on host transport ownership, verification-intent forwarding, and accepted-job envelope projection.
+- Validated AT-2026-05-04-066 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`; the host transport smoke test passed.
+- Confirmed `git diff --check` returned clean for the task-record files, handoff, and the touched engines transport file.
+- Marked AT-2026-05-04-066 complete after validation; the remaining action in this turn is publication only.
+
+- The user chose to continue after AT-2026-05-04-065, so the rollout stayed inside the same desktop host commands boundary for another small slice.
+- Compared the adjacent `jobs.rs` and `engines.rs` handlers, then chose `src-tauri/src/commands/engines.rs` because `jobs.rs` already carries declaration-level comments while `engines.rs` still exposes a bare public handler.
+- Started AT-2026-05-04-066 and confirmed the local hypothesis: this slice should explain verification-intent forwarding and accepted-job projection without adding low-value comments to the obvious one-line mapper call.
 
 - Added the ninth backend comment slice in `src-tauri/src/commands/downloads.rs`, focusing on host transport ownership, facade forwarding semantics, and the current `DOWNLOADS_NOT_WIRED` stub-query fallbacks.
 - Validated AT-2026-05-04-065 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`; the host transport smoke test passed.

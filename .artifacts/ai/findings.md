@@ -8,6 +8,10 @@
 
 ## Research Findings
 
+- `src-tauri/src/commands/engines.rs` is the strongest next slice after downloads because it is a host transport boundary still missing declaration-level comments, while the adjacent `jobs.rs` file already documents its cross-module snapshot query semantics.
+- The comments here should focus on verification-intent forwarding and accepted-job envelope projection, not on restating the obvious `map_accepted_job_result` one-line wrapper.
+- `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke` is the narrowest executable validation for this slice and is stronger than the downloads-host case because the smoke test directly calls `engines_run_verification` today.
+
 - `src-tauri/src/commands/downloads.rs` is the strongest next slice because it is the host-owned downloads transport boundary that forwards IPC DTOs into the downloads facade while still owning temporary `DOWNLOADS_NOT_WIRED` fallback projections for list/detail/policy queries.
 - The comments here should focus on handler responsibility and stub fallback ownership, not on restating the obvious `map_command_result` and `map_accepted_job_result` one-line wrappers.
 - `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke` is the narrowest practical executable validation for this slice: it does not call the downloads handlers directly today, but it does compile the same host transport boundary and remains the documented host transport gate.
