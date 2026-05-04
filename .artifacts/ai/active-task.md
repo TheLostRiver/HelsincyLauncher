@@ -2,16 +2,16 @@
 
 ## Identity
 
-- task id: AT-2026-05-04-059
-- title: Composition root comment slice 3
+- task id: AT-2026-05-04-060
+- title: Startup pipeline comment slice 4
 - status: completed
 
 ## Goal
 
-按新的仓库注释规范，为 composition-root 装配 owner 的第三批后端文件补上高信号注释：
-- `crates/composition-root/src/bootstrap.rs`
+按新的仓库注释规范，为 composition-root 启动阶段边界的第四批后端文件补上高信号注释：
+- `crates/composition-root/src/startup.rs`
 
-本轮只补模块/声明级注释和少量必要的非显然语义说明，不改动装配行为、依赖图或测试断言。
+本轮只补模块/声明级注释和少量必要的非显然语义说明，不改动启动阶段行为、恢复判定或测试断言。
 
 ## Scope
 
@@ -21,10 +21,10 @@
   - update `.artifacts/ai/progress.md`
   - update `.artifacts/ai/findings.md`
   - update `.artifacts/ai/handoff.md`
-  - update `crates/composition-root/src/bootstrap.rs`
+  - update `crates/composition-root/src/startup.rs`
 - out of scope:
   - annotate more than this one backend file
-  - change composition-root wiring, runtime behavior, or DTO contracts
+  - change startup stage behavior, restore policy, or DTO contracts
   - add lint rules or doc tooling
   - modify frontend code or repo architecture docs
 
@@ -35,7 +35,7 @@
 3. .artifacts/ai/progress.md
 4. .artifacts/ai/findings.md
 5. .artifacts/ai/handoff.md
-6. crates/composition-root/src/bootstrap.rs
+6. crates/composition-root/src/startup.rs
 
 ## 控制性文档
 
@@ -46,19 +46,20 @@
 5. docs/TauriCodeCommentStandard.md
 6. docs/TauriCompositionRootWiringDesign.md
 7. docs/TauriBackendSkeletonImplementationDesign.md
+8. docs/TauriStartupPipelineDesign.md
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If the composition-root bootstrap assembly surface receives declaration-level comments that explain configuration ownership, service aggregation, module construction, runtime setup, and guarded builder failures, then this third backend comment slice will satisfy the repository comment standard without adding noisy comments to obvious struct literals or adapter constructor calls.
+- falsifiable local hypothesis: If the startup pipeline boundary receives declaration-level comments that explain stage ownership, restore/prewarm responsibilities, and the contract of the startup ports and facade, then this fourth backend comment slice will satisfy the repository comment standard without adding noisy comments around each tracing branch or test helper.
 
 ## Cheap Check
 
-- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\composition-root\Cargo.toml bootstrap_wiring_smoke`
+- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\composition-root\Cargo.toml run_stage3_background_prewarm_triggers_fab_prewarm_when_enabled`
 
 ## Validation Gate
 
-1. `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\composition-root\Cargo.toml bootstrap_wiring_smoke`
-2. `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/composition-root/src/bootstrap.rs`
+1. `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\composition-root\Cargo.toml run_stage3_background_prewarm_triggers_fab_prewarm_when_enabled`
+2. `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/composition-root/src/startup.rs`
 
 ## Validation Result
 
@@ -66,14 +67,14 @@
 
 ## Notes
 
-- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\composition-root\Cargo.toml bootstrap_wiring_smoke` passed with the composition-root wiring smoke test green.
-- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/composition-root/src/bootstrap.rs` produced no output.
+- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\composition-root\Cargo.toml run_stage3_background_prewarm_triggers_fab_prewarm_when_enabled` passed with the stage-3 startup prewarm test green.
+- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/composition-root/src/startup.rs` produced no output.
 
 ## 安全恢复点
 
-- 第三批后端注释切片已收敛到 composition-root 的 bootstrap 装配边界；若中断，恢复时直接补 `crates/composition-root/src/bootstrap.rs` 的声明级注释，然后立刻跑 `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\composition-root\Cargo.toml bootstrap_wiring_smoke`。
+- 第四批后端注释切片已收敛到 composition-root 的 startup 阶段边界；若中断，恢复时直接补 `crates/composition-root/src/startup.rs` 的声明级注释，然后立刻跑 `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\composition-root\Cargo.toml run_stage3_background_prewarm_triggers_fab_prewarm_when_enabled`。
 
 ## Completion
 
-- completed slice: `crates/composition-root/src/bootstrap.rs`
+- completed slice: `crates/composition-root/src/startup.rs`
 - publication step: pending commit and push in this turn, then wait for user confirmation before opening the next 1-2 file backend slice

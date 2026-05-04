@@ -2,14 +2,23 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-04-059 - Composition root comment slice 3 - COMPLETED
+- Active atomic task: AT-2026-05-04-060 - Startup pipeline comment slice 4 - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-04-059 - documented the composition-root bootstrap assembly owner as the third backend comment rollout slice
+- Last completed slice: AT-2026-05-04-060 - documented the composition-root startup pipeline boundary as the fourth backend comment rollout slice
 - Next step: publish this slice, then wait for user confirmation before selecting the next 1-2 backend files
 
 ## Session Timeline
 
 ### Session: 2026-05-04
+
+- Added the fourth backend comment slice in `crates/composition-root/src/startup.rs`, focusing on startup stage ownership, restore-before-warmup semantics, and the contract of the startup prewarm port/facade methods.
+- Validated AT-2026-05-04-060 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\composition-root\Cargo.toml run_stage3_background_prewarm_triggers_fab_prewarm_when_enabled`; the targeted startup test passed.
+- Confirmed `git diff --check` returned clean for the task-record files, handoff, and the touched startup pipeline file.
+- Marked AT-2026-05-04-060 complete after validation; the remaining action in this turn is publication only.
+
+- The user confirmed through the UI to continue again after AT-2026-05-04-059, so the workflow advanced into a fourth small backend comment slice instead of pausing.
+- Started AT-2026-05-04-060 and narrowed the next file to `crates/composition-root/src/startup.rs` because it is the host-facing startup boundary adjacent to the freshly documented composition-root assembly owner and still lacks declaration-level comments on its port/facade/stage methods.
+- Re-read `docs/TauriStartupPipelineDesign.md` together with the composition-root wiring docs, then confirmed the local hypothesis: this slice should explain stage ownership, restore semantics, and startup prewarm gating without adding line-by-line comments to tracing branches or test fixtures.
 
 - Added the third backend comment slice in `crates/composition-root/src/bootstrap.rs`, focusing on composition-root ownership, public bootstrap configuration, service aggregation, and the non-obvious guarded builder helpers.
 - Validated AT-2026-05-04-059 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\composition-root\Cargo.toml bootstrap_wiring_smoke`; the composition-root wiring smoke test passed.

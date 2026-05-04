@@ -8,6 +8,10 @@
 
 ## Research Findings
 
+- `crates/composition-root/src/startup.rs` is the strongest next slice because it is the startup-stage boundary exposed by composition-root, yet it currently lacks declaration-level comments on the prewarm port, startup facade, and stage methods even though those methods encode restore-vs-warmup policy.
+- `docs/TauriStartupPipelineDesign.md` is the controlling task-specific document for this slice because it defines shell-first, restore-before-warmup, and explicit blocking rules that the comments should reflect.
+- A focused validation for this slice can use `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\composition-root\Cargo.toml run_stage3_background_prewarm_triggers_fab_prewarm_when_enabled`, because it compiles the startup pipeline file and executes one of the key stage-3 boundary tests without widening back to the full bootstrap smoke matrix.
+
 - `crates/composition-root/src/bootstrap.rs` is the strongest next slice because it is the concrete assembly owner promised by the wiring design, yet it currently exposes the public bootstrap config, desktop service aggregation, and many builder helpers without declaration-level comments.
 - The narrowest executable validation for this composition-root slice is `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\composition-root\Cargo.toml bootstrap_wiring_smoke`, because that smoke test exercises `build_desktop_services()` and the startup/runtime wiring assembled in the same file.
 - The adjacent `crates/composition-root/tests/bootstrap_wiring_smoke.rs` already contains several intent-revealing comments; for now it is better kept out of scope so the slice remains focused on the production assembly owner.

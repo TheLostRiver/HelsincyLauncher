@@ -1,3 +1,10 @@
+//! Startup pipeline boundary for staged restore and optional background warmup.
+//!
+//! This module keeps startup policy explicit inside composition-root: stage 1 keeps
+//! the shell/backend baseline callable, stage 2 restores resumable runtime state,
+//! and stage 3 triggers optional background prewarm without hiding that work in
+//! constructors or module assembly.
+
 use std::fmt::{Debug, Formatter};
 use std::sync::Arc;
 
@@ -11,7 +18,9 @@ use launcher_module_fab::{
     FabFacade,
 };
 
+/// Startup-stage port that can enqueue the Fab prewarm job without exposing concrete wiring.
 pub trait FabStartupPrewarmPort: Send + Sync {
+    /// Triggers the startup Fab prewarm path when stage 3 decides it is allowed.
     fn run_startup_prewarm(&self, request: FabInventoryPrewarmRequestDto) -> AppResult<AcceptedJob>;
 }
 
@@ -28,6 +37,7 @@ where
     }
 }
 
+/// Staged startup facade exposed by composition-root to the desktop host.
 #[derive(Clone)]
 pub struct StartupPipelineFacade {
     enable_startup_prewarm: bool,
@@ -49,12 +59,14 @@ impl Debug for StartupPipelineFacade {
 }
 
 impl Default for StartupPipelineFacade {
+    /// Returns a no-op startup facade suitable for placeholder or test-only wiring.
     fn default() -> Self {
         Self::new(false, None, None, None)
     }
 }
 
 impl StartupPipelineFacade {
+    /// Creates a startup facade over the already-assembled startup-stage dependencies.
     pub fn new(
         enable_startup_prewarm: bool,
         fab_prewarm: Option<Arc<dyn FabStartupPrewarmPort>>,
@@ -69,10 +81,16 @@ impl StartupPipelineFacade {
         }
     }
 
+    /// Runs stage 1 of startup, which is currently a no-op once the shell/backend baseline exists.
     pub async fn run_stage1_shell_ready(&self) -> AppResult<()> {
         Ok(())
     }
 
+    /// Runs stage 2 restore before any optional warmup work begins.
+    ///
+    /// The current baseline repairs orphaned runtime state, consults registered
+    /// restore drivers for queued jobs, and persists any resulting state changes
+    /// back to the shared snapshot store.
     pub async fn run_stage2_restore_runtime_state(&self) -> AppResult<()> {
         let orphaned_states = [
             JobState::Running,
@@ -151,6 +169,9 @@ impl StartupPipelineFacade {
         Ok(())
     }
 
+    /// Runs stage 3 optional background prewarm after restore has completed.
+    ///
+    /// This stage must remain capability-gated and non-blocking for shell-first startup.
     pub async fn run_stage3_background_prewarm(&self) -> AppResult<()> {
         if !self.enable_startup_prewarm {
             return Ok(());
