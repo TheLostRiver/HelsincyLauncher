@@ -8,6 +8,10 @@
 
 ## Research Findings
 
+- `crates/module-downloads/src/contracts/mod.rs` is a valid small comment slice because it is the module's public contract aggregation boundary, yet it currently exposes commands/dto/events/queries re-exports without any declaration-level explanation of that role.
+- The narrowest executable validation for this slice is `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority`, because that named unit test compiles the downloads module and exercises one of the public contract paths without reopening broader host wiring.
+- This slice should stay focused on the aggregation boundary itself rather than spilling into the underlying downloads contract submodules or facade implementation.
+
 - `src-tauri/src/state.rs` is the strongest next slice because it is the host-owned state handle that projects composition-root services into the desktop command layer, yet it currently exposes its wrapper struct and methods without declaration-level comments.
 - The narrowest executable validation for this host-state slice is `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`, because that smoke test exercises the state handle indirectly through the host bootstrap and command path.
 - This slice should stay small and focused on the wrapper boundary itself; the concrete command handlers can remain later slices.

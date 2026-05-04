@@ -2,14 +2,23 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-04-061 - Host state handle comment slice 5 - COMPLETED
+- Active atomic task: AT-2026-05-04-062 - Downloads contracts comment slice 6 - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-04-061 - documented the desktop host state handle as the fifth backend comment rollout slice
-- Next step: if the user wants to continue, pick a small command-handler file next and repeat the same narrow validate/commit flow
+- Last completed slice: AT-2026-05-04-062 - documented the downloads contracts aggregation boundary as the sixth backend comment rollout slice
+- Next step: publish this slice, then wait for user confirmation before selecting the next 1-2 backend files
 
 ## Session Timeline
 
 ### Session: 2026-05-04
+
+- Added the sixth backend comment slice in `crates/module-downloads/src/contracts/mod.rs`, focusing on the contracts entrypoint role and the four public contract families re-exported by the downloads module.
+- Validated AT-2026-05-04-062 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority`; the targeted downloads unit test passed.
+- Confirmed `git diff --check` returned clean for the task-record files, handoff, and the touched downloads contracts file.
+- Marked AT-2026-05-04-062 complete after validation; the remaining action in this turn is publication only.
+
+- The user asked to continue again while the editor focus was already on `crates/module-downloads/src/contracts/mod.rs`, so the workflow used that backend file as the concrete anchor for the next small slice.
+- Started AT-2026-05-04-062 and narrowed the next file to `crates/module-downloads/src/contracts/mod.rs` because it is the public contracts aggregation boundary for downloads and still lacks declaration-level comments on its entrypoint role.
+- Re-read `docs/TauriDownloadRuntimeDesign.md` and the downloads module surfaces, then confirmed the local hypothesis: this slice should explain the contracts families re-exported by the module without adding low-value comments to each trivial `pub use` statement.
 
 - Added the fifth backend comment slice in `src-tauri/src/state.rs`, focusing on the host-owned service wrapper boundary and how it projects the composition-root service graph into command handlers.
 - Validated AT-2026-05-04-061 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`; the host transport smoke test passed.
