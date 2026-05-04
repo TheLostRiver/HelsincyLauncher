@@ -9,7 +9,7 @@ import {
   Settings,
 } from "lucide-react";
 
-export type PageId = "home" | "my-projects" | "fab" | "engine";
+export type PageId = "home" | "my-projects" | "fab" | "engine" | "downloads" | "settings";
 
 const navItems: {
   icon: typeof Home;
@@ -20,7 +20,7 @@ const navItems: {
   { icon: FolderKanban, label: "我的工程", activeOn: "my-projects" },
   { icon: PackageOpen, label: "Fab 库存", activeOn: "fab" },
   { icon: Box, label: "引擎管理", activeOn: "engine" },
-  { icon: Download, label: "下载队列", activeOn: null },
+  { icon: Download, label: "下载队列", activeOn: "downloads" },
 ];
 
 interface SidebarProps {
@@ -83,7 +83,14 @@ export default function Sidebar({ activePage, onNavigate }: SidebarProps) {
 
       {/* Settings pinned to bottom */}
       <div className="px-5 pb-5">
-        <button className="flex items-center gap-3.5 h-12 rounded-2xl px-3 text-launcher-textSecondary hover:bg-launcher-hover w-full transition-colors">
+        <button
+          onClick={() => onNavigate("settings")}
+          className={`flex items-center gap-3.5 h-12 rounded-2xl px-3 w-full transition-colors ${
+            activePage === "settings"
+              ? "bg-launcher-active text-white border border-launcher-borderLight"
+              : "text-launcher-textSecondary hover:bg-launcher-hover border border-transparent"
+          }`}
+        >
           <Settings size={20} />
           <span className="font-sans text-[15px] font-normal">设置</span>
         </button>

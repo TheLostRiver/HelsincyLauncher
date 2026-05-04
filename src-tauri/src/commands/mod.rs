@@ -4,6 +4,7 @@ use launcher_kernel_jobs::AcceptedJob;
 
 pub mod downloads;
 pub mod fab;
+pub mod jobs;
 
 pub const REGISTERED_COMMANDS: &[&str] = &[
     "fab_list_inventory",
@@ -18,6 +19,7 @@ pub const REGISTERED_COMMANDS: &[&str] = &[
     "downloads_get_job_snapshot",
     "downloads_get_policy",
     "downloads_update_policy",
+    "jobs_list_active",
 ];
 
 #[derive(Debug, Clone, PartialEq, Eq)]

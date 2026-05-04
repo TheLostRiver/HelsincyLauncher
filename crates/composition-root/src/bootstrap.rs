@@ -12,7 +12,7 @@ use launcher_adapter_storage_sqlite::{
 use launcher_kernel_foundation::{
     AppError, AppErrorSeverity, AppResult, CorrelationId,
 };
-use launcher_kernel_jobs::{JobDriverRegistry, RuntimeQueuePolicy, SharedJobRuntimeHost};
+use launcher_kernel_jobs::{JobDriverRegistry, JobSnapshotStore, RuntimeQueuePolicy, SharedJobRuntimeHost};
 use launcher_module_downloads::{DownloadFacade, DownloadJobDriver, DownloadModuleDeps};
 use launcher_module_fab::{FabFacade, FabModuleDeps, FabPrewarmJobDriver, FabSyncJobDriver};
 
@@ -77,14 +77,21 @@ pub struct DesktopAppServices<F = DesktopFabFacade, D = DesktopDownloadFacade> {
     pub fab: Arc<F>,
     pub downloads: Arc<D>,
     pub startup: Arc<StartupPipelineFacade>,
+    pub snapshot_store: Arc<dyn JobSnapshotStore<()>>,
 }
 
 impl<F, D> DesktopAppServices<F, D> {
-    pub fn new(fab: Arc<F>, downloads: Arc<D>, startup: Arc<StartupPipelineFacade>) -> Self {
+    pub fn new(
+        fab: Arc<F>,
+        downloads: Arc<D>,
+        startup: Arc<StartupPipelineFacade>,
+        snapshot_store: Arc<dyn JobSnapshotStore<()>>,
+    ) -> Self {
         Self {
             fab,
             downloads,
             startup,
+            snapshot_store,
         }
     }
 }
@@ -101,9 +108,10 @@ pub fn build_desktop_services(config: DesktopBootstrapConfig) -> AppResult<Deskt
     ));
     let downloads = Arc::new(build_downloads_module(sqlite_config, job_runtime));
     let registry = build_job_driver_registry();
+    let snapshot_store_dyn: Arc<dyn JobSnapshotStore<()>> = snapshot_store.clone();
     let startup = Arc::new(build_startup_pipeline(&config, fab.clone(), snapshot_store, registry));
 
-    Ok(DesktopAppServices::new(fab, downloads, startup))
+    Ok(DesktopAppServices::new(fab, downloads, startup, snapshot_store_dyn))
 }
 
 fn build_storage_config(config: &DesktopBootstrapConfig) -> AppResult<SqliteStorageAdapterConfig> {

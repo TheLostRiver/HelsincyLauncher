@@ -7,12 +7,16 @@ import HomeContent from "@/components/HomeContent";
 import MyProjectsContent from "@/components/MyProjectsContent";
 import FabInventoryContent from "@/components/FabInventoryContent";
 import EngineManagementContent from "@/components/EngineManagementContent";
+import DownloadsContent from "@/components/DownloadsContent";
+import SettingsContent from "@/components/SettingsContent";
 
 const pageMeta: Record<PageId, { kicker: string; title: string }> = {
   home: { kicker: "UNREAL WORKSPACE", title: "首页" },
   "my-projects": { kicker: "PROJECT LIBRARY", title: "我的工程" },
   fab: { kicker: "FAB INVENTORY", title: "Fab 库存" },
   engine: { kicker: "ENGINE MANAGER", title: "引擎管理" },
+  downloads: { kicker: "DOWNLOAD CENTER", title: "下载中心" },
+  settings: { kicker: "SETTINGS", title: "通用设置" },
 };
 
 export default function Home() {
@@ -63,6 +67,8 @@ export default function Home() {
             {activePage === "my-projects" && <MyProjectsContent />}
             {activePage === "fab" && <FabInventoryContent />}
             {activePage === "engine" && <EngineManagementContent />}
+            {activePage === "downloads" && <DownloadsContent />}
+            {activePage === "settings" && <SettingsContent />}
           </div>
         </div>
       </div>

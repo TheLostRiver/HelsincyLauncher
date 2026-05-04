@@ -94,3 +94,30 @@ pub struct JobSnapshot<E> {
     pub updated_at: IsoDateTime,
     pub extension: Option<E>,
 }
+
+/// Frontend-facing read model for an active job.
+/// Extension-generic details are stripped — only kernel fields cross the IPC boundary.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct JobSnapshotDto {
+    pub job_id: JobId,
+    pub module: String,
+    pub kind: String,
+    pub state: JobState,
+    pub ui_state: JobUiState,
+    pub progress: JobProgress,
+    pub updated_at: IsoDateTime,
+}
+
+impl From<&JobSnapshot<()>> for JobSnapshotDto {
+    fn from(s: &JobSnapshot<()>) -> Self {
+        Self {
+            job_id: s.job_id.clone(),
+            module: s.module.clone(),
+            kind: s.kind.clone(),
+            state: s.state,
+            ui_state: s.ui_state,
+            progress: s.progress.clone(),
+            updated_at: s.updated_at.clone(),
+        }
+    }
+}

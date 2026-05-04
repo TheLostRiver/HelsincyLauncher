@@ -2,8 +2,8 @@
 
 ## Identity
 
-- task id: AT-2026-05-04-049
-- title: Downloads stub driver + stage-2 restore registration
+- task id: AT-2026-05-04-050
+- title: IPC jobs.list_active query — JobSnapshotDto + snapshot_store exposure
 - status: in_progress
 
 ## Goal
