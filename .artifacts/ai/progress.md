@@ -2,14 +2,23 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-04-058 - Desktop host comment slice 2 - COMPLETED
+- Active atomic task: AT-2026-05-04-059 - Composition root comment slice 3 - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-04-058 - documented the desktop host bootstrap boundary and shared transport command/DTO mapping surface as the second backend comment rollout slice
+- Last completed slice: AT-2026-05-04-059 - documented the composition-root bootstrap assembly owner as the third backend comment rollout slice
 - Next step: publish this slice, then wait for user confirmation before selecting the next 1-2 backend files
 
 ## Session Timeline
 
 ### Session: 2026-05-04
+
+- Added the third backend comment slice in `crates/composition-root/src/bootstrap.rs`, focusing on composition-root ownership, public bootstrap configuration, service aggregation, and the non-obvious guarded builder helpers.
+- Validated AT-2026-05-04-059 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\composition-root\Cargo.toml bootstrap_wiring_smoke`; the composition-root wiring smoke test passed.
+- Confirmed `git diff --check` returned clean for the task-record files, handoff, and the touched composition-root bootstrap file.
+- Marked AT-2026-05-04-059 complete after validation; the remaining action in this turn is publication only.
+
+- The user confirmed through the UI to continue again after AT-2026-05-04-058, so the workflow advanced into a third small backend comment slice instead of pausing.
+- Started AT-2026-05-04-059 and narrowed the next file to `crates/composition-root/src/bootstrap.rs` because it is the concrete assembly owner behind the host boundary and still lacks declaration-level comments on its public configuration and service aggregation surface.
+- Re-read `docs/TauriCompositionRootWiringDesign.md` and the D2/E2 sections of `docs/TauriBackendSkeletonImplementationDesign.md`, then confirmed the local hypothesis: this slice should explain composition-root ownership, service aggregation, builder responsibilities, and guarded config failure semantics without spilling into low-signal comments on straightforward constructor code.
 
 - Added the second backend comment slice in `src-tauri/src/bootstrap.rs` and `src-tauri/src/commands/mod.rs`, focusing on host bootstrap ownership, registered command exposure, transport envelopes, and the non-obvious stub-query fallback semantics.
 - Validated AT-2026-05-04-058 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`; the transport smoke test passed.

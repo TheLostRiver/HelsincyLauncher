@@ -2,19 +2,18 @@
 
 ## Latest Completed Atomic Task
 
-- task id: AT-2026-05-04-058
-- title: Desktop host comment slice 2
+- task id: AT-2026-05-04-059
+- title: Composition root comment slice 3
 - status: completed
 
 ## Validated Slice
 
-- `src-tauri/src/bootstrap.rs`
-- `src-tauri/src/commands/mod.rs`
+- `crates/composition-root/src/bootstrap.rs`
 
 ## Validation
 
-- `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`
-- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md src-tauri/src/bootstrap.rs src-tauri/src/commands/mod.rs`
+- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\composition-root\Cargo.toml bootstrap_wiring_smoke`
+- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/composition-root/src/bootstrap.rs`
 
 ## Next Resume Point
 

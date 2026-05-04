@@ -2,17 +2,16 @@
 
 ## Identity
 
-- task id: AT-2026-05-04-058
-- title: Desktop host comment slice 2
+- task id: AT-2026-05-04-059
+- title: Composition root comment slice 3
 - status: completed
 
 ## Goal
 
-按新的仓库注释规范，为桌面宿主边界的第二批后端文件补上高信号注释：
-- `src-tauri/src/bootstrap.rs`
-- `src-tauri/src/commands/mod.rs`
+按新的仓库注释规范，为 composition-root 装配 owner 的第三批后端文件补上高信号注释：
+- `crates/composition-root/src/bootstrap.rs`
 
-本轮只补模块/声明级注释和少量必要的非显然语义说明，不改动 transport 行为或 composition-root 接线。
+本轮只补模块/声明级注释和少量必要的非显然语义说明，不改动装配行为、依赖图或测试断言。
 
 ## Scope
 
@@ -22,11 +21,10 @@
   - update `.artifacts/ai/progress.md`
   - update `.artifacts/ai/findings.md`
   - update `.artifacts/ai/handoff.md`
-  - update `src-tauri/src/bootstrap.rs`
-  - update `src-tauri/src/commands/mod.rs`
+  - update `crates/composition-root/src/bootstrap.rs`
 - out of scope:
-  - annotate more than these two backend files
-  - change desktop host wiring, transport behavior, or DTO contracts
+  - annotate more than this one backend file
+  - change composition-root wiring, runtime behavior, or DTO contracts
   - add lint rules or doc tooling
   - modify frontend code or repo architecture docs
 
@@ -37,8 +35,7 @@
 3. .artifacts/ai/progress.md
 4. .artifacts/ai/findings.md
 5. .artifacts/ai/handoff.md
-6. src-tauri/src/bootstrap.rs
-7. src-tauri/src/commands/mod.rs
+6. crates/composition-root/src/bootstrap.rs
 
 ## 控制性文档
 
@@ -48,20 +45,20 @@
 4. docs/TauriTestingStrategyAndQualityGateDesign.md
 5. docs/TauriCodeCommentStandard.md
 6. docs/TauriCompositionRootWiringDesign.md
-7. docs/TauriIPCAndStateContractsDesign.md
+7. docs/TauriBackendSkeletonImplementationDesign.md
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If the desktop host bootstrap boundary and the shared transport command/DTO mapping surface receive declaration-level comments that explain assembly ownership, registered-command exposure, and error/result envelope roles, then this second backend comment slice will satisfy the repository comment standard without adding line-by-line comments to obvious mapping code.
+- falsifiable local hypothesis: If the composition-root bootstrap assembly surface receives declaration-level comments that explain configuration ownership, service aggregation, module construction, runtime setup, and guarded builder failures, then this third backend comment slice will satisfy the repository comment standard without adding noisy comments to obvious struct literals or adapter constructor calls.
 
 ## Cheap Check
 
-- `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`
+- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\composition-root\Cargo.toml bootstrap_wiring_smoke`
 
 ## Validation Gate
 
-1. `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`
-2. `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md src-tauri/src/bootstrap.rs src-tauri/src/commands/mod.rs`
+1. `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\composition-root\Cargo.toml bootstrap_wiring_smoke`
+2. `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/composition-root/src/bootstrap.rs`
 
 ## Validation Result
 
@@ -69,14 +66,14 @@
 
 ## Notes
 
-- `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke` passed with the transport smoke test green.
-- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md src-tauri/src/bootstrap.rs src-tauri/src/commands/mod.rs` produced no output.
+- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\composition-root\Cargo.toml bootstrap_wiring_smoke` passed with the composition-root wiring smoke test green.
+- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/composition-root/src/bootstrap.rs` produced no output.
 
 ## 安全恢复点
 
-- 第二批后端注释切片已收敛到桌面宿主 bootstrap 与 commands 边界；若中断，恢复时直接补这两文件的声明级注释，然后立刻跑 `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`。
+- 第三批后端注释切片已收敛到 composition-root 的 bootstrap 装配边界；若中断，恢复时直接补 `crates/composition-root/src/bootstrap.rs` 的声明级注释，然后立刻跑 `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\composition-root\Cargo.toml bootstrap_wiring_smoke`。
 
 ## Completion
 
-- completed slice: `src-tauri/src/bootstrap.rs` + `src-tauri/src/commands/mod.rs`
+- completed slice: `crates/composition-root/src/bootstrap.rs`
 - publication step: pending commit and push in this turn, then wait for user confirmation before opening the next 1-2 file backend slice

@@ -8,6 +8,10 @@
 
 ## Research Findings
 
+- `crates/composition-root/src/bootstrap.rs` is the strongest next slice because it is the concrete assembly owner promised by the wiring design, yet it currently exposes the public bootstrap config, desktop service aggregation, and many builder helpers without declaration-level comments.
+- The narrowest executable validation for this composition-root slice is `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\composition-root\Cargo.toml bootstrap_wiring_smoke`, because that smoke test exercises `build_desktop_services()` and the startup/runtime wiring assembled in the same file.
+- The adjacent `crates/composition-root/tests/bootstrap_wiring_smoke.rs` already contains several intent-revealing comments; for now it is better kept out of scope so the slice remains focused on the production assembly owner.
+
 - `src-tauri/src/bootstrap.rs` is a strong second backend comment slice because it is the desktop host assembly entry point exposed by `my_epic_launcher_desktop`, yet it currently lacks comments on the bootstrap struct and the two public functions that define host startup semantics.
 - `src-tauri/src/commands/mod.rs` is the shared transport mapping surface for registered command names, error envelopes, accepted-job projection, and result wrappers; it currently exposes multiple public DTOs and helpers without declaration-level comments.
 - The narrowest executable validation for this host-facing slice is `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`, because that test exercises both bootstrap assembly and command invocation through the desktop transport boundary.
