@@ -2,16 +2,16 @@
 
 ## Identity
 
-- task id: AT-2026-05-04-060
-- title: Startup pipeline comment slice 4
+- task id: AT-2026-05-04-061
+- title: Host state handle comment slice 5
 - status: completed
 
 ## Goal
 
-按新的仓库注释规范，为 composition-root 启动阶段边界的第四批后端文件补上高信号注释：
-- `crates/composition-root/src/startup.rs`
+按新的仓库注释规范，为桌面宿主状态句柄的第五批后端文件补上高信号注释：
+- `src-tauri/src/state.rs`
 
-本轮只补模块/声明级注释和少量必要的非显然语义说明，不改动启动阶段行为、恢复判定或测试断言。
+本轮只补模块/声明级注释和少量必要的非显然语义说明，不改动句柄行为、共享状态访问或测试断言。
 
 ## Scope
 
@@ -21,10 +21,10 @@
   - update `.artifacts/ai/progress.md`
   - update `.artifacts/ai/findings.md`
   - update `.artifacts/ai/handoff.md`
-  - update `crates/composition-root/src/startup.rs`
+  - update `src-tauri/src/state.rs`
 - out of scope:
   - annotate more than this one backend file
-  - change startup stage behavior, restore policy, or DTO contracts
+  - change host state access behavior or shared service ownership
   - add lint rules or doc tooling
   - modify frontend code or repo architecture docs
 
@@ -35,7 +35,7 @@
 3. .artifacts/ai/progress.md
 4. .artifacts/ai/findings.md
 5. .artifacts/ai/handoff.md
-6. crates/composition-root/src/startup.rs
+6. src-tauri/src/state.rs
 
 ## 控制性文档
 
@@ -46,20 +46,20 @@
 5. docs/TauriCodeCommentStandard.md
 6. docs/TauriCompositionRootWiringDesign.md
 7. docs/TauriBackendSkeletonImplementationDesign.md
-8. docs/TauriStartupPipelineDesign.md
+8. docs/TauriIPCAndStateContractsDesign.md
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If the startup pipeline boundary receives declaration-level comments that explain stage ownership, restore/prewarm responsibilities, and the contract of the startup ports and facade, then this fourth backend comment slice will satisfy the repository comment standard without adding noisy comments around each tracing branch or test helper.
+- falsifiable local hypothesis: If the desktop host state handle receives declaration-level comments that explain how host code wraps and projects the composition-root service aggregation, then this fifth backend comment slice will satisfy the repository comment standard without adding low-signal comments to obvious `Arc` forwarding code.
 
 ## Cheap Check
 
-- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\composition-root\Cargo.toml run_stage3_background_prewarm_triggers_fab_prewarm_when_enabled`
+- `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`
 
 ## Validation Gate
 
-1. `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\composition-root\Cargo.toml run_stage3_background_prewarm_triggers_fab_prewarm_when_enabled`
-2. `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/composition-root/src/startup.rs`
+1. `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`
+2. `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md src-tauri/src/state.rs`
 
 ## Validation Result
 
@@ -67,14 +67,14 @@
 
 ## Notes
 
-- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\composition-root\Cargo.toml run_stage3_background_prewarm_triggers_fab_prewarm_when_enabled` passed with the stage-3 startup prewarm test green.
-- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/composition-root/src/startup.rs` produced no output.
+- `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke` passed with the host transport smoke test green.
+- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md src-tauri/src/state.rs` produced no output.
 
 ## 安全恢复点
 
-- 第四批后端注释切片已收敛到 composition-root 的 startup 阶段边界；若中断，恢复时直接补 `crates/composition-root/src/startup.rs` 的声明级注释，然后立刻跑 `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\composition-root\Cargo.toml run_stage3_background_prewarm_triggers_fab_prewarm_when_enabled`。
+- 第五批后端注释切片已收敛到桌面宿主状态句柄；若中断，恢复时直接补 `src-tauri/src/state.rs` 的声明级注释，然后立刻跑 `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`。
 
 ## Completion
 
-- completed slice: `crates/composition-root/src/startup.rs`
-- publication step: pending commit and push in this turn, then wait for user confirmation before opening the next 1-2 file backend slice
+- completed slice: `src-tauri/src/state.rs`
+- publication step: pending commit and push in this turn

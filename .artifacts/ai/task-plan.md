@@ -10,8 +10,8 @@ Phase 23 - Backend comment rollout
 
 ## Current Focus
 
-- AT-2026-05-04-060 completed the fourth backend comment slice in the startup pipeline boundary.
-- The next action is publication only in this turn; after that the workflow should stop for user confirmation before opening the next 1-2 file slice.
+- AT-2026-05-04-061 completed the fifth backend comment slice in the desktop host state boundary.
+- The next likely slice is a small command-handler file, but no further file is active yet in this record.
 
 ## Phases
 
@@ -150,7 +150,7 @@ Phase 23 - Backend comment rollout
 ### Phase 23: Backend Comment Rollout
 
 - Outcome: apply the new repository comment standard to backend Rust/Tauri files in small, commit-sized slices of one or two files.
-- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060
+- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061
 - **Status:** in_progress
 
 ## Atomic Task Ledger
@@ -209,6 +209,7 @@ Phase 23 - Backend comment rollout
 52. AT-2026-05-04-058 - completed - annotated the desktop host bootstrap boundary and shared transport command/DTO mapping surface, then validated the slice and prepared it for publication before asking whether to continue.
 53. AT-2026-05-04-059 - completed - annotated the composition-root bootstrap assembly owner, then validated the slice and prepared it for publication before asking whether to continue.
 54. AT-2026-05-04-060 - completed - annotated the startup pipeline boundary in composition-root, then validated the slice and prepared it for publication before asking whether to continue.
+55. AT-2026-05-04-061 - completed - annotated the desktop host state handle boundary, then validated and prepared the slice for publication.
 
 ## Key Questions
 

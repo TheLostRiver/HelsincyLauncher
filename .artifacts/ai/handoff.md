@@ -2,18 +2,18 @@
 
 ## Latest Completed Atomic Task
 
-- task id: AT-2026-05-04-060
-- title: Startup pipeline comment slice 4
+- task id: AT-2026-05-04-061
+- title: Host state handle comment slice 5
 - status: completed
 
 ## Validated Slice
 
-- `crates/composition-root/src/startup.rs`
+- `src-tauri/src/state.rs`
 
 ## Validation
 
-- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\composition-root\Cargo.toml run_stage3_background_prewarm_triggers_fab_prewarm_when_enabled`
-- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/composition-root/src/startup.rs`
+- `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`
+- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md src-tauri/src/state.rs`
 
 ## Next Resume Point
 

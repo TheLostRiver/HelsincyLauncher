@@ -2,14 +2,23 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-04-060 - Startup pipeline comment slice 4 - COMPLETED
+- Active atomic task: AT-2026-05-04-061 - Host state handle comment slice 5 - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-04-060 - documented the composition-root startup pipeline boundary as the fourth backend comment rollout slice
-- Next step: publish this slice, then wait for user confirmation before selecting the next 1-2 backend files
+- Last completed slice: AT-2026-05-04-061 - documented the desktop host state handle as the fifth backend comment rollout slice
+- Next step: if the user wants to continue, pick a small command-handler file next and repeat the same narrow validate/commit flow
 
 ## Session Timeline
 
 ### Session: 2026-05-04
+
+- Added the fifth backend comment slice in `src-tauri/src/state.rs`, focusing on the host-owned service wrapper boundary and how it projects the composition-root service graph into command handlers.
+- Validated AT-2026-05-04-061 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`; the host transport smoke test passed.
+- Confirmed `git diff --check` returned clean for the task-record files, handoff, and the touched host state file.
+- Marked AT-2026-05-04-061 complete after validation; the remaining action in this turn is publication only.
+
+- The user explicitly entered `继续` after AT-2026-05-04-060, so the workflow advanced into a fifth small backend comment slice.
+- Started AT-2026-05-04-061 and narrowed the next file to `src-tauri/src/state.rs` because it is the host-owned service handle directly adjacent to the already documented bootstrap/commands surfaces and still lacks declaration-level comments.
+- Re-read `docs/TauriIPCAndStateContractsDesign.md` together with the host boundary files, then confirmed the local hypothesis: this slice should explain how the host wraps and exposes the composition-root service graph without adding low-value comments to obvious `Arc` forwarding.
 
 - Added the fourth backend comment slice in `crates/composition-root/src/startup.rs`, focusing on startup stage ownership, restore-before-warmup semantics, and the contract of the startup prewarm port/facade methods.
 - Validated AT-2026-05-04-060 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\composition-root\Cargo.toml run_stage3_background_prewarm_triggers_fab_prewarm_when_enabled`; the targeted startup test passed.

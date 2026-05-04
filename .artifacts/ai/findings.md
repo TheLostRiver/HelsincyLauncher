@@ -8,6 +8,10 @@
 
 ## Research Findings
 
+- `src-tauri/src/state.rs` is the strongest next slice because it is the host-owned state handle that projects composition-root services into the desktop command layer, yet it currently exposes its wrapper struct and methods without declaration-level comments.
+- The narrowest executable validation for this host-state slice is `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`, because that smoke test exercises the state handle indirectly through the host bootstrap and command path.
+- This slice should stay small and focused on the wrapper boundary itself; the concrete command handlers can remain later slices.
+
 - `crates/composition-root/src/startup.rs` is the strongest next slice because it is the startup-stage boundary exposed by composition-root, yet it currently lacks declaration-level comments on the prewarm port, startup facade, and stage methods even though those methods encode restore-vs-warmup policy.
 - `docs/TauriStartupPipelineDesign.md` is the controlling task-specific document for this slice because it defines shell-first, restore-before-warmup, and explicit blocking rules that the comments should reflect.
 - A focused validation for this slice can use `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\composition-root\Cargo.toml run_stage3_background_prewarm_triggers_fab_prewarm_when_enabled`, because it compiles the startup pipeline file and executes one of the key stage-3 boundary tests without widening back to the full bootstrap smoke matrix.
