@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-05-078 - Annotate missing downloads record-state variant comments - COMPLETED
+- Active atomic task: AT-2026-05-05-079 - Annotate missing engine contract DTO comments - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-05-078 - added missing downloads record-state variant comments without rewriting existing comments
-- Next step: publish this missing-comment slice and pause for user confirmation before opening the next one
+- Last completed slice: AT-2026-05-05-079 - added missing engine contract DTO comments without rewriting existing comments
+- Next step: run scoped diff and diagnostics, then publish only the AT-2026-05-05-079 file set and pause for user confirmation
 
 ## Session Timeline
 
@@ -18,6 +18,13 @@
 
 ### Session: 2026-05-05
 
+- Published AT-2026-05-05-078 as commit `62d8c1a` after the scoped diff check, selective staging, commit, and push all succeeded.
+- Rechecked `src-tauri/src/commands/downloads.rs` because earlier notes still listed it as the next candidate, then rejected it for AT-079 after confirming its public handlers already have acceptable comments and should remain untouched under the user's current rule.
+- Started AT-2026-05-05-079 and narrowed it to `crates/module-engines/src/contracts/mod.rs` because its three public request DTOs still lacked declaration comments while the adjacent host and state files no longer did.
+- Tried the named engine verification unit test first, but it currently fails before execution because a pre-existing `JobPriority` import is missing in `crates/module-engines/src/facade/mod.rs` test code; the slice therefore falls back to `cargo check --manifest-path q:\DEV\MyEpicLauncher\crates\module-engines\Cargo.toml --lib` as the narrow validation gate.
+- Added Chinese declaration comments to the three public request DTOs in `crates/module-engines/src/contracts/mod.rs` without changing the contract field shape or touching adjacent already-commented files.
+- Validated AT-2026-05-05-079 with `cargo check --manifest-path q:\DEV\MyEpicLauncher\crates\module-engines\Cargo.toml --lib`; the module-engines library compiled successfully.
+- Marked AT-2026-05-05-079 complete after the focused compile validation; the remaining action in this turn is scoped diff/diagnostics followed by publication and user confirmation.
 - After AT-077 published and the confirmation window returned "继续，按建议推进", the rollout stayed on the missing-comment-only path.
 - Started AT-2026-05-05-078 and narrowed it to the `DownloadJobRecordState` variants in `crates/module-downloads/src/facade/mod.rs` because the surrounding facade boundary comments are already present while those state declarations still lack per-variant explanation.
 - Added Chinese declaration comments to the six `DownloadJobRecordState` variants in `crates/module-downloads/src/facade/mod.rs` without modifying the surrounding acceptable facade comments.

@@ -11,6 +11,12 @@
 
 ## Research Findings
 
+- `src-tauri/src/commands/downloads.rs` is no longer a valid missing-comment-only candidate under the user's current rule because its public handler declarations already carry acceptable comments; rewriting those English comments would now violate the stated preference.
+- `crates/module-engines/src/contracts/mod.rs` is the strongest next slice because it is a one-file backend contracts boundary whose three public DTO declarations currently have no declaration comments at all.
+- The safest change is to add Chinese comments only to `ListEnginesRequestDto`, `GetEngineStatusRequestDto`, and `RunEngineVerificationRequestDto`, leaving the field and payload shape unchanged.
+- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-engines\Cargo.toml run_verification_returns_backend_owned_accepted_job` would normally be the narrowest executable validation for this slice, but it is currently blocked by a pre-existing missing `JobPriority` import in `crates/module-engines/src/facade/mod.rs` test code.
+- `cargo check --manifest-path q:\DEV\MyEpicLauncher\crates\module-engines\Cargo.toml --lib` is therefore the narrowest reliable validation gate for this comment-only slice because it compiles the touched contracts file without widening scope into unrelated test repair.
+
 - `crates/module-downloads/src/facade/mod.rs` remains the strongest next missing-comment slice because the file already has high-level boundary comments, but `DownloadJobRecordState` still exposes uncommented enum variants that carry persisted-state meaning.
 - The smallest safe move here is to add Chinese comments only to those enum variants and leave the surrounding acceptable comments untouched.
 - `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority` is the narrowest executable validation for this slice because it compiles the touched facade surface through the only currently wired facade intake path.

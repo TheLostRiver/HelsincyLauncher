@@ -2,22 +2,22 @@
 
 ## Latest Completed Atomic Task
 
-- task id: AT-2026-05-05-078
-- title: Annotate missing downloads record-state variant comments
+- task id: AT-2026-05-05-079
+- title: Annotate missing engine contract DTO comments
 - status: completed
 
 ## Validated Slice
 
-- `crates/module-downloads/src/facade/mod.rs`
+- `crates/module-engines/src/contracts/mod.rs`
 
 ## Validation
 
-- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority`
-- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/module-downloads/src/facade/mod.rs`
+- `cargo check --manifest-path q:\DEV\MyEpicLauncher\crates\module-engines\Cargo.toml --lib`
+- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/module-engines/src/contracts/mod.rs`
 - VS Code diagnostics reported no errors for the touched contracts file or updated task records.
 
 ## Next Resume Point
 
-- Commit and push this validated Chinese-comment rewrite slice if publication has not happened yet.
+- Publish this validated missing-comment slice if publication has not happened yet.
+- Keep the named engine verification test blocker recorded: `crates/module-engines/src/facade/mod.rs` test code still misses a `JobPriority` import, so this slice validated through `cargo check --lib` instead of the blocked unit test.
 - After publication, pause for user confirmation before opening the next atomic task.
-- The next natural missing-comment candidate is `src-tauri/src/commands/downloads.rs`, because that nearby host transport boundary still contains uncommented declarations while its existing comment blocks are already acceptable.
