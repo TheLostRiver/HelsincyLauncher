@@ -1,55 +1,54 @@
-//! Command input contracts for the downloads module.
+//! downloads 模块的命令输入 contracts。
 //!
-//! These DTOs describe user intents that can mutate backend-owned download state
-//! or scheduling policy.
+//! 这些 DTO 描述会修改后端拥有的下载状态或调度策略的用户意图。
 
 use launcher_kernel_foundation::JobId;
 use launcher_kernel_jobs::JobPriority;
 use serde::{Deserialize, Serialize};
 
-/// Requests creation of a new download job for a target asset or engine payload.
+/// 请求为目标资产或引擎载荷创建新的下载任务。
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct StartDownloadRequestDto {
-    /// Backend-known identifier of the content the user wants to download.
+    /// 后端已知的内容标识，表示用户要下载的目标。
     pub target_id: String,
 
-    /// Logical content kind used by downstream orchestration and repair flows.
+    /// 下游编排与修复流程使用的逻辑内容类型。
     pub kind: String,
 
-    /// Optional follow-on install intent captured at intake time.
+    /// intake 时捕获的可选后续安装意图。
     pub install_intent: Option<String>,
 
-    /// Queue priority snapshot applied when the backend enqueues the download job.
+    /// 后端入队下载任务时应用的队列优先级快照。
     pub priority: JobPriority,
 }
 
-/// Requests pausing an existing download job.
+/// 请求暂停一个已有的下载任务。
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PauseDownloadRequestDto {
     pub job_id: JobId,
 }
 
-/// Requests resuming an existing paused download job.
+/// 请求恢复一个已经暂停的下载任务。
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ResumeDownloadRequestDto {
     pub job_id: JobId,
 }
 
-/// Requests canceling an existing download job.
+/// 请求取消一个已有的下载任务。
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CancelDownloadRequestDto {
     pub job_id: JobId,
 }
 
-/// Requests updating the downloads scheduling policy exposed to users.
+/// 请求更新面向用户暴露的 downloads 调度策略。
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct UpdateDownloadPolicyRequestDto {
-    /// User-facing concurrent download slot budget, not a raw OS thread count.
+    /// 面向用户的并发下载槽位预算，而不是原始 OS 线程数。
     pub concurrency_slots: u32,
 
-    /// Optional aggregate bandwidth cap applied by the backend scheduler.
+    /// 后端调度器应用的可选聚合带宽上限。
     pub bandwidth_limit_bytes_per_sec: Option<u64>,
 
-    /// Whether queued downloads should resume automatically after supported restarts.
+    /// 支持的重启之后，排队下载是否应自动恢复。
     pub auto_resume: bool,
 }

@@ -10,8 +10,8 @@ Phase 23 - Backend comment rollout
 
 ## Current Focus
 
-- AT-2026-05-05-073 completed the second old-English-comment rewrite slice by converting the downloads contracts entry comments to Chinese.
-- The next action is to publish this slice and then pause for user confirmation before opening AT-2026-05-05-074.
+- AT-2026-05-05-074 completed the third old-English-comment rewrite slice by converting the downloads command contracts comments to Chinese.
+- The next action is to publish this slice and then pause for user confirmation before opening AT-2026-05-05-075.
 
 ## Phases
 
@@ -150,7 +150,7 @@ Phase 23 - Backend comment rollout
 ### Phase 23: Backend Comment Rollout
 
 - Outcome: apply the new repository comment standard to backend Rust/Tauri files in small, commit-sized slices of one or two files.
-- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062, AT-2026-05-04-063, AT-2026-05-04-064, AT-2026-05-04-065, AT-2026-05-04-066, AT-2026-05-04-067, AT-2026-05-04-068, AT-2026-05-05-071, AT-2026-05-05-072, AT-2026-05-05-073
+- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062, AT-2026-05-04-063, AT-2026-05-04-064, AT-2026-05-04-065, AT-2026-05-04-066, AT-2026-05-04-067, AT-2026-05-04-068, AT-2026-05-05-071, AT-2026-05-05-072, AT-2026-05-05-073, AT-2026-05-05-074
 - **Status:** in_progress
 
 ### Phase 24: Comment Language Controls
@@ -234,6 +234,7 @@ Phase 23 - Backend comment rollout
 65. AT-2026-05-05-071 - completed - annotated the downloads facade public boundary, validated the slice, and prepared it for publication before asking whether to continue.
 66. AT-2026-05-05-072 - completed - rewrote the downloads restore-driver comments from English to Chinese, validated the slice, and prepared it for publication before asking whether to continue.
 67. AT-2026-05-05-073 - completed - rewrote the downloads contracts entry comments from English to Chinese, validated the slice, and prepared it for publication before asking whether to continue.
+68. AT-2026-05-05-074 - completed - rewrote the downloads command contracts comments from English to Chinese, validated the slice, and prepared it for publication before asking whether to continue.
 
 ## Key Questions
 

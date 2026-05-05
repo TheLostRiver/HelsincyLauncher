@@ -11,6 +11,10 @@
 
 ## Research Findings
 
+- `crates/module-downloads/src/contracts/commands.rs` is the strongest next rewrite slice after `contracts/mod.rs` because it is the next adjacent contracts file, still carries fully English declaration comments, and can validate through the same narrow downloads module test.
+- The change here should rewrite the command request and policy-field comments into Chinese without changing any DTO field names, accepted payload shape, or scheduling semantics.
+- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority` remains the narrowest executable validation for this slice because it compiles the touched command contracts through the public downloads module.
+
 - `crates/module-downloads/src/contracts/mod.rs` is the strongest next rewrite slice after `driver.rs` because it is a tiny adjacent module-entry file with fully English declaration comments and no behavior logic to reopen.
 - The change here should rewrite the contracts aggregation comments into Chinese without changing what the file re-exports or how callers import the downloads contract surface.
 - `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority` is the narrowest executable validation for this slice because it compiles the touched contracts boundary through the public downloads module.

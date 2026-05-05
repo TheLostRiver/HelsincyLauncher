@@ -2,9 +2,9 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-05-073 - Rewrite downloads contracts entry comments to Chinese - COMPLETED
+- Active atomic task: AT-2026-05-05-074 - Rewrite downloads command contract comments to Chinese - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-05-072 - rewrote the downloads restore-driver comment block from English to Chinese
+- Last completed slice: AT-2026-05-05-074 - rewrote the downloads command contracts comments from English to Chinese
 - Next step: publish this Chinese-comment rewrite slice and pause for user confirmation before opening the next one
 
 ## Session Timeline
@@ -17,6 +17,12 @@
 - Marked AT-2026-05-04-068 complete after validation; the remaining action in this turn is publication only.
 
 ### Session: 2026-05-05
+
+- After AT-073 published, the user chose to continue immediately with the next old-English-comment rewrite slice.
+- Started AT-2026-05-05-074 and narrowed it to `crates/module-downloads/src/contracts/commands.rs` because it is the next adjacent downloads contracts file whose declaration comments are still English while the runtime behavior remains unchanged.
+- Rewrote the downloads command contracts comments in `crates/module-downloads/src/contracts/commands.rs` to Chinese without changing DTO names, fields, or scheduling semantics.
+- Validated AT-2026-05-05-074 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority`; the targeted downloads unit test passed.
+- Marked AT-2026-05-05-074 complete after the focused executable validation; the remaining action in this turn is publication followed by user confirmation.
 
 - After AT-072 published, the user chose to continue immediately with the next old-English-comment rewrite slice.
 - Started AT-2026-05-05-073 and narrowed it to `crates/module-downloads/src/contracts/mod.rs` because it is a small adjacent module-entry file whose comments are still entirely English while its behavior surface is unchanged.
