@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-05-071 - Downloads facade comment slice 13 - COMPLETED
+- Active atomic task: AT-2026-05-05-072 - Rewrite downloads driver comments to Chinese - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
 - Last completed slice: AT-2026-05-05-071 - annotated the downloads facade public boundary with declaration-level Chinese comments and stub-ownership notes
-- Next step: publish this backend comment slice and pause for user confirmation before opening the next one
+- Next step: publish this Chinese-comment rewrite slice and pause for user confirmation before opening the next one
 
 ## Session Timeline
 
@@ -17,6 +17,13 @@
 - Marked AT-2026-05-04-068 complete after validation; the remaining action in this turn is publication only.
 
 ### Session: 2026-05-05
+
+- After publication, the user pointed out that existing old backend comments are still in English and explicitly chose the follow-up path that rewrites touched old English code comments to Chinese in small slices.
+- Re-read the comment standard, current task records, and backend Rust comment surfaces, then started AT-2026-05-05-072.
+- Narrowed the first rewrite slice to `crates/module-downloads/src/driver.rs` because it contains a small, self-contained old English restore-driver comment block and has a dedicated narrow driver test.
+- Rewrote the existing restore-driver English comment block in `crates/module-downloads/src/driver.rs` to Chinese without changing any restore logic or test behavior.
+- Validated AT-2026-05-05-072 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml restore_returns_failed_when_checkpoint_is_missing`; the targeted driver unit test passed.
+- Marked AT-2026-05-05-072 complete after the focused executable validation; the remaining action in this turn is publication followed by user confirmation.
 
 - The user accepted the next backend comment slice recommendation, so the workflow moved back from the docs-only prompt work into Phase 23 backend comment rollout.
 - Re-read `docs/TauriCodeCommentStandard.md`, `docs/TauriDownloadRuntimeDesign.md`, and the downloads facade boundary before opening the next single-file annotation slice.

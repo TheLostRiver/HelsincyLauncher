@@ -13,11 +13,10 @@ pub trait DownloadCheckpointRepository: Send + Sync {
     fn save(&self, checkpoint: &DownloadCheckpointRecord) -> AppResult<()>;
 }
 
-/// Restore driver for the `downloads/download` job kind.
+/// `downloads/download` 任务种类的恢复驱动。
 ///
-/// Stage-2 restore is only allowed to keep a download job resumable when
-/// its persisted download checkpoint still exists. Staging-file verification
-/// remains a later slice.
+/// 只有在持久化下载 checkpoint 仍然存在时，stage 2 restore 才允许把
+/// 一个下载任务继续视为可恢复。staging 文件校验仍留给后续切片处理。
 #[derive(Clone)]
 pub struct DownloadJobDriver {
     checkpoint_repo: Arc<dyn DownloadCheckpointRepository>,

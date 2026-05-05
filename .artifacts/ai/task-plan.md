@@ -10,8 +10,8 @@ Phase 23 - Backend comment rollout
 
 ## Current Focus
 
-- AT-2026-05-05-071 completed the thirteenth backend comment slice by documenting the downloads facade public boundary.
-- The next action is to pause for user confirmation before opening AT-2026-05-05-072.
+- AT-2026-05-05-072 completed the first old-English-comment rewrite slice by converting the downloads restore-driver comment block to Chinese.
+- The next action is to publish this slice and then pause for user confirmation before opening AT-2026-05-05-073.
 
 ## Phases
 
@@ -150,7 +150,7 @@ Phase 23 - Backend comment rollout
 ### Phase 23: Backend Comment Rollout
 
 - Outcome: apply the new repository comment standard to backend Rust/Tauri files in small, commit-sized slices of one or two files.
-- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062, AT-2026-05-04-063, AT-2026-05-04-064, AT-2026-05-04-065, AT-2026-05-04-066, AT-2026-05-04-067, AT-2026-05-04-068, AT-2026-05-05-071
+- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062, AT-2026-05-04-063, AT-2026-05-04-064, AT-2026-05-04-065, AT-2026-05-04-066, AT-2026-05-04-067, AT-2026-05-04-068, AT-2026-05-05-071, AT-2026-05-05-072
 - **Status:** in_progress
 
 ### Phase 24: Comment Language Controls
@@ -232,6 +232,7 @@ Phase 23 - Backend comment rollout
 63. AT-2026-05-05-069 - completed - documented Chinese-by-default comment language and added prompt-based comment-language switches for future comment-authoring work, later normalized under the `hsy-` prefix.
 64. AT-2026-05-05-070 - completed - renamed all repository workspace prompts to `hsy-XXX` and updated normative references so the repo command surface avoids name collisions.
 65. AT-2026-05-05-071 - completed - annotated the downloads facade public boundary, validated the slice, and prepared it for publication before asking whether to continue.
+66. AT-2026-05-05-072 - completed - rewrote the downloads restore-driver comments from English to Chinese, validated the slice, and prepared it for publication before asking whether to continue.
 
 ## Key Questions
 
