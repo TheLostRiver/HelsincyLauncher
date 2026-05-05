@@ -3,13 +3,18 @@ use std::sync::Arc;
 use launcher_kernel_foundation::{AppResult, JobId};
 use launcher_kernel_jobs::{JobDriver, JobSnapshot, RestoreDisposition};
 
+/// 持久化下载 checkpoint 的最小记录。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DownloadCheckpointRecord {
+    /// 与该 checkpoint 关联的稳定下载任务标识。
     pub job_id: JobId,
 }
 
+/// 提供下载 checkpoint 读取与保存能力的最小仓储边界。
 pub trait DownloadCheckpointRepository: Send + Sync {
+    /// 按任务标识读取已存在的 checkpoint 记录。
     fn load(&self, job_id: &JobId) -> AppResult<Option<DownloadCheckpointRecord>>;
+    /// 持久化一个新的或更新后的 checkpoint 记录。
     fn save(&self, checkpoint: &DownloadCheckpointRecord) -> AppResult<()>;
 }
 
@@ -23,6 +28,7 @@ pub struct DownloadJobDriver {
 }
 
 impl DownloadJobDriver {
+    /// 用共享的 checkpoint 仓储能力创建下载恢复驱动。
     pub fn new(checkpoint_repo: Arc<dyn DownloadCheckpointRepository>) -> Self {
         Self { checkpoint_repo }
     }

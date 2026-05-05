@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-05-076 - Rewrite downloads event contract comments to Chinese - COMPLETED
+- Active atomic task: AT-2026-05-05-077 - Annotate missing downloads driver checkpoint comments - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-05-076 - rewrote the downloads event contract comments from English to Chinese
-- Next step: publish this Chinese-comment rewrite slice and pause for user confirmation before opening the next one
+- Last completed slice: AT-2026-05-05-077 - added missing downloads driver checkpoint comments without rewriting existing English comments
+- Next step: publish this missing-comment slice and pause for user confirmation before opening the next one
 
 ## Session Timeline
 
@@ -18,6 +18,12 @@
 
 ### Session: 2026-05-05
 
+- After AT-076 published, the user clarified that already-correct English comments do not need to be deleted or rewritten; from this point onward, new slices should only fill missing comments and keep new comment text in Chinese by default.
+- Started AT-2026-05-05-077 and narrowed it to `crates/module-downloads/src/driver.rs` because that nearby backend file still has uncommented checkpoint declarations while its existing restore-driver comment is already acceptable and should remain untouched.
+- Added Chinese declaration comments to the previously uncommented checkpoint record, repository boundary, and constructor in `crates/module-downloads/src/driver.rs` without modifying the existing restore-driver comment block.
+- Validated AT-2026-05-05-077 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml restore_returns_failed_when_checkpoint_is_missing`; the targeted driver unit test passed.
+- Confirmed scoped `git diff --check` returned clean for the task-record files, handoff, and the touched downloads driver file, and VS Code diagnostics reported no errors.
+- Marked AT-2026-05-05-077 complete after the focused executable validation; the remaining action in this turn is publication followed by user confirmation.
 - After AT-075 published and the confirmation window returned "继续，按建议推进", the rollout stayed on the next adjacent downloads contracts file.
 - Started AT-2026-05-05-076 and narrowed it to `crates/module-downloads/src/contracts/events.rs` because it is the next adjacent downloads contracts file whose declaration comments are still English while the lifecycle event semantics remain unchanged.
 - Rewrote the downloads event contract comments in `crates/module-downloads/src/contracts/events.rs` to Chinese without changing event variants, payload fields, or transport semantics.

@@ -11,6 +11,10 @@
 
 ## Research Findings
 
+- The user clarified that already-correct English comments do not need to be deleted or rewritten; the rollout should now target only missing declaration comments, while new comments still default to simplified Chinese.
+- `crates/module-downloads/src/driver.rs` is the strongest next slice under that rule because its checkpoint record and repository declarations still lack comments, while the main restore-driver comment block is already acceptable and does not need rewriting.
+- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml restore_returns_failed_when_checkpoint_is_missing` is the narrowest executable validation for this slice because it directly compiles and exercises the touched checkpoint/restore boundary.
+
 - `crates/module-downloads/src/contracts/events.rs` is the strongest next rewrite slice after `dto.rs` because it is the next adjacent contracts file, still carries fully English declaration comments, and can validate through the same narrow downloads module test.
 - The change here should rewrite the event-union and lifecycle-payload comments into Chinese without changing the event variants, payload fields, or transport-safe semantics.
 - `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority` remains the narrowest executable validation for this slice because it compiles the touched event contracts through the public downloads module.

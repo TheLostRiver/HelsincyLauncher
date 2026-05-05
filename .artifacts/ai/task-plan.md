@@ -10,8 +10,8 @@ Phase 23 - Backend comment rollout
 
 ## Current Focus
 
-- AT-2026-05-05-076 completed the fifth old-English-comment rewrite slice by converting the downloads event contract comments to Chinese.
-- The next action is to publish this slice and then pause for user confirmation before opening AT-2026-05-05-077.
+- AT-2026-05-05-077 completed the first missing-comment-only slice by documenting the downloads driver checkpoint boundary without rewriting existing English comments.
+- The next action is to publish this slice and then pause for user confirmation before opening AT-2026-05-05-078.
 
 ## Phases
 
@@ -237,6 +237,7 @@ Phase 23 - Backend comment rollout
 68. AT-2026-05-05-074 - completed - rewrote the downloads command contracts comments from English to Chinese, validated the slice, and prepared it for publication before asking whether to continue.
 69. AT-2026-05-05-075 - completed - rewrote the downloads read-model DTO comments from English to Chinese, validated the slice, and prepared it for publication before asking whether to continue.
 70. AT-2026-05-05-076 - completed - rewrote the downloads event contract comments from English to Chinese, validated the slice, and prepared it for publication before asking whether to continue.
+71. AT-2026-05-05-077 - completed - added missing checkpoint-boundary comments in the downloads driver without rewriting already-correct English comments, validated the slice, and prepared it for publication before asking whether to continue.
 
 ## Key Questions
 
