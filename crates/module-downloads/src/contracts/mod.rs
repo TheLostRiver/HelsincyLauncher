@@ -1,18 +1,18 @@
-//! Public contract entrypoint for the downloads module.
+//! downloads 模块的公开 contracts 入口。
 //!
-//! Callers import downloads command/query inputs, read models, and event payloads
-//! from this boundary instead of depending on the module's internal file layout.
+//! 调用方从这个边界导入下载命令/查询输入、读模型和事件载荷，
+//! 而不是依赖模块内部的文件布局。
 
-/// Command input contracts that express downloads-side user intent.
+/// 表达 downloads 侧用户意图的命令输入 contracts。
 pub mod commands;
 
-/// Read-model and snapshot DTOs projected from backend-owned download state.
+/// 从后端拥有的下载状态投影出的读模型与快照 DTO。
 pub mod dto;
 
-/// Event payloads broadcast when download facts change.
+/// 下载事实变化时广播的事件载荷。
 pub mod events;
 
-/// Query input contracts for stable download reads.
+/// 稳定下载读取路径使用的查询输入 contracts。
 pub mod queries;
 
 pub use commands::{

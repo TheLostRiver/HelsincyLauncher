@@ -2,9 +2,9 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-05-072 - Rewrite downloads driver comments to Chinese - COMPLETED
+- Active atomic task: AT-2026-05-05-073 - Rewrite downloads contracts entry comments to Chinese - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-05-071 - annotated the downloads facade public boundary with declaration-level Chinese comments and stub-ownership notes
+- Last completed slice: AT-2026-05-05-072 - rewrote the downloads restore-driver comment block from English to Chinese
 - Next step: publish this Chinese-comment rewrite slice and pause for user confirmation before opening the next one
 
 ## Session Timeline
@@ -17,6 +17,12 @@
 - Marked AT-2026-05-04-068 complete after validation; the remaining action in this turn is publication only.
 
 ### Session: 2026-05-05
+
+- After AT-072 published, the user chose to continue immediately with the next old-English-comment rewrite slice.
+- Started AT-2026-05-05-073 and narrowed it to `crates/module-downloads/src/contracts/mod.rs` because it is a small adjacent module-entry file whose comments are still entirely English while its behavior surface is unchanged.
+- Rewrote the downloads contracts entry comments in `crates/module-downloads/src/contracts/mod.rs` to Chinese without changing the file's export surface.
+- Validated AT-2026-05-05-073 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority`; the targeted downloads unit test passed.
+- Marked AT-2026-05-05-073 complete after the focused executable validation; the remaining action in this turn is publication followed by user confirmation.
 
 - After publication, the user pointed out that existing old backend comments are still in English and explicitly chose the follow-up path that rewrites touched old English code comments to Chinese in small slices.
 - Re-read the comment standard, current task records, and backend Rust comment surfaces, then started AT-2026-05-05-072.

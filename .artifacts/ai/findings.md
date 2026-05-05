@@ -11,6 +11,10 @@
 
 ## Research Findings
 
+- `crates/module-downloads/src/contracts/mod.rs` is the strongest next rewrite slice after `driver.rs` because it is a tiny adjacent module-entry file with fully English declaration comments and no behavior logic to reopen.
+- The change here should rewrite the contracts aggregation comments into Chinese without changing what the file re-exports or how callers import the downloads contract surface.
+- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority` is the narrowest executable validation for this slice because it compiles the touched contracts boundary through the public downloads module.
+
 - `crates/module-downloads/src/driver.rs` is the strongest first rewrite slice for old English backend comments because it has one compact restore-driver comment block, sits adjacent to the just-finished downloads facade slice, and can validate through a driver-specific unit test.
 - The change here should rewrite existing restore/checkpoint comments into Chinese without changing the driver's current checkpoint-gated restore semantics.
 - `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml restore_returns_failed_when_checkpoint_is_missing` is the narrowest executable validation for this slice because it compiles the touched file and directly exercises the commented restore boundary.
