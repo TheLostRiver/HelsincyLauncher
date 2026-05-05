@@ -6,12 +6,12 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 25 - Slash command prefix normalization
+Phase 23 - Backend comment rollout
 
 ## Current Focus
 
-- AT-2026-05-05-070 completed the repo-local slash command normalization, so the workspace prompt surface now consistently uses the `hsy-XXX` prefix.
-- The remaining action in this turn is publication only; after that future command references should use the `hsy-` names.
+- AT-2026-05-05-071 completed the thirteenth backend comment slice by documenting the downloads facade public boundary.
+- The next action is to pause for user confirmation before opening AT-2026-05-05-072.
 
 ## Phases
 
@@ -150,7 +150,7 @@ Phase 25 - Slash command prefix normalization
 ### Phase 23: Backend Comment Rollout
 
 - Outcome: apply the new repository comment standard to backend Rust/Tauri files in small, commit-sized slices of one or two files.
-- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062, AT-2026-05-04-063, AT-2026-05-04-064, AT-2026-05-04-065, AT-2026-05-04-066, AT-2026-05-04-067, AT-2026-05-04-068
+- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062, AT-2026-05-04-063, AT-2026-05-04-064, AT-2026-05-04-065, AT-2026-05-04-066, AT-2026-05-04-067, AT-2026-05-04-068, AT-2026-05-05-071
 - **Status:** in_progress
 
 ### Phase 24: Comment Language Controls
@@ -230,7 +230,8 @@ Phase 25 - Slash command prefix normalization
 61. AT-2026-05-04-067 - completed - annotated the desktop host Fab transport handlers, then validated the slice and prepared it for publication before asking whether to continue.
 62. AT-2026-05-04-068 - completed - annotated the desktop host crate entry surface, then validated the slice and prepared it for publication before asking whether to continue.
 63. AT-2026-05-05-069 - completed - documented Chinese-by-default comment language and added prompt-based comment-language switches for future comment-authoring work, later normalized under the `hsy-` prefix.
-64. AT-2026-05-05-070 - in_progress - rename all repository workspace prompts to `hsy-XXX` and update normative references so the repo command surface avoids name collisions.
+64. AT-2026-05-05-070 - completed - renamed all repository workspace prompts to `hsy-XXX` and updated normative references so the repo command surface avoids name collisions.
+65. AT-2026-05-05-071 - completed - annotated the downloads facade public boundary, validated the slice, and prepared it for publication before asking whether to continue.
 
 ## Key Questions
 

@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-05-070 - Prefix workspace slash commands with hsy - COMPLETED
-- Current phase: Phase 25 - Slash command prefix normalization
-- Last completed slice: AT-2026-05-05-070 - renamed the repository-local workspace prompt surface to `hsy-XXX` and updated the normative references
-- Next step: publish this docs-only slice, then continue using the new `hsy-` command names
+- Active atomic task: AT-2026-05-05-071 - Downloads facade comment slice 13 - COMPLETED
+- Current phase: Phase 23 - Backend comment rollout
+- Last completed slice: AT-2026-05-05-071 - annotated the downloads facade public boundary with declaration-level Chinese comments and stub-ownership notes
+- Next step: publish this backend comment slice and pause for user confirmation before opening the next one
 
 ## Session Timeline
 
@@ -17,6 +17,14 @@
 - Marked AT-2026-05-04-068 complete after validation; the remaining action in this turn is publication only.
 
 ### Session: 2026-05-05
+
+- The user accepted the next backend comment slice recommendation, so the workflow moved back from the docs-only prompt work into Phase 23 backend comment rollout.
+- Re-read `docs/TauriCodeCommentStandard.md`, `docs/TauriDownloadRuntimeDesign.md`, and the downloads facade boundary before opening the next single-file annotation slice.
+- Started AT-2026-05-05-071 and constrained it to `crates/module-downloads/src/facade/mod.rs` because that file is the downloads module's real public intake boundary and still lacks declaration-level comments on its types, dependencies, and stubbed operations.
+- Added Chinese module/type/method comments to the downloads facade boundary, focusing on accepted-job intake semantics, dependency-bundle ownership, persisted record meaning, and the current `DOWNLOADS_NOT_WIRED` stub responsibility.
+- Validated AT-2026-05-05-071 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority`; the targeted downloads unit test passed.
+- Confirmed `git diff --check` returned clean for the task-record files, handoff, and the touched downloads facade file, and VS Code diagnostics reported no errors.
+- Marked AT-2026-05-05-071 complete after validation; the remaining action in this turn is publication followed by user confirmation.
 
 - The user then asked to normalize repository slash commands under an `hsy-XXX` prefix to avoid collisions with other command surfaces.
 - Re-read the live workspace prompt files plus the current task records and confirmed all six repository-local prompt commands still expose unprefixed names.

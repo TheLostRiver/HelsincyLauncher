@@ -2,15 +2,17 @@
 
 ## Identity
 
-- task id: AT-2026-05-05-070
-- title: Prefix workspace slash commands with hsy
+- task id: AT-2026-05-05-071
+- title: Downloads facade comment slice 13
 - status: completed
 
 ## Goal
 
-统一仓库级 slash prompt 命名，避免和其他工作区命令冲突：把现有 workspace prompt 全部改为 `hsy-XXX` 形式，并同步更新当前规范与任务记录中的命令引用。
+按当前仓库注释规范，为 downloads 模块 facade 公开边界补上第十三批高信号注释：
 
-本轮只调整 prompt 文件名、prompt `name` 和相关文档引用，不改 hook 行为、不改业务代码，也不扩展新的命令能力。
+- `crates/module-downloads/src/facade/mod.rs`
+
+本轮只补模块/声明级注释和少量必要的 stub 语义说明，不改 downloads 行为、不扩展查询/策略接线，也不顺带打开第二个源码文件。
 
 ## Scope
 
@@ -20,19 +22,12 @@
   - update `.artifacts/ai/progress.md`
   - update `.artifacts/ai/findings.md`
   - update `.artifacts/ai/handoff.md`
-  - update `docs/TauriCodeCommentStandard.md`
-  - replace `.github/prompts/plan-atomic-task.prompt.md`
-  - replace `.github/prompts/plan-backend-skeleton.prompt.md`
-  - replace `.github/prompts/plan-doc-review.prompt.md`
-  - replace `.github/prompts/resume-from-handoff.prompt.md`
-  - replace `.github/prompts/comment-zh.prompt.md`
-  - replace `.github/prompts/comment-en.prompt.md`
+  - update `crates/module-downloads/src/facade/mod.rs`
 - out of scope:
-  - change any backend or frontend runtime behavior
-  - change hook dispatch or workflow language mode semantics
-  - add new prompt capabilities beyond the rename
-  - rewrite unrelated historical logs outside the touched task records
-  - modify backend or frontend source files
+  - annotate more than this one backend source file
+  - change downloads facade behavior or wire currently stubbed operations
+  - modify downloads driver, contracts, or host transport files in the same slice
+  - add comments to obvious tests only to raise coverage numbers
 
 ## Allowed Files
 
@@ -41,19 +36,7 @@
 3. .artifacts/ai/progress.md
 4. .artifacts/ai/findings.md
 5. .artifacts/ai/handoff.md
-6. docs/TauriCodeCommentStandard.md
-7. .github/prompts/plan-atomic-task.prompt.md
-8. .github/prompts/plan-backend-skeleton.prompt.md
-9. .github/prompts/plan-doc-review.prompt.md
-10. .github/prompts/resume-from-handoff.prompt.md
-11. .github/prompts/comment-zh.prompt.md
-12. .github/prompts/comment-en.prompt.md
-13. .github/prompts/hsy-plan-atomic-task.prompt.md
-14. .github/prompts/hsy-plan-backend-skeleton.prompt.md
-15. .github/prompts/hsy-plan-doc-review.prompt.md
-16. .github/prompts/hsy-resume-from-handoff.prompt.md
-17. .github/prompts/hsy-comment-zh.prompt.md
-18. .github/prompts/hsy-comment-en.prompt.md
+6. crates/module-downloads/src/facade/mod.rs
 
 ## 控制性文档
 
@@ -62,19 +45,21 @@
 3. docs/TauriAIDevelopmentTransactionProtocolDesign.md
 4. docs/TauriTestingStrategyAndQualityGateDesign.md
 5. docs/TauriCodeCommentStandard.md
-6. .github/skills/strict-doc-driven-development/SKILL.md
+6. docs/TauriDownloadRuntimeDesign.md
+7. .github/skills/strict-doc-driven-development/SKILL.md
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If all repository-local workspace prompts are renamed to `hsy-XXX` at both the filename and frontmatter `name` level, and the normative docs switch to the same names, then the repo command surface will avoid common command-name collisions without changing any underlying workflow behavior.
+- falsifiable local hypothesis: If `crates/module-downloads/src/facade/mod.rs` receives declaration-level comments that explain the facade boundary, dependency bundle, persisted job-record semantics, and the current `DOWNLOADS_NOT_WIRED` stub ownership, then this next backend comment slice will satisfy the repository standard without cluttering obvious tests or changing runtime behavior.
 
 ## Cheap Check
 
-- `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md docs/TauriCodeCommentStandard.md .github/prompts/*.prompt.md`
+- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority`
 
 ## Validation Gate
 
-1. `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md docs/TauriCodeCommentStandard.md .github/prompts/*.prompt.md`
+1. `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority`
+2. `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/module-downloads/src/facade/mod.rs`
 
 ## Validation Result
 
@@ -82,15 +67,15 @@
 
 ## Notes
 
-- `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md docs/TauriCodeCommentStandard.md .github/prompts/*.prompt.md` produced no output.
-- `.github/prompts/*.prompt.md` now resolves to exactly six `hsy-` prefixed prompt files with no remaining unprefixed prompt files.
-- VS Code diagnostics stayed clean for `docs/TauriCodeCommentStandard.md` and the six active `hsy-` prompt files.
+- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority` passed with `1 passed; 0 failed`.
+- `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/module-downloads/src/facade/mod.rs` produced no output.
+- VS Code diagnostics reported no errors for the touched facade file or updated task records.
 
 ## 安全恢复点
 
-- hsy 前缀统一收敛在 `docs/TauriCodeCommentStandard.md` 和 `.github/prompts/*.prompt.md`；若中断，恢复时直接把六个 prompt 全部切到 `hsy-XXX` 并立刻跑 scoped `git diff --check`。
+- 第十三批后端注释切片已经收敛到 `crates/module-downloads/src/facade/mod.rs`；若中断，恢复时直接补这个 facade 边界的声明级注释，然后立刻跑 module-downloads 的窄单测。
 
 ## Completion
 
-- completed slice: `docs/TauriCodeCommentStandard.md`, `.github/prompts/hsy-plan-atomic-task.prompt.md`, `.github/prompts/hsy-plan-backend-skeleton.prompt.md`, `.github/prompts/hsy-plan-doc-review.prompt.md`, `.github/prompts/hsy-resume-from-handoff.prompt.md`, `.github/prompts/hsy-comment-zh.prompt.md`, `.github/prompts/hsy-comment-en.prompt.md`
-- publication step: pending commit and push in this turn
+- completed slice: `crates/module-downloads/src/facade/mod.rs`
+- task records updated for AT-2026-05-05-071 completion and user-confirmation pause point

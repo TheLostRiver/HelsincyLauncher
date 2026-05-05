@@ -11,6 +11,10 @@
 
 ## Research Findings
 
+- `crates/module-downloads/src/facade/mod.rs` is the strongest next backend comment slice because it is the downloads module's public intake boundary and still exposes the accepted-job record model, dependency bundle, and multiple `DOWNLOADS_NOT_WIRED` facade methods without declaration-level comments.
+- The comments here should focus on the facade boundary, dependency bundle, persisted intake record semantics, and the ownership of the still-stubbed `DOWNLOADS_NOT_WIRED` operations, not on obvious test helpers or every one-line delegation.
+- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority` is the narrowest executable validation for this slice because it compiles the touched facade surface and exercises the only currently wired facade command path.
+
 - Before AT-2026-05-05-070, all six current workspace prompt commands still used unprefixed names; the normalized surface is now `hsy-plan-atomic-task`, `hsy-plan-backend-skeleton`, `hsy-plan-doc-review`, `hsy-resume-from-handoff`, `hsy-comment-zh`, and `hsy-comment-en`.
 - The live references to these command names are narrow and local: the prompt files themselves, the comment standard's comment-language section, and the current `.artifacts/ai` task records.
 - Renaming both the prompt filenames and frontmatter `name` fields to `hsy-XXX` is sufficient for a consistent repo-local command surface; hook scripts do not depend on these names.
