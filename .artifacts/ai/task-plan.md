@@ -10,7 +10,7 @@ Phase 23 - Backend comment rollout
 
 ## Current Focus
 
-- AT-2026-05-05-080 completed the next missing-comment-only slice by documenting the public facade boundary in `crates/module-engines/src/facade/mod.rs`.
+- AT-2026-05-05-081 completed the next missing-comment-only slice by documenting the file-entry boundary in `crates/module-engines/src/driver.rs`.
 - The next action is to run the scoped diff and diagnostics, publish only this slice, and then pause for user confirmation.
 
 ## Phases
@@ -241,6 +241,7 @@ Phase 23 - Backend comment rollout
 72. AT-2026-05-05-078 - completed - added missing record-state variant comments in the downloads facade without rewriting already-correct comments, validated the slice, and prepared it for publication before asking whether to continue.
 73. AT-2026-05-05-079 - completed - added missing declaration comments to the public engine contract DTOs without rewriting already-correct comments in adjacent host files.
 74. AT-2026-05-05-080 - completed - added missing declaration comments to the public engine facade boundary without rewriting already-correct comments or widening into test repair.
+75. AT-2026-05-05-081 - completed - added the missing file-entry comment to the engine restore driver while preserving the existing correct English struct comment.
 
 ## Key Questions
 

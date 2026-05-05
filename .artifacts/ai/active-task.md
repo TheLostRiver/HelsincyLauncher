@@ -2,17 +2,17 @@
 
 ## Identity
 
-- task id: AT-2026-05-05-080
-- title: Annotate missing engine facade boundary comments
+- task id: AT-2026-05-05-081
+- title: Annotate missing engine driver entry comment
 - status: completed
 
 ## Goal
 
-按当前仓库注释规范，在不改动已有正确英文注释的前提下，为 engines facade 里的公开依赖包、边界类型和入口方法补齐缺失的声明级中文注释：
+按当前仓库注释规范，在不改动已有正确英文注释的前提下，为 engines driver 文件入口补齐缺失的声明级中文注释：
 
-- `crates/module-engines/src/facade/mod.rs`
+- `crates/module-engines/src/driver.rs`
 
-本轮只补 `EngineModuleDeps`、`EngineFacade`、其公开字段与公开方法的缺失注释，不删除或回写已有正确英文注释，不改 engines facade 行为语义，也不顺带打开第二个源码文件。
+本轮只补 `crates/module-engines/src/driver.rs` 缺失的文件入口注释，不删除或回写已有正确英文注释，不改引擎恢复 driver 语义，也不顺带打开第二个源码文件。
 
 ## Scope
 
@@ -22,10 +22,10 @@
   - update `.artifacts/ai/progress.md`
   - update `.artifacts/ai/findings.md`
   - update `.artifacts/ai/handoff.md`
-  - update `crates/module-engines/src/facade/mod.rs`
+  - update `crates/module-engines/src/driver.rs`
 - out of scope:
   - annotate more than this one backend source file
-  - change engines facade behavior, queueing semantics, or test code
+  - change engine restore behavior, return semantics, or test code
   - rewrite or delete already-correct English comments in this file or other modules
   - add comments to obvious tests only to raise coverage numbers
 
@@ -36,7 +36,7 @@
 3. .artifacts/ai/progress.md
 4. .artifacts/ai/findings.md
 5. .artifacts/ai/handoff.md
-6. crates/module-engines/src/facade/mod.rs
+6. crates/module-engines/src/driver.rs
 
 ## 控制性文档
 
@@ -50,7 +50,7 @@
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If `crates/module-engines/src/facade/mod.rs` adds Chinese declaration comments only to the currently uncommented public dependency bundle, facade boundary, and public methods while preserving the existing queueing and not-wired behavior, then this touched backend slice will satisfy the repository comment rule and the user's updated preference without changing runtime behavior.
+- falsifiable local hypothesis: If `crates/module-engines/src/driver.rs` adds a Chinese file-entry comment that explains the restore-driver boundary while leaving the existing correct English struct comment and current stub restore behavior untouched, then this touched backend slice will satisfy the repository comment rule and the user's updated preference without changing runtime behavior.
 
 ## Cheap Check
 
@@ -59,7 +59,7 @@
 ## Validation Gate
 
 1. `cargo check --manifest-path q:\DEV\MyEpicLauncher\crates\module-engines\Cargo.toml --lib`
-2. `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/module-engines/src/facade/mod.rs`
+2. `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/module-engines/src/driver.rs`
 
 ## Validation Result
 
@@ -67,16 +67,15 @@
 
 ## Notes
 
-- `crates/module-engines/src/facade/mod.rs` is the next adjacent missing-comment boundary after the published contracts slice because its public dependency bundle, facade type, and methods still have no declaration comments.
-- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-engines\Cargo.toml run_verification_returns_backend_owned_accepted_job` is currently blocked by a pre-existing missing `JobPriority` import inside `crates/module-engines/src/facade/mod.rs` test code, so the focused validation for this comment-only slice falls back to a library compile gate instead of widening scope into unrelated test repair.
-- The private `not_wired` helper stays out of scope for declaration comments here because it is a short local helper and the current slice is limited to the public facade boundary.
-- `cargo check --manifest-path q:\DEV\MyEpicLauncher\crates\module-engines\Cargo.toml --lib` passed and compiled `launcher-module-engines` successfully for the facade slice.
+- `crates/module-engines/src/driver.rs` already has a correct English declaration comment on `EngineJobDriver`, so this slice preserves that block and only fills the missing file-entry explanation required by the comment standard.
+- The named engine verification unit test remains blocked by the same pre-existing missing `JobPriority` import in `crates/module-engines/src/facade/mod.rs` test code, so this adjacent comment-only slice continues to validate through the module-engines library compile gate.
+- `cargo check --manifest-path q:\DEV\MyEpicLauncher\crates\module-engines\Cargo.toml --lib` passed and compiled `launcher-module-engines` successfully for the driver slice.
 
 ## 安全恢复点
 
-- 缺失注释补齐切片已经收敛到 `crates/module-engines/src/facade/mod.rs` 的公开依赖包、facade 类型和公开方法；若中断，恢复时直接给这些公开声明补中文说明，然后立刻跑 engines 的库级编译校验。
+- 缺失注释补齐切片已经收敛到 `crates/module-engines/src/driver.rs` 的文件入口注释；若中断，恢复时直接补这一段中文入口说明，然后立刻跑 engines 的库级编译校验。
 
 ## Completion
 
-- completed slice: `crates/module-engines/src/facade/mod.rs`
-- task records updated for AT-2026-05-05-080 completion and publication prep
+- completed slice: `crates/module-engines/src/driver.rs`
+- task records updated for AT-2026-05-05-081 completion and publication prep

@@ -11,6 +11,10 @@
 
 ## Research Findings
 
+- `crates/module-engines/src/driver.rs` is the strongest next slice after the published facade boundary because it is the adjacent driver entry file and still lacks a file-entry comment, while its public `EngineJobDriver` declaration already has a correct English comment that should remain untouched.
+- The safest move is to add only a Chinese file-entry comment that explains the driver boundary and current stub restore ownership, without rewriting the existing English struct comment or the inline TODO/body comments.
+- The named engine verification unit test is still blocked by the same pre-existing missing `JobPriority` import in `crates/module-engines/src/facade/mod.rs` test code, so `cargo check --manifest-path q:\DEV\MyEpicLauncher\crates\module-engines\Cargo.toml --lib` remains the narrowest reliable validation gate for this adjacent comment-only slice.
+
 - `crates/module-engines/src/facade/mod.rs` is the strongest next slice after the contracts file because it is the adjacent public engines boundary and its dependency bundle, facade type, and public methods still expose no declaration comments.
 - The safest change is to add Chinese comments only to the public dependency bundle, facade type, public fields, and public methods, while leaving the short private `not_wired` helper and the currently blocked test code untouched.
 - The named `run_verification_returns_backend_owned_accepted_job` unit test is still blocked by the same pre-existing missing `JobPriority` import in the test module, so `cargo check --manifest-path q:\DEV\MyEpicLauncher\crates\module-engines\Cargo.toml --lib` remains the narrowest reliable validation gate for this adjacent comment-only slice.

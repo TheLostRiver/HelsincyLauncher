@@ -2,15 +2,21 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-05-080 - Annotate missing engine facade boundary comments - COMPLETED
+- Active atomic task: AT-2026-05-05-081 - Annotate missing engine driver entry comment - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-05-080 - added missing engine facade boundary comments without rewriting existing comments
-- Next step: run scoped diff and diagnostics, then publish only the AT-2026-05-05-080 file set and pause for user confirmation
+- Last completed slice: AT-2026-05-05-081 - added the missing engine driver entry comment without rewriting existing comments
+- Next step: run scoped diff and diagnostics, then publish only the AT-2026-05-05-081 file set and pause for user confirmation
 
 ## Session Timeline
 
 ### Session: 2026-05-04
 
+- Published AT-2026-05-05-080 as commit `16e436b` after the scoped diff check, selective staging, commit, and push all succeeded.
+- After the confirmation window again returned "继续，按建议推进", the rollout stayed in `module-engines` and moved one hop from the facade boundary to the adjacent restore driver entry file.
+- Started AT-2026-05-05-081 and narrowed it to `crates/module-engines/src/driver.rs` because the file still lacked a module-entry explanation even though the public `EngineJobDriver` declaration already had an acceptable English comment that should remain untouched.
+- Added a Chinese file-entry comment to `crates/module-engines/src/driver.rs` without changing the existing English driver declaration comment or restore behavior.
+- Validated AT-2026-05-05-081 with `cargo check --manifest-path q:\DEV\MyEpicLauncher\crates\module-engines\Cargo.toml --lib`; the module-engines library compiled successfully.
+- Marked AT-2026-05-05-081 complete after the focused compile validation; the remaining action in this turn is scoped diff/diagnostics followed by publication and user confirmation.
 - Added the twelfth backend comment slice in `src-tauri/src/lib.rs`, focusing on crate-entry ownership, exported host surfaces, and the meaning of the public bootstrap/state re-exports.
 - Validated AT-2026-05-04-068 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\src-tauri\Cargo.toml transport_wiring_smoke`; the host transport smoke test passed.
 - Confirmed `git diff --check` returned clean for the task-record files, handoff, and the touched desktop host crate-entry file.
@@ -18,6 +24,9 @@
 
 ### Session: 2026-05-05
 
+- Published AT-2026-05-05-080 as commit `16e436b` after the scoped diff check, selective staging, commit, and push all succeeded.
+- After the confirmation window again returned "继续，按建议推进", the rollout stayed in `module-engines` and moved one hop from the facade boundary to the adjacent restore driver entry file.
+- Started AT-2026-05-05-081 and narrowed it to `crates/module-engines/src/driver.rs` because the file still lacked a module-entry explanation even though the public `EngineJobDriver` declaration already had an acceptable English comment that should remain untouched.
 - Published AT-2026-05-05-079 as commit `1bc5564` after the scoped diff check, selective staging, commit, and push all succeeded.
 - After the confirmation window again returned "继续，按建议推进", the rollout stayed in the same crate and moved one hop from engine contracts to the adjacent engine facade boundary.
 - Started AT-2026-05-05-080 and narrowed it to `crates/module-engines/src/facade/mod.rs` because its public dependency bundle, facade type, and public methods still lacked declaration comments while the private helper remained simple enough to stay uncommented.
