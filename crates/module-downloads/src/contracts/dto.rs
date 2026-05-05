@@ -1,56 +1,56 @@
-//! Read-model DTOs projected from backend-owned download state.
+//! 从后端拥有的下载状态投影出的读模型 DTO。
 //!
-//! These shapes are stable transport contracts for list/detail reads and policy
-//! snapshots exposed outside the downloads module.
+//! 这些类型是暴露给 downloads 模块外部的稳定传输契约，用于列表/详情读取
+//! 以及策略快照查询。
 
 use launcher_kernel_foundation::{JobId, PageSlice};
 use launcher_kernel_jobs::{JobSnapshot, JobUiState};
 use serde::{Deserialize, Serialize};
 
-/// Download-specific extension facts attached to a generic job snapshot.
+/// 附加在通用任务快照上的下载专属扩展事实。
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct DownloadJobExtensionDto {
-    /// Backend-known identifier of the asset or engine payload being downloaded.
+    /// 后端识别的下载目标标识，可指向资产或引擎载荷。
     pub target_id: String,
 
-    /// Optional install follow-up captured when the job was created.
+    /// 创建任务时捕获的可选安装后续意图。
     pub install_intent: Option<String>,
 
-    /// Number of payload bytes already materialized locally.
+    /// 已经成功落地到本地的载荷字节数。
     pub completed_bytes: u64,
 
-    /// Total payload size when the backend can determine it.
+    /// 后端能够确定时的载荷总大小。
     pub total_bytes: Option<u64>,
 
-    /// Whether the latest failure mode allows another backend retry attempt.
+    /// 最近一次失败形态是否仍允许后端再次重试。
     pub retryable: bool,
 }
 
-/// Full projected snapshot of one download job.
+/// 单个下载任务的完整投影快照。
 pub type DownloadJobSnapshotDto = JobSnapshot<DownloadJobExtensionDto>;
 
-/// Summary row used by paged download job listings.
+/// 分页下载任务列表中使用的摘要行。
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct DownloadJobListItemDto {
     pub job_id: JobId,
 
-    /// User-facing title resolved for the item shown in download lists.
+    /// 展示在下载列表中的面向用户标题。
     pub title: String,
 
-    /// Projected UI state consumed by the shell and frontend filters.
+    /// 供壳层和前端筛选消费的投影 UI 状态。
     pub ui_state: JobUiState,
 
-    /// Optional human-readable progress message when raw bytes are not enough.
+    /// 原始字节进度不足以表达状态时使用的可选人类可读进度文案。
     pub progress_label: Option<String>,
 
-    /// Latest observed transfer rate, if the runtime currently exposes one.
+    /// 运行时当前可提供时的最近观测传输速率。
     pub throughput_bytes_per_sec: Option<u64>,
 }
 
-/// Paged download job list read model.
+/// 分页下载任务列表读模型。
 pub type DownloadJobListDto = PageSlice<DownloadJobListItemDto>;
 
-/// Snapshot of the downloads policy currently enforced by the backend.
+/// 后端当前生效的下载策略快照。
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct DownloadPolicyDto {
     pub concurrency_slots: u32,
