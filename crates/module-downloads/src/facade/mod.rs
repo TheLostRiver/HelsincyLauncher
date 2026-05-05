@@ -23,11 +23,17 @@ use crate::contracts::{
 /// 共享 job runtime 的更细粒度快照状态机。
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DownloadJobRecordState {
+    /// 已创建并持久化，但尚未真正进入运行时执行。
     Queued,
+    /// 已由运行时接管并处于执行中。
     Running,
+    /// 已被显式暂停，等待后续恢复。
     Paused,
+    /// 已完成并产出预期下载结果。
     Completed,
+    /// 已失败，后续是否重试由更高层策略决定。
     Failed,
+    /// 已被取消，不再继续推进。
     Canceled,
 }
 

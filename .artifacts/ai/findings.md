@@ -11,6 +11,10 @@
 
 ## Research Findings
 
+- `crates/module-downloads/src/facade/mod.rs` remains the strongest next missing-comment slice because the file already has high-level boundary comments, but `DownloadJobRecordState` still exposes uncommented enum variants that carry persisted-state meaning.
+- The smallest safe move here is to add Chinese comments only to those enum variants and leave the surrounding acceptable comments untouched.
+- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority` is the narrowest executable validation for this slice because it compiles the touched facade surface through the only currently wired facade intake path.
+
 - The user clarified that already-correct English comments do not need to be deleted or rewritten; the rollout should now target only missing declaration comments, while new comments still default to simplified Chinese.
 - `crates/module-downloads/src/driver.rs` is the strongest next slice under that rule because its checkpoint record and repository declarations still lack comments, while the main restore-driver comment block is already acceptable and does not need rewriting.
 - `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml restore_returns_failed_when_checkpoint_is_missing` is the narrowest executable validation for this slice because it directly compiles and exercises the touched checkpoint/restore boundary.

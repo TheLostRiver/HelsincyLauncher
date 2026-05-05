@@ -10,8 +10,8 @@ Phase 23 - Backend comment rollout
 
 ## Current Focus
 
-- AT-2026-05-05-077 completed the first missing-comment-only slice by documenting the downloads driver checkpoint boundary without rewriting existing English comments.
-- The next action is to publish this slice and then pause for user confirmation before opening AT-2026-05-05-078.
+- AT-2026-05-05-078 completed the second missing-comment-only slice by documenting the downloads record-state enum variants.
+- The next action is to publish this slice and then pause for user confirmation before opening AT-2026-05-05-079.
 
 ## Phases
 
@@ -238,6 +238,7 @@ Phase 23 - Backend comment rollout
 69. AT-2026-05-05-075 - completed - rewrote the downloads read-model DTO comments from English to Chinese, validated the slice, and prepared it for publication before asking whether to continue.
 70. AT-2026-05-05-076 - completed - rewrote the downloads event contract comments from English to Chinese, validated the slice, and prepared it for publication before asking whether to continue.
 71. AT-2026-05-05-077 - completed - added missing checkpoint-boundary comments in the downloads driver without rewriting already-correct English comments, validated the slice, and prepared it for publication before asking whether to continue.
+72. AT-2026-05-05-078 - completed - added missing record-state variant comments in the downloads facade without rewriting already-correct comments, validated the slice, and prepared it for publication before asking whether to continue.
 
 ## Key Questions
 

@@ -2,17 +2,17 @@
 
 ## Identity
 
-- task id: AT-2026-05-05-077
-- title: Annotate missing downloads driver checkpoint comments
+- task id: AT-2026-05-05-078
+- title: Annotate missing downloads record-state variant comments
 - status: completed
 
 ## Goal
 
-按当前仓库注释规范，在不改动已有正确英文注释的前提下，为一个后端 checkpoint 驱动边界补齐缺失的声明级中文注释：
+按当前仓库注释规范，在不改动已有正确英文注释的前提下，为 downloads facade 里的状态枚举值补齐缺失的声明级中文注释：
 
-- `crates/module-downloads/src/driver.rs`
+- `crates/module-downloads/src/facade/mod.rs`
 
-本轮只补 driver.rs 里缺失的声明级注释，不删除或回写已有正确英文注释，不改 checkpoint 恢复语义，也不顺带打开第二个源码文件。
+本轮只补 `DownloadJobRecordState` 中缺失的状态值注释，不删除或回写已有正确英文注释，不改 downloads intake 或持久化状态语义，也不顺带打开第二个源码文件。
 
 ## Scope
 
@@ -22,10 +22,10 @@
   - update `.artifacts/ai/progress.md`
   - update `.artifacts/ai/findings.md`
   - update `.artifacts/ai/handoff.md`
-  - update `crates/module-downloads/src/driver.rs`
+  - update `crates/module-downloads/src/facade/mod.rs`
 - out of scope:
   - annotate more than this one backend source file
-  - change downloads restore or checkpoint semantics
+  - change downloads intake, repository, or state semantics
   - rewrite or delete already-correct English comments in this file or other modules
   - add comments to obvious tests only to raise coverage numbers
 
@@ -36,7 +36,7 @@
 3. .artifacts/ai/progress.md
 4. .artifacts/ai/findings.md
 5. .artifacts/ai/handoff.md
-6. crates/module-downloads/src/driver.rs
+6. crates/module-downloads/src/facade/mod.rs
 
 ## 控制性文档
 
@@ -50,16 +50,16 @@
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If `crates/module-downloads/src/driver.rs` adds Chinese declaration comments only to the currently uncommented checkpoint record and repository boundary while preserving the existing restore behavior and leaving already-correct comments untouched, then the repository's comment rule and the user's updated comment preference will both hold for this touched backend slice without changing runtime behavior.
+- falsifiable local hypothesis: If `crates/module-downloads/src/facade/mod.rs` adds Chinese declaration comments only to the currently uncommented `DownloadJobRecordState` variants while preserving the existing facade behavior and leaving already-correct comments untouched, then the repository's comment rule and the user's updated comment preference will both hold for this touched backend slice without changing runtime behavior.
 
 ## Cheap Check
 
-- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml restore_returns_failed_when_checkpoint_is_missing`
+- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority`
 
 ## Validation Gate
 
-1. `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml restore_returns_failed_when_checkpoint_is_missing`
-2. `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/module-downloads/src/driver.rs`
+1. `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority`
+2. `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/module-downloads/src/facade/mod.rs`
 
 ## Validation Result
 
@@ -67,15 +67,15 @@
 
 ## Notes
 
-- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml restore_returns_failed_when_checkpoint_is_missing` passed with `1 passed; 0 failed`.
-- `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/module-downloads/src/driver.rs` produced no output.
-- VS Code diagnostics reported no errors for `crates/module-downloads/src/driver.rs` or the updated task records.
+- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority` passed with `1 passed; 0 failed`.
+- `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/module-downloads/src/facade/mod.rs` produced no output.
+- VS Code diagnostics reported no errors for `crates/module-downloads/src/facade/mod.rs` or the updated task records.
 
 ## 安全恢复点
 
-- 缺失注释补齐切片已经收敛到 `crates/module-downloads/src/driver.rs` 的 checkpoint 边界；若中断，恢复时直接给缺注释声明补中文说明，然后立刻跑 driver 的窄单测。
+- 缺失注释补齐切片已经收敛到 `crates/module-downloads/src/facade/mod.rs` 的 `DownloadJobRecordState` 枚举值；若中断，恢复时直接给这些状态值补中文说明，然后立刻跑 facade 的窄单测。
 
 ## Completion
 
-- completed slice: `crates/module-downloads/src/driver.rs`
-- task records updated for AT-2026-05-05-077 completion and user-confirmation pause point
+- completed slice: `crates/module-downloads/src/facade/mod.rs`
+- task records updated for AT-2026-05-05-078 completion and user-confirmation pause point
