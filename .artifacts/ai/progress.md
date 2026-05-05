@@ -2,9 +2,9 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-05-075 - Rewrite downloads read-model DTO comments to Chinese - COMPLETED
+- Active atomic task: AT-2026-05-05-076 - Rewrite downloads event contract comments to Chinese - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-05-075 - rewrote the downloads read-model DTO comments from English to Chinese
+- Last completed slice: AT-2026-05-05-076 - rewrote the downloads event contract comments from English to Chinese
 - Next step: publish this Chinese-comment rewrite slice and pause for user confirmation before opening the next one
 
 ## Session Timeline
@@ -18,6 +18,12 @@
 
 ### Session: 2026-05-05
 
+- After AT-075 published and the confirmation window returned "继续，按建议推进", the rollout stayed on the next adjacent downloads contracts file.
+- Started AT-2026-05-05-076 and narrowed it to `crates/module-downloads/src/contracts/events.rs` because it is the next adjacent downloads contracts file whose declaration comments are still English while the lifecycle event semantics remain unchanged.
+- Rewrote the downloads event contract comments in `crates/module-downloads/src/contracts/events.rs` to Chinese without changing event variants, payload fields, or transport semantics.
+- Validated AT-2026-05-05-076 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority`; the targeted downloads unit test passed.
+- Confirmed scoped `git diff --check` returned clean for the task-record files, handoff, and the touched downloads events file, and VS Code diagnostics reported no errors.
+- Marked AT-2026-05-05-076 complete after the focused executable validation; the remaining action in this turn is publication followed by user confirmation.
 - After AT-074 published, the user chose to continue immediately with the next old-English-comment rewrite slice.
 - Started AT-2026-05-05-075 and narrowed it to `crates/module-downloads/src/contracts/dto.rs` because it is the next adjacent downloads contracts file whose declaration comments are still English while the projected read-model semantics remain unchanged.
 - Rewrote the downloads read-model DTO comments in `crates/module-downloads/src/contracts/dto.rs` to Chinese without changing DTO aliases, fields, or projection semantics.

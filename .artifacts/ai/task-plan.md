@@ -10,8 +10,8 @@ Phase 23 - Backend comment rollout
 
 ## Current Focus
 
-- AT-2026-05-05-075 completed the fourth old-English-comment rewrite slice by converting the downloads read-model DTO comments to Chinese.
-- The next action is to publish this slice and then pause for user confirmation before opening AT-2026-05-05-076.
+- AT-2026-05-05-076 completed the fifth old-English-comment rewrite slice by converting the downloads event contract comments to Chinese.
+- The next action is to publish this slice and then pause for user confirmation before opening AT-2026-05-05-077.
 
 ## Phases
 
@@ -236,6 +236,7 @@ Phase 23 - Backend comment rollout
 67. AT-2026-05-05-073 - completed - rewrote the downloads contracts entry comments from English to Chinese, validated the slice, and prepared it for publication before asking whether to continue.
 68. AT-2026-05-05-074 - completed - rewrote the downloads command contracts comments from English to Chinese, validated the slice, and prepared it for publication before asking whether to continue.
 69. AT-2026-05-05-075 - completed - rewrote the downloads read-model DTO comments from English to Chinese, validated the slice, and prepared it for publication before asking whether to continue.
+70. AT-2026-05-05-076 - completed - rewrote the downloads event contract comments from English to Chinese, validated the slice, and prepared it for publication before asking whether to continue.
 
 ## Key Questions
 
