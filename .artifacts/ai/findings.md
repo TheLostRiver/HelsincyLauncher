@@ -11,6 +11,10 @@
 
 ## Research Findings
 
+- `crates/module-engines/src/facade/mod.rs` is the strongest next slice after the contracts file because it is the adjacent public engines boundary and its dependency bundle, facade type, and public methods still expose no declaration comments.
+- The safest change is to add Chinese comments only to the public dependency bundle, facade type, public fields, and public methods, while leaving the short private `not_wired` helper and the currently blocked test code untouched.
+- The named `run_verification_returns_backend_owned_accepted_job` unit test is still blocked by the same pre-existing missing `JobPriority` import in the test module, so `cargo check --manifest-path q:\DEV\MyEpicLauncher\crates\module-engines\Cargo.toml --lib` remains the narrowest reliable validation gate for this adjacent comment-only slice.
+
 - `src-tauri/src/commands/downloads.rs` is no longer a valid missing-comment-only candidate under the user's current rule because its public handler declarations already carry acceptable comments; rewriting those English comments would now violate the stated preference.
 - `crates/module-engines/src/contracts/mod.rs` is the strongest next slice because it is a one-file backend contracts boundary whose three public DTO declarations currently have no declaration comments at all.
 - The safest change is to add Chinese comments only to `ListEnginesRequestDto`, `GetEngineStatusRequestDto`, and `RunEngineVerificationRequestDto`, leaving the field and payload shape unchanged.

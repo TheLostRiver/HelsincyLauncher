@@ -2,17 +2,17 @@
 
 ## Identity
 
-- task id: AT-2026-05-05-079
-- title: Annotate missing engine contract DTO comments
+- task id: AT-2026-05-05-080
+- title: Annotate missing engine facade boundary comments
 - status: completed
 
 ## Goal
 
-按当前仓库注释规范，在不改动已有正确英文注释的前提下，为 engines contracts 里的公开 DTO 补齐缺失的声明级中文注释：
+按当前仓库注释规范，在不改动已有正确英文注释的前提下，为 engines facade 里的公开依赖包、边界类型和入口方法补齐缺失的声明级中文注释：
 
-- `crates/module-engines/src/contracts/mod.rs`
+- `crates/module-engines/src/facade/mod.rs`
 
-本轮只补 `ListEnginesRequestDto`、`GetEngineStatusRequestDto`、`RunEngineVerificationRequestDto` 的缺失注释，不删除或回写已有正确英文注释，不改 engines contract 形状或验证语义，也不顺带打开第二个源码文件。
+本轮只补 `EngineModuleDeps`、`EngineFacade`、其公开字段与公开方法的缺失注释，不删除或回写已有正确英文注释，不改 engines facade 行为语义，也不顺带打开第二个源码文件。
 
 ## Scope
 
@@ -22,10 +22,10 @@
   - update `.artifacts/ai/progress.md`
   - update `.artifacts/ai/findings.md`
   - update `.artifacts/ai/handoff.md`
-  - update `crates/module-engines/src/contracts/mod.rs`
+  - update `crates/module-engines/src/facade/mod.rs`
 - out of scope:
   - annotate more than this one backend source file
-  - change engines contract payload shape or verification behavior
+  - change engines facade behavior, queueing semantics, or test code
   - rewrite or delete already-correct English comments in this file or other modules
   - add comments to obvious tests only to raise coverage numbers
 
@@ -36,7 +36,7 @@
 3. .artifacts/ai/progress.md
 4. .artifacts/ai/findings.md
 5. .artifacts/ai/handoff.md
-6. crates/module-engines/src/contracts/mod.rs
+6. crates/module-engines/src/facade/mod.rs
 
 ## 控制性文档
 
@@ -50,7 +50,7 @@
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If `crates/module-engines/src/contracts/mod.rs` adds Chinese declaration comments only to the currently uncommented public request DTOs while preserving the existing contract fields and leaving already-correct comments elsewhere untouched, then this touched backend slice will satisfy the repository comment rule and the user's updated preference without changing runtime behavior.
+- falsifiable local hypothesis: If `crates/module-engines/src/facade/mod.rs` adds Chinese declaration comments only to the currently uncommented public dependency bundle, facade boundary, and public methods while preserving the existing queueing and not-wired behavior, then this touched backend slice will satisfy the repository comment rule and the user's updated preference without changing runtime behavior.
 
 ## Cheap Check
 
@@ -59,7 +59,7 @@
 ## Validation Gate
 
 1. `cargo check --manifest-path q:\DEV\MyEpicLauncher\crates\module-engines\Cargo.toml --lib`
-2. `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/module-engines/src/contracts/mod.rs`
+2. `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/module-engines/src/facade/mod.rs`
 
 ## Validation Result
 
@@ -67,16 +67,16 @@
 
 ## Notes
 
-- `src-tauri/src/commands/downloads.rs` was rechecked first, but its handler declarations already have acceptable comments, so this slice moved one hop to the next actual missing-comment boundary.
-- `crates/module-engines/src/contracts/mod.rs` contains three public DTO declarations with no declaration comments, making it the smallest compliant next slice under the user's missing-comment-only rule.
+- `crates/module-engines/src/facade/mod.rs` is the next adjacent missing-comment boundary after the published contracts slice because its public dependency bundle, facade type, and methods still have no declaration comments.
 - `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-engines\Cargo.toml run_verification_returns_backend_owned_accepted_job` is currently blocked by a pre-existing missing `JobPriority` import inside `crates/module-engines/src/facade/mod.rs` test code, so the focused validation for this comment-only slice falls back to a library compile gate instead of widening scope into unrelated test repair.
-- `cargo check --manifest-path q:\DEV\MyEpicLauncher\crates\module-engines\Cargo.toml --lib` passed and compiled `launcher-module-engines` successfully.
+- The private `not_wired` helper stays out of scope for declaration comments here because it is a short local helper and the current slice is limited to the public facade boundary.
+- `cargo check --manifest-path q:\DEV\MyEpicLauncher\crates\module-engines\Cargo.toml --lib` passed and compiled `launcher-module-engines` successfully for the facade slice.
 
 ## 安全恢复点
 
-- 缺失注释补齐切片已经收敛到 `crates/module-engines/src/contracts/mod.rs` 的三个请求 DTO；若中断，恢复时直接为这三个公开声明补中文说明，然后立刻跑 engines 的窄单测。
+- 缺失注释补齐切片已经收敛到 `crates/module-engines/src/facade/mod.rs` 的公开依赖包、facade 类型和公开方法；若中断，恢复时直接给这些公开声明补中文说明，然后立刻跑 engines 的库级编译校验。
 
 ## Completion
 
-- completed slice: `crates/module-engines/src/contracts/mod.rs`
-- task records updated for AT-2026-05-05-079 completion and publication prep
+- completed slice: `crates/module-engines/src/facade/mod.rs`
+- task records updated for AT-2026-05-05-080 completion and publication prep

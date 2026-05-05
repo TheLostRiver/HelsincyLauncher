@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-05-079 - Annotate missing engine contract DTO comments - COMPLETED
+- Active atomic task: AT-2026-05-05-080 - Annotate missing engine facade boundary comments - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-05-079 - added missing engine contract DTO comments without rewriting existing comments
-- Next step: run scoped diff and diagnostics, then publish only the AT-2026-05-05-079 file set and pause for user confirmation
+- Last completed slice: AT-2026-05-05-080 - added missing engine facade boundary comments without rewriting existing comments
+- Next step: run scoped diff and diagnostics, then publish only the AT-2026-05-05-080 file set and pause for user confirmation
 
 ## Session Timeline
 
@@ -18,6 +18,12 @@
 
 ### Session: 2026-05-05
 
+- Published AT-2026-05-05-079 as commit `1bc5564` after the scoped diff check, selective staging, commit, and push all succeeded.
+- After the confirmation window again returned "继续，按建议推进", the rollout stayed in the same crate and moved one hop from engine contracts to the adjacent engine facade boundary.
+- Started AT-2026-05-05-080 and narrowed it to `crates/module-engines/src/facade/mod.rs` because its public dependency bundle, facade type, and public methods still lacked declaration comments while the private helper remained simple enough to stay uncommented.
+- Added Chinese declaration comments to the public engine dependency bundle, facade type, public fields, and public methods in `crates/module-engines/src/facade/mod.rs` without changing queueing or stub behavior.
+- Validated AT-2026-05-05-080 with `cargo check --manifest-path q:\DEV\MyEpicLauncher\crates\module-engines\Cargo.toml --lib`; the module-engines library compiled successfully.
+- Marked AT-2026-05-05-080 complete after the focused compile validation; the remaining action in this turn is scoped diff/diagnostics followed by publication and user confirmation.
 - Published AT-2026-05-05-078 as commit `62d8c1a` after the scoped diff check, selective staging, commit, and push all succeeded.
 - Rechecked `src-tauri/src/commands/downloads.rs` because earlier notes still listed it as the next candidate, then rejected it for AT-079 after confirming its public handlers already have acceptable comments and should remain untouched under the user's current rule.
 - Started AT-2026-05-05-079 and narrowed it to `crates/module-engines/src/contracts/mod.rs` because its three public request DTOs still lacked declaration comments while the adjacent host and state files no longer did.

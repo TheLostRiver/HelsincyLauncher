@@ -2,18 +2,18 @@
 
 ## Latest Completed Atomic Task
 
-- task id: AT-2026-05-05-079
-- title: Annotate missing engine contract DTO comments
+- task id: AT-2026-05-05-080
+- title: Annotate missing engine facade boundary comments
 - status: completed
 
 ## Validated Slice
 
-- `crates/module-engines/src/contracts/mod.rs`
+- `crates/module-engines/src/facade/mod.rs`
 
 ## Validation
 
 - `cargo check --manifest-path q:\DEV\MyEpicLauncher\crates\module-engines\Cargo.toml --lib`
-- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/module-engines/src/contracts/mod.rs`
+- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/module-engines/src/facade/mod.rs`
 - VS Code diagnostics reported no errors for the touched contracts file or updated task records.
 
 ## Next Resume Point
