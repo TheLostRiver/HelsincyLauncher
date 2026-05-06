@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-06-083 - Annotate missing downloads crate entry comment - COMPLETED
+- Active atomic task: AT-2026-05-06-084 - Annotate missing fab crate entry comment - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-06-083 - added the missing downloads crate entry comment without rewriting existing comments
-- Next step: run scoped diff and diagnostics, then publish only the AT-2026-05-06-083 file set and pause for user confirmation
+- Last completed slice: AT-2026-05-06-084 - added the missing fab crate entry comment without rewriting existing comments
+- Next step: run scoped diff and diagnostics, then publish only the AT-2026-05-06-084 file set and pause for user confirmation
 
 ## Session Timeline
 
@@ -18,6 +18,12 @@
 - Added a Chinese file-entry comment to `crates/module-downloads/src/lib.rs` without changing the module export surface or touching adjacent already-commented files.
 - Validated AT-2026-05-06-083 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority`; the targeted downloads unit test passed.
 - Marked AT-2026-05-06-083 complete after the focused executable validation; the remaining action in this turn is scoped diff/diagnostics followed by publication and user confirmation.
+- Published AT-2026-05-06-083 as commit `92696c0` after the scoped diff check, selective staging, commit, and push all succeeded.
+- After the confirmation window again returned "继续，按建议推进", the rollout rechecked the next same-class crate-entry candidates and narrowed AT-2026-05-06-084 to `crates/module-fab/src/lib.rs`.
+- Rejected `src-tauri/src/commands/downloads.rs` and `crates/module-downloads/src/contracts/queries.rs` for AT-2026-05-06-084 because both files already carry acceptable comments under the user's current rule.
+- Added a Chinese file-entry comment to `crates/module-fab/src/lib.rs` without changing the module export surface or touching adjacent already-commented files.
+- Validated AT-2026-05-06-084 with `cargo test -p launcher-module-fab --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`; the module-fab package test gate passed with all 4 unit tests green.
+- Marked AT-2026-05-06-084 complete after the focused executable validation; the remaining action in this turn is scoped diff/diagnostics followed by publication and user confirmation.
 
 ### Session: 2026-05-04
 

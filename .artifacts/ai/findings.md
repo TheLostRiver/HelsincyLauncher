@@ -11,6 +11,11 @@
 
 ## Research Findings
 
+- `crates/module-fab/src/lib.rs` is the strongest next slice after the published downloads crate entry because it is the remaining same-class backend crate-entry boundary that still has no file-entry explanation.
+- `src-tauri/src/commands/downloads.rs` and `crates/module-downloads/src/contracts/queries.rs` are not valid missing-comment-only candidates under the user's current rule because their public/module-level comments are already acceptable and should remain untouched.
+- The safest move is to add only a Chinese file-entry comment to `crates/module-fab/src/lib.rs`, leaving its `pub mod` and `pub use` export wiring unchanged.
+- `cargo test -p launcher-module-fab --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` is the narrowest current executable validation gate for this adjacent crate-entry slice because the fab crate has a small package-local test surface but no narrower named test anchor was identified during the local scan.
+
 - `crates/module-downloads/src/lib.rs` is the strongest next slice after the published engines crate entry because it is the next small backend crate-entry boundary that still has no file-entry explanation.
 - `crates/module-downloads/src/contracts/queries.rs` is not a valid missing-comment-only candidate under the user's current rule because its module-entry and public DTO declarations already carry acceptable English comments that should remain untouched.
 - The safest move is to add only a Chinese file-entry comment to `crates/module-downloads/src/lib.rs`, leaving its `pub mod` and `pub use` export wiring unchanged.
