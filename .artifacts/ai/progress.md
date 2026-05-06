@@ -2,15 +2,22 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-06-087 - Annotate missing fab event contract comments - COMPLETED
+- Active atomic task: AT-2026-05-06-088 - Annotate missing fab query contract comments - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-06-087 - added the missing fab event contract comments without rewriting existing comments
-- Next step: run scoped diff and diagnostics, then publish only the AT-2026-05-06-087 file set and pause for user confirmation
+- Last completed slice: AT-2026-05-06-088 - added the missing fab query contract comments without rewriting existing comments
+- Next step: run scoped diff and diagnostics, then publish only the AT-2026-05-06-088 file set and pause for user confirmation
 
 ## Session Timeline
 
 ### Session: 2026-05-06
 
+- Published AT-2026-05-06-087 as commit `0d33c98` after the scoped diff check, selective staging, commit, and push all succeeded.
+- After the confirmation window again returned "继续，按建议推进", the rollout stayed in `module-fab/src/contracts` and narrowed the remaining choices to `queries.rs` and `dto.rs`.
+- Started AT-2026-05-06-088 and narrowed it to `crates/module-fab/src/contracts/queries.rs` because that file remains smaller than the read-model DTO surface while still exposing two uncommented public query DTOs.
+- Rejected `crates/module-fab/src/contracts/dto.rs` for AT-2026-05-06-088 because it would widen the slice into a broader read-model annotation pass.
+- Added Chinese declaration comments to `FabInventoryListQueryDto` and `FabAssetDetailQueryDto` without changing query payload shape, serde shape, or adjacent already-commented files.
+- Validated AT-2026-05-06-088 with `cargo test -p launcher-module-fab --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`; the module-fab package test gate passed with all 4 unit tests green.
+- Marked AT-2026-05-06-088 complete after the focused executable validation; the remaining action in this turn is scoped diff/diagnostics followed by publication and user confirmation.
 - Published AT-2026-05-06-086 as commit `8b4f751` after the scoped diff check, selective staging, commit, and push all succeeded.
 - After the confirmation window again returned "继续，按建议推进", the rollout stayed in `module-fab/src/contracts` and compared the remaining `queries.rs`, `events.rs`, and `dto.rs` candidates.
 - Started AT-2026-05-06-087 and narrowed it to `crates/module-fab/src/contracts/events.rs` because that file is the smallest remaining adjacent Fab contracts boundary, exposing only one public enum and two public variants.
