@@ -13,7 +13,8 @@ Phase 23 - Backend comment rollout
 - AT-2026-05-06-082 has been published as commit `bfdbf9a` after documenting the crate-entry boundary in `crates/module-engines/src/lib.rs`.
 - AT-2026-05-06-083 has been published as commit `92696c0` after documenting the crate-entry boundary in `crates/module-downloads/src/lib.rs`.
 - AT-2026-05-06-084 has been published as commit `ec0f940` after documenting the crate-entry boundary in `crates/module-fab/src/lib.rs`.
-- AT-2026-05-06-085 has now completed the next missing-comment-only slice by documenting the contracts-entry boundary in `crates/module-fab/src/contracts/mod.rs`.
+- AT-2026-05-06-085 has been published as commit `bf96bb2` after documenting the contracts-entry boundary in `crates/module-fab/src/contracts/mod.rs`.
+- AT-2026-05-06-086 has now completed the next missing-comment-only slice by documenting the public command DTOs in `crates/module-fab/src/contracts/commands.rs`.
 - The next action is to run the scoped diff and diagnostics, publish only this slice, and then pause for user confirmation.
 
 ## Phases
@@ -153,7 +154,7 @@ Phase 23 - Backend comment rollout
 ### Phase 23: Backend Comment Rollout
 
 - Outcome: apply the new repository comment standard to backend Rust/Tauri files in small, commit-sized slices of one or two files.
-- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062, AT-2026-05-04-063, AT-2026-05-04-064, AT-2026-05-04-065, AT-2026-05-04-066, AT-2026-05-04-067, AT-2026-05-04-068, AT-2026-05-05-071, AT-2026-05-05-072, AT-2026-05-05-073, AT-2026-05-05-074, AT-2026-05-05-075, AT-2026-05-05-076, AT-2026-05-05-077, AT-2026-05-05-078, AT-2026-05-05-079, AT-2026-05-05-080, AT-2026-05-05-081, AT-2026-05-06-082, AT-2026-05-06-083, AT-2026-05-06-084, AT-2026-05-06-085
+- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062, AT-2026-05-04-063, AT-2026-05-04-064, AT-2026-05-04-065, AT-2026-05-04-066, AT-2026-05-04-067, AT-2026-05-04-068, AT-2026-05-05-071, AT-2026-05-05-072, AT-2026-05-05-073, AT-2026-05-05-074, AT-2026-05-05-075, AT-2026-05-05-076, AT-2026-05-05-077, AT-2026-05-05-078, AT-2026-05-05-079, AT-2026-05-05-080, AT-2026-05-05-081, AT-2026-05-06-082, AT-2026-05-06-083, AT-2026-05-06-084, AT-2026-05-06-085, AT-2026-05-06-086
 - **Status:** in_progress
 
 ### Phase 24: Comment Language Controls
@@ -249,6 +250,7 @@ Phase 23 - Backend comment rollout
 77. AT-2026-05-06-083 - completed - added the missing file-entry comment to the downloads crate entry while preserving its existing export wiring and acceptable adjacent comments.
 78. AT-2026-05-06-084 - completed - added the missing file-entry comment to the fab crate entry while preserving its existing export wiring and acceptable adjacent comments.
 79. AT-2026-05-06-085 - completed - added the missing file-entry comment to the Fab contracts aggregation entry while preserving its existing export wiring and acceptable adjacent comments.
+80. AT-2026-05-06-086 - completed - added the missing declaration comments to the Fab command request DTOs while preserving their existing payload shape and adjacent comments.
 
 ## Key Questions
 

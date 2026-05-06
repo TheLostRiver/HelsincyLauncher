@@ -2,15 +2,22 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-06-085 - Annotate missing fab contracts entry comment - COMPLETED
+- Active atomic task: AT-2026-05-06-086 - Annotate missing fab command contract comments - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-06-085 - added the missing fab contracts entry comment without rewriting existing comments
-- Next step: run scoped diff and diagnostics, then publish only the AT-2026-05-06-085 file set and pause for user confirmation
+- Last completed slice: AT-2026-05-06-086 - added the missing fab command contract comments without rewriting existing comments
+- Next step: run scoped diff and diagnostics, then publish only the AT-2026-05-06-086 file set and pause for user confirmation
 
 ## Session Timeline
 
 ### Session: 2026-05-06
 
+- Published AT-2026-05-06-085 as commit `bf96bb2` after the scoped diff check, selective staging, commit, and push all succeeded.
+- After the confirmation window again returned "继续，按建议推进", the rollout stayed in `module-fab/src/contracts` and moved one hop from the published contracts entry to the adjacent command DTO contracts file.
+- Started AT-2026-05-06-086 and narrowed it to `crates/module-fab/src/contracts/commands.rs` because that file exposes only two public command DTOs and is smaller than the neighboring multi-type read-model file.
+- Rejected `crates/module-fab/src/contracts/dto.rs` for AT-2026-05-06-086 because it would widen the slice into a broader read-model annotation pass.
+- Added Chinese declaration comments to `FabInventoryPrewarmRequestDto` and `FabInventorySyncRequestDto` without changing DTO fields, serde shape, or adjacent already-commented files.
+- Validated AT-2026-05-06-086 with `cargo test -p launcher-module-fab --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`; the module-fab package test gate passed with all 4 unit tests green.
+- Marked AT-2026-05-06-086 complete after the focused executable validation; the remaining action in this turn is scoped diff/diagnostics followed by publication and user confirmation.
 - Published AT-2026-05-06-084 as commit `ec0f940` after the scoped diff check, selective staging, commit, and push all succeeded.
 - After the confirmation window again returned "继续，按建议推进", the rollout stayed in `module-fab` and moved one hop from the published crate entry to the adjacent contracts aggregation entry.
 - Started AT-2026-05-06-085 and narrowed it to `crates/module-fab/src/contracts/mod.rs` because that file still remains a bare public export shell while the surrounding Fab crate entry is now documented.

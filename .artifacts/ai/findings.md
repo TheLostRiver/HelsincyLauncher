@@ -11,6 +11,11 @@
 
 ## Research Findings
 
+- `crates/module-fab/src/contracts/commands.rs` is the strongest next slice after the published contracts entry because it is the next adjacent Fab contracts file and currently exposes only two uncommented public command DTOs.
+- `crates/module-fab/src/contracts/dto.rs` is not the best next candidate for this round because it would widen the slice into a broader read-model annotation pass with more public types.
+- The safest move is to add only Chinese declaration comments to `FabInventoryPrewarmRequestDto` and `FabInventorySyncRequestDto`, leaving their field shape and serde wiring unchanged.
+- `cargo test -p launcher-module-fab --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` remains the narrowest current executable validation gate for this Fab command-contract slice because the fab crate has a small package-local test surface but no narrower named test anchor was identified during the local scan.
+
 - `crates/module-fab/src/contracts/mod.rs` is the strongest next slice after the published fab crate entry because it is the next adjacent public aggregation boundary inside the same module and still has no file-entry explanation.
 - `crates/module-fab/src/contracts/commands.rs` and `crates/module-fab/src/contracts/dto.rs` also expose uncommented public DTO declarations, but they are larger multi-declaration candidates and therefore weaker than the smaller same-class `contracts/mod.rs` entry slice.
 - The safest move is to add only a Chinese file-entry comment to `crates/module-fab/src/contracts/mod.rs`, leaving its `pub mod` and `pub use` export wiring unchanged.
