@@ -11,6 +11,11 @@
 
 ## Research Findings
 
+- `crates/module-fab/src/contracts/events.rs` is the strongest next slice after the published command contracts because it is the smallest remaining adjacent Fab contracts file and exposes only one public enum with two public variants.
+- `crates/module-fab/src/contracts/queries.rs` and `crates/module-fab/src/contracts/dto.rs` are not the best next candidates for this round because they would widen the slice into larger query/read-model annotation passes.
+- The safest move is to add only Chinese declaration comments to `FabInventoryEventDto` and its two public variants, leaving the event payload shape and serde tagging unchanged.
+- `cargo test -p launcher-module-fab --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` remains the narrowest current executable validation gate for this Fab event-contract slice because the fab crate has a small package-local test surface but no narrower named test anchor was identified during the local scan.
+
 - `crates/module-fab/src/contracts/commands.rs` is the strongest next slice after the published contracts entry because it is the next adjacent Fab contracts file and currently exposes only two uncommented public command DTOs.
 - `crates/module-fab/src/contracts/dto.rs` is not the best next candidate for this round because it would widen the slice into a broader read-model annotation pass with more public types.
 - The safest move is to add only Chinese declaration comments to `FabInventoryPrewarmRequestDto` and `FabInventorySyncRequestDto`, leaving their field shape and serde wiring unchanged.
