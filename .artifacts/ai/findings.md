@@ -11,6 +11,11 @@
 
 ## Research Findings
 
+- `crates/module-downloads/src/lib.rs` is the strongest next slice after the published engines crate entry because it is the next small backend crate-entry boundary that still has no file-entry explanation.
+- `crates/module-downloads/src/contracts/queries.rs` is not a valid missing-comment-only candidate under the user's current rule because its module-entry and public DTO declarations already carry acceptable English comments that should remain untouched.
+- The safest move is to add only a Chinese file-entry comment to `crates/module-downloads/src/lib.rs`, leaving its `pub mod` and `pub use` export wiring unchanged.
+- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority` is the narrowest executable validation gate for this adjacent crate-entry slice because it compiles the public downloads surface through the currently wired facade intake path.
+
 - `crates/module-engines/src/lib.rs` is the strongest next slice after the published driver entry because it is the adjacent crate-entry boundary and still has no file-entry explanation even though its submodule surfaces are now individually documented.
 - The safest move is to add only a Chinese file-entry comment that explains the engines module's public export surface, while leaving the current `pub mod` and `pub use` lines untouched.
 - The named engine verification unit test remains blocked by the same pre-existing missing `JobPriority` import in `crates/module-engines/src/facade/mod.rs` test code, so `cargo check --manifest-path q:\DEV\MyEpicLauncher\crates\module-engines\Cargo.toml --lib` remains the narrowest reliable validation gate for this adjacent comment-only slice.

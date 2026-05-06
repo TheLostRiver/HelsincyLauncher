@@ -10,7 +10,8 @@ Phase 23 - Backend comment rollout
 
 ## Current Focus
 
-- AT-2026-05-06-082 completed the next missing-comment-only slice by documenting the crate-entry boundary in `crates/module-engines/src/lib.rs`.
+- AT-2026-05-06-082 has been published as commit `bfdbf9a` after documenting the crate-entry boundary in `crates/module-engines/src/lib.rs`.
+- AT-2026-05-06-083 has now completed the next missing-comment-only slice by documenting the crate-entry boundary in `crates/module-downloads/src/lib.rs`.
 - The next action is to run the scoped diff and diagnostics, publish only this slice, and then pause for user confirmation.
 
 ## Phases
@@ -150,7 +151,7 @@ Phase 23 - Backend comment rollout
 ### Phase 23: Backend Comment Rollout
 
 - Outcome: apply the new repository comment standard to backend Rust/Tauri files in small, commit-sized slices of one or two files.
-- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062, AT-2026-05-04-063, AT-2026-05-04-064, AT-2026-05-04-065, AT-2026-05-04-066, AT-2026-05-04-067, AT-2026-05-04-068, AT-2026-05-05-071, AT-2026-05-05-072, AT-2026-05-05-073, AT-2026-05-05-074
+- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062, AT-2026-05-04-063, AT-2026-05-04-064, AT-2026-05-04-065, AT-2026-05-04-066, AT-2026-05-04-067, AT-2026-05-04-068, AT-2026-05-05-071, AT-2026-05-05-072, AT-2026-05-05-073, AT-2026-05-05-074, AT-2026-05-05-075, AT-2026-05-05-076, AT-2026-05-05-077, AT-2026-05-05-078, AT-2026-05-05-079, AT-2026-05-05-080, AT-2026-05-05-081, AT-2026-05-06-082, AT-2026-05-06-083
 - **Status:** in_progress
 
 ### Phase 24: Comment Language Controls
@@ -243,6 +244,7 @@ Phase 23 - Backend comment rollout
 74. AT-2026-05-05-080 - completed - added missing declaration comments to the public engine facade boundary without rewriting already-correct comments or widening into test repair.
 75. AT-2026-05-05-081 - completed - added the missing file-entry comment to the engine restore driver while preserving the existing correct English struct comment.
 76. AT-2026-05-06-082 - completed - added the missing file-entry comment to the engines crate entry without widening into re-export rewrites.
+77. AT-2026-05-06-083 - in_progress - add the missing file-entry comment to the downloads crate entry while preserving its existing export wiring and acceptable adjacent comments.
 
 ## Key Questions
 

@@ -2,12 +2,22 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-06-082 - Annotate missing engine crate entry comment - COMPLETED
+- Active atomic task: AT-2026-05-06-083 - Annotate missing downloads crate entry comment - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-06-082 - added the missing engine crate entry comment without rewriting existing comments
-- Next step: run scoped diff and diagnostics, then publish only the AT-2026-05-06-082 file set and pause for user confirmation
+- Last completed slice: AT-2026-05-06-083 - added the missing downloads crate entry comment without rewriting existing comments
+- Next step: run scoped diff and diagnostics, then publish only the AT-2026-05-06-083 file set and pause for user confirmation
 
 ## Session Timeline
+
+### Session: 2026-05-06
+
+- Published AT-2026-05-06-082 as commit `bfdbf9a` after the scoped diff check, selective staging, commit, and push all succeeded.
+- After the confirmation window again returned "继续，按建议推进", the rollout first rechecked the remaining engine-adjacent boundaries and confirmed they already carry acceptable comments.
+- Compared the next smallest downloads candidates and rejected `crates/module-downloads/src/contracts/queries.rs` for AT-2026-05-06-083 because it already carries acceptable English declaration comments under the user's current rule.
+- Started AT-2026-05-06-083 and narrowed it to `crates/module-downloads/src/lib.rs` because the downloads crate entry still remains a bare export shell while adjacent module boundaries now have acceptable declaration comments.
+- Added a Chinese file-entry comment to `crates/module-downloads/src/lib.rs` without changing the module export surface or touching adjacent already-commented files.
+- Validated AT-2026-05-06-083 with `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority`; the targeted downloads unit test passed.
+- Marked AT-2026-05-06-083 complete after the focused executable validation; the remaining action in this turn is scoped diff/diagnostics followed by publication and user confirmation.
 
 ### Session: 2026-05-04
 

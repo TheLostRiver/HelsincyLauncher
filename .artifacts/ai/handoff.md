@@ -2,22 +2,22 @@
 
 ## Latest Completed Atomic Task
 
-- task id: AT-2026-05-06-082
-- title: Annotate missing engine crate entry comment
+- task id: AT-2026-05-06-083
+- title: Annotate missing downloads crate entry comment
 - status: completed
 
 ## Validated Slice
 
-- `crates/module-engines/src/lib.rs`
+- `crates/module-downloads/src/lib.rs`
 
 ## Validation
 
-- `cargo check --manifest-path q:\DEV\MyEpicLauncher\crates\module-engines\Cargo.toml --lib`
-- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/module-engines/src/lib.rs`
-- VS Code diagnostics reported no errors for the touched contracts file or updated task records.
+- `cargo test --manifest-path q:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml start_download_persists_request_metadata_and_enqueue_priority`
+- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/module-downloads/src/lib.rs`
+- VS Code diagnostics should report no errors for the touched downloads crate-entry file or updated task records.
 
 ## Next Resume Point
 
+- AT-2026-05-06-082 has been published as commit `bfdbf9a`.
 - Publish this validated missing-comment slice if publication has not happened yet.
-- Keep the named engine verification test blocker recorded: `crates/module-engines/src/facade/mod.rs` test code still misses a `JobPriority` import, so this slice validated through `cargo check --lib` instead of the blocked unit test.
-- AT-2026-05-05-081 has been published as commit `d6246c7`.
+- Keep the current `pub mod` / `pub use` export wiring in `crates/module-downloads/src/lib.rs` unchanged; this slice only adds the file-entry comment.
