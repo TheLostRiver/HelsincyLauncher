@@ -2,17 +2,17 @@
 
 ## Identity
 
-- task id: AT-2026-05-06-084
-- title: Annotate missing fab crate entry comment
+- task id: AT-2026-05-06-085
+- title: Annotate missing fab contracts entry comment
 - status: completed
 
 ## Goal
 
-按当前仓库注释规范，在不改动已有正确英文注释的前提下，为 fab crate 入口文件补齐缺失的声明级中文注释：
+按当前仓库注释规范，在不改动已有正确英文注释的前提下，为 fab contracts 聚合入口文件补齐缺失的声明级中文注释：
 
-- `crates/module-fab/src/lib.rs`
+- `crates/module-fab/src/contracts/mod.rs`
 
-本轮只补 `crates/module-fab/src/lib.rs` 缺失的文件入口注释，不删除或回写已有正确英文注释，不改 fab 模块导出面，也不顺带打开第二个源码文件。
+本轮只补 `crates/module-fab/src/contracts/mod.rs` 缺失的文件入口注释，不删除或回写已有正确英文注释，不改 contracts 聚合导出面，也不顺带打开第二个源码文件。
 
 ## Scope
 
@@ -22,10 +22,10 @@
   - update `.artifacts/ai/progress.md`
   - update `.artifacts/ai/findings.md`
   - update `.artifacts/ai/handoff.md`
-  - update `crates/module-fab/src/lib.rs`
+  - update `crates/module-fab/src/contracts/mod.rs`
 - out of scope:
   - annotate more than this one backend source file
-  - change module export shape, re-export set, or engine behavior
+  - change contracts export shape, re-export set, or fab behavior
   - rewrite or delete already-correct English comments in this file or other modules
   - add comments to obvious tests only to raise coverage numbers
 
@@ -36,7 +36,7 @@
 3. .artifacts/ai/progress.md
 4. .artifacts/ai/findings.md
 5. .artifacts/ai/handoff.md
-6. crates/module-fab/src/lib.rs
+6. crates/module-fab/src/contracts/mod.rs
 
 ## 控制性文档
 
@@ -50,7 +50,7 @@
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If `crates/module-fab/src/lib.rs` adds a Chinese file-entry comment that explains the module's public crate-entry role while leaving the current `contracts`/`driver`/`facade` exports untouched, then this touched backend slice will satisfy the repository comment rule and the user's updated preference without changing runtime behavior.
+- falsifiable local hypothesis: If `crates/module-fab/src/contracts/mod.rs` adds a Chinese file-entry comment that explains the Fab contracts aggregation role while leaving the current `commands`/`dto`/`events`/`queries` re-exports untouched, then this touched backend slice will satisfy the repository comment rule and the user's updated preference without changing runtime behavior.
 
 ## Cheap Check
 
@@ -59,7 +59,7 @@
 ## Validation Gate
 
 1. `cargo test -p launcher-module-fab --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`
-2. `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/module-fab/src/lib.rs`
+2. `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/module-fab/src/contracts/mod.rs`
 
 ## Validation Result
 
@@ -67,15 +67,15 @@
 
 ## Notes
 
-- `crates/module-fab/src/lib.rs` is the strongest next missing-comment boundary because the adjacent downloads and engines crate-entry files are now covered, while the fab crate entry still remains a bare export shell.
-- `src-tauri/src/commands/downloads.rs` and `crates/module-downloads/src/contracts/queries.rs` were both rechecked and remain out of scope because they already carry acceptable comments under the user's current rule.
+- `crates/module-fab/src/contracts/mod.rs` is the strongest next missing-comment boundary because it is the next adjacent Fab public aggregation file after the published crate entry and still remains a bare export shell.
+- `crates/module-fab/src/contracts/commands.rs` and `crates/module-fab/src/contracts/dto.rs` also have uncommented public declarations, but `contracts/mod.rs` is the smaller same-class boundary and therefore the safer next atomic slice.
 - This slice stays at file-entry level only; the existing `pub mod` and `pub use` lines remain behavior-free export wiring and are not expanded into line-by-line comments here.
-- `cargo test -p launcher-module-fab --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` is the narrowest current executable validation gate for this crate-entry slice because the fab crate already has a small package-local test surface but no narrower named test anchor was identified during the local scan.
-- `cargo test -p launcher-module-fab --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` passed and confirmed the fab crate entry comment does not disturb the public module surface.
+- `cargo test -p launcher-module-fab --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` remains the narrowest current executable validation gate for this contracts-entry slice because the fab crate has a small package-local test surface but no narrower named test anchor was identified during the local scan.
+- `cargo test -p launcher-module-fab --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` passed and confirmed the Fab contracts entry comment does not disturb the public module surface.
 
 ## 安全恢复点
 
-- 缺失注释补齐切片已经收敛到 `crates/module-fab/src/lib.rs` 的文件入口注释；若中断，恢复时直接补这一段中文入口说明，然后立刻跑 module-fab 的包级测试校验。
+- 缺失注释补齐切片已经收敛到 `crates/module-fab/src/contracts/mod.rs` 的文件入口注释；若中断，恢复时直接补这一段中文入口说明，然后立刻跑 module-fab 的包级测试校验。
 
 ## Completion
 
