@@ -16,7 +16,8 @@ Phase 23 - Backend comment rollout
 - AT-2026-05-06-085 has been published as commit `bf96bb2` after documenting the contracts-entry boundary in `crates/module-fab/src/contracts/mod.rs`.
 - AT-2026-05-06-086 has been published as commit `8b4f751` after documenting the public command DTOs in `crates/module-fab/src/contracts/commands.rs`.
 - AT-2026-05-06-087 has been published as commit `0d33c98` after documenting the public event union and variants in `crates/module-fab/src/contracts/events.rs`.
-- AT-2026-05-06-088 has now completed the next missing-comment-only slice by documenting the public query DTOs in `crates/module-fab/src/contracts/queries.rs`.
+- AT-2026-05-06-088 has been published as commit `f9b7512` after documenting the public query DTOs in `crates/module-fab/src/contracts/queries.rs`.
+- AT-2026-05-06-089 has now completed the next missing-comment-only slice by documenting the public read-model declarations in `crates/module-fab/src/contracts/dto.rs`.
 - The next action is to run the scoped diff and diagnostics, publish only this slice, and then pause for user confirmation.
 
 ## Phases
@@ -156,7 +157,7 @@ Phase 23 - Backend comment rollout
 ### Phase 23: Backend Comment Rollout
 
 - Outcome: apply the new repository comment standard to backend Rust/Tauri files in small, commit-sized slices of one or two files.
-- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062, AT-2026-05-04-063, AT-2026-05-04-064, AT-2026-05-04-065, AT-2026-05-04-066, AT-2026-05-04-067, AT-2026-05-04-068, AT-2026-05-05-071, AT-2026-05-05-072, AT-2026-05-05-073, AT-2026-05-05-074, AT-2026-05-05-075, AT-2026-05-05-076, AT-2026-05-05-077, AT-2026-05-05-078, AT-2026-05-05-079, AT-2026-05-05-080, AT-2026-05-05-081, AT-2026-05-06-082, AT-2026-05-06-083, AT-2026-05-06-084, AT-2026-05-06-085, AT-2026-05-06-086, AT-2026-05-06-087, AT-2026-05-06-088
+- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062, AT-2026-05-04-063, AT-2026-05-04-064, AT-2026-05-04-065, AT-2026-05-04-066, AT-2026-05-04-067, AT-2026-05-04-068, AT-2026-05-05-071, AT-2026-05-05-072, AT-2026-05-05-073, AT-2026-05-05-074, AT-2026-05-05-075, AT-2026-05-05-076, AT-2026-05-05-077, AT-2026-05-05-078, AT-2026-05-05-079, AT-2026-05-05-080, AT-2026-05-05-081, AT-2026-05-06-082, AT-2026-05-06-083, AT-2026-05-06-084, AT-2026-05-06-085, AT-2026-05-06-086, AT-2026-05-06-087, AT-2026-05-06-088, AT-2026-05-06-089
 - **Status:** in_progress
 
 ### Phase 24: Comment Language Controls
@@ -255,6 +256,7 @@ Phase 23 - Backend comment rollout
 80. AT-2026-05-06-086 - completed - added the missing declaration comments to the Fab command request DTOs while preserving their existing payload shape and adjacent comments.
 81. AT-2026-05-06-087 - completed - added the missing declaration comments to the Fab inventory event union and its variants while preserving the existing event payload shape and adjacent comments.
 82. AT-2026-05-06-088 - completed - added the missing declaration comments to the Fab query DTOs while preserving their existing payload shape and adjacent comments.
+83. AT-2026-05-06-089 - completed - added the missing declaration comments to the Fab read-model DTOs while preserving their existing payload shape and adjacent comments.
 
 ## Key Questions
 

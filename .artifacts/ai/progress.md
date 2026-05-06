@@ -2,15 +2,21 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-06-088 - Annotate missing fab query contract comments - COMPLETED
+- Active atomic task: AT-2026-05-06-089 - Annotate missing fab read-model contract comments - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-06-088 - added the missing fab query contract comments without rewriting existing comments
-- Next step: run scoped diff and diagnostics, then publish only the AT-2026-05-06-088 file set and pause for user confirmation
+- Last completed slice: AT-2026-05-06-089 - added the missing fab read-model contract comments without rewriting existing comments
+- Next step: run scoped diff and diagnostics, then publish only the AT-2026-05-06-089 file set and pause for user confirmation
 
 ## Session Timeline
 
 ### Session: 2026-05-06
 
+- Published AT-2026-05-06-088 as commit `f9b7512` after the scoped diff check, selective staging, commit, and push all succeeded.
+- After the confirmation window again returned "继续，按建议推进", the rollout stayed in `module-fab/src/contracts` and moved to the remaining read-model DTO surface.
+- Started AT-2026-05-06-089 and narrowed it to `crates/module-fab/src/contracts/dto.rs` because it is the remaining adjacent contracts file in this local area and still exposes uncommented public read-model declarations.
+- Added Chinese declaration comments to `FabInventoryItemDto`, `FabInventoryPageDto`, and `FabAssetDetailDto` without changing DTO payload shape, alias wiring, or adjacent already-commented files.
+- Validated AT-2026-05-06-089 with `cargo test -p launcher-module-fab --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml`; the module-fab package test gate passed with all 4 unit tests green.
+- Marked AT-2026-05-06-089 complete after the focused executable validation; the remaining action in this turn is scoped diff/diagnostics followed by publication and user confirmation.
 - Published AT-2026-05-06-087 as commit `0d33c98` after the scoped diff check, selective staging, commit, and push all succeeded.
 - After the confirmation window again returned "继续，按建议推进", the rollout stayed in `module-fab/src/contracts` and narrowed the remaining choices to `queries.rs` and `dto.rs`.
 - Started AT-2026-05-06-088 and narrowed it to `crates/module-fab/src/contracts/queries.rs` because that file remains smaller than the read-model DTO surface while still exposing two uncommented public query DTOs.

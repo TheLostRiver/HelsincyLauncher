@@ -11,6 +11,10 @@
 
 ## Research Findings
 
+- `crates/module-fab/src/contracts/dto.rs` is the strongest next slice after the published query contracts because it is the remaining adjacent Fab contracts file in this local area and still exposes uncommented public read-model declarations.
+- The safest move is to add only Chinese declaration comments to `FabInventoryItemDto`, `FabInventoryPageDto`, and `FabAssetDetailDto`, leaving their field shape and alias wiring unchanged.
+- `cargo test -p launcher-module-fab --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` remains the narrowest current executable validation gate for this Fab read-model contract slice because the fab crate has a small package-local test surface but no narrower named test anchor was identified during the local scan.
+
 - `crates/module-fab/src/contracts/queries.rs` is the strongest next slice after the published event contracts because it is the next adjacent Fab contracts file and still remains smaller than the read-model DTO file while exposing two uncommented public query DTOs.
 - `crates/module-fab/src/contracts/dto.rs` is not the best next candidate for this round because it would widen the slice into a broader read-model annotation pass.
 - The safest move is to add only Chinese declaration comments to `FabInventoryListQueryDto` and `FabAssetDetailQueryDto`, leaving their field shape and serde wiring unchanged.
