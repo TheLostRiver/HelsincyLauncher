@@ -11,6 +11,10 @@
 
 ## Research Findings
 
+- `crates/module-engines/src/lib.rs` is the strongest next slice after the published driver entry because it is the adjacent crate-entry boundary and still has no file-entry explanation even though its submodule surfaces are now individually documented.
+- The safest move is to add only a Chinese file-entry comment that explains the engines module's public export surface, while leaving the current `pub mod` and `pub use` lines untouched.
+- The named engine verification unit test remains blocked by the same pre-existing missing `JobPriority` import in `crates/module-engines/src/facade/mod.rs` test code, so `cargo check --manifest-path q:\DEV\MyEpicLauncher\crates\module-engines\Cargo.toml --lib` remains the narrowest reliable validation gate for this adjacent comment-only slice.
+
 - `crates/module-engines/src/driver.rs` is the strongest next slice after the published facade boundary because it is the adjacent driver entry file and still lacks a file-entry comment, while its public `EngineJobDriver` declaration already has a correct English comment that should remain untouched.
 - The safest move is to add only a Chinese file-entry comment that explains the driver boundary and current stub restore ownership, without rewriting the existing English struct comment or the inline TODO/body comments.
 - The named engine verification unit test is still blocked by the same pre-existing missing `JobPriority` import in `crates/module-engines/src/facade/mod.rs` test code, so `cargo check --manifest-path q:\DEV\MyEpicLauncher\crates\module-engines\Cargo.toml --lib` remains the narrowest reliable validation gate for this adjacent comment-only slice.

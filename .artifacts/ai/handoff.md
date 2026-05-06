@@ -2,22 +2,22 @@
 
 ## Latest Completed Atomic Task
 
-- task id: AT-2026-05-05-081
-- title: Annotate missing engine driver entry comment
+- task id: AT-2026-05-06-082
+- title: Annotate missing engine crate entry comment
 - status: completed
 
 ## Validated Slice
 
-- `crates/module-engines/src/driver.rs`
+- `crates/module-engines/src/lib.rs`
 
 ## Validation
 
 - `cargo check --manifest-path q:\DEV\MyEpicLauncher\crates\module-engines\Cargo.toml --lib`
-- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/module-engines/src/driver.rs`
+- `git diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/module-engines/src/lib.rs`
 - VS Code diagnostics reported no errors for the touched contracts file or updated task records.
 
 ## Next Resume Point
 
 - Publish this validated missing-comment slice if publication has not happened yet.
 - Keep the named engine verification test blocker recorded: `crates/module-engines/src/facade/mod.rs` test code still misses a `JobPriority` import, so this slice validated through `cargo check --lib` instead of the blocked unit test.
-- After publication, pause for user confirmation before opening the next atomic task.
+- AT-2026-05-05-081 has been published as commit `d6246c7`.

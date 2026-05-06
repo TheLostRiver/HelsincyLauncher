@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-05-081 - Annotate missing engine driver entry comment - COMPLETED
+- Active atomic task: AT-2026-05-06-082 - Annotate missing engine crate entry comment - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-05-081 - added the missing engine driver entry comment without rewriting existing comments
-- Next step: run scoped diff and diagnostics, then publish only the AT-2026-05-05-081 file set and pause for user confirmation
+- Last completed slice: AT-2026-05-06-082 - added the missing engine crate entry comment without rewriting existing comments
+- Next step: run scoped diff and diagnostics, then publish only the AT-2026-05-06-082 file set and pause for user confirmation
 
 ## Session Timeline
 
@@ -24,6 +24,12 @@
 
 ### Session: 2026-05-05
 
+- Published AT-2026-05-05-081 as commit `d6246c7` after the scoped diff check, selective staging, commit, and push all succeeded.
+- After the next confirmation again returned "继续，按建议推进", the rollout stayed in `module-engines` and moved one hop from the driver entry file to the adjacent crate entry file.
+- Started AT-2026-05-06-082 and narrowed it to `crates/module-engines/src/lib.rs` because the crate entry still lacked a file-entry explanation while the underlying contracts, facade, and driver boundaries had already received their own focused comment slices.
+- Added a Chinese file-entry comment to `crates/module-engines/src/lib.rs` without changing the module export surface or touching adjacent already-commented files.
+- Validated AT-2026-05-06-082 with `cargo check --manifest-path q:\DEV\MyEpicLauncher\crates\module-engines\Cargo.toml --lib`; the module-engines library compiled successfully.
+- Marked AT-2026-05-06-082 complete after the focused compile validation; the remaining action in this turn is scoped diff/diagnostics followed by publication and user confirmation.
 - Published AT-2026-05-05-080 as commit `16e436b` after the scoped diff check, selective staging, commit, and push all succeeded.
 - After the confirmation window again returned "继续，按建议推进", the rollout stayed in `module-engines` and moved one hop from the facade boundary to the adjacent restore driver entry file.
 - Started AT-2026-05-05-081 and narrowed it to `crates/module-engines/src/driver.rs` because the file still lacked a module-entry explanation even though the public `EngineJobDriver` declaration already had an acceptable English comment that should remain untouched.
