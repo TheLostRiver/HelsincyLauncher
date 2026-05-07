@@ -1,3 +1,9 @@
+//! SQLite storage adapter crate 的共享入口与仓储外壳集合。
+//!
+//! 这个 crate 负责把结构化本地事实落到 SQLite，并为 Fab、downloads 和 job
+//! runtime 暴露各自的适配器外壳。当前这一刀只补文件头和共享配置声明注释，
+//! 不改变既有 `rusqlite` 访问方式、schema 初始化或仓储行为。
+
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
@@ -12,18 +18,21 @@ use launcher_module_fab::{
     facade::{FabInventoryProjectionPage, FabInventoryProjectionRepository},
 };
 
+/// 组装各个 SQLite 仓储适配器时共享的最小配置快照。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SqliteStorageAdapterConfig {
     database_path: PathBuf,
 }
 
 impl SqliteStorageAdapterConfig {
+    /// 用数据库文件路径创建 SQLite adapter 配置。
     pub fn new(database_path: impl Into<PathBuf>) -> Self {
         Self {
             database_path: database_path.into(),
         }
     }
 
+    /// 返回 SQLite 数据库文件的本地路径。
     pub fn database_path(&self) -> &Path {
         &self.database_path
     }

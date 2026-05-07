@@ -2,15 +2,23 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-06-090 - Annotate missing fab provider adapter comments - COMPLETED
+- Active atomic task: AT-2026-05-06-091 - Annotate missing sqlite adapter config comments - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-06-090 - added the missing Fab provider adapter comments without changing the shell-only adapter surface
-- Next step: publish only the AT-2026-05-06-090 file set and pause for user confirmation
+- Last completed slice: AT-2026-05-06-091 - added the missing SQLite storage adapter config comments without changing repository behavior
+- Next step: publish only the AT-2026-05-06-091 file set and pause for user confirmation
 
 ## Session Timeline
 
 ### Session: 2026-05-06
 
+- Published AT-2026-05-06-090 as commit `9c44f56` after the scoped diff check, selective staging, commit, and push all succeeded.
+- After the confirmation window returned "继续", the rollout stayed in the same adapter layer and compared the next smallest uncommented adapter entry surfaces.
+- Started AT-2026-05-06-091 and narrowed it to the file-entry plus shared config cluster at the top of `crates/adapter-storage-sqlite/src/lib.rs` because that is the next same-class adapter boundary with a smaller blast radius than the lower repository shells.
+- Rejected the lower `SqliteFabInventoryProjectionRepository` and download/job adapter declarations for AT-2026-05-06-091 because documenting them now would widen the slice into a larger multi-declaration pass.
+- Re-read `docs/TauriCodeCommentStandard.md`, `docs/TauriRepositoryPortsAndAdapterDesign.md`, and `docs/TauriStorageAndDatabaseDesign.md`, then opened the slice with `cargo check -p launcher-adapter-storage-sqlite --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib` as the narrowest validation gate.
+- Validated AT-2026-05-06-091 with `cargo check -p launcher-adapter-storage-sqlite --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib`; the adapter-storage-sqlite package library compiled successfully.
+- Confirmed scoped `git diff --check` returned clean for the task-record files, handoff, and the touched SQLite storage adapter file, and VS Code diagnostics reported no errors.
+- Marked AT-2026-05-06-091 complete after the focused validation; the remaining action in this turn is publication followed by user confirmation.
 - Published AT-2026-05-06-089 as commit `83dd236` after the scoped diff check, selective staging, commit, and push all succeeded.
 - After the confirmation window again returned "继续，按建议推进", the rollout rechecked nearby downloads/fab/host candidates and rejected files that already carry acceptable Chinese or English comments under the current rule.
 - Started AT-2026-05-06-090 and narrowed it to `crates/adapter-provider-fab/src/lib.rs` because it is the smallest Fab-adjacent adapter boundary that still lacks both a file-entry explanation and declaration comments on its public config and adapter shell.

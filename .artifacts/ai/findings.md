@@ -11,6 +11,11 @@
 
 ## Research Findings
 
+- `crates/adapter-storage-sqlite/src/lib.rs` is the strongest next slice after the published Fab provider adapter shell because it is the next same-class adapter entry file and its shared `SqliteStorageAdapterConfig` cluster still lacks both a file-entry explanation and declaration comments.
+- The smallest safe move here is to add only the file-entry comment plus declaration comments for `SqliteStorageAdapterConfig`, `new()`, and `database_path()`, leaving the lower Fab/download/job repository shells for later slices.
+- `SqliteFabInventoryProjectionRepository` and the lower repository adapters are not the best next candidates for this round because they would widen the slice into a much larger multi-declaration annotation pass.
+- `cargo check -p launcher-adapter-storage-sqlite --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib` is the narrowest reliable validation gate for this slice because the crate currently exposes no smaller named test anchor and this check compiles the touched public shell surface.
+
 - `crates/adapter-provider-fab/src/lib.rs` is the strongest next slice after the published Fab read-model DTO surface because it is a Fab-adjacent shell-first adapter entry file whose public config and adapter declarations still have no file-entry or declaration comments at all.
 - `src-tauri/src/state.rs` and `crates/module-fab/src/facade/mod.rs` are not valid missing-comment-only candidates under the user's current rule because they already carry acceptable English comments; rewriting them would add churn without filling a real gap.
 - The safest move is to add only Chinese file-entry and declaration comments to `EpicFabCatalogProviderConfig`, its constructor/getters, `EpicFabCatalogProviderAdapter`, and its constructor/getter, leaving remote auth, HTTP wiring, and payload mapping deferred.
