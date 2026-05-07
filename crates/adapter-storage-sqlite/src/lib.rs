@@ -38,16 +38,19 @@ impl SqliteStorageAdapterConfig {
     }
 }
 
+/// 基于 SQLite projection 的 Fab 库存读模型仓储外壳。
 #[derive(Debug, Clone)]
 pub struct SqliteFabInventoryProjectionRepository {
     config: SqliteStorageAdapterConfig,
 }
 
 impl SqliteFabInventoryProjectionRepository {
+    /// 用共享 SQLite 配置创建 Fab 库存 projection 仓储。
     pub fn new(config: SqliteStorageAdapterConfig) -> Self {
         Self { config }
     }
 
+    /// 暴露只读配置快照，供装配和诊断路径检查数据库绑定结果。
     pub fn config(&self) -> &SqliteStorageAdapterConfig {
         &self.config
     }

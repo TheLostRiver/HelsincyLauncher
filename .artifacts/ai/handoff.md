@@ -2,8 +2,8 @@
 
 ## Latest Completed Atomic Task
 
-- task id: AT-2026-05-06-091
-- title: Annotate missing sqlite adapter config comments
+- task id: AT-2026-05-06-092
+- title: Annotate missing sqlite fab projection repo comments
 - status: completed
 
 ## Validated Slice
@@ -19,4 +19,4 @@
 ## Next Resume Point
 
 - Publish this validated missing-comment slice if publication has not happened yet.
-- Keep the current `rusqlite` access pattern and lower repository behavior in `crates/adapter-storage-sqlite/src/lib.rs` unchanged; this slice only adds the file-entry and `SqliteStorageAdapterConfig` declaration comments.
+- Keep the current empty-page/detail-`None` stub behavior in `crates/adapter-storage-sqlite/src/lib.rs` unchanged; this slice only adds the `SqliteFabInventoryProjectionRepository` declaration comments.
