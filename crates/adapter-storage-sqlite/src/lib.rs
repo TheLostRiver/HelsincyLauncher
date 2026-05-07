@@ -84,16 +84,19 @@ impl SqliteFabSyncCursorRepository {
     }
 }
 
+/// 基于 SQLite 媒体投影的 Fab 媒体元数据仓储外壳。
 #[derive(Debug, Clone)]
 pub struct SqliteFabMediaMetadataRepository {
     config: SqliteStorageAdapterConfig,
 }
 
 impl SqliteFabMediaMetadataRepository {
+    /// 用共享 SQLite 配置创建 Fab 媒体元数据仓储。
     pub fn new(config: SqliteStorageAdapterConfig) -> Self {
         Self { config }
     }
 
+    /// 暴露只读配置快照，供装配和诊断路径确认媒体仓储绑定结果。
     pub fn config(&self) -> &SqliteStorageAdapterConfig {
         &self.config
     }

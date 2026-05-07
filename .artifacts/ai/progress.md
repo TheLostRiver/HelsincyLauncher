@@ -2,15 +2,22 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-07-093 - Annotate missing sqlite fab sync cursor repo comments - COMPLETED
+- Active atomic task: AT-2026-05-07-094 - Annotate missing sqlite fab media repo comments - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-07-093 - added the missing SQLite Fab sync cursor repository comments without changing cursor behavior
-- Next step: publish only the AT-2026-05-07-093 file set
+- Last completed slice: AT-2026-05-07-094 - added the missing SQLite Fab media metadata repository comments without changing media behavior
+- Next step: publish only the AT-2026-05-07-094 file set
 
 ## Session Timeline
 
 ### Session: 2026-05-06
 
+- Published AT-2026-05-07-093 as commit `d8fbbc8` after the scoped diff check, selective staging, commit, and push all succeeded.
+- After the next confirmation returned "继续", the rollout stayed in the same SQLite adapter file and moved one hop from the published Fab sync cursor repository shell to the adjacent Fab media metadata repository shell.
+- Started AT-2026-05-07-094 and narrowed it to `SqliteFabMediaMetadataRepository` in `crates/adapter-storage-sqlite/src/lib.rs` because that declaration cluster is the next smallest uncommented public boundary in the same file.
+- Rejected the lower download/job repository declarations for AT-2026-05-07-094 because documenting them now would widen the slice beyond this one adjacent Fab media metadata boundary.
+- Validated AT-2026-05-07-094 with `cargo check -p launcher-adapter-storage-sqlite --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib`; the adapter-storage-sqlite package library compiled successfully.
+- Confirmed scoped `git diff --check` returned clean for the task-record files, handoff, and the touched SQLite storage adapter file, and VS Code diagnostics reported no errors.
+- Marked AT-2026-05-07-094 complete after the focused validation; the remaining action in this turn is publication.
 - Published AT-2026-05-06-092 as commit `c5b6f33` after the scoped diff check, selective staging, commit, and push all succeeded.
 - After the next confirmation returned "继续", the rollout stayed in the same SQLite adapter file and moved one hop from the published Fab projection repository shell to the adjacent Fab sync cursor repository shell.
 - Started AT-2026-05-07-093 and narrowed it to `SqliteFabSyncCursorRepository` in `crates/adapter-storage-sqlite/src/lib.rs` because that declaration cluster is the next smallest uncommented public boundary in the same file.

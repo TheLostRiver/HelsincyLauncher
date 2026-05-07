@@ -2,8 +2,8 @@
 
 ## Latest Completed Atomic Task
 
-- task id: AT-2026-05-07-093
-- title: Annotate missing sqlite fab sync cursor repo comments
+- task id: AT-2026-05-07-094
+- title: Annotate missing sqlite fab media repo comments
 - status: completed
 
 ## Validated Slice
@@ -19,4 +19,4 @@
 ## Next Resume Point
 
 - Publish this validated missing-comment slice if publication has not happened yet.
-- Keep the current projection/detail placeholder behavior in `crates/adapter-storage-sqlite/src/lib.rs` unchanged; this slice only adds the `SqliteFabSyncCursorRepository` declaration comments.
+- Keep the current projection/detail placeholder behavior in `crates/adapter-storage-sqlite/src/lib.rs` unchanged; this slice only adds the `SqliteFabMediaMetadataRepository` declaration comments.
