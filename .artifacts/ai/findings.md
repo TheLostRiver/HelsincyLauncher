@@ -11,6 +11,11 @@
 
 ## Research Findings
 
+- `SqliteFabSyncCursorRepository` in `crates/adapter-storage-sqlite/src/lib.rs` is the strongest next slice after the published Fab projection repository shell because it is the next smallest public declaration cluster in the same file and directly matches the `fab_sync_cursor` storage boundary from the Fab loading and storage docs.
+- The safest move is to add only Chinese declaration comments to `SqliteFabSyncCursorRepository`, `new()`, and `config()`, leaving cursor persistence behavior, config wiring, and all lower repository shells unchanged.
+- `SqliteFabMediaMetadataRepository` and the lower download/job repository shells are not the best next candidates for this round because they would widen the slice beyond this one adjacent Fab sync cursor boundary.
+- `cargo check -p launcher-adapter-storage-sqlite --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib` remains the narrowest reliable validation gate for this slice because the crate currently exposes no smaller named test anchor and this check compiles the touched public shell surface.
+
 - `SqliteFabInventoryProjectionRepository` in `crates/adapter-storage-sqlite/src/lib.rs` is the strongest next slice after the published shared config cluster because it is the next smallest public declaration cluster in the same file and directly owns the local Fab projection read path.
 - The safest move is to add only Chinese declaration comments to `SqliteFabInventoryProjectionRepository`, `new()`, and `config()`, leaving the current empty-page/detail-`None` stub behavior unchanged.
 - `SqliteFabSyncCursorRepository`, `SqliteFabMediaMetadataRepository`, and the lower download/job repository shells are not the best next candidates for this round because they would widen the slice beyond this one adjacent Fab projection boundary.

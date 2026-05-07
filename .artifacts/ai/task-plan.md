@@ -20,7 +20,8 @@ Phase 23 - Backend comment rollout
 - AT-2026-05-06-089 has been published as commit `83dd236` after documenting the public read-model declarations in `crates/module-fab/src/contracts/dto.rs`.
 - AT-2026-05-06-090 has been published as commit `9c44f56` after documenting the Fab provider adapter shell in `crates/adapter-provider-fab/src/lib.rs`.
 - AT-2026-05-06-091 has been published as commit `f20e4f5` after documenting the SQLite storage adapter file-entry and shared config cluster in `crates/adapter-storage-sqlite/src/lib.rs`.
-- AT-2026-05-06-092 has now completed the next missing-comment-only slice by documenting the Fab projection repository shell in `crates/adapter-storage-sqlite/src/lib.rs`.
+- AT-2026-05-06-092 has been published as commit `c5b6f33` after documenting the Fab projection repository shell in `crates/adapter-storage-sqlite/src/lib.rs`.
+- AT-2026-05-07-093 has now completed the next missing-comment-only slice by documenting the Fab sync cursor repository shell in `crates/adapter-storage-sqlite/src/lib.rs`.
 - The focused validation gates for this slice have passed: package-scoped `cargo check`, scoped `git diff --check`, and VS Code diagnostics all stayed clean.
 - The next action is to publish only this slice.
 
@@ -264,6 +265,7 @@ Phase 23 - Backend comment rollout
 84. AT-2026-05-06-090 - completed - added the missing file-entry and public declaration comments to the Fab provider adapter shell while preserving its current config and constructor surface.
 85. AT-2026-05-06-091 - completed - added the missing file-entry and `SqliteStorageAdapterConfig` declaration comments to the SQLite storage adapter shell while preserving existing repository behavior.
 86. AT-2026-05-06-092 - completed - added the missing declaration comments to the SQLite Fab projection repository shell while preserving its current stub behavior and config wiring.
+87. AT-2026-05-07-093 - completed - added the missing declaration comments to the SQLite Fab sync cursor repository shell while preserving its current config wiring and placeholder behavior.
 
 ## Key Questions
 

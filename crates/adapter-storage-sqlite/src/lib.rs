@@ -66,16 +66,19 @@ impl FabInventoryProjectionRepository for SqliteFabInventoryProjectionRepository
     }
 }
 
+/// 基于 SQLite 游标表的 Fab 同步进度仓储外壳。
 #[derive(Debug, Clone)]
 pub struct SqliteFabSyncCursorRepository {
     config: SqliteStorageAdapterConfig,
 }
 
 impl SqliteFabSyncCursorRepository {
+    /// 用共享 SQLite 配置创建 Fab 同步游标仓储。
     pub fn new(config: SqliteStorageAdapterConfig) -> Self {
         Self { config }
     }
 
+    /// 暴露只读配置快照，供装配和诊断路径确认游标仓储绑定结果。
     pub fn config(&self) -> &SqliteStorageAdapterConfig {
         &self.config
     }
