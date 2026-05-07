@@ -22,7 +22,8 @@ Phase 23 - Backend comment rollout
 - AT-2026-05-06-091 has been published as commit `f20e4f5` after documenting the SQLite storage adapter file-entry and shared config cluster in `crates/adapter-storage-sqlite/src/lib.rs`.
 - AT-2026-05-06-092 has been published as commit `c5b6f33` after documenting the Fab projection repository shell in `crates/adapter-storage-sqlite/src/lib.rs`.
 - AT-2026-05-07-093 has been published as commit `d8fbbc8` after documenting the Fab sync cursor repository shell in `crates/adapter-storage-sqlite/src/lib.rs`.
-- AT-2026-05-07-094 has now completed the next missing-comment-only slice by documenting the Fab media metadata repository shell in `crates/adapter-storage-sqlite/src/lib.rs`.
+- AT-2026-05-07-094 has been published as commit `39ba47d` after documenting the Fab media metadata repository shell in `crates/adapter-storage-sqlite/src/lib.rs`.
+- AT-2026-05-07-095 has now completed the next missing-comment-only slice by documenting the download job repository shell in `crates/adapter-storage-sqlite/src/lib.rs`.
 - The focused validation gates for this slice have passed: package-scoped `cargo check`, scoped `git diff --check`, and VS Code diagnostics all stayed clean.
 - The next action is to publish only this slice.
 
@@ -268,6 +269,7 @@ Phase 23 - Backend comment rollout
 86. AT-2026-05-06-092 - completed - added the missing declaration comments to the SQLite Fab projection repository shell while preserving its current stub behavior and config wiring.
 87. AT-2026-05-07-093 - completed - added the missing declaration comments to the SQLite Fab sync cursor repository shell while preserving its current config wiring and placeholder behavior.
 88. AT-2026-05-07-094 - completed - added the missing declaration comments to the SQLite Fab media metadata repository shell while preserving its current config wiring and placeholder behavior.
+89. AT-2026-05-07-095 - completed - added the missing declaration comments to the SQLite download job repository shell while preserving its current config wiring and persistence behavior.
 
 ## Key Questions
 

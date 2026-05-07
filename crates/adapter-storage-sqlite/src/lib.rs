@@ -102,12 +102,14 @@ impl SqliteFabMediaMetadataRepository {
     }
 }
 
+/// 基于 SQLite 作业表的下载任务仓储外壳。
 #[derive(Debug, Clone)]
 pub struct SqliteDownloadJobRepository {
     config: SqliteStorageAdapterConfig,
 }
 
 impl SqliteDownloadJobRepository {
+    /// 用共享 SQLite 配置创建下载任务仓储，并确保作业表可用。
     pub fn new(config: SqliteStorageAdapterConfig) -> Self {
         let repo = Self { config };
         repo.ensure_table()
@@ -115,6 +117,7 @@ impl SqliteDownloadJobRepository {
         repo
     }
 
+    /// 暴露只读配置快照，供装配和诊断路径确认下载任务仓储绑定结果。
     pub fn config(&self) -> &SqliteStorageAdapterConfig {
         &self.config
     }
@@ -153,6 +156,7 @@ impl SqliteDownloadJobRepository {
         })
     }
 
+    /// 按作业标识读取当前持久化的下载任务快照。
     pub fn get_job(&self, job_id: &JobId) -> AppResult<Option<DownloadJobRecord>> {
         let conn = self.open_connection()?;
         let mut stmt = conn

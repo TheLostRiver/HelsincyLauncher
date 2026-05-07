@@ -11,6 +11,11 @@
 
 ## Research Findings
 
+- `SqliteDownloadJobRepository` in `crates/adapter-storage-sqlite/src/lib.rs` is the strongest next slice after the published Fab media metadata repository shell because it is the next smallest public declaration cluster in the same file and directly owns persisted download job facts defined by the download runtime and storage docs.
+- The safest move is to add only Chinese declaration comments to `SqliteDownloadJobRepository`, `new()`, `config()`, and `get_job()`, leaving download job persistence behavior, config wiring, and all lower repository shells unchanged.
+- `SqliteDownloadCheckpointRepository` and `SqliteJobSnapshotStore` are not the best next candidates for this round because they would widen the slice beyond this one adjacent download-job repository boundary.
+- `cargo check -p launcher-adapter-storage-sqlite --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib` remains the narrowest reliable validation gate for this slice because the crate currently exposes no smaller named test anchor and this check compiles the touched public shell surface.
+
 - `SqliteFabMediaMetadataRepository` in `crates/adapter-storage-sqlite/src/lib.rs` is the strongest next slice after the published Fab sync cursor repository shell because it is the next smallest public declaration cluster in the same file and directly matches the `fab_media_metadata_projection` storage boundary from the Fab loading and storage docs.
 - The safest move is to add only Chinese declaration comments to `SqliteFabMediaMetadataRepository`, `new()`, and `config()`, leaving media persistence behavior, config wiring, and all lower repository shells unchanged.
 - The lower download/job repository shells are not the best next candidates for this round because they would widen the slice beyond this one adjacent Fab media metadata boundary.
