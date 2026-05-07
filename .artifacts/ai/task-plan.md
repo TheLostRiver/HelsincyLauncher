@@ -17,8 +17,10 @@ Phase 23 - Backend comment rollout
 - AT-2026-05-06-086 has been published as commit `8b4f751` after documenting the public command DTOs in `crates/module-fab/src/contracts/commands.rs`.
 - AT-2026-05-06-087 has been published as commit `0d33c98` after documenting the public event union and variants in `crates/module-fab/src/contracts/events.rs`.
 - AT-2026-05-06-088 has been published as commit `f9b7512` after documenting the public query DTOs in `crates/module-fab/src/contracts/queries.rs`.
-- AT-2026-05-06-089 has now completed the next missing-comment-only slice by documenting the public read-model declarations in `crates/module-fab/src/contracts/dto.rs`.
-- The next action is to run the scoped diff and diagnostics, publish only this slice, and then pause for user confirmation.
+- AT-2026-05-06-089 has been published as commit `83dd236` after documenting the public read-model declarations in `crates/module-fab/src/contracts/dto.rs`.
+- AT-2026-05-06-090 has now completed the next missing-comment-only slice by documenting the Fab provider adapter shell in `crates/adapter-provider-fab/src/lib.rs`.
+- The focused validation gates for this slice have passed: package-scoped `cargo check`, scoped `git diff --check`, and VS Code diagnostics all stayed clean.
+- The next action is to publish only this slice and then pause for user confirmation.
 
 ## Phases
 
@@ -257,6 +259,7 @@ Phase 23 - Backend comment rollout
 81. AT-2026-05-06-087 - completed - added the missing declaration comments to the Fab inventory event union and its variants while preserving the existing event payload shape and adjacent comments.
 82. AT-2026-05-06-088 - completed - added the missing declaration comments to the Fab query DTOs while preserving their existing payload shape and adjacent comments.
 83. AT-2026-05-06-089 - completed - added the missing declaration comments to the Fab read-model DTOs while preserving their existing payload shape and adjacent comments.
+84. AT-2026-05-06-090 - completed - added the missing file-entry and public declaration comments to the Fab provider adapter shell while preserving its current config and constructor surface.
 
 ## Key Questions
 

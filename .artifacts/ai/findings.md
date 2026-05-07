@@ -11,6 +11,11 @@
 
 ## Research Findings
 
+- `crates/adapter-provider-fab/src/lib.rs` is the strongest next slice after the published Fab read-model DTO surface because it is a Fab-adjacent shell-first adapter entry file whose public config and adapter declarations still have no file-entry or declaration comments at all.
+- `src-tauri/src/state.rs` and `crates/module-fab/src/facade/mod.rs` are not valid missing-comment-only candidates under the user's current rule because they already carry acceptable English comments; rewriting them would add churn without filling a real gap.
+- The safest move is to add only Chinese file-entry and declaration comments to `EpicFabCatalogProviderConfig`, its constructor/getters, `EpicFabCatalogProviderAdapter`, and its constructor/getter, leaving remote auth, HTTP wiring, and payload mapping deferred.
+- `cargo check -p launcher-adapter-provider-fab --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib` is the narrowest reliable validation gate for this slice because the crate currently exposes only a small public shell surface and has no narrower named test anchor.
+
 - `crates/module-fab/src/contracts/dto.rs` is the strongest next slice after the published query contracts because it is the remaining adjacent Fab contracts file in this local area and still exposes uncommented public read-model declarations.
 - The safest move is to add only Chinese declaration comments to `FabInventoryItemDto`, `FabInventoryPageDto`, and `FabAssetDetailDto`, leaving their field shape and alias wiring unchanged.
 - `cargo test -p launcher-module-fab --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml` remains the narrowest current executable validation gate for this Fab read-model contract slice because the fab crate has a small package-local test surface but no narrower named test anchor was identified during the local scan.
