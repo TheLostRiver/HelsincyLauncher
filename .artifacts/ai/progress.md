@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-08-103 - Annotate kernel foundation time contract comments - COMPLETED
+- Active atomic task: AT-2026-05-08-104 - Annotate kernel foundation id contract comments - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-08-103 - added the missing kernel foundation time comments without changing UTC wrapper behavior
-- Next step: publish only the AT-2026-05-08-103 file set
+- Last completed slice: AT-2026-05-08-104 - added the missing kernel foundation id comments without changing wrapper behavior
+- Next step: publish only the AT-2026-05-08-104 file set
 - Published AT-2026-05-08-097 as commit `367b4b6` after the scoped diff check, selective staging, commit, and push all succeeded.
 - After the next confirmation returned "继续", the rollout moved out of the finished SQLite adapter chain and narrowed the next smallest backend foundation contract to `crates/kernel-foundation/src/error.rs`.
 - Started AT-2026-05-08-098 and constrained it to the public `AppErrorSeverity`, `AppError`, and `AppError::new()` declarations because that is the smallest stable error-projection boundary currently missing Chinese comments.
@@ -39,6 +39,12 @@
 - Validated AT-2026-05-08-103 with `cargo check -p launcher-kernel-foundation --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib`; the kernel-foundation package library compiled successfully.
 - Confirmed scoped `git diff --check` returned clean for the task-record files, handoff, and the touched kernel foundation time file, and VS Code diagnostics reported no errors.
 - Marked AT-2026-05-08-103 complete after the focused validation; the remaining action in this turn is publication.
+- Published AT-2026-05-08-103 as commit `6fcb6e3` after the scoped diff check, selective staging, commit, and push all succeeded.
+- After the next confirmation returned "继续", the rollout stayed in `kernel-foundation` and narrowed the last remaining production contract file to `crates/kernel-foundation/src/ids.rs`.
+- Started AT-2026-05-08-104 and constrained it to the macro-generated shared ID wrappers because that is the smallest remaining backend foundation API boundary and can still be documented in one file.
+- Validated AT-2026-05-08-104 with `cargo check -p launcher-kernel-foundation --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib`; the kernel-foundation package library compiled successfully.
+- Confirmed scoped `git diff --check` returned clean for the task-record files, handoff, and the touched kernel foundation ID file, and VS Code diagnostics reported no errors.
+- Marked AT-2026-05-08-104 complete after the focused validation; the remaining action in this turn is publication.
 - Validated AT-2026-05-08-100 with `cargo check -p launcher-kernel-foundation --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib`; the kernel-foundation package library compiled successfully.
 - Confirmed scoped `git diff --check` returned clean for the task-record files, handoff, and the touched kernel foundation result alias file, and VS Code diagnostics reported no errors.
 - Marked AT-2026-05-08-100 complete after the focused validation; the remaining action in this turn is publication.

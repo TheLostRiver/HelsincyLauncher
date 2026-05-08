@@ -11,6 +11,11 @@
 
 ## Research Findings
 
+- `crates/kernel-foundation/src/ids.rs` is the strongest next slice after the published foundation time contract because it is the last remaining production contract file in `kernel-foundation`, and `JobId` plus the other shared identifiers are part of the documented minimal foundation API.
+- The safest move is to add only Chinese file-entry and generated public declaration comments by threading documentation through the macro-generated ID surface, leaving the current string wrapper pattern, UUID generation, serde transparency, and conversion behavior unchanged.
+- This macro-generated file is now a valid immediate candidate because there are no smaller remaining production contract files in `kernel-foundation`.
+- `cargo check -p launcher-kernel-foundation --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib` remains the narrowest reliable validation gate for this slice because the crate currently exposes no smaller named test anchor for this one-file contract surface.
+
 - `crates/kernel-foundation/src/time.rs` is the strongest next slice after the published foundation clock contract because it is the smallest remaining direct-declaration foundation contract file and `IsoDateTime` is the shared timestamp wrapper re-exported by the foundation crate.
 - The safest move is to add only Chinese file-entry and public declaration comments to `IsoDateTime`, `now()`, and `as_datetime()`, leaving the current UTC wrapper shape, serde transparency, display formatting, and conversion behavior unchanged.
 - `crates/kernel-foundation/src/ids.rs` is not the best immediate candidate because its public surface is macro-generated and would widen the explanation surface beyond this one time-wrapper boundary.

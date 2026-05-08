@@ -31,7 +31,8 @@ Phase 23 - Backend comment rollout
 - AT-2026-05-08-100 has been published as commit `fab77ce` after documenting the shared foundation result alias in `crates/kernel-foundation/src/result.rs`.
 - AT-2026-05-08-101 has been published as commit `340bd13` after documenting the foundation crate entry boundary in `crates/kernel-foundation/src/lib.rs`.
 - AT-2026-05-08-102 has been published as commit `7fa1bda` after documenting the shared foundation clock boundary in `crates/kernel-foundation/src/clock.rs`.
-- AT-2026-05-08-103 has now completed the next missing-comment-only slice by documenting the shared foundation time wrapper boundary in `crates/kernel-foundation/src/time.rs`.
+- AT-2026-05-08-103 has been published as commit `6fcb6e3` after documenting the shared foundation time wrapper boundary in `crates/kernel-foundation/src/time.rs`.
+- AT-2026-05-08-104 has now completed the next missing-comment-only slice by documenting the shared foundation ID wrapper boundary in `crates/kernel-foundation/src/ids.rs`.
 - The focused validation gates for this slice have passed: package-scoped `cargo check`, scoped `git diff --check`, and VS Code diagnostics all stayed clean.
 - The next action is to publish only this slice.
 
@@ -286,6 +287,7 @@ Phase 23 - Backend comment rollout
 95. AT-2026-05-08-101 - completed - added the missing crate-entry comment to kernel foundation while preserving its current module and export wiring.
 96. AT-2026-05-08-102 - completed - added the missing clock-boundary comments to kernel foundation while preserving the current clock trait and system clock behavior.
 97. AT-2026-05-08-103 - completed - added the missing time-wrapper comments to kernel foundation while preserving its current UTC wrapper and conversion semantics.
+98. AT-2026-05-08-104 - completed - added the missing id-wrapper comments to kernel foundation while preserving its current string wrapper and UUID generation semantics.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

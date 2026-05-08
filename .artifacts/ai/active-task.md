@@ -2,17 +2,17 @@
 
 ## Identity
 
-- task id: AT-2026-05-08-103
-- title: Annotate kernel foundation time contract comments
+- task id: AT-2026-05-08-104
+- title: Annotate kernel foundation id contract comments
 - status: completed
 
 ## Goal
 
-按当前仓库注释规范，在不改动任何运行时行为或已有正确英文注释的前提下，为 kernel foundation 时间包装契约边界的缺失声明级中文注释补齐：
+按当前仓库注释规范，在不改动任何运行时行为或已有正确英文注释的前提下，为 kernel foundation 标识类型契约边界的缺失声明级中文注释补齐：
 
-- `crates/kernel-foundation/src/time.rs`
+- `crates/kernel-foundation/src/ids.rs`
 
-本轮只补 `crates/kernel-foundation/src/time.rs` 的文件级与公开声明注释，不改当前 UTC 时间包装、serde 透明表示或转换语义，也不顺带打开第二个源码文件。
+本轮只补 `crates/kernel-foundation/src/ids.rs` 的文件级与公开声明注释，不改当前字符串 ID 包装、UUID 生成、serde 透明表示或转换语义，也不顺带打开第二个源码文件。
 
 ## Scope
 
@@ -22,12 +22,12 @@
   - update `.artifacts/ai/progress.md`
   - update `.artifacts/ai/findings.md`
   - update `.artifacts/ai/handoff.md`
-  - update `crates/kernel-foundation/src/time.rs`
+  - update `crates/kernel-foundation/src/ids.rs`
 - out of scope:
   - annotate more than this one backend source file
-  - annotate more than this one time-wrapper contract boundary in this file
-  - change UTC wrapper shape, serde transparency, conversion behavior, or display formatting
-  - rewrite comments in adjacent clock or id modules that are outside this boundary
+  - annotate more than this one id-contract boundary in this file
+  - change string wrapper shape, UUID generation behavior, serde transparency, or string conversion semantics
+  - rewrite comments in adjacent time or other foundation modules that are outside this boundary
   - rewrite or delete already-correct English comments in this file or other modules
   - touch unrelated dirty frontend, pen, sqlite, or lockfile changes already present in the worktree
   - add comments to obvious tests only to raise coverage numbers
@@ -39,7 +39,7 @@
 3. .artifacts/ai/progress.md
 4. .artifacts/ai/findings.md
 5. .artifacts/ai/handoff.md
-6. crates/kernel-foundation/src/time.rs
+6. crates/kernel-foundation/src/ids.rs
 
 ## 控制性文档
 
@@ -51,11 +51,11 @@
 6. docs/TauriFirstCrateApiDrafts.md
 7. docs/TauriBackendSkeletonImplementationDesign.md
 8. .github/skills/strict-doc-driven-development/SKILL.md
-9. crates/kernel-foundation/src/time.rs
+9. crates/kernel-foundation/src/ids.rs
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If `crates/kernel-foundation/src/time.rs` adds Chinese file-entry and public declaration comments for `IsoDateTime` and its public accessors while leaving the current UTC wrapper shape, serde transparency, and conversion/display behavior unchanged, then this kernel-foundation time slice will satisfy the repository comment rule and the documented minimal foundation API without changing runtime behavior.
+- falsifiable local hypothesis: If `crates/kernel-foundation/src/ids.rs` adds Chinese file-entry and generated public declaration comments for the string ID wrappers while leaving the current UUID generation, string wrapper shape, serde transparency, and conversion behavior unchanged, then this kernel-foundation id slice will satisfy the repository comment rule and the documented minimal foundation API without changing runtime behavior.
 
 ## Cheap Check
 
@@ -64,7 +64,7 @@
 ## Validation Gate
 
 1. `cargo check -p launcher-kernel-foundation --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib`
-2. `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/kernel-foundation/src/time.rs`
+2. `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/kernel-foundation/src/ids.rs`
 
 ## Validation Result
 
@@ -72,15 +72,15 @@
 
 ## Notes
 
-- `crates/kernel-foundation/src/time.rs` is the strongest next missing-comment boundary because it is the smallest remaining direct-declaration foundation contract file after `clock.rs`, and `IsoDateTime` is the shared timestamp representation re-exported by the foundation crate.
-- `crates/kernel-foundation/src/ids.rs` is a weaker immediate candidate because its public surface is macro-generated and would widen the explanation surface beyond this one time-wrapper boundary.
-- This slice stays at declaration level only; no UTC wrapper shape, serialization contract, display formatting, or conversion semantics are changed.
-- `cargo check -p launcher-kernel-foundation --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib` is the narrowest current executable validation gate for this foundation time slice because the crate exposes no smaller named test anchor for this file and this check compiles the touched public contract surface.
+- `crates/kernel-foundation/src/ids.rs` is the strongest next missing-comment boundary because it is the last remaining production contract file in `kernel-foundation`, and `JobId` plus the other shared identifiers are part of the documented minimal foundation API.
+- The safest move is to thread comments through the macro-generated declaration surface instead of expanding or rewriting the ID implementation pattern.
+- This slice stays at declaration level only; no string wrapper shape, UUID generation behavior, serialization contract, or conversion semantics are changed.
+- `cargo check -p launcher-kernel-foundation --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib` is the narrowest current executable validation gate for this foundation id slice because the crate exposes no smaller named test anchor for this file and this check compiles the touched public contract surface.
 - `cargo check -p launcher-kernel-foundation --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib` passed, `git diff --check` returned clean for the scoped file set, and VS Code diagnostics reported no errors for the touched files.
 
 ## 安全恢复点
 
-- 缺失注释补齐切片已经收敛到 `crates/kernel-foundation/src/time.rs` 的共享时间包装边界；若中断，恢复时只补这个文件的中文声明注释，然后立刻跑 kernel-foundation 的包级 `cargo check` 校验。
+- 缺失注释补齐切片已经收敛到 `crates/kernel-foundation/src/ids.rs` 的共享标识类型边界；若中断，恢复时只补这个文件的中文声明注释，然后立刻跑 kernel-foundation 的包级 `cargo check` 校验。
 
 ## Completion
 - AT-2026-05-06-091 has been published as commit `f20e4f5`.
@@ -95,6 +95,7 @@
 - AT-2026-05-08-100 has been published as commit `fab77ce`.
 - AT-2026-05-08-101 has been published as commit `340bd13`.
 - AT-2026-05-08-102 has been published as commit `7fa1bda`.
-- AT-2026-05-08-103 has been validated and is ready for selective publication.
+- AT-2026-05-08-103 has been published as commit `6fcb6e3`.
+- AT-2026-05-08-104 has been validated and is ready for selective publication.
 
 
