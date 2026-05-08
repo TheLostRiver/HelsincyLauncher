@@ -2,16 +2,16 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-08-097 - Annotate missing sqlite job snapshot store comments - COMPLETED
+- Active atomic task: AT-2026-05-08-098 - Annotate kernel foundation error contract comments - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-08-097 - added the missing SQLite job snapshot store comments without changing snapshot behavior
-- Next step: publish only the AT-2026-05-08-097 file set
-- Published AT-2026-05-07-096 as commit `5b5a96a` after the scoped diff check, selective staging, commit, and push all succeeded.
-- After the next confirmation returned "继续", the rollout stayed in the same SQLite adapter file and narrowed the final remaining public storage shell to `SqliteJobSnapshotStore`.
-- Started AT-2026-05-08-097 and constrained it to the public snapshot store declaration and constructor in `crates/adapter-storage-sqlite/src/lib.rs` because that is the smallest remaining uncommented public boundary in the file.
-- Validated AT-2026-05-08-097 with `cargo check -p launcher-adapter-storage-sqlite --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib`; the adapter-storage-sqlite package library compiled successfully.
-- Confirmed scoped `git diff --check` returned clean for the task-record files, handoff, and the touched SQLite storage adapter file, and VS Code diagnostics reported no errors.
-- Marked AT-2026-05-08-097 complete after the focused validation; the remaining action in this turn is publication.
+- Last completed slice: AT-2026-05-08-098 - added the missing kernel foundation error contract comments without changing error projection behavior
+- Next step: publish only the AT-2026-05-08-098 file set
+- Published AT-2026-05-08-097 as commit `367b4b6` after the scoped diff check, selective staging, commit, and push all succeeded.
+- After the next confirmation returned "继续", the rollout moved out of the finished SQLite adapter chain and narrowed the next smallest backend foundation contract to `crates/kernel-foundation/src/error.rs`.
+- Started AT-2026-05-08-098 and constrained it to the public `AppErrorSeverity`, `AppError`, and `AppError::new()` declarations because that is the smallest stable error-projection boundary currently missing Chinese comments.
+- Validated AT-2026-05-08-098 with `cargo check -p launcher-kernel-foundation --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib`; the kernel-foundation package library compiled successfully.
+- Confirmed scoped `git diff --check` returned clean for the task-record files, handoff, and the touched kernel foundation error contract file, and VS Code diagnostics reported no errors.
+- Marked AT-2026-05-08-098 complete after the focused validation; the remaining action in this turn is publication.
 
 ## Session Timeline
 

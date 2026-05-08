@@ -11,6 +11,11 @@
 
 ## Research Findings
 
+- `crates/kernel-foundation/src/error.rs` is the strongest next slice after the published SQLite storage adapter chain because it is a one-file public foundation contract that directly owns the stable error projection semantics used across backend modules.
+- The safest move is to add only Chinese declaration comments to `AppErrorSeverity`, its public variants, `AppError`, its public fields, and `AppError::new()`, leaving enum shape, serde rename rules, field meanings, and constructor behavior unchanged.
+- `crates/kernel-foundation/src/ids.rs` and `crates/kernel-foundation/src/paging.rs` are not the best immediate candidates because they expose broader public surfaces than this error contract slice.
+- `cargo check -p launcher-kernel-foundation --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib` remains the narrowest reliable validation gate for this slice because the crate currently exposes no smaller named test anchor for this one-file contract surface.
+
 - `SqliteJobSnapshotStore` in `crates/adapter-storage-sqlite/src/lib.rs` is the strongest next slice after the published download checkpoint repository shell because it is the last remaining public storage shell in the file and directly owns the shared runtime snapshot persistence boundary defined by the kernel-jobs runtime design.
 - The safest move is to add only Chinese declaration comments to `SqliteJobSnapshotStore` and `new()`, leaving snapshot schema initialization, mutex ownership, serialization, and recovery query behavior unchanged.
 - `cargo check -p launcher-adapter-storage-sqlite --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib` remains the narrowest reliable validation gate for this slice because the crate currently exposes no smaller named test anchor and this check compiles the touched public shell surface.

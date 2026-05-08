@@ -2,8 +2,8 @@
 
 ## Latest Completed Atomic Task
 
-- task id: AT-2026-05-08-097
-- title: Annotate missing sqlite job snapshot store comments
+- task id: AT-2026-05-08-098
+- title: Annotate kernel foundation error contract comments
 - status: completed
 
 ## Validated Slice
@@ -19,4 +19,4 @@
 ## Next Resume Point
 
 - Publish this validated missing-comment slice if publication has not happened yet.
-- Keep the current snapshot persistence and recovery behavior in `crates/adapter-storage-sqlite/src/lib.rs` unchanged; this slice only adds the `SqliteJobSnapshotStore` declaration comments.
+- Keep the current error contract shape and constructor behavior in `crates/kernel-foundation/src/error.rs` unchanged; this slice only adds the `AppErrorSeverity` and `AppError` declaration comments.
