@@ -11,6 +11,11 @@
 
 ## Research Findings
 
+- `crates/kernel-foundation/src/paging.rs` is the strongest next slice after the published foundation error contract because it is the smaller direct-declaration contract file in the same crate and its shared paging request/result semantics are explicitly sketched in `docs/TauriFirstCrateApiDrafts.md`.
+- The safest move is to add only Chinese declaration comments to `PageCursor`, `PageRequest`, `PageSlice<T>`, their public fields, and their public constructors/accessors, leaving cursor shape, serde behavior, and pagination semantics unchanged.
+- `crates/kernel-foundation/src/ids.rs` is not the best immediate candidate because its public surface is macro-generated and would widen the explanation surface beyond this one direct paging contract file.
+- `cargo check -p launcher-kernel-foundation --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib` remains the narrowest reliable validation gate for this slice because the crate currently exposes no smaller named test anchor for this one-file contract surface.
+
 - `crates/kernel-foundation/src/error.rs` is the strongest next slice after the published SQLite storage adapter chain because it is a one-file public foundation contract that directly owns the stable error projection semantics used across backend modules.
 - The safest move is to add only Chinese declaration comments to `AppErrorSeverity`, its public variants, `AppError`, its public fields, and `AppError::new()`, leaving enum shape, serde rename rules, field meanings, and constructor behavior unchanged.
 - `crates/kernel-foundation/src/ids.rs` and `crates/kernel-foundation/src/paging.rs` are not the best immediate candidates because they expose broader public surfaces than this error contract slice.
