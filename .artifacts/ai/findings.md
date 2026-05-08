@@ -11,6 +11,11 @@
 
 ## Research Findings
 
+- `crates/kernel-jobs/src/lib.rs` is the strongest next slice after the published foundation ID contract because it is the smallest remaining production file in the adjacent shared jobs crate, and the jobs runtime design explicitly defines the crate-level public export surface.
+- The safest move is to add only a Chinese file-entry comment to `crates/kernel-jobs/src/lib.rs`, leaving `model` / `runtime` module declarations and re-export wiring unchanged.
+- `crates/kernel-jobs/src/model.rs` and `crates/kernel-jobs/src/runtime.rs` are not the best immediate candidates because they widen the slice into much larger declaration surfaces than this crate entry file.
+- `cargo check -p launcher-kernel-jobs --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib` remains the narrowest reliable validation gate for this slice because the crate currently exposes no smaller named test anchor for this one-file contract surface.
+
 - `crates/kernel-foundation/src/ids.rs` is the strongest next slice after the published foundation time contract because it is the last remaining production contract file in `kernel-foundation`, and `JobId` plus the other shared identifiers are part of the documented minimal foundation API.
 - The safest move is to add only Chinese file-entry and generated public declaration comments by threading documentation through the macro-generated ID surface, leaving the current string wrapper pattern, UUID generation, serde transparency, and conversion behavior unchanged.
 - This macro-generated file is now a valid immediate candidate because there are no smaller remaining production contract files in `kernel-foundation`.

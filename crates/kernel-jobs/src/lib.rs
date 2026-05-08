@@ -1,3 +1,5 @@
+//! 聚合共享作业模型与运行时能力，对外暴露统一的长任务内核导出面。
+
 pub mod model;
 pub mod runtime;
 
