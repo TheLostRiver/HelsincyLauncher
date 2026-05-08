@@ -11,6 +11,10 @@
 
 ## Research Findings
 
+- `SqliteJobSnapshotStore` in `crates/adapter-storage-sqlite/src/lib.rs` is the strongest next slice after the published download checkpoint repository shell because it is the last remaining public storage shell in the file and directly owns the shared runtime snapshot persistence boundary defined by the kernel-jobs runtime design.
+- The safest move is to add only Chinese declaration comments to `SqliteJobSnapshotStore` and `new()`, leaving snapshot schema initialization, mutex ownership, serialization, and recovery query behavior unchanged.
+- `cargo check -p launcher-adapter-storage-sqlite --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib` remains the narrowest reliable validation gate for this slice because the crate currently exposes no smaller named test anchor and this check compiles the touched public shell surface.
+
 - `SqliteDownloadCheckpointRepository` in `crates/adapter-storage-sqlite/src/lib.rs` is the strongest next slice after the published download job repository shell because it is the next smallest public declaration cluster in the same file and directly owns persisted checkpoint facts defined by the download runtime and storage docs.
 - The safest move is to add only Chinese declaration comments to `SqliteDownloadCheckpointRepository`, `new()`, `config()`, `load_checkpoint()`, and `save_checkpoint()`, leaving checkpoint persistence behavior, config wiring, and the lower snapshot store unchanged.
 - `SqliteJobSnapshotStore` is not the best next candidate for this round because it would widen the slice beyond this one adjacent download-checkpoint repository boundary.

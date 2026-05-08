@@ -454,11 +454,13 @@ impl DownloadCheckpointRepository for SqliteDownloadCheckpointRepository {
     }
 }
 
+/// 基于 SQLite 快照表的共享作业快照存储外壳。
 pub struct SqliteJobSnapshotStore {
     conn: Mutex<rusqlite::Connection>,
 }
 
 impl SqliteJobSnapshotStore {
+    /// 用共享 SQLite 配置创建作业快照存储，并确保快照表可用。
     pub fn new(config: SqliteStorageAdapterConfig) -> Self {
         let conn = rusqlite::Connection::open(config.database_path())
             .expect("SqliteJobSnapshotStore: failed to open sqlite database");

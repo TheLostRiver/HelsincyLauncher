@@ -24,7 +24,8 @@ Phase 23 - Backend comment rollout
 - AT-2026-05-07-093 has been published as commit `d8fbbc8` after documenting the Fab sync cursor repository shell in `crates/adapter-storage-sqlite/src/lib.rs`.
 - AT-2026-05-07-094 has been published as commit `39ba47d` after documenting the Fab media metadata repository shell in `crates/adapter-storage-sqlite/src/lib.rs`.
 - AT-2026-05-07-095 has been published as commit `f022abe` after documenting the download job repository shell in `crates/adapter-storage-sqlite/src/lib.rs`.
-- AT-2026-05-07-096 has now completed the next missing-comment-only slice by documenting the download checkpoint repository shell in `crates/adapter-storage-sqlite/src/lib.rs`.
+- AT-2026-05-07-096 has been published as commit `5b5a96a` after documenting the download checkpoint repository shell in `crates/adapter-storage-sqlite/src/lib.rs`.
+- AT-2026-05-08-097 has now completed the next missing-comment-only slice by documenting the shared job snapshot store shell in `crates/adapter-storage-sqlite/src/lib.rs`.
 - The focused validation gates for this slice have passed: package-scoped `cargo check`, scoped `git diff --check`, and VS Code diagnostics all stayed clean.
 - The next action is to publish only this slice.
 
@@ -271,6 +272,8 @@ Phase 23 - Backend comment rollout
 87. AT-2026-05-07-093 - completed - added the missing declaration comments to the SQLite Fab sync cursor repository shell while preserving its current config wiring and placeholder behavior.
 88. AT-2026-05-07-094 - completed - added the missing declaration comments to the SQLite Fab media metadata repository shell while preserving its current config wiring and placeholder behavior.
 89. AT-2026-05-07-095 - completed - added the missing declaration comments to the SQLite download job repository shell while preserving its current config wiring and persistence behavior.
+90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and persistence behavior.
+91. AT-2026-05-08-097 - completed - added the missing declaration comments to the SQLite job snapshot store shell while preserving its current persistence and recovery behavior.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
