@@ -105,4 +105,4 @@
 
 1. `.github/skills/strict-doc-driven-development/SKILL.md` 中的 `name`、`user-invocable`、`allowed-tools` 属于 Copilot skill 元数据，不应直接当成 Windsurf 的原生配置格式。
 2. 在 Windsurf 中，应把本文件视为对该 skill 的操作性翻译，而不是要求 Windsurf 原生执行 `.github/skills`。
-3. 如果你的 Windsurf 版本支持额外的 repo rules 目录，可以复用本文件内容，但不得改变 `.artifacts/ai` 是唯一事实源这一点。
+3. `.windsurf/rules/` 是当前仓库唯一的 Windsurf 规则落点；不要同时维护根 `.windsurfrules`，以免形成双入口漂移。

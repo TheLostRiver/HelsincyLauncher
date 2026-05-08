@@ -36,8 +36,10 @@ Phase 26 - External Agent Compatibility
 - AT-2026-05-08-105 has been published as commit `7b4b502` after documenting the shared jobs crate entry boundary in `crates/kernel-jobs/src/lib.rs`.
 - AT-2026-05-08-106 has been published as commit `ec3dc63` after documenting the `JobState` / `JobUiState` declaration cluster in `crates/kernel-jobs/src/model.rs`.
 - The user then requested a Windsurf-specific repo rules translation instead of continuing the backend comment rollout immediately.
-- AT-2026-05-08-107 completed the Windsurf compatibility slice by adding a repo-root `.windsurfrules` file that maps the strict-doc and `.artifacts/ai` workflow into plain instructions without creating a second planning source.
-- The focused validation gates for this slice passed: scoped `git diff --check` returned clean and VS Code diagnostics reported no errors for the touched text files.
+- AT-2026-05-08-107 has been published as commit `a17e9f7` after adding a repo-root `.windsurfrules` file that maps the strict-doc and `.artifacts/ai` workflow into plain instructions.
+- The user then requested that the Windsurf compatibility surface use `.windsurf/rules` instead of the repo-root `.windsurfrules` file.
+- AT-2026-05-08-108 completed the relocation slice by moving the Windsurf compatibility rules into `.windsurf/rules/repo-workflow.md` and deleting the root `.windsurfrules` file.
+- The focused validation gates for AT-2026-05-08-108 passed: scoped `git diff --check` returned clean and VS Code diagnostics reported no errors for the touched text files.
 
 ## Phases
 
@@ -194,7 +196,7 @@ Phase 26 - External Agent Compatibility
 ### Phase 26: External Agent Compatibility
 
 - Outcome: add a Windsurf-compatible repository rules file that restates the strict-doc and `.artifacts/ai` workflow in plain instructions without creating a second planning source.
-- Atomic tasks: AT-2026-05-08-107
+- Atomic tasks: AT-2026-05-08-107, AT-2026-05-08-108
 - **Status:** complete
 
 ## Atomic Task Ledger
@@ -300,6 +302,7 @@ Phase 26 - External Agent Compatibility
 99. AT-2026-05-08-105 - completed - added the missing crate-entry comment to kernel-jobs while preserving its current module and re-export wiring.
 100. AT-2026-05-08-106 - completed - added the missing state-enum comments to kernel-jobs while preserving the current enum values and UI-state projection semantics.
 101. AT-2026-05-08-107 - completed - added a repo-root `.windsurfrules` file that maps the current strict-doc and `.artifacts/ai` protocol into plain Windsurf rules without creating a second workflow source.
+102. AT-2026-05-08-108 - completed - moved the Windsurf rules surface from root `.windsurfrules` into `.windsurf/rules/repo-workflow.md` so the workspace uses the requested folder-based entrypoint without parallel rule files.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

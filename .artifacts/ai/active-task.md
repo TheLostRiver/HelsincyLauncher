@@ -2,22 +2,24 @@
 
 ## Identity
 
-- task id: AT-2026-05-08-107
-- title: Create Windsurf repo rules mapping
+- task id: AT-2026-05-08-108
+- title: Move Windsurf rules into folder surface
 - status: completed
 
 ## Goal
 
-在不改动现有 Copilot 规则文件、不开第二套计划协议、也不引入 Windsurf 专用并行工作流的前提下，为当前仓库生成一份可直接给 Windsurf 消费的 repo-local 规则文件：
+在不改动现有 Copilot 规则文件、不开第二套计划协议、也不引入 Windsurf 专用并行工作流的前提下，把当前 Windsurf 兼容层从根 `.windsurfrules` 迁到 `.windsurf/rules` 目录：
 
-- `.windsurfrules`
+- delete `.windsurfrules`
+- add `.windsurf/rules/repo-workflow.md`
 
-本轮只把现有 strict-doc-driven-development 和 `.artifacts/ai` 事务协议投影成 plain-text Windsurf 规则，不改后端代码、不改模块设计、不重写已有 Copilot skill frontmatter。
+本轮只迁移已存在的 Windsurf 规则内容和任务记录，不改后端代码、不改模块设计，也不新增第二份规则真相。
 
 ## Scope
 
 - in scope:
-  - add `.windsurfrules`
+  - delete `.windsurfrules`
+  - add `.windsurf/rules/repo-workflow.md`
   - update `.artifacts/ai/active-task.md`
   - update `.artifacts/ai/task-plan.md`
   - update `.artifacts/ai/progress.md`
@@ -28,16 +30,18 @@
   - replace `.artifacts/ai` with a second planning or memory surface
   - rewrite `.github/skills/strict-doc-driven-development/SKILL.md` into a non-Copilot format
   - introduce `.windsurf/` planning files or any root legacy planning files as a second source of truth
+  - keep both `.windsurfrules` and `.windsurf/rules` as parallel active rule surfaces
   - touch unrelated dirty frontend, pen, sqlite, or lockfile changes already present in the worktree
 
 ## Allowed Files
 
 1. .windsurfrules
-2. .artifacts/ai/active-task.md
-3. .artifacts/ai/task-plan.md
-4. .artifacts/ai/progress.md
-5. .artifacts/ai/findings.md
-6. .artifacts/ai/handoff.md
+2. .windsurf/rules/repo-workflow.md
+3. .artifacts/ai/active-task.md
+4. .artifacts/ai/task-plan.md
+5. .artifacts/ai/progress.md
+6. .artifacts/ai/findings.md
+7. .artifacts/ai/handoff.md
 
 ## 控制性文档
 
@@ -52,16 +56,16 @@
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If the repo adds a root `.windsurfrules` file that restates the existing strict-doc and `.artifacts/ai` transaction protocol in plain instructions instead of Copilot-specific skill metadata, then Windsurf can follow the same repository workflow without introducing a second planning source or changing any runtime behavior.
+- falsifiable local hypothesis: If the repo moves the existing Windsurf compatibility content from root `.windsurfrules` into a single file under `.windsurf/rules/` and removes the root file, then the workspace will satisfy the user's requested Windsurf folder-based rule surface without creating parallel rule entrypoints or changing runtime behavior.
 
 ## Cheap Check
 
-- `git -C q:\DEV\MyEpicLauncher diff --check -- .windsurfrules .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md`
+- `git -C q:\DEV\MyEpicLauncher diff --check -- .windsurfrules .windsurf/rules/repo-workflow.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md`
 
 ## Validation Gate
 
-1. `git -C q:\DEV\MyEpicLauncher diff --check -- .windsurfrules .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md`
-2. VS Code diagnostics should report no errors for `.windsurfrules` and the touched task-record files.
+1. `git -C q:\DEV\MyEpicLauncher diff --check -- .windsurfrules .windsurf/rules/repo-workflow.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md`
+2. VS Code diagnostics should report no errors for `.windsurf/rules/repo-workflow.md` and the touched task-record files.
 
 ## Validation Result
 
@@ -69,20 +73,29 @@
 
 ## Notes
 
-- The workspace scan found no existing Windsurf-specific repo rule surface, no `.windsurf/` directory, and no adjacent generic agent rule files such as `AGENTS.md`.
+- The user explicitly wants the Windsurf compatibility surface to live under `.windsurf/rules` instead of the repo-root `.windsurfrules` file.
 - Reusing `.github/skills/strict-doc-driven-development/SKILL.md` verbatim is not the right move for Windsurf because its frontmatter is Copilot-specific; the safe move is to restate only the operational rules in plain text.
-- A repo-root `.windsurfrules` file is the smallest isolated compatibility layer because it does not require rewriting existing Copilot instructions or reopening the `.artifacts/ai` protocol design.
+- The smallest safe migration is to move the already-published plain-text rule content into a single `.windsurf/rules` markdown file and delete the root `.windsurfrules` file so the workspace keeps only one Windsurf rule entrypoint.
 - This slice is docs and workflow text only; no backend, frontend, or transport behavior is changed.
+- Scoped `git diff --check` returned clean for the root file deletion, the new `.windsurf/rules/repo-workflow.md` file, and the touched task-record files, and VS Code diagnostics reported no errors for the touched text files.
 
 ## 安全恢复点
 
-- Windsurf 兼容切片已经收敛到 `.windsurfrules` 单文件规则投影；若中断，恢复时先对 `.windsurfrules` 和 5 个任务记录文件做 scoped `git diff --check`，确认无格式问题后再决定是否发布。
+- Windsurf 目录化迁移切片已经完成并通过聚焦校验；若中断，恢复时只发布根 `.windsurfrules` 删除、`.windsurf/rules/repo-workflow.md` 新增和 5 个任务记录文件，不要扩大到其他 agent 或后端文件。
 
 ## Completion Summary
 
-- The repo now has a root `.windsurfrules` file that restates the current strict-doc workflow, `.artifacts/ai` source-of-truth rule, validation order, architecture guardrails, and comment-language defaults in plain instructions for Windsurf.
-- Scoped `git diff --check` passed for `.windsurfrules` and the touched task-record files.
-- VS Code diagnostics reported no errors for `.windsurfrules` or the touched task-record files.
+- The Windsurf compatibility surface now lives at `.windsurf/rules/repo-workflow.md`.
+- The repo-root `.windsurfrules` file has been removed to avoid a second active rule entrypoint.
+- Scoped `git diff --check` passed and VS Code diagnostics reported no errors for the touched text files.
+
+## 安全恢复点
+
+- Windsurf 兼容切片已经收敛到 `.windsurf/rules/repo-workflow.md` 单文件迁移；若中断，恢复时先对根 `.windsurfrules` 删除、目录规则文件新增和 5 个任务记录文件做 scoped `git diff --check`，确认无格式问题后再决定是否发布。
+
+## Completion Summary
+
+- AT-2026-05-08-107 has been published as commit `a17e9f7`.
 
 ## Completion
 - AT-2026-05-06-091 has been published as commit `f20e4f5`.

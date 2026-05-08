@@ -2,10 +2,16 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-08-107 - Create Windsurf repo rules mapping - COMPLETED
+- Active atomic task: AT-2026-05-08-108 - Move Windsurf rules into folder surface - COMPLETED
 - Current phase: Phase 26 - External Agent Compatibility
-- Last completed slice: AT-2026-05-08-107 - completed after adding the repo-root `.windsurfrules` compatibility rules file
+- Last completed slice: AT-2026-05-08-108 - completed after moving the Windsurf compatibility rules into `.windsurf/rules/repo-workflow.md`
 - Next step: wait for user direction before opening another atomic task
+- Published AT-2026-05-08-107 as commit `a17e9f7` after the scoped diff check, selective staging, commit, and push all succeeded.
+- The user then requested the Windsurf compatibility layer to use `.windsurf/rules` instead of the repo-root `.windsurfrules` file.
+- Started AT-2026-05-08-108 and constrained it to a one-file relocation into `.windsurf/rules/repo-workflow.md` plus task-record updates so the workspace does not keep two parallel Windsurf rule entrypoints.
+- Validated AT-2026-05-08-108 with scoped `git diff --check`; the root file deletion, the new `.windsurf/rules/repo-workflow.md` file, and the touched task-record files remained clean.
+- Confirmed VS Code diagnostics reported no errors for `.windsurf/rules/repo-workflow.md` and the touched task-record files.
+- Marked AT-2026-05-08-108 complete after the focused docs-only validation; the remaining action in this turn is publication.
 - Published AT-2026-05-08-106 as commit `ec3dc63` after the scoped diff check, selective staging, commit, and push all succeeded.
 - The user selected the Windsurf follow-up path, so the workflow opened a cross-agent compatibility slice instead of continuing the backend comment rollout immediately.
 - Started AT-2026-05-08-107 and constrained it to `.windsurfrules` plus task-record updates because the workspace has no existing Windsurf rule surface and the current `.github/skills/strict-doc-driven-development/SKILL.md` frontmatter is Copilot-specific.

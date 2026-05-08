@@ -11,9 +11,10 @@
 
 ## Research Findings
 
-- The workspace scan found no existing Windsurf-specific rule surface, no `.windsurf/` directory, no `.windsurfrules` file, and no adjacent generic agent rule files such as `AGENTS.md`.
-- Because `.github/skills/strict-doc-driven-development/SKILL.md` carries Copilot-specific frontmatter such as `name`, `user-invocable`, and `allowed-tools`, the portable move is to restate its operational rules in plain text instead of trying to reuse that file verbatim in Windsurf.
-- The safest first Windsurf landing surface is a repo-root `.windsurfrules` file because it isolates the compatibility layer to one external-agent entrypoint and avoids creating a second planning protocol or reopening the existing `.artifacts/ai` design.
+- The user explicitly prefers the Windsurf rule surface under `.windsurf/rules` rather than a repo-root `.windsurfrules` file.
+- Because `.github/skills/strict-doc-driven-development/SKILL.md` carries Copilot-specific frontmatter such as `name`, `user-invocable`, and `allowed-tools`, the portable move remains to restate its operational rules in plain text instead of trying to reuse that file verbatim in Windsurf.
+- Once a folder-based Windsurf rule surface is requested, keeping both `.windsurfrules` and `.windsurf/rules/*` would create avoidable drift, so the safer move is a one-file relocation with root file deletion.
+- A single `.windsurf/rules/repo-workflow.md` file is enough for the current repository because the existing Windsurf compatibility content is one cohesive workflow rule set rather than multiple independently scoped rule families.
 - The Windsurf translation must preserve `.artifacts/ai` as the only authoritative workflow record set and must not revive root `task_plan.md`, `progress.md`, or `findings.md` as active files.
 
 - `crates/kernel-jobs/src/model.rs` is the strongest next slice after the published kernel-jobs crate entry because it is the next smallest production file in that crate, and the shared state vocabulary sits at the top of the file as the smallest documented declaration cluster.
