@@ -11,6 +11,11 @@
 
 ## Research Findings
 
+- `crates/kernel-foundation/src/clock.rs` is the strongest next slice after the published foundation crate entry because it is the smallest remaining direct-declaration foundation contract file and `Clock` is explicitly listed in the minimal API sketch in `docs/TauriFirstCrateApiDrafts.md`.
+- The safest move is to add only Chinese file-entry and public declaration comments to `Clock`, `Clock::now()`, and `SystemClock`, leaving the current timestamp source and system-clock behavior unchanged.
+- `crates/kernel-foundation/src/time.rs` is a weaker immediate candidate because it exposes a broader timestamp wrapper surface than this one-trait clock boundary, and `crates/kernel-foundation/src/ids.rs` remains weaker because its public surface is macro-generated.
+- `cargo check -p launcher-kernel-foundation --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib` remains the narrowest reliable validation gate for this slice because the crate currently exposes no smaller named test anchor for this one-file contract surface.
+
 - `crates/kernel-foundation/src/lib.rs` is the strongest next slice after the published foundation result alias because it is the smallest remaining crate-entry aggregation surface and the foundation crate/module layout is explicitly defined in `docs/TauriFirstCrateApiDrafts.md`.
 - The safest move is to add only a Chinese file-entry comment to `crates/kernel-foundation/src/lib.rs`, leaving module declarations and re-export wiring unchanged.
 - `crates/kernel-foundation/src/ids.rs` is not the best immediate candidate because its public surface is macro-generated and would widen the explanation surface beyond this single entry file.
