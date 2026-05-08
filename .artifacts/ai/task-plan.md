@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 23 - Backend comment rollout
+Phase 26 - External Agent Compatibility
 
 ## Current Focus
 
@@ -34,9 +34,10 @@ Phase 23 - Backend comment rollout
 - AT-2026-05-08-103 has been published as commit `6fcb6e3` after documenting the shared foundation time wrapper boundary in `crates/kernel-foundation/src/time.rs`.
 - AT-2026-05-08-104 has been published as commit `c35ffaa` after documenting the shared foundation ID wrapper boundary in `crates/kernel-foundation/src/ids.rs`.
 - AT-2026-05-08-105 has been published as commit `7b4b502` after documenting the shared jobs crate entry boundary in `crates/kernel-jobs/src/lib.rs`.
-- AT-2026-05-08-106 has now completed the next missing-comment-only slice by documenting the `JobState` / `JobUiState` declaration cluster in `crates/kernel-jobs/src/model.rs`.
-- The focused validation gates for this slice have passed: package-scoped `cargo check`, scoped `git diff --check`, and VS Code diagnostics all stayed clean.
-- The next action is to publish only this slice.
+- AT-2026-05-08-106 has been published as commit `ec3dc63` after documenting the `JobState` / `JobUiState` declaration cluster in `crates/kernel-jobs/src/model.rs`.
+- The user then requested a Windsurf-specific repo rules translation instead of continuing the backend comment rollout immediately.
+- AT-2026-05-08-107 completed the Windsurf compatibility slice by adding a repo-root `.windsurfrules` file that maps the strict-doc and `.artifacts/ai` workflow into plain instructions without creating a second planning source.
+- The focused validation gates for this slice passed: scoped `git diff --check` returned clean and VS Code diagnostics reported no errors for the touched text files.
 
 ## Phases
 
@@ -190,6 +191,12 @@ Phase 23 - Backend comment rollout
 - Atomic tasks: AT-2026-05-05-070
 - **Status:** complete
 
+### Phase 26: External Agent Compatibility
+
+- Outcome: add a Windsurf-compatible repository rules file that restates the strict-doc and `.artifacts/ai` workflow in plain instructions without creating a second planning source.
+- Atomic tasks: AT-2026-05-08-107
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -292,6 +299,7 @@ Phase 23 - Backend comment rollout
 98. AT-2026-05-08-104 - completed - added the missing id-wrapper comments to kernel foundation while preserving its current string wrapper and UUID generation semantics.
 99. AT-2026-05-08-105 - completed - added the missing crate-entry comment to kernel-jobs while preserving its current module and re-export wiring.
 100. AT-2026-05-08-106 - completed - added the missing state-enum comments to kernel-jobs while preserving the current enum values and UI-state projection semantics.
+101. AT-2026-05-08-107 - completed - added a repo-root `.windsurfrules` file that maps the current strict-doc and `.artifacts/ai` protocol into plain Windsurf rules without creating a second workflow source.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

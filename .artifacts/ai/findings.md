@@ -11,6 +11,11 @@
 
 ## Research Findings
 
+- The workspace scan found no existing Windsurf-specific rule surface, no `.windsurf/` directory, no `.windsurfrules` file, and no adjacent generic agent rule files such as `AGENTS.md`.
+- Because `.github/skills/strict-doc-driven-development/SKILL.md` carries Copilot-specific frontmatter such as `name`, `user-invocable`, and `allowed-tools`, the portable move is to restate its operational rules in plain text instead of trying to reuse that file verbatim in Windsurf.
+- The safest first Windsurf landing surface is a repo-root `.windsurfrules` file because it isolates the compatibility layer to one external-agent entrypoint and avoids creating a second planning protocol or reopening the existing `.artifacts/ai` design.
+- The Windsurf translation must preserve `.artifacts/ai` as the only authoritative workflow record set and must not revive root `task_plan.md`, `progress.md`, or `findings.md` as active files.
+
 - `crates/kernel-jobs/src/model.rs` is the strongest next slice after the published kernel-jobs crate entry because it is the next smallest production file in that crate, and the shared state vocabulary sits at the top of the file as the smallest documented declaration cluster.
 - Within this file, `JobState` and `JobUiState` are the safest immediate candidates because they are smaller than `AcceptedJob`, `EnqueueJobRequest`, and `JobSnapshot`, while still directly defining the shared runtime/UI state semantics.
 - The safest move is to add only Chinese declaration comments to those two enums and their variants, leaving enum values, serde rename rules, and the adjacent English `JobSnapshotDto` comment unchanged.

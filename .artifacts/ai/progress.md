@@ -2,10 +2,19 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-08-106 - Annotate kernel jobs state enum comments - COMPLETED
-- Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-08-105 - published as commit `7b4b502` after adding the missing kernel jobs crate entry comments
-- Next step: publish only the AT-2026-05-08-106 file set
+- Active atomic task: AT-2026-05-08-107 - Create Windsurf repo rules mapping - COMPLETED
+- Current phase: Phase 26 - External Agent Compatibility
+- Last completed slice: AT-2026-05-08-107 - completed after adding the repo-root `.windsurfrules` compatibility rules file
+- Next step: wait for user direction before opening another atomic task
+- Published AT-2026-05-08-106 as commit `ec3dc63` after the scoped diff check, selective staging, commit, and push all succeeded.
+- The user selected the Windsurf follow-up path, so the workflow opened a cross-agent compatibility slice instead of continuing the backend comment rollout immediately.
+- Started AT-2026-05-08-107 and constrained it to `.windsurfrules` plus task-record updates because the workspace has no existing Windsurf rule surface and the current `.github/skills/strict-doc-driven-development/SKILL.md` frontmatter is Copilot-specific.
+- Re-read the blueprint, architecture principles, AI transaction protocol, AI context integration design, testing strategy, repo instructions, and strict-doc skill before opening this slice.
+- The current falsifiable hypothesis is that a repo-root `.windsurfrules` file can carry the existing strict-doc and `.artifacts/ai` protocol into Windsurf without introducing a second planning source or changing any runtime behavior.
+- The cheapest validation gate for this docs-only slice is `git -C q:\DEV\MyEpicLauncher diff --check -- .windsurfrules .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md`, followed by a clean diagnostics pass for the touched text files.
+- Validated AT-2026-05-08-107 with scoped `git diff --check`; the Windsurf rules slice and touched task-record files remained clean.
+- Confirmed VS Code diagnostics reported no errors for `.windsurfrules` and the touched task-record files.
+- Marked AT-2026-05-08-107 complete after the focused docs-only validation.
 - Published AT-2026-05-08-097 as commit `367b4b6` after the scoped diff check, selective staging, commit, and push all succeeded.
 - After the next confirmation returned "继续", the rollout moved out of the finished SQLite adapter chain and narrowed the next smallest backend foundation contract to `crates/kernel-foundation/src/error.rs`.
 - Started AT-2026-05-08-098 and constrained it to the public `AppErrorSeverity`, `AppError`, and `AppError::new()` declarations because that is the smallest stable error-projection boundary currently missing Chinese comments.

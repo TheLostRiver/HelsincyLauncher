@@ -2,44 +2,42 @@
 
 ## Identity
 
-- task id: AT-2026-05-08-106
-- title: Annotate kernel jobs state enum comments
+- task id: AT-2026-05-08-107
+- title: Create Windsurf repo rules mapping
 - status: completed
 
 ## Goal
 
-按当前仓库注释规范，在不改动任何运行时行为或已有正确英文注释的前提下，为 kernel jobs 状态枚举边界的缺失声明级中文注释补齐：
+在不改动现有 Copilot 规则文件、不开第二套计划协议、也不引入 Windsurf 专用并行工作流的前提下，为当前仓库生成一份可直接给 Windsurf 消费的 repo-local 规则文件：
 
-- `crates/kernel-jobs/src/model.rs`
+- `.windsurfrules`
 
-本轮只补 `crates/kernel-jobs/src/model.rs` 中 `JobState` 与 `JobUiState` 的声明级中文注释，不改当前状态机枚举值、序列化命名或 UI 投影语义，也不顺带打开第二个源码文件。
+本轮只把现有 strict-doc-driven-development 和 `.artifacts/ai` 事务协议投影成 plain-text Windsurf 规则，不改后端代码、不改模块设计、不重写已有 Copilot skill frontmatter。
 
 ## Scope
 
 - in scope:
+  - add `.windsurfrules`
   - update `.artifacts/ai/active-task.md`
   - update `.artifacts/ai/task-plan.md`
   - update `.artifacts/ai/progress.md`
   - update `.artifacts/ai/findings.md`
   - update `.artifacts/ai/handoff.md`
-  - update `crates/kernel-jobs/src/model.rs`
 - out of scope:
-  - annotate more than this one backend source file
-  - annotate more than this one state-enum declaration cluster in this file
-  - change job state enum values, serde rename rules, or UI projection semantics
-  - rewrite comments on unrelated declarations in `model.rs` or adjacent `runtime.rs`
-  - rewrite or delete already-correct English comments in this file or other modules
+  - change any backend or frontend runtime behavior
+  - replace `.artifacts/ai` with a second planning or memory surface
+  - rewrite `.github/skills/strict-doc-driven-development/SKILL.md` into a non-Copilot format
+  - introduce `.windsurf/` planning files or any root legacy planning files as a second source of truth
   - touch unrelated dirty frontend, pen, sqlite, or lockfile changes already present in the worktree
-  - add comments to obvious tests only to raise coverage numbers
 
 ## Allowed Files
 
-1. .artifacts/ai/active-task.md
-2. .artifacts/ai/task-plan.md
-3. .artifacts/ai/progress.md
-4. .artifacts/ai/findings.md
-5. .artifacts/ai/handoff.md
-6. crates/kernel-jobs/src/model.rs
+1. .windsurfrules
+2. .artifacts/ai/active-task.md
+3. .artifacts/ai/task-plan.md
+4. .artifacts/ai/progress.md
+5. .artifacts/ai/findings.md
+6. .artifacts/ai/handoff.md
 
 ## 控制性文档
 
@@ -47,25 +45,23 @@
 2. docs/TauriArchitecturePrinciplesDesign.md
 3. docs/TauriAIDevelopmentTransactionProtocolDesign.md
 4. docs/TauriTestingStrategyAndQualityGateDesign.md
-5. docs/TauriCodeCommentStandard.md
-6. docs/TauriFirstCrateApiDrafts.md
-7. docs/TauriBackendSkeletonImplementationDesign.md
-8. docs/TauriKernelJobsRuntimeDesign.md
-9. .github/skills/strict-doc-driven-development/SKILL.md
-10. crates/kernel-jobs/src/model.rs
+5. docs/TauriAIContextManagementIntegrationDesign.md
+6. .github/copilot-instructions.md
+7. .github/skills/strict-doc-driven-development/SKILL.md
+8. .artifacts/ai/README.md
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If `crates/kernel-jobs/src/model.rs` adds Chinese declaration comments for `JobState` and `JobUiState` while leaving the current enum variants and serde rename rules unchanged, then this kernel-jobs state slice will satisfy the repository comment rule and the documented shared job-state boundary without changing runtime behavior.
+- falsifiable local hypothesis: If the repo adds a root `.windsurfrules` file that restates the existing strict-doc and `.artifacts/ai` transaction protocol in plain instructions instead of Copilot-specific skill metadata, then Windsurf can follow the same repository workflow without introducing a second planning source or changing any runtime behavior.
 
 ## Cheap Check
 
-- `cargo check -p launcher-kernel-jobs --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib`
+- `git -C q:\DEV\MyEpicLauncher diff --check -- .windsurfrules .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md`
 
 ## Validation Gate
 
-1. `cargo check -p launcher-kernel-jobs --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib`
-2. `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/kernel-jobs/src/model.rs`
+1. `git -C q:\DEV\MyEpicLauncher diff --check -- .windsurfrules .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md`
+2. VS Code diagnostics should report no errors for `.windsurfrules` and the touched task-record files.
 
 ## Validation Result
 
@@ -73,15 +69,20 @@
 
 ## Notes
 
-- `crates/kernel-jobs/src/model.rs` is the strongest next missing-comment boundary because it is the next smallest production file in `kernel-jobs`, and the shared state enums sit at the top of the file as the smallest documented declaration cluster.
-- Within this file, `JobState` and `JobUiState` are stronger immediate candidates than `AcceptedJob` or `JobSnapshot` because they are smaller and directly define the shared runtime/UI state vocabulary.
-- This slice stays at declaration level only; no enum variants, state-machine semantics, or serialization contracts are changed.
-- `cargo check -p launcher-kernel-jobs --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib` is the narrowest current executable validation gate for this kernel-jobs state slice because the crate exposes no smaller named test anchor for this file and this check compiles the touched public contract surface.
-- `cargo check -p launcher-kernel-jobs --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib` passed, `git diff --check` returned clean for the scoped file set, and VS Code diagnostics reported no errors for the touched files.
+- The workspace scan found no existing Windsurf-specific repo rule surface, no `.windsurf/` directory, and no adjacent generic agent rule files such as `AGENTS.md`.
+- Reusing `.github/skills/strict-doc-driven-development/SKILL.md` verbatim is not the right move for Windsurf because its frontmatter is Copilot-specific; the safe move is to restate only the operational rules in plain text.
+- A repo-root `.windsurfrules` file is the smallest isolated compatibility layer because it does not require rewriting existing Copilot instructions or reopening the `.artifacts/ai` protocol design.
+- This slice is docs and workflow text only; no backend, frontend, or transport behavior is changed.
 
 ## 安全恢复点
 
-- 缺失注释补齐切片已经收敛到 `crates/kernel-jobs/src/model.rs` 的状态枚举簇；若中断，恢复时只补 `JobState` 与 `JobUiState` 的中文声明注释，然后立刻跑 kernel-jobs 的包级 `cargo check` 校验。
+- Windsurf 兼容切片已经收敛到 `.windsurfrules` 单文件规则投影；若中断，恢复时先对 `.windsurfrules` 和 5 个任务记录文件做 scoped `git diff --check`，确认无格式问题后再决定是否发布。
+
+## Completion Summary
+
+- The repo now has a root `.windsurfrules` file that restates the current strict-doc workflow, `.artifacts/ai` source-of-truth rule, validation order, architecture guardrails, and comment-language defaults in plain instructions for Windsurf.
+- Scoped `git diff --check` passed for `.windsurfrules` and the touched task-record files.
+- VS Code diagnostics reported no errors for `.windsurfrules` or the touched task-record files.
 
 ## Completion
 - AT-2026-05-06-091 has been published as commit `f20e4f5`.
@@ -99,6 +100,6 @@
 - AT-2026-05-08-103 has been published as commit `6fcb6e3`.
 - AT-2026-05-08-104 has been published as commit `c35ffaa`.
 - AT-2026-05-08-105 has been published as commit `7b4b502`.
-- AT-2026-05-08-106 has been validated and is ready for selective publication.
+- AT-2026-05-08-106 has been published as commit `ec3dc63`.
 
 
