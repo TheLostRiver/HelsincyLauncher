@@ -2,8 +2,8 @@
 
 ## Latest Completed Atomic Task
 
-- task id: AT-2026-05-07-095
-- title: Annotate missing sqlite download job repo comments
+- task id: AT-2026-05-07-096
+- title: Annotate missing sqlite download checkpoint repo comments
 - status: completed
 
 ## Validated Slice
@@ -19,4 +19,4 @@
 ## Next Resume Point
 
 - Publish this validated missing-comment slice if publication has not happened yet.
-- Keep the current download job persistence behavior in `crates/adapter-storage-sqlite/src/lib.rs` unchanged; this slice only adds the `SqliteDownloadJobRepository` declaration comments.
+- Keep the current checkpoint persistence behavior in `crates/adapter-storage-sqlite/src/lib.rs` unchanged; this slice only adds the `SqliteDownloadCheckpointRepository` declaration comments.

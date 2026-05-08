@@ -2,10 +2,17 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-07-095 - Annotate missing sqlite download job repo comments - COMPLETED
+- Active atomic task: AT-2026-05-07-096 - Annotate missing sqlite download checkpoint repo comments - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-07-095 - added the missing SQLite download job repository comments without changing persistence behavior
-- Next step: publish only the AT-2026-05-07-095 file set
+- Last completed slice: AT-2026-05-07-096 - added the missing SQLite download checkpoint repository comments without changing checkpoint behavior
+- Next step: publish only the AT-2026-05-07-096 file set
+- Published AT-2026-05-07-095 as commit `f022abe` after the scoped diff check, selective staging, commit, and push all succeeded.
+- After the next confirmation returned "继续", the rollout stayed in the same SQLite adapter file and moved one hop from the published download job repository shell to the adjacent download checkpoint repository shell.
+- Started AT-2026-05-07-096 and narrowed it to `SqliteDownloadCheckpointRepository` in `crates/adapter-storage-sqlite/src/lib.rs` because that declaration cluster is the next smallest uncommented public boundary in the same file.
+- Rejected `SqliteJobSnapshotStore` for AT-2026-05-07-096 because documenting it now would widen the slice beyond this one adjacent download-checkpoint repository boundary.
+- Validated AT-2026-05-07-096 with `cargo check -p launcher-adapter-storage-sqlite --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib`; the adapter-storage-sqlite package library compiled successfully.
+- Confirmed scoped `git diff --check` returned clean for the task-record files, handoff, and the touched SQLite storage adapter file, and VS Code diagnostics reported no errors.
+- Marked AT-2026-05-07-096 complete after the focused validation; the remaining action in this turn is publication.
 
 ## Session Timeline
 

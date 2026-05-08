@@ -341,12 +341,14 @@ fn decode_download_job_state(state: &str) -> AppResult<DownloadJobRecordState> {
     }
 }
 
+/// 基于 SQLite checkpoint 表的下载断点仓储外壳。
 #[derive(Debug, Clone)]
 pub struct SqliteDownloadCheckpointRepository {
     config: SqliteStorageAdapterConfig,
 }
 
 impl SqliteDownloadCheckpointRepository {
+    /// 用共享 SQLite 配置创建下载 checkpoint 仓储，并确保断点表可用。
     pub fn new(config: SqliteStorageAdapterConfig) -> Self {
         let repo = Self { config };
         repo.ensure_table()
@@ -354,6 +356,7 @@ impl SqliteDownloadCheckpointRepository {
         repo
     }
 
+    /// 暴露只读配置快照，供装配和诊断路径确认 checkpoint 仓储绑定结果。
     pub fn config(&self) -> &SqliteStorageAdapterConfig {
         &self.config
     }
@@ -387,6 +390,7 @@ impl SqliteDownloadCheckpointRepository {
         })
     }
 
+    /// 按作业标识读取当前持久化的下载断点记录。
     pub fn load_checkpoint(&self, job_id: &JobId) -> AppResult<Option<DownloadCheckpointRecord>> {
         let conn = self.open_connection()?;
         let mut stmt = conn
@@ -422,6 +426,7 @@ impl SqliteDownloadCheckpointRepository {
         }))
     }
 
+    /// 持久化最新的下载断点记录，供暂停和恢复链路复用。
     pub fn save_checkpoint(&self, checkpoint: &DownloadCheckpointRecord) -> AppResult<()> {
         let conn = self.open_connection()?;
         conn.execute(

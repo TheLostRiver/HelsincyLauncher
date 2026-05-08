@@ -11,6 +11,11 @@
 
 ## Research Findings
 
+- `SqliteDownloadCheckpointRepository` in `crates/adapter-storage-sqlite/src/lib.rs` is the strongest next slice after the published download job repository shell because it is the next smallest public declaration cluster in the same file and directly owns persisted checkpoint facts defined by the download runtime and storage docs.
+- The safest move is to add only Chinese declaration comments to `SqliteDownloadCheckpointRepository`, `new()`, `config()`, `load_checkpoint()`, and `save_checkpoint()`, leaving checkpoint persistence behavior, config wiring, and the lower snapshot store unchanged.
+- `SqliteJobSnapshotStore` is not the best next candidate for this round because it would widen the slice beyond this one adjacent download-checkpoint repository boundary.
+- `cargo check -p launcher-adapter-storage-sqlite --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib` remains the narrowest reliable validation gate for this slice because the crate currently exposes no smaller named test anchor and this check compiles the touched public shell surface.
+
 - `SqliteDownloadJobRepository` in `crates/adapter-storage-sqlite/src/lib.rs` is the strongest next slice after the published Fab media metadata repository shell because it is the next smallest public declaration cluster in the same file and directly owns persisted download job facts defined by the download runtime and storage docs.
 - The safest move is to add only Chinese declaration comments to `SqliteDownloadJobRepository`, `new()`, `config()`, and `get_job()`, leaving download job persistence behavior, config wiring, and all lower repository shells unchanged.
 - `SqliteDownloadCheckpointRepository` and `SqliteJobSnapshotStore` are not the best next candidates for this round because they would widen the slice beyond this one adjacent download-job repository boundary.
