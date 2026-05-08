@@ -11,6 +11,11 @@
 
 ## Research Findings
 
+- `crates/kernel-foundation/src/lib.rs` is the strongest next slice after the published foundation result alias because it is the smallest remaining crate-entry aggregation surface and the foundation crate/module layout is explicitly defined in `docs/TauriFirstCrateApiDrafts.md`.
+- The safest move is to add only a Chinese file-entry comment to `crates/kernel-foundation/src/lib.rs`, leaving module declarations and re-export wiring unchanged.
+- `crates/kernel-foundation/src/ids.rs` is not the best immediate candidate because its public surface is macro-generated and would widen the explanation surface beyond this single entry file.
+- `cargo check -p launcher-kernel-foundation --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib` remains the narrowest reliable validation gate for this slice because the crate currently exposes no smaller named test anchor for this one-file entry surface.
+
 - `crates/kernel-foundation/src/result.rs` is the strongest next slice after the published foundation paging contract because it is the smallest remaining public foundation contract file and `AppResult<T>` is explicitly listed as required minimal API in both `docs/TauriFirstCrateApiDrafts.md` and `docs/TauriBackendSkeletonImplementationDesign.md`.
 - The safest move is to add only Chinese declaration comments to the `AppResult<T>` alias and the file entry, leaving its `Result<T, AppError>` binding unchanged.
 - `crates/kernel-foundation/src/ids.rs` and `crates/kernel-foundation/src/lib.rs` are not the best immediate candidates because they expose broader or macro-generated public surfaces than this one-line result alias slice.

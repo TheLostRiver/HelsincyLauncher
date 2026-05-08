@@ -1,3 +1,5 @@
+//! 聚合所有跨模块复用的基础契约、时间与错误类型导出。
+
 pub mod clock;
 pub mod error;
 pub mod ids;

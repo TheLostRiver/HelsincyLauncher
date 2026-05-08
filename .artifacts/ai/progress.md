@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-08-100 - Annotate kernel foundation result alias comments - COMPLETED
+- Active atomic task: AT-2026-05-08-101 - Annotate kernel foundation crate entry comments - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-08-100 - added the missing kernel foundation result alias comments without changing error binding semantics
-- Next step: publish only the AT-2026-05-08-100 file set
+- Last completed slice: AT-2026-05-08-101 - added the missing kernel foundation crate entry comments without changing export wiring
+- Next step: publish only the AT-2026-05-08-101 file set
 - Published AT-2026-05-08-097 as commit `367b4b6` after the scoped diff check, selective staging, commit, and push all succeeded.
 - After the next confirmation returned "继续", the rollout moved out of the finished SQLite adapter chain and narrowed the next smallest backend foundation contract to `crates/kernel-foundation/src/error.rs`.
 - Started AT-2026-05-08-098 and constrained it to the public `AppErrorSeverity`, `AppError`, and `AppError::new()` declarations because that is the smallest stable error-projection boundary currently missing Chinese comments.
@@ -21,6 +21,12 @@
 - Published AT-2026-05-08-099 as commit `2792762` after the scoped diff check, selective staging, commit, and push all succeeded.
 - After the next confirmation returned "继续", the rollout stayed in `kernel-foundation` and narrowed the smallest remaining public contract file to `crates/kernel-foundation/src/result.rs`.
 - Started AT-2026-05-08-100 and constrained it to the public `AppResult<T>` alias because that is the smallest shared foundation API still missing declaration comments and is explicitly required by the crate draft and backend skeleton docs.
+- Published AT-2026-05-08-100 as commit `fab77ce` after the scoped diff check, selective staging, commit, and push all succeeded.
+- After the next confirmation returned "继续", the rollout stayed in `kernel-foundation` and narrowed the next smallest remaining boundary to the crate entry file `crates/kernel-foundation/src/lib.rs`.
+- Started AT-2026-05-08-101 and constrained it to the missing file-entry comment because that is the smallest remaining aggregation boundary in the crate and avoids widening into macro-generated ID surface.
+- Validated AT-2026-05-08-101 with `cargo check -p launcher-kernel-foundation --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib`; the kernel-foundation package library compiled successfully.
+- Confirmed scoped `git diff --check` returned clean for the task-record files, handoff, and the touched kernel foundation crate entry file, and VS Code diagnostics reported no errors.
+- Marked AT-2026-05-08-101 complete after the focused validation; the remaining action in this turn is publication.
 - Validated AT-2026-05-08-100 with `cargo check -p launcher-kernel-foundation --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib`; the kernel-foundation package library compiled successfully.
 - Confirmed scoped `git diff --check` returned clean for the task-record files, handoff, and the touched kernel foundation result alias file, and VS Code diagnostics reported no errors.
 - Marked AT-2026-05-08-100 complete after the focused validation; the remaining action in this turn is publication.
