@@ -2,10 +2,10 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-08-105 - Annotate kernel jobs crate entry comments - COMPLETED
+- Active atomic task: AT-2026-05-08-106 - Annotate kernel jobs state enum comments - COMPLETED
 - Current phase: Phase 23 - Backend comment rollout
-- Last completed slice: AT-2026-05-08-105 - added the missing kernel jobs crate entry comments without changing export wiring
-- Next step: publish only the AT-2026-05-08-105 file set
+- Last completed slice: AT-2026-05-08-105 - published as commit `7b4b502` after adding the missing kernel jobs crate entry comments
+- Next step: publish only the AT-2026-05-08-106 file set
 - Published AT-2026-05-08-097 as commit `367b4b6` after the scoped diff check, selective staging, commit, and push all succeeded.
 - After the next confirmation returned "继续", the rollout moved out of the finished SQLite adapter chain and narrowed the next smallest backend foundation contract to `crates/kernel-foundation/src/error.rs`.
 - Started AT-2026-05-08-098 and constrained it to the public `AppErrorSeverity`, `AppError`, and `AppError::new()` declarations because that is the smallest stable error-projection boundary currently missing Chinese comments.
@@ -51,6 +51,12 @@
 - Validated AT-2026-05-08-105 with `cargo check -p launcher-kernel-jobs --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib`; the kernel-jobs package library compiled successfully.
 - Confirmed scoped `git diff --check` returned clean for the task-record files, handoff, and the touched kernel-jobs crate entry file, and VS Code diagnostics reported no errors.
 - Marked AT-2026-05-08-105 complete after the focused validation; the remaining action in this turn is publication.
+- Published AT-2026-05-08-105 as commit `7b4b502` after the scoped diff check, selective staging, commit, and push all succeeded.
+- After the repaired confirmation flow returned "继续", the rollout stayed in `kernel-jobs` and narrowed the next smallest declaration cluster to `JobState` and `JobUiState` in `crates/kernel-jobs/src/model.rs`.
+- Started AT-2026-05-08-106 and constrained it to the shared state enums because they are smaller than the accepted-job and snapshot contracts while still carrying documented runtime/UI state semantics.
+- Validated AT-2026-05-08-106 with `cargo check -p launcher-kernel-jobs --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib`; the kernel-jobs package library compiled successfully.
+- Confirmed scoped `git diff --check` returned clean for the task-record files, handoff, and the touched kernel-jobs model file, and VS Code diagnostics reported no errors.
+- Marked AT-2026-05-08-106 complete after the focused validation; the remaining action in this turn is publication.
 - Validated AT-2026-05-08-104 with `cargo check -p launcher-kernel-foundation --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib`; the kernel-foundation package library compiled successfully.
 - Confirmed scoped `git diff --check` returned clean for the task-record files, handoff, and the touched kernel foundation ID file, and VS Code diagnostics reported no errors.
 - Marked AT-2026-05-08-104 complete after the focused validation; the remaining action in this turn is publication.

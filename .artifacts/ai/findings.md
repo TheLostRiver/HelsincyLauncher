@@ -11,6 +11,11 @@
 
 ## Research Findings
 
+- `crates/kernel-jobs/src/model.rs` is the strongest next slice after the published kernel-jobs crate entry because it is the next smallest production file in that crate, and the shared state vocabulary sits at the top of the file as the smallest documented declaration cluster.
+- Within this file, `JobState` and `JobUiState` are the safest immediate candidates because they are smaller than `AcceptedJob`, `EnqueueJobRequest`, and `JobSnapshot`, while still directly defining the shared runtime/UI state semantics.
+- The safest move is to add only Chinese declaration comments to those two enums and their variants, leaving enum values, serde rename rules, and the adjacent English `JobSnapshotDto` comment unchanged.
+- `cargo check -p launcher-kernel-jobs --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib` remains the narrowest reliable validation gate for this slice because the crate currently exposes no smaller named test anchor for this one-file contract surface.
+
 - `crates/kernel-jobs/src/lib.rs` is the strongest next slice after the published foundation ID contract because it is the smallest remaining production file in the adjacent shared jobs crate, and the jobs runtime design explicitly defines the crate-level public export surface.
 - The safest move is to add only a Chinese file-entry comment to `crates/kernel-jobs/src/lib.rs`, leaving `model` / `runtime` module declarations and re-export wiring unchanged.
 - `crates/kernel-jobs/src/model.rs` and `crates/kernel-jobs/src/runtime.rs` are not the best immediate candidates because they widen the slice into much larger declaration surfaces than this crate entry file.

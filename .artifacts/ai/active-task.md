@@ -2,17 +2,17 @@
 
 ## Identity
 
-- task id: AT-2026-05-08-105
-- title: Annotate kernel jobs crate entry comments
+- task id: AT-2026-05-08-106
+- title: Annotate kernel jobs state enum comments
 - status: completed
 
 ## Goal
 
-按当前仓库注释规范，在不改动任何运行时行为或已有正确英文注释的前提下，为 kernel jobs crate 入口边界的缺失声明级中文注释补齐：
+按当前仓库注释规范，在不改动任何运行时行为或已有正确英文注释的前提下，为 kernel jobs 状态枚举边界的缺失声明级中文注释补齐：
 
-- `crates/kernel-jobs/src/lib.rs`
+- `crates/kernel-jobs/src/model.rs`
 
-本轮只补 `crates/kernel-jobs/src/lib.rs` 的文件级入口注释，不改当前 jobs model/runtime 模块组织或对外 re-export wiring，也不顺带打开第二个源码文件。
+本轮只补 `crates/kernel-jobs/src/model.rs` 中 `JobState` 与 `JobUiState` 的声明级中文注释，不改当前状态机枚举值、序列化命名或 UI 投影语义，也不顺带打开第二个源码文件。
 
 ## Scope
 
@@ -22,12 +22,12 @@
   - update `.artifacts/ai/progress.md`
   - update `.artifacts/ai/findings.md`
   - update `.artifacts/ai/handoff.md`
-  - update `crates/kernel-jobs/src/lib.rs`
+  - update `crates/kernel-jobs/src/model.rs`
 - out of scope:
   - annotate more than this one backend source file
-  - annotate more than this one crate-entry comment boundary in this file
-  - change jobs model/runtime module organization or public re-export wiring
-  - rewrite comments in adjacent `model.rs` or `runtime.rs` that are outside this entry boundary
+  - annotate more than this one state-enum declaration cluster in this file
+  - change job state enum values, serde rename rules, or UI projection semantics
+  - rewrite comments on unrelated declarations in `model.rs` or adjacent `runtime.rs`
   - rewrite or delete already-correct English comments in this file or other modules
   - touch unrelated dirty frontend, pen, sqlite, or lockfile changes already present in the worktree
   - add comments to obvious tests only to raise coverage numbers
@@ -39,7 +39,7 @@
 3. .artifacts/ai/progress.md
 4. .artifacts/ai/findings.md
 5. .artifacts/ai/handoff.md
-6. crates/kernel-jobs/src/lib.rs
+6. crates/kernel-jobs/src/model.rs
 
 ## 控制性文档
 
@@ -52,11 +52,11 @@
 7. docs/TauriBackendSkeletonImplementationDesign.md
 8. docs/TauriKernelJobsRuntimeDesign.md
 9. .github/skills/strict-doc-driven-development/SKILL.md
-10. crates/kernel-jobs/src/lib.rs
+10. crates/kernel-jobs/src/model.rs
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If `crates/kernel-jobs/src/lib.rs` adds a Chinese file-entry comment that explains the shared job runtime crate export boundary while leaving the current module organization and public re-export wiring unchanged, then this kernel-jobs crate-entry slice will satisfy the repository comment rule and the documented crate ownership boundary without changing runtime behavior.
+- falsifiable local hypothesis: If `crates/kernel-jobs/src/model.rs` adds Chinese declaration comments for `JobState` and `JobUiState` while leaving the current enum variants and serde rename rules unchanged, then this kernel-jobs state slice will satisfy the repository comment rule and the documented shared job-state boundary without changing runtime behavior.
 
 ## Cheap Check
 
@@ -65,7 +65,7 @@
 ## Validation Gate
 
 1. `cargo check -p launcher-kernel-jobs --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib`
-2. `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/kernel-jobs/src/lib.rs`
+2. `git -C q:\DEV\MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md crates/kernel-jobs/src/model.rs`
 
 ## Validation Result
 
@@ -73,15 +73,15 @@
 
 ## Notes
 
-- `crates/kernel-jobs/src/lib.rs` is the strongest next missing-comment boundary because it is the smallest remaining production file in the adjacent shared jobs crate, and the jobs runtime design explicitly defines the crate-level public export surface.
-- `crates/kernel-jobs/src/model.rs` and `crates/kernel-jobs/src/runtime.rs` are weaker immediate candidates because they would widen the slice into larger declaration surfaces than this crate entry file.
-- This slice stays at declaration level only; no job model semantics, runtime behavior, or re-export wiring are changed.
-- `cargo check -p launcher-kernel-jobs --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib` is the narrowest current executable validation gate for this kernel-jobs crate-entry slice because the crate exposes no smaller named test anchor for this file and this check compiles the touched public contract surface.
+- `crates/kernel-jobs/src/model.rs` is the strongest next missing-comment boundary because it is the next smallest production file in `kernel-jobs`, and the shared state enums sit at the top of the file as the smallest documented declaration cluster.
+- Within this file, `JobState` and `JobUiState` are stronger immediate candidates than `AcceptedJob` or `JobSnapshot` because they are smaller and directly define the shared runtime/UI state vocabulary.
+- This slice stays at declaration level only; no enum variants, state-machine semantics, or serialization contracts are changed.
+- `cargo check -p launcher-kernel-jobs --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib` is the narrowest current executable validation gate for this kernel-jobs state slice because the crate exposes no smaller named test anchor for this file and this check compiles the touched public contract surface.
 - `cargo check -p launcher-kernel-jobs --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib` passed, `git diff --check` returned clean for the scoped file set, and VS Code diagnostics reported no errors for the touched files.
 
 ## 安全恢复点
 
-- 缺失注释补齐切片已经收敛到 `crates/kernel-jobs/src/lib.rs` 的 crate 入口边界；若中断，恢复时只补这个文件的中文文件头说明，然后立刻跑 kernel-jobs 的包级 `cargo check` 校验。
+- 缺失注释补齐切片已经收敛到 `crates/kernel-jobs/src/model.rs` 的状态枚举簇；若中断，恢复时只补 `JobState` 与 `JobUiState` 的中文声明注释，然后立刻跑 kernel-jobs 的包级 `cargo check` 校验。
 
 ## Completion
 - AT-2026-05-06-091 has been published as commit `f20e4f5`.
@@ -98,6 +98,7 @@
 - AT-2026-05-08-102 has been published as commit `7fa1bda`.
 - AT-2026-05-08-103 has been published as commit `6fcb6e3`.
 - AT-2026-05-08-104 has been published as commit `c35ffaa`.
-- AT-2026-05-08-105 has been validated and is ready for selective publication.
+- AT-2026-05-08-105 has been published as commit `7b4b502`.
+- AT-2026-05-08-106 has been validated and is ready for selective publication.
 
 
