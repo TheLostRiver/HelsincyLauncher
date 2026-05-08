@@ -11,6 +11,11 @@
 
 ## Research Findings
 
+- `crates/kernel-foundation/src/result.rs` is the strongest next slice after the published foundation paging contract because it is the smallest remaining public foundation contract file and `AppResult<T>` is explicitly listed as required minimal API in both `docs/TauriFirstCrateApiDrafts.md` and `docs/TauriBackendSkeletonImplementationDesign.md`.
+- The safest move is to add only Chinese declaration comments to the `AppResult<T>` alias and the file entry, leaving its `Result<T, AppError>` binding unchanged.
+- `crates/kernel-foundation/src/ids.rs` and `crates/kernel-foundation/src/lib.rs` are not the best immediate candidates because they expose broader or macro-generated public surfaces than this one-line result alias slice.
+- `cargo check -p launcher-kernel-foundation --manifest-path q:\DEV\MyEpicLauncher\Cargo.toml --lib` remains the narrowest reliable validation gate for this slice because the crate currently exposes no smaller named test anchor for this one-file contract surface.
+
 - `crates/kernel-foundation/src/paging.rs` is the strongest next slice after the published foundation error contract because it is the smaller direct-declaration contract file in the same crate and its shared paging request/result semantics are explicitly sketched in `docs/TauriFirstCrateApiDrafts.md`.
 - The safest move is to add only Chinese declaration comments to `PageCursor`, `PageRequest`, `PageSlice<T>`, their public fields, and their public constructors/accessors, leaving cursor shape, serde behavior, and pagination semantics unchanged.
 - `crates/kernel-foundation/src/ids.rs` is not the best immediate candidate because its public surface is macro-generated and would widen the explanation surface beyond this one direct paging contract file.

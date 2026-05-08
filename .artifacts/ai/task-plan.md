@@ -27,7 +27,8 @@ Phase 23 - Backend comment rollout
 - AT-2026-05-07-096 has been published as commit `5b5a96a` after documenting the download checkpoint repository shell in `crates/adapter-storage-sqlite/src/lib.rs`.
 - AT-2026-05-08-097 has been published as commit `367b4b6` after documenting the shared job snapshot store shell in `crates/adapter-storage-sqlite/src/lib.rs`.
 - AT-2026-05-08-098 has been published as commit `7260673` after documenting the shared foundation error contract in `crates/kernel-foundation/src/error.rs`.
-- AT-2026-05-08-099 has now completed the next missing-comment-only slice by documenting the shared foundation paging contract in `crates/kernel-foundation/src/paging.rs`.
+- AT-2026-05-08-099 has been published as commit `2792762` after documenting the shared foundation paging contract in `crates/kernel-foundation/src/paging.rs`.
+- AT-2026-05-08-100 has now completed the next missing-comment-only slice by documenting the shared foundation result alias in `crates/kernel-foundation/src/result.rs`.
 - The focused validation gates for this slice have passed: package-scoped `cargo check`, scoped `git diff --check`, and VS Code diagnostics all stayed clean.
 - The next action is to publish only this slice.
 
@@ -278,6 +279,7 @@ Phase 23 - Backend comment rollout
 91. AT-2026-05-08-097 - completed - added the missing declaration comments to the SQLite job snapshot store shell while preserving its current persistence and recovery behavior.
 92. AT-2026-05-08-098 - completed - added the missing declaration comments to the kernel foundation error contract while preserving its current projection semantics and constructor behavior.
 93. AT-2026-05-08-099 - completed - added the missing declaration comments to the kernel foundation paging contract while preserving its current cursor and page-shape semantics.
+94. AT-2026-05-08-100 - completed - added the missing declaration comments to the kernel foundation result alias while preserving its current error binding semantics.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
