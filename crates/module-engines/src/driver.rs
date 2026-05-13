@@ -6,10 +6,9 @@
 use launcher_kernel_foundation::AppResult;
 use launcher_kernel_jobs::{JobDriver, JobSnapshot, RestoreDisposition};
 
-/// Stub restore driver for the `engines/verification` job kind.
+/// 表示当前 `engines/verification` 作业种类的占位恢复 driver。
 ///
-/// Always returns `Resumed` for engine verification jobs.
-/// Real restoration logic will check cache and verification state in a later slice.
+/// 当前基线总是返回 `Resumed`，真实恢复逻辑会在后续切片中检查缓存和验证状态。
 pub struct EngineJobDriver;
 
 impl JobDriver<()> for EngineJobDriver {
@@ -22,8 +21,8 @@ impl JobDriver<()> for EngineJobDriver {
     }
 
     fn restore(&self, _snapshot: &JobSnapshot<()>) -> AppResult<RestoreDisposition> {
-        // TODO: AT-054 — Check engine cache and verification state for recovery
-        // For now, stub returns Resumed.
+        // TODO: AT-054 - 检查引擎缓存和验证状态后再决定恢复处置。
+        // 当前占位实现保持可恢复，以便 startup stage 2 能先验证 driver 接线。
         Ok(RestoreDisposition::Resumed)
     }
 }
