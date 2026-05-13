@@ -478,8 +478,8 @@ impl SqliteJobSnapshotStore {
             );",
         )
         .expect("SqliteJobSnapshotStore: failed to create job_snapshots table");
-        // Migration: add recoverable column to databases created before this column was added.
-        // SQLite does not support IF NOT EXISTS for ALTER TABLE; ignore the error if the column exists.
+        // 兼容旧库：为早于 `recoverable` 字段的 job_snapshots 表补列。
+        // SQLite 的 ALTER TABLE 不支持 IF NOT EXISTS；列已存在时保留忽略错误的迁移策略。
         let _ = conn.execute(
             "ALTER TABLE job_snapshots ADD COLUMN recoverable INTEGER NOT NULL DEFAULT 1",
             [],

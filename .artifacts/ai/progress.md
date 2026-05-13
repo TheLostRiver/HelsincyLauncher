@@ -1098,6 +1098,20 @@
 - Validation passed: `cargo check -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`.
 - Scoped `git diff --check` passed for `crates/module-downloads/src/contracts/queries.rs`, `.artifacts/ai/active-task.md`, `.artifacts/ai/task-plan.md`, and `.artifacts/ai/progress.md`.
 
+## 2026-05-14 - AT-2026-05-14-124 started
+
+- Published AT-2026-05-14-123 as commit `9e0b534`, then continued Phase 23 because the next backend-only slice is clear.
+- Read `docs/TauriStorageAndDatabaseDesign.md` and `docs/TauriRepositoryPortsAndAdapterDesign.md` before editing the SQLite adapter.
+- Selected the `SqliteJobSnapshotStore::new` `recoverable` compatibility migration comments because they were still in English.
+- Scoped AT-2026-05-14-124 to comment localization only; migration SQL, ignored-error behavior, and database files must remain unchanged.
+
+## 2026-05-14 - AT-2026-05-14-124 completed
+
+- Localized the `job_snapshots.recoverable` compatibility migration comments in `crates/adapter-storage-sqlite/src/lib.rs`.
+- Preserved migration SQL, ignored-error behavior, store behavior, repository behavior, and database files.
+- Validation passed: `cargo check -p launcher-adapter-storage-sqlite --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`.
+- Scoped `git diff --check` passed for `crates/adapter-storage-sqlite/src/lib.rs`, `.artifacts/ai/active-task.md`, `.artifacts/ai/task-plan.md`, and `.artifacts/ai/progress.md`.
+
 ### Auto Record: 2026-05-14 01:45:06
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
@@ -1573,6 +1587,54 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
 
 ### Auto Record: 2026-05-14 07:49:33
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-14 07:51:38
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-14 07:52:09
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-14 07:52:21
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-14 07:52:30
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\adapter-storage-sqlite\src\lib.rs` (update)
+
+### Auto Record: 2026-05-14 07:52:36
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-14 07:53:21
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-14 07:53:30
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-14 07:53:41
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
 - Files:
