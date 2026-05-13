@@ -88,7 +88,9 @@ pub trait JobSnapshotStore<E>: Send + Sync {
 }
 
 #[derive(Debug, Clone, Default)]
+/// 表示共享运行时默认使用的内存快照存储实现。
 struct InMemoryJobSnapshotStore {
+    /// 按 `JobId` 保存快照；`Mutex` 保护运行时共享访问，`Arc` 允许 host 克隆同一份存储状态。
     snapshots: Arc<Mutex<HashMap<JobId, JobSnapshot<()>>>>,
 }
 
