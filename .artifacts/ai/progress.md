@@ -36,6 +36,8 @@
 - Validated AT-2026-05-14-112 with `cargo check -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`; the `launcher-kernel-jobs` library check passed.
 - Confirmed scoped `git diff --check` returned clean for `crates/kernel-jobs/src/model.rs` and the touched `.artifacts/ai` records.
 - Marked AT-2026-05-14-112 complete after the focused validation.
+- Committed AT-2026-05-14-112 as `3e54e3a` (`docs: annotate kernel job restore disposition`) and pushed it to `origin/main`.
+- Started AT-2026-05-14-113 and constrained it to `JobSnapshot<E>` comments only, leaving `JobSnapshotDto` for a later slice.
 - The user asked whether moving `.artifacts/ai` task records back to the repo root would help after `pwf-doctor` reported `active plan: missing` and `planning files: missing`.
 - Chose the safer repair path: keep `.artifacts/ai` as the only authoritative task surface and fix repo-local PWF path detection instead of recreating root planning files.
 - Started AT-2026-05-14-109 and constrained it to `.codex/hooks/planning_state.py` plus task-record updates.
@@ -918,3 +920,39 @@
 - Phase: Phase 23 - Backend Comment Rollout
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (delete)
+
+### Auto Record: 2026-05-14 01:39:23
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-14 01:39:33
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-14 01:39:44
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\kernel-jobs\src\model.rs` (update)
+
+### Auto Record: 2026-05-14 01:40:08
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-14 01:40:35
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-14 01:42:12
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)

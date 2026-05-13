@@ -126,16 +126,26 @@ pub enum RestoreDisposition {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+/// 表示共享运行时持久化和投影使用的通用作业快照。
 pub struct JobSnapshot<E> {
+    /// 快照所属作业的全局稳定标识。
     pub job_id: JobId,
+    /// 拥有该作业业务语义的模块名。
     pub module: String,
+    /// 模块内用于区分作业类型的稳定名称。
     pub kind: String,
+    /// 运行时内部使用的生命周期状态。
     pub state: JobState,
+    /// 面向界面和宿主投影的简化状态。
     pub ui_state: JobUiState,
+    /// 跨模块共享的聚合进度。
     pub progress: JobProgress,
+    /// 标记该快照是否允许后续恢复流程尝试重新接管作业。
     #[serde(default = "default_recoverable")]
     pub recoverable: bool,
+    /// 快照最后一次被运行时更新的 UTC 时间。
     pub updated_at: IsoDateTime,
+    /// 模块保留的扩展状态；共享运行时只持久化和回传，不解释内容。
     pub extension: Option<E>,
 }
 

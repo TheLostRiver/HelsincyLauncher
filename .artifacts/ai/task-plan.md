@@ -48,7 +48,8 @@ Phase 23 - Backend Comment Rollout
 - The user installed Rust; `cargo 1.95.0` and `rustc 1.95.0` are now visible in the current shell.
 - AT-2026-05-14-110 completed after `cargo check -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed.
 - AT-2026-05-14-111 completed after documenting `AcceptedJob` and `EnqueueJobRequest<E>` in `crates/kernel-jobs/src/model.rs` and validating with the same `launcher-kernel-jobs` lib check.
-- AT-2026-05-14-112 completed after documenting `RestoreDisposition` in `crates/kernel-jobs/src/model.rs` and validating with the same `launcher-kernel-jobs` lib check.
+- AT-2026-05-14-112 completed after documenting `RestoreDisposition` in `crates/kernel-jobs/src/model.rs` and publishing commit `3e54e3a`.
+- AT-2026-05-14-113 completed after documenting `JobSnapshot<E>` in `crates/kernel-jobs/src/model.rs` and validating with the same `launcher-kernel-jobs` lib check.
 
 ## Phases
 
@@ -187,7 +188,7 @@ Phase 23 - Backend Comment Rollout
 ### Phase 23: Backend Comment Rollout
 
 - Outcome: apply the new repository comment standard to backend Rust/Tauri files in small, commit-sized slices of one or two files.
-- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062, AT-2026-05-04-063, AT-2026-05-04-064, AT-2026-05-04-065, AT-2026-05-04-066, AT-2026-05-04-067, AT-2026-05-04-068, AT-2026-05-05-071, AT-2026-05-05-072, AT-2026-05-05-073, AT-2026-05-05-074, AT-2026-05-05-075, AT-2026-05-05-076, AT-2026-05-05-077, AT-2026-05-05-078, AT-2026-05-05-079, AT-2026-05-05-080, AT-2026-05-05-081, AT-2026-05-06-082, AT-2026-05-06-083, AT-2026-05-06-084, AT-2026-05-06-085, AT-2026-05-06-086, AT-2026-05-06-087, AT-2026-05-06-088, AT-2026-05-06-089, AT-2026-05-14-110, AT-2026-05-14-111, AT-2026-05-14-112
+- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062, AT-2026-05-04-063, AT-2026-05-04-064, AT-2026-05-04-065, AT-2026-05-04-066, AT-2026-05-04-067, AT-2026-05-04-068, AT-2026-05-05-071, AT-2026-05-05-072, AT-2026-05-05-073, AT-2026-05-05-074, AT-2026-05-05-075, AT-2026-05-05-076, AT-2026-05-05-077, AT-2026-05-05-078, AT-2026-05-05-079, AT-2026-05-05-080, AT-2026-05-05-081, AT-2026-05-06-082, AT-2026-05-06-083, AT-2026-05-06-084, AT-2026-05-06-085, AT-2026-05-06-086, AT-2026-05-06-087, AT-2026-05-06-088, AT-2026-05-06-089, AT-2026-05-14-110, AT-2026-05-14-111, AT-2026-05-14-112, AT-2026-05-14-113
 - **Status:** in_progress
 
 ### Phase 24: Comment Language Controls
@@ -322,6 +323,7 @@ Phase 23 - Backend Comment Rollout
 104. AT-2026-05-14-110 - completed - added Chinese declaration comments to `JobPriority` and `JobProgress`, then validated the slice with `cargo check -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` after Rust was installed.
 105. AT-2026-05-14-111 - completed - added Chinese declaration comments to `AcceptedJob` and `EnqueueJobRequest<E>` while preserving their field shape, serde defaults, and generic extension boundary.
 106. AT-2026-05-14-112 - completed - added Chinese declaration comments to `RestoreDisposition` and its variants while preserving restore result semantics.
+107. AT-2026-05-14-113 - completed - added Chinese declaration comments to `JobSnapshot<E>` and its fields while preserving snapshot field shape, serde defaults, and generic extension boundary.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
@@ -340,7 +342,7 @@ Phase 23 - Backend Comment Rollout
 
 ## Follow-up Queue
 
-1. Continue Phase 23 with a separate narrow `kernel-jobs` slice for `JobSnapshot` or the next smallest contract surface.
+1. Continue Phase 23 with a separate narrow `kernel-jobs` slice for `JobSnapshotDto` or the next smallest contract surface.
 2. Leave unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, and `src/` changes untouched unless the user explicitly scopes them into a task.
 
 ## Legacy Note
