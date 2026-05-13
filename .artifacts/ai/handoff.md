@@ -2,8 +2,8 @@
 
 ## Latest Completed Atomic Task
 
-- task id: AT-2026-05-14-111
-- title: Annotate kernel-jobs accepted and enqueue contracts
+- task id: AT-2026-05-14-112
+- title: Annotate kernel-jobs restore disposition contract
 - status: completed
 
 ## Validated Slice
@@ -22,6 +22,7 @@
 
 ## Next Resume Point
 
-- Treat AT-2026-05-14-111 as validated and ready for publication.
-- If continuing Phase 23 after publication, open a separate narrow `kernel-jobs` comment slice for `RestoreDisposition` / `JobSnapshot` or the next smallest contract surface.
-- Keep unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, and `src/` changes out of this slice unless explicitly requested.
+- Treat AT-2026-05-14-112 as validated and ready for publication.
+- If continuing Phase 23 after publication, open a separate narrow `kernel-jobs` comment slice for `JobSnapshot` or the next smallest contract surface.
+- If comment rollout is later judged complete, switch to backend-only feature work only after rereading `README.md`, `CONTRIBUTING.md`, the relevant architecture docs, and relevant module docs.
+- Keep frontend prototype files out of backend tasks unless explicitly requested.

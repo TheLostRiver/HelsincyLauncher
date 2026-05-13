@@ -29,6 +29,8 @@
 - After the user installed Rust through `rustup-init`, `cargo 1.95.0` and `rustc 1.95.0` became available in PATH, and the `launcher-kernel-jobs` lib check passed for AT-2026-05-14-110.
 - After AT-2026-05-14-110, `AcceptedJob` and `EnqueueJobRequest<E>` became the next smallest public contract cluster in `crates/kernel-jobs/src/model.rs` because they share the job acceptance/enqueue boundary and are smaller than the restore/snapshot model cluster.
 - The safe AT-2026-05-14-111 move was to add only Chinese declaration comments to those two structs and their fields, preserving `serde(default = "default_recoverable")`, the extension generic, and the runtime enqueue behavior.
+- After AT-2026-05-14-111, `RestoreDisposition` became the next smallest public contract surface in `crates/kernel-jobs/src/model.rs` because it is one restore-result enum and can be documented without opening the broader snapshot model.
+- The safe AT-2026-05-14-112 move was to add only Chinese declaration comments to `RestoreDisposition` and its variants, preserving restore result semantics and variant payload shape.
 
 - `crates/kernel-jobs/src/model.rs` is the strongest next slice after the published kernel-jobs crate entry because it is the next smallest production file in that crate, and the shared state vocabulary sits at the top of the file as the smallest documented declaration cluster.
 - Within this file, `JobState` and `JobUiState` are the safest immediate candidates because they are smaller than `AcceptedJob`, `EnqueueJobRequest`, and `JobSnapshot`, while still directly defining the shared runtime/UI state semantics.

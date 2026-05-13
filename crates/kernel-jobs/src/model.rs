@@ -117,8 +117,11 @@ pub struct EnqueueJobRequest<E> {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+/// 表示运行时尝试恢复持久化作业快照后的结果。
 pub enum RestoreDisposition {
+    /// 作业已经被恢复流程接管，可以继续进入运行时调度。
     Resumed,
+    /// 作业无法安全恢复，应按不可恢复失败状态投影。
     FailedAsUnrecoverable { reason: String },
 }
 

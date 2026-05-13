@@ -2,18 +2,17 @@
 
 ## Identity
 
-- task id: AT-2026-05-14-111
-- title: Annotate kernel-jobs accepted and enqueue contracts
+- task id: AT-2026-05-14-112
+- title: Annotate kernel-jobs restore disposition contract
 - status: completed
 
 ## Goal
 
-继续 Phase 23 Backend Comment Rollout，在不改变共享作业模型行为、序列化形状或运行时逻辑的前提下，为 `crates/kernel-jobs/src/model.rs` 中下一组最小公开作业接收/入队契约补齐中文声明注释。
+继续 Phase 23 Backend Comment Rollout，在不改变共享作业模型行为或恢复语义的前提下，为 `crates/kernel-jobs/src/model.rs` 中下一组最小恢复结果契约补齐中文声明注释。
 
 本轮只覆盖：
 
-- `AcceptedJob`
-- `EnqueueJobRequest<E>`
+- `RestoreDisposition`
 
 ## Scope
 
@@ -25,8 +24,8 @@
   - update `.artifacts/ai/findings.md`
   - update `.artifacts/ai/handoff.md`
 - out of scope:
-  - change enum variants, struct fields, serde attributes, generic parameters, or method behavior
-  - document `RestoreDisposition`, `JobSnapshot`, or `JobSnapshotDto` in this slice
+  - change enum variants, variant payloads, or restore behavior
+  - document `JobSnapshot` or `JobSnapshotDto` in this slice
   - modify runtime, adapter, frontend, database, or transport files
   - touch unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, or `src/` changes already present in the worktree
 
@@ -44,12 +43,11 @@
 1. docs/TauriCodeCommentStandard.md
 2. docs/TauriKernelJobsRuntimeDesign.md
 3. docs/TauriFirstCrateApiDrafts.md
-4. docs/TauriBackendSkeletonImplementationDesign.md
-5. .artifacts/ai/handoff.md
+4. .artifacts/ai/handoff.md
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If this slice adds only high-signal Chinese declaration comments to `AcceptedJob`, `EnqueueJobRequest<E>`, and their public fields, then the next `kernel-jobs` job acceptance/enqueue contract surface will comply better with the repository comment standard while preserving the compiled public API shape.
+- falsifiable local hypothesis: If this slice adds only high-signal Chinese declaration comments to `RestoreDisposition` and its variants, then the restore result contract will comply better with the repository comment standard while preserving the compiled public API shape.
 
 ## Cheap Check
 
@@ -68,15 +66,15 @@
 
 ## Notes
 
-- AT-2026-05-14-110 completed the immediately preceding `JobPriority` / `JobProgress` contract comments.
-- This slice stops before restore disposition and snapshot contracts so Phase 23 keeps moving in small, reviewable units.
+- AT-2026-05-14-111 completed the immediately preceding accepted/enqueue contract comments and was pushed as part of commit `7ff33fb`.
+- This slice stops before snapshot contracts so Phase 23 keeps moving in small, reviewable units.
 
 ## 安全恢复点
 
-- AT-2026-05-14-111 is validated and ready for publication. If work resumes before publishing, rerun the scoped `cargo check` and `git diff --check`, then publish only `crates/kernel-jobs/src/model.rs` plus the touched `.artifacts/ai` records.
+- AT-2026-05-14-112 is validated and ready for publication. If work resumes before publishing, rerun the scoped `cargo check` and `git diff --check`, then publish only `crates/kernel-jobs/src/model.rs` plus the touched `.artifacts/ai` records.
 
 ## Completion Summary
 
-- `AcceptedJob`, `EnqueueJobRequest<E>`, and their public fields now have Chinese declaration comments.
-- The slice preserves struct fields, serde attributes, generic parameters, and runtime behavior.
+- `RestoreDisposition` and its variants now have Chinese declaration comments.
+- The slice preserves enum variants, variant payloads, and restore behavior.
 - `cargo check -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed.

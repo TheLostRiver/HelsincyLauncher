@@ -26,6 +26,16 @@
 - Validated AT-2026-05-14-111 with `cargo check -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`; the `launcher-kernel-jobs` library check passed.
 - Confirmed scoped `git diff --check` returned clean for `crates/kernel-jobs/src/model.rs` and the touched `.artifacts/ai` records.
 - Marked AT-2026-05-14-111 complete after the focused validation.
+- Created commit `7ff33fb` (`chore: publish pwf repair and kernel job comments`) for the completed AT-109/AT-110/AT-111 work.
+- Push to `origin/main` is pending explicit user approval because the safety reviewer blocked pushing to the default branch remote `https://github.com/TheLostRiver/HelsincyLauncher.git`; per user rule, do not continue the next task until this commit is pushed.
+- User clarified the ongoing workflow rule: after each completed task, commit and push if possible; if push is blocked or unavailable, continue directly to the next task.
+- Pushed commit `7ff33fb` to `origin/main` successfully.
+- Re-read the comment standard and kernel-jobs architecture docs, then inspected `crates/kernel-jobs/src/model.rs`; comment rollout is not complete because `RestoreDisposition`, `JobSnapshot`, and `JobSnapshotDto` still need focused review/comment slices.
+- Started AT-2026-05-14-112 and constrained it to the `RestoreDisposition` restore result contract only.
+- Added Chinese declaration comments to `RestoreDisposition` and its variants without changing enum variants, variant payloads, or restore behavior.
+- Validated AT-2026-05-14-112 with `cargo check -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`; the `launcher-kernel-jobs` library check passed.
+- Confirmed scoped `git diff --check` returned clean for `crates/kernel-jobs/src/model.rs` and the touched `.artifacts/ai` records.
+- Marked AT-2026-05-14-112 complete after the focused validation.
 - The user asked whether moving `.artifacts/ai` task records back to the repo root would help after `pwf-doctor` reported `active plan: missing` and `planning files: missing`.
 - Chose the safer repair path: keep `.artifacts/ai` as the only authoritative task surface and fix repo-local PWF path detection instead of recreating root planning files.
 - Started AT-2026-05-14-109 and constrained it to `.codex/hooks/planning_state.py` plus task-record updates.
@@ -850,6 +860,60 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
 
 ### Auto Record: 2026-05-14 01:28:11
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (delete)
+
+### Auto Record: 2026-05-14 01:33:29
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-14 01:35:55
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-14 01:36:08
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-14 01:36:40
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\kernel-jobs\src\model.rs` (update)
+
+### Auto Record: 2026-05-14 01:37:13
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-14 01:37:39
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-14 01:37:47
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-14 01:37:56
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-14 01:38:07
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
 - Files:
