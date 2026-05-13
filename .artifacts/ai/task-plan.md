@@ -54,6 +54,7 @@ Phase 23 - Backend Comment Rollout
 - AT-2026-05-14-115 completed after documenting `RuntimeQueuePolicy` in `crates/kernel-jobs/src/runtime.rs` and validating with the same `launcher-kernel-jobs` lib check.
 - AT-2026-05-14-116 completed after documenting `JobDriver<E>` in `crates/kernel-jobs/src/runtime.rs` and validating with the same `launcher-kernel-jobs` lib check.
 - AT-2026-05-14-117 completed after documenting `JobDriverRegistry<E>` in `crates/kernel-jobs/src/runtime.rs` and validating with the same `launcher-kernel-jobs` lib check.
+- AT-2026-05-14-118 completed after documenting `JobSnapshotStore<E>` in `crates/kernel-jobs/src/runtime.rs` and validating with the same `launcher-kernel-jobs` lib check.
 
 ## Phases
 
@@ -192,7 +193,7 @@ Phase 23 - Backend Comment Rollout
 ### Phase 23: Backend Comment Rollout
 
 - Outcome: apply the new repository comment standard to backend Rust/Tauri files in small, commit-sized slices of one or two files.
-- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062, AT-2026-05-04-063, AT-2026-05-04-064, AT-2026-05-04-065, AT-2026-05-04-066, AT-2026-05-04-067, AT-2026-05-04-068, AT-2026-05-05-071, AT-2026-05-05-072, AT-2026-05-05-073, AT-2026-05-05-074, AT-2026-05-05-075, AT-2026-05-05-076, AT-2026-05-05-077, AT-2026-05-05-078, AT-2026-05-05-079, AT-2026-05-05-080, AT-2026-05-05-081, AT-2026-05-06-082, AT-2026-05-06-083, AT-2026-05-06-084, AT-2026-05-06-085, AT-2026-05-06-086, AT-2026-05-06-087, AT-2026-05-06-088, AT-2026-05-06-089, AT-2026-05-14-110, AT-2026-05-14-111, AT-2026-05-14-112, AT-2026-05-14-113, AT-2026-05-14-114, AT-2026-05-14-115, AT-2026-05-14-116, AT-2026-05-14-117
+- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062, AT-2026-05-04-063, AT-2026-05-04-064, AT-2026-05-04-065, AT-2026-05-04-066, AT-2026-05-04-067, AT-2026-05-04-068, AT-2026-05-05-071, AT-2026-05-05-072, AT-2026-05-05-073, AT-2026-05-05-074, AT-2026-05-05-075, AT-2026-05-05-076, AT-2026-05-05-077, AT-2026-05-05-078, AT-2026-05-05-079, AT-2026-05-05-080, AT-2026-05-05-081, AT-2026-05-06-082, AT-2026-05-06-083, AT-2026-05-06-084, AT-2026-05-06-085, AT-2026-05-06-086, AT-2026-05-06-087, AT-2026-05-06-088, AT-2026-05-06-089, AT-2026-05-14-110, AT-2026-05-14-111, AT-2026-05-14-112, AT-2026-05-14-113, AT-2026-05-14-114, AT-2026-05-14-115, AT-2026-05-14-116, AT-2026-05-14-117, AT-2026-05-14-118
 - **Status:** in_progress
 
 ### Phase 24: Comment Language Controls
@@ -332,6 +333,7 @@ Phase 23 - Backend Comment Rollout
 109. AT-2026-05-14-115 - completed - added Chinese declaration comments to `RuntimeQueuePolicy` and its constructor while preserving queue policy behavior.
 110. AT-2026-05-14-116 - completed - added Chinese declaration comments to `JobDriver<E>` and its methods while preserving driver routing and restore behavior.
 111. AT-2026-05-14-117 - completed - added Chinese declaration comments to `JobDriverRegistry<E>` and its public methods while preserving registry ownership and lookup behavior.
+112. AT-2026-05-14-118 - completed - added Chinese declaration comments to `JobSnapshotStore<E>` and its methods while preserving persistence and recovery-query behavior.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
@@ -350,7 +352,7 @@ Phase 23 - Backend Comment Rollout
 
 ## Follow-up Queue
 
-1. Continue Phase 23 with the next narrow `kernel-jobs` runtime surface after publishing AT-2026-05-14-117.
+1. Continue Phase 23 with the next narrow `kernel-jobs` runtime surface after publishing AT-2026-05-14-118.
 2. Leave unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, and `src/` changes untouched unless the user explicitly scopes them into a task.
 
 ## Legacy Note

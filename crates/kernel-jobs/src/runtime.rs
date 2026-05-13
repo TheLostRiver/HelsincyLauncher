@@ -73,10 +73,17 @@ impl<E: 'static> JobDriverRegistry<E> {
     }
 }
 
+/// 表示共享运行时持久化、更新和查询作业快照的存储端口。
+///
+/// 该端口只处理通用 snapshot，不接管模块自己的业务 checkpoint。
 pub trait JobSnapshotStore<E>: Send + Sync {
+    /// 创建一条新的作业快照记录。
     fn create(&self, snapshot: &JobSnapshot<E>) -> AppResult<()>;
+    /// 用新的快照内容覆盖同一作业的现有记录。
     fn update(&self, snapshot: &JobSnapshot<E>) -> AppResult<()>;
+    /// 按作业标识读取当前快照，找不到时返回空结果。
     fn get(&self, job_id: &JobId) -> AppResult<Option<JobSnapshot<E>>>;
+    /// 列出运行时启动后可以尝试恢复的快照。
     fn list_resumable(&self) -> AppResult<Vec<JobSnapshot<E>>>;
 }
 
