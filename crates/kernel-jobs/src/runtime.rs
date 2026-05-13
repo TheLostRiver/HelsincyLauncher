@@ -176,13 +176,20 @@ impl Debug for SharedJobRuntimeHost {
     }
 }
 
+/// 表示模块和宿主用于入队、查询和控制共享作业的运行时端口。
 pub trait JobRuntime: Send + Sync {
+    /// 模块附加在通用作业快照上的扩展摘要类型。
     type Extension;
 
+    /// 接受一个模块作业入队请求，并返回稳定的入队确认。
     fn enqueue(&self, request: EnqueueJobRequest<Self::Extension>) -> AppResult<AcceptedJob>;
+    /// 按作业标识查询当前共享快照，找不到时返回空结果。
     fn snapshot(&self, job_id: &JobId) -> AppResult<Option<JobSnapshot<Self::Extension>>>;
+    /// 请求暂停指定作业。
     fn pause(&self, job_id: &JobId) -> AppResult<()>;
+    /// 请求恢复指定作业。
     fn resume(&self, job_id: &JobId) -> AppResult<()>;
+    /// 请求取消指定作业。
     fn cancel(&self, job_id: &JobId) -> AppResult<()>;
 }
 

@@ -2,34 +2,35 @@
 
 ## Identity
 
-- task id: AT-2026-05-14-120
-- title: Annotate shared job runtime host contract
+- task id: AT-2026-05-14-121
+- title: Annotate kernel-jobs runtime control port
 - status: completed
 
 ## Goal
 
-继续 Phase 23 Backend Comment Rollout，在不改变共享作业运行时 host 状态、构造方式或访问行为的前提下，为 `crates/kernel-jobs/src/runtime.rs` 中的 `SharedJobRuntimeHost` 契约补齐中文声明注释。
+继续 Phase 23 Backend Comment Rollout，在不改变共享作业运行时控制 trait API 或 host 实现行为的前提下，为 `crates/kernel-jobs/src/runtime.rs` 中的 `JobRuntime` 契约补齐中文声明注释。
 
 本轮只覆盖：
 
-- `SharedJobRuntimeHost`
-- `SharedJobRuntimeHost::policy`
-- `SharedJobRuntimeHost::snapshot_store`
-- `SharedJobRuntimeHost::new`
-- `SharedJobRuntimeHost::with_store`
-- `SharedJobRuntimeHost::policy()`
+- `JobRuntime`
+- `JobRuntime::Extension`
+- `JobRuntime::enqueue`
+- `JobRuntime::snapshot`
+- `JobRuntime::pause`
+- `JobRuntime::resume`
+- `JobRuntime::cancel`
 
 ## Scope
 
 - in scope:
-  - add Chinese declaration comments to the runtime host type and fields
-  - add Chinese method comments for host construction and policy access
+  - add Chinese declaration comments to `JobRuntime`
+  - add Chinese associated-type and method comments for the runtime control port
   - update `.artifacts/ai/active-task.md`
   - update `.artifacts/ai/task-plan.md`
   - update `.artifacts/ai/progress.md`
 - out of scope:
-  - change host state ownership, default store choice, injected store behavior, debug output, or `JobRuntime` behavior
-  - document `JobRuntime` trait or its implementation methods in this slice
+  - change trait bounds, associated type, method signatures, control semantics, host implementation behavior, or tests
+  - document individual `SharedJobRuntimeHost` implementation methods in this slice
   - modify model, adapter, frontend, database, transport, or composition files
   - touch unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, or `src/` changes already present in the worktree
 
@@ -53,7 +54,7 @@
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If this slice only adds high-signal Chinese declaration comments to `SharedJobRuntimeHost` and its constructor/accessor surface, then the shared runtime host boundary will match the repository comment standard while preserving compiled behavior.
+- falsifiable local hypothesis: If this slice only adds high-signal Chinese declaration comments to `JobRuntime` and its control methods, then the enqueue/query/control port will match the repository comment standard while preserving the compiled public API and runtime behavior.
 
 ## Cheap Check
 
@@ -72,15 +73,15 @@
 
 ## Notes
 
-- AT-2026-05-14-119 completed and was pushed as commit `dd30580`.
-- `SharedJobRuntimeHost` is the next public runtime surface after the store implementation state and owns the queue policy plus snapshot store handle.
+- AT-2026-05-14-120 completed and was pushed as commit `dc1fc3a`.
+- `JobRuntime` is the next public runtime surface and represents the enqueue, snapshot query, and pause/resume/cancel command port.
 
 ## 安全恢复点
 
-- AT-2026-05-14-120 is validated and ready for publication. If work resumes before publishing, rerun the scoped `cargo check` and `git diff --check`, then publish only `crates/kernel-jobs/src/runtime.rs` plus the touched `.artifacts/ai` records.
+- AT-2026-05-14-121 is validated and ready for publication. If work resumes before publishing, rerun the scoped `cargo check` and `git diff --check`, then publish only `crates/kernel-jobs/src/runtime.rs` plus the touched `.artifacts/ai` records.
 
 ## Completion Summary
 
-- `SharedJobRuntimeHost`, its fields, and its `new`, `with_store`, and `policy` methods now have Chinese declaration comments.
-- The slice preserves host state ownership, default store selection, injected store behavior, debug formatting behavior, and runtime behavior.
+- `JobRuntime`, its `Extension` associated type, and its enqueue/query/control methods now have Chinese declaration comments.
+- The slice preserves trait bounds, associated type, method signatures, host implementation behavior, and tests.
 - `cargo check -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed.
