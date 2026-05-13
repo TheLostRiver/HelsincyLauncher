@@ -10,11 +10,14 @@ use crate::model::{
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// 表示共享作业运行时选择可执行作业时使用的队列策略。
 pub struct RuntimeQueuePolicy {
+    /// 允许共享运行时同时推进的最大作业数。
     pub max_concurrent_jobs: usize,
 }
 
 impl RuntimeQueuePolicy {
+    /// 按调用方提供的全局并发预算构造队列策略。
     pub fn new(max_concurrent_jobs: usize) -> Self {
         Self {
             max_concurrent_jobs,
