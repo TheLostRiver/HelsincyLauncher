@@ -1,28 +1,29 @@
-//! Query input contracts for stable downloads read paths.
+//! downloads 模块稳定读取路径的查询输入 contracts。
 //!
-//! These DTOs let callers ask for paged job lists, one concrete job snapshot, or
-//! the current downloads policy without leaking backend internals.
+//! 这些 DTO 让调用方读取分页任务列表、单个作业快照或当前下载策略，
+//! 同时避免把下载运行时内部细节泄露到调用边界。
 
 use launcher_kernel_foundation::{JobId, PageRequest};
 use launcher_kernel_jobs::JobUiState;
 use serde::{Deserialize, Serialize};
 
-/// Requests a paged list of download jobs, optionally filtered by projected UI state.
+/// 表示按分页窗口读取下载作业列表的查询输入。
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ListDownloadJobsQueryDto {
-    /// Requested page window for the stable download jobs read model.
+    /// 稳定下载作业 read model 使用的分页窗口。
     pub page: PageRequest,
 
-    /// Optional UI-level state filter applied to the projected job list.
+    /// 可选的 UI 投影状态过滤条件。
     pub ui_state: Option<JobUiState>,
 }
 
-/// Requests one projected download job snapshot by stable job identifier.
+/// 表示按稳定作业标识读取单个下载作业快照的查询输入。
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct GetDownloadJobQueryDto {
+    /// 要读取的下载作业标识。
     pub job_id: JobId,
 }
 
-/// Requests the current downloads policy snapshot.
+/// 表示读取当前下载策略快照的查询输入。
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub struct GetDownloadPolicyQueryDto;

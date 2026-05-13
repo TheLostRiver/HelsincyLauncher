@@ -2,35 +2,36 @@
 
 ## Identity
 
-- task id: AT-2026-05-14-122
-- title: Localize engines restore driver comments
+- task id: AT-2026-05-14-123
+- title: Localize downloads query contract comments
 - status: completed
 
 ## Goal
 
-继续 Phase 23 Backend Comment Rollout，在不改变 engines 校验恢复 driver 行为的前提下，把 `crates/module-engines/src/driver.rs` 中仍为英文的 `EngineJobDriver` 注释改为高信号中文注释。
+继续 Phase 23 Backend Comment Rollout，在不改变 downloads 查询 DTO 结构、serde 形状或读取语义的前提下，把 `crates/module-downloads/src/contracts/queries.rs` 中的英文注释改为高信号中文注释，并补齐缺失字段注释。
 
 本轮只覆盖：
 
-- `EngineJobDriver`
-- `EngineJobDriver::restore` 中的占位 TODO/说明注释
+- `ListDownloadJobsQueryDto`
+- `GetDownloadJobQueryDto`
+- `GetDownloadPolicyQueryDto`
 
 ## Scope
 
 - in scope:
-  - replace English Rustdoc on `EngineJobDriver` with Chinese comments
-  - replace the English restore-body TODO note with Chinese comments that preserve the placeholder recovery semantics
+  - replace English module and declaration comments with Chinese comments
+  - add the missing `job_id` field comment
   - update `.artifacts/ai/active-task.md`
   - update `.artifacts/ai/task-plan.md`
   - update `.artifacts/ai/progress.md`
 - out of scope:
-  - change `JobDriver` implementation, module/kind strings, restore result, verification logic, repair logic, facade behavior, or transport behavior
-  - modify frontend, database, storage, downloads, installations, or composition files
+  - change DTO fields, derives, serde shape, query behavior, facade behavior, transport behavior, or frontend files
+  - modify download runtime, repository, adapter, database, composition, or kernel files
   - touch unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, or `src/` changes already present in the worktree
 
 ## Allowed Files
 
-1. crates/module-engines/src/driver.rs
+1. crates/module-downloads/src/contracts/queries.rs
 2. .artifacts/ai/active-task.md
 3. .artifacts/ai/task-plan.md
 4. .artifacts/ai/progress.md
@@ -41,42 +42,43 @@
 2. CONTRIBUTING.md
 3. docs/README.md
 4. docs/TauriCodeCommentStandard.md
-5. docs/modules/engines/README_ARCH.md
-6. docs/modules/engines/README_API.md
-7. docs/modules/engines/README_FLOW.md
-8. docs/TauriEngineVerificationRepairDesign.md
+5. docs/modules/downloads/README_ARCH.md
+6. docs/modules/downloads/README_API.md
+7. docs/modules/downloads/README_FLOW.md
+8. docs/TauriDownloadRuntimeDesign.md
 9. .artifacts/ai/task-plan.md
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If this slice only localizes the `EngineJobDriver` comments and keeps the restore method returning `RestoreDisposition::Resumed`, then engines restore driver documentation will match the repository comment language policy while preserving compiled behavior.
+- falsifiable local hypothesis: If this slice only localizes downloads query contract comments and adds the missing `job_id` field comment, then downloads read-path DTO documentation will match the repository comment policy while preserving compiled behavior.
 
 ## Cheap Check
 
-- `cargo check -p launcher-module-engines --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`
+- `cargo check -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`
 
 ## Validation Gate
 
-1. `cargo check -p launcher-module-engines --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`
-2. `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- crates/module-engines/src/driver.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md`
+1. `cargo check -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`
+2. `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- crates/module-downloads/src/contracts/queries.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md`
 
 ## Validation Result
 
 - passed
-- `cargo check -p launcher-module-engines --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed.
+- `cargo check -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed.
 - `git diff --check` passed for the scoped file set.
 
 ## Notes
 
-- AT-2026-05-14-121 completed and was pushed as commit `b4ec590`.
-- Engines module docs keep verification and repair as backend long-running work; this slice only documents the current placeholder restore driver.
+- AT-2026-05-14-122 completed and was pushed as commit `a3c3cd8`.
+- Downloads docs keep frontend read paths on aggregate projections; this slice only documents stable backend query contracts.
 
 ## 安全恢复点
 
-- AT-2026-05-14-122 is validated and ready for publication. If work resumes before publishing, rerun the scoped `cargo check` and `git diff --check`, then publish only `crates/module-engines/src/driver.rs` plus the touched `.artifacts/ai` records.
+- AT-2026-05-14-123 is validated and ready for publication. If work resumes before publishing, rerun the scoped `cargo check` and `git diff --check`, then publish only `crates/module-downloads/src/contracts/queries.rs` plus the touched `.artifacts/ai` records.
 
 ## Completion Summary
 
-- `EngineJobDriver` Rustdoc and restore-body TODO comments are now Chinese.
-- The slice preserves `JobDriver` implementation, module/kind strings, placeholder restore result, facade behavior, and transport behavior.
-- `cargo check -p launcher-module-engines --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed.
+- `crates/module-downloads/src/contracts/queries.rs` module comments and query DTO comments are now Chinese.
+- Added the missing `GetDownloadJobQueryDto::job_id` field comment.
+- The slice preserves DTO fields, derives, serde shape, facade behavior, and transport behavior.
+- `cargo check -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed.

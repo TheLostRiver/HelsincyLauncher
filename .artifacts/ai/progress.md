@@ -1083,6 +1083,21 @@
 - Validation passed: `cargo check -p launcher-module-engines --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`.
 - Scoped `git diff --check` passed for `crates/module-engines/src/driver.rs`, `.artifacts/ai/active-task.md`, `.artifacts/ai/task-plan.md`, and `.artifacts/ai/progress.md`.
 
+## 2026-05-14 - AT-2026-05-14-123 started
+
+- Published AT-2026-05-14-122 as commit `a3c3cd8`, then continued Phase 23 because the next backend-only slice is clear.
+- Read downloads module docs and `docs/TauriDownloadRuntimeDesign.md` before editing query contracts.
+- Selected `crates/module-downloads/src/contracts/queries.rs` because it still contained English module/declaration comments and one missing `job_id` field comment.
+- Scoped AT-2026-05-14-123 to comments only; DTO fields, derives, serde shape, facade behavior, and transport behavior must remain unchanged.
+
+## 2026-05-14 - AT-2026-05-14-123 completed
+
+- Localized `crates/module-downloads/src/contracts/queries.rs` module comments and query DTO declaration comments to Chinese.
+- Added the missing `GetDownloadJobQueryDto::job_id` field comment.
+- Preserved DTO fields, derives, serde shape, facade behavior, and transport behavior.
+- Validation passed: `cargo check -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`.
+- Scoped `git diff --check` passed for `crates/module-downloads/src/contracts/queries.rs`, `.artifacts/ai/active-task.md`, `.artifacts/ai/task-plan.md`, and `.artifacts/ai/progress.md`.
+
 ### Auto Record: 2026-05-14 01:45:06
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
@@ -1510,6 +1525,54 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
 
 ### Auto Record: 2026-05-14 07:45:42
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-14 07:47:40
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-14 07:48:10
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-14 07:48:20
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-14 07:48:34
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\contracts\queries.rs` (update)
+
+### Auto Record: 2026-05-14 07:48:41
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-14 07:49:12
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-14 07:49:22
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-14 07:49:33
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
 - Files:
