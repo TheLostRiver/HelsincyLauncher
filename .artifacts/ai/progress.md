@@ -956,3 +956,65 @@
 - Phase: Phase 23 - Backend Comment Rollout
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+## 2026-05-14 - AT-2026-05-14-114 started
+
+- Started the next backend-only Phase 23 slice after publishing AT-2026-05-14-113 as commit `ff2974d`.
+- Re-read the repository entry and relevant docs before editing: `README.md`, `CONTRIBUTING.md`, `docs/README.md`, `docs/TauriCodeCommentStandard.md`, `docs/TauriKernelJobsRuntimeDesign.md`, `docs/TauriCurrentRepoArchitectureOverview.md`, and `docs/TauriAIDevelopmentTransactionProtocolDesign.md`.
+- Scoped AT-2026-05-14-114 to `crates/kernel-jobs/src/model.rs` `JobSnapshotDto` comments plus the planning records only.
+- Validation gate remains narrow: `cargo check -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` and scoped `git diff --check`.
+
+## 2026-05-14 - AT-2026-05-14-114 completed
+
+- Replaced the existing English `JobSnapshotDto` Rustdoc with Chinese declaration comments that describe the IPC/read-model projection boundary.
+- Added Chinese field comments for the DTO fields while leaving field order, derive list, serde shape, and conversion behavior unchanged.
+- Validation passed: `cargo check -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`.
+- Scoped `git diff --check` passed for `crates/kernel-jobs/src/model.rs`, `.artifacts/ai/active-task.md`, `.artifacts/ai/task-plan.md`, and `.artifacts/ai/progress.md`.
+
+### Auto Record: 2026-05-14 01:45:06
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-14 01:45:36
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-14 01:45:46
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-14 01:45:57
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\kernel-jobs\src\model.rs` (update)
+
+### Auto Record: 2026-05-14 01:46:02
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-14 01:46:40
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-14 01:46:48
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-14 01:46:58
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)

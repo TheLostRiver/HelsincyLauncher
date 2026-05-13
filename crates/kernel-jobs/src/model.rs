@@ -149,16 +149,24 @@ pub struct JobSnapshot<E> {
     pub extension: Option<E>,
 }
 
-/// Frontend-facing read model for an active job.
-/// Extension-generic details are stripped — only kernel fields cross the IPC boundary.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+/// 表示跨 IPC 或宿主边界暴露的共享作业快照读模型。
+///
+/// 该 DTO 去除模块扩展字段，只保留 kernel 层稳定字段，避免前端依赖业务扩展状态。
 pub struct JobSnapshotDto {
+    /// 快照所属作业的全局稳定标识。
     pub job_id: JobId,
+    /// 拥有该作业业务语义的模块名。
     pub module: String,
+    /// 模块内用于区分作业类型的稳定名称。
     pub kind: String,
+    /// 运行时内部使用的生命周期状态。
     pub state: JobState,
+    /// 面向界面和宿主投影的简化状态。
     pub ui_state: JobUiState,
+    /// 跨模块共享的聚合进度。
     pub progress: JobProgress,
+    /// 快照最后一次被运行时更新的 UTC 时间。
     pub updated_at: IsoDateTime,
 }
 
