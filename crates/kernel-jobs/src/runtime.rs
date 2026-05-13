@@ -139,16 +139,21 @@ impl JobSnapshotStore<()> for InMemoryJobSnapshotStore {
 }
 
 #[derive(Clone)]
+/// 表示共享作业运行时的宿主对象，持有队列策略和快照存储端口。
 pub struct SharedJobRuntimeHost {
+    /// 当前 host 使用的队列策略。
     policy: RuntimeQueuePolicy,
+    /// 当前 host 读写通用作业快照的存储端口。
     snapshot_store: Arc<dyn JobSnapshotStore<()>>,
 }
 
 impl SharedJobRuntimeHost {
+    /// 使用默认内存快照存储构造共享运行时 host。
     pub fn new(policy: RuntimeQueuePolicy) -> Self {
         Self::with_store(policy, Arc::new(InMemoryJobSnapshotStore::default()))
     }
 
+    /// 使用外部提供的快照存储端口构造共享运行时 host。
     pub fn with_store(policy: RuntimeQueuePolicy, snapshot_store: Arc<dyn JobSnapshotStore<()>>) -> Self {
         Self {
             policy,
@@ -156,6 +161,7 @@ impl SharedJobRuntimeHost {
         }
     }
 
+    /// 返回当前 host 的队列策略快照。
     pub fn policy(&self) -> RuntimeQueuePolicy {
         self.policy
     }
