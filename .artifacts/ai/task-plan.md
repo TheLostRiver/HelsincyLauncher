@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 26 - External Agent Compatibility
+Phase 23 - Backend Comment Rollout
 
 ## Current Focus
 
@@ -40,6 +40,14 @@ Phase 26 - External Agent Compatibility
 - The user then requested that the Windsurf compatibility surface use `.windsurf/rules` instead of the repo-root `.windsurfrules` file.
 - AT-2026-05-08-108 completed the relocation slice by moving the Windsurf compatibility rules into `.windsurf/rules/repo-workflow.md` and deleting the root `.windsurfrules` file.
 - The focused validation gates for AT-2026-05-08-108 passed: scoped `git diff --check` returned clean and VS Code diagnostics reported no errors for the touched text files.
+- The user chose to keep `.artifacts/ai` as the authoritative task record surface instead of moving the files back to the repo root.
+- AT-2026-05-14-109 repaired the repo-local PWF path resolver so `pwf-doctor` recognizes `.artifacts/ai/task-plan.md` and reports the existing planning files as healthy.
+- The focused validation gates for AT-2026-05-14-109 passed: the resolver assertion first failed before the fix, then passed after the fix, and `pwf-doctor` reported `active plan: ok` plus `planning files: ok`.
+- Stop hook then correctly pointed back to the only remaining incomplete phase, Phase 23 Backend Comment Rollout.
+- AT-2026-05-14-110 added the next narrow `kernel-jobs` comments for `JobPriority` and `JobProgress`, but final Rust validation is blocked because the current shell cannot find `cargo`.
+- The user installed Rust; `cargo 1.95.0` and `rustc 1.95.0` are now visible in the current shell.
+- AT-2026-05-14-110 completed after `cargo check -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed.
+- AT-2026-05-14-111 completed after documenting `AcceptedJob` and `EnqueueJobRequest<E>` in `crates/kernel-jobs/src/model.rs` and validating with the same `launcher-kernel-jobs` lib check.
 
 ## Phases
 
@@ -178,7 +186,7 @@ Phase 26 - External Agent Compatibility
 ### Phase 23: Backend Comment Rollout
 
 - Outcome: apply the new repository comment standard to backend Rust/Tauri files in small, commit-sized slices of one or two files.
-- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062, AT-2026-05-04-063, AT-2026-05-04-064, AT-2026-05-04-065, AT-2026-05-04-066, AT-2026-05-04-067, AT-2026-05-04-068, AT-2026-05-05-071, AT-2026-05-05-072, AT-2026-05-05-073, AT-2026-05-05-074, AT-2026-05-05-075, AT-2026-05-05-076, AT-2026-05-05-077, AT-2026-05-05-078, AT-2026-05-05-079, AT-2026-05-05-080, AT-2026-05-05-081, AT-2026-05-06-082, AT-2026-05-06-083, AT-2026-05-06-084, AT-2026-05-06-085, AT-2026-05-06-086, AT-2026-05-06-087, AT-2026-05-06-088, AT-2026-05-06-089
+- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062, AT-2026-05-04-063, AT-2026-05-04-064, AT-2026-05-04-065, AT-2026-05-04-066, AT-2026-05-04-067, AT-2026-05-04-068, AT-2026-05-05-071, AT-2026-05-05-072, AT-2026-05-05-073, AT-2026-05-05-074, AT-2026-05-05-075, AT-2026-05-05-076, AT-2026-05-05-077, AT-2026-05-05-078, AT-2026-05-05-079, AT-2026-05-05-080, AT-2026-05-05-081, AT-2026-05-06-082, AT-2026-05-06-083, AT-2026-05-06-084, AT-2026-05-06-085, AT-2026-05-06-086, AT-2026-05-06-087, AT-2026-05-06-088, AT-2026-05-06-089, AT-2026-05-14-110, AT-2026-05-14-111
 - **Status:** in_progress
 
 ### Phase 24: Comment Language Controls
@@ -197,6 +205,12 @@ Phase 26 - External Agent Compatibility
 
 - Outcome: add a Windsurf-compatible repository rules file that restates the strict-doc and `.artifacts/ai` workflow in plain instructions without creating a second planning source.
 - Atomic tasks: AT-2026-05-08-107, AT-2026-05-08-108
+- **Status:** complete
+
+### Phase 27: PWF Doctor Compatibility Repair
+
+- Outcome: make the repo-local Plan With Files doctor recognize `.artifacts/ai` as the active task record surface without recreating root planning files or `.planning` state.
+- Atomic tasks: AT-2026-05-14-109
 - **Status:** complete
 
 ## Atomic Task Ledger
@@ -303,6 +317,9 @@ Phase 26 - External Agent Compatibility
 100. AT-2026-05-08-106 - completed - added the missing state-enum comments to kernel-jobs while preserving the current enum values and UI-state projection semantics.
 101. AT-2026-05-08-107 - completed - added a repo-root `.windsurfrules` file that maps the current strict-doc and `.artifacts/ai` protocol into plain Windsurf rules without creating a second workflow source.
 102. AT-2026-05-08-108 - completed - moved the Windsurf rules surface from root `.windsurfrules` into `.windsurf/rules/repo-workflow.md` so the workspace uses the requested folder-based entrypoint without parallel rule files.
+103. AT-2026-05-14-109 - completed - repaired repo-local PWF doctor path detection so `.artifacts/ai/task-plan.md`, `progress.md`, and `findings.md` are recognized as the active plan files without moving them to the repo root.
+104. AT-2026-05-14-110 - completed - added Chinese declaration comments to `JobPriority` and `JobProgress`, then validated the slice with `cargo check -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` after Rust was installed.
+105. AT-2026-05-14-111 - completed - added Chinese declaration comments to `AcceptedJob` and `EnqueueJobRequest<E>` while preserving their field shape, serde defaults, and generic extension boundary.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
@@ -321,8 +338,8 @@ Phase 26 - External Agent Compatibility
 
 ## Follow-up Queue
 
-1. After AT-2026-05-03-045, decide whether the next backend slice should open stage-2 restore orchestration, lease handling, broader downloads runtime behavior, or another narrow backend path.
-2. If backend work pauses after this query slice, resume from the validated host transport baseline while leaving user frontend edits untouched.
+1. Continue Phase 23 with a separate narrow `kernel-jobs` slice for `RestoreDisposition` / `JobSnapshot` or the next smallest contract surface.
+2. Leave unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, and `src/` changes untouched unless the user explicitly scopes them into a task.
 
 ## Legacy Note
 

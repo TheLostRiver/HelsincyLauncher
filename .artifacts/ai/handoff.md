@@ -2,20 +2,26 @@
 
 ## Latest Completed Atomic Task
 
-- task id: AT-2026-05-08-108
-- title: Move Windsurf rules into folder surface
+- task id: AT-2026-05-14-111
+- title: Annotate kernel-jobs accepted and enqueue contracts
 - status: completed
 
 ## Validated Slice
 
-- `.windsurf/rules/repo-workflow.md`
+- `crates/kernel-jobs/src/model.rs`
+- `.artifacts/ai/active-task.md`
+- `.artifacts/ai/task-plan.md`
+- `.artifacts/ai/progress.md`
+- `.artifacts/ai/findings.md`
+- `.artifacts/ai/handoff.md`
 
 ## Validation
 
-- `git diff --check -- .windsurfrules .windsurf/rules/repo-workflow.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md`
-- VS Code diagnostics should report no errors for `.windsurf/rules/repo-workflow.md` or the updated task records.
+- `cargo check -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed.
+- Run scoped `git diff --check -- crates/kernel-jobs/src/model.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md` before publishing.
 
 ## Next Resume Point
 
-- Treat AT-2026-05-08-108 as closed. If the user asks for deeper Windsurf integration later, compare whether another Windsurf-specific surface is actually required before splitting the current single rule file into multiple files.
-- Keep `.artifacts/ai` as the only planning surface, keep `.windsurf/rules/repo-workflow.md` as the only Windsurf rule entrypoint, and do not recreate root `.windsurfrules`.
+- Treat AT-2026-05-14-111 as validated and ready for publication.
+- If continuing Phase 23 after publication, open a separate narrow `kernel-jobs` comment slice for `RestoreDisposition` / `JobSnapshot` or the next smallest contract surface.
+- Keep unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, and `src/` changes out of this slice unless explicitly requested.

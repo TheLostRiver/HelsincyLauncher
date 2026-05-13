@@ -2,10 +2,37 @@
 
 ## Current Status
 
-- Active atomic task: AT-2026-05-08-108 - Move Windsurf rules into folder surface - COMPLETED
-- Current phase: Phase 26 - External Agent Compatibility
-- Last completed slice: AT-2026-05-08-108 - completed after moving the Windsurf compatibility rules into `.windsurf/rules/repo-workflow.md`
-- Next step: wait for user direction before opening another atomic task
+- Active atomic task: AT-2026-05-14-110 - Annotate kernel-jobs priority and progress contracts - COMPLETED
+- Current phase: Phase 23 - Backend Comment Rollout
+- Last completed slice: AT-2026-05-14-109 - completed after teaching repo-local PWF path resolution to recognize `.artifacts/ai/task-plan.md`
+- Next step: publish AT-2026-05-14-110 when ready, then continue Phase 23 with a separate narrow `kernel-jobs` contract-comment slice
+- Stop hook reported 26/27 phases done because Phase 23 remains `in_progress`; this does not invalidate the completed AT-109 PWF doctor repair.
+- Read the Phase 23 section and handoff; both point to resuming the backend comment rollout from the next narrow `kernel-jobs` contract surface.
+- Started AT-2026-05-14-110 and constrained it to `JobPriority`, `JobProgress`, and `JobProgress::pending()` comments only, leaving later job snapshot/request contracts for follow-up slices.
+- Added Chinese declaration comments to `JobPriority`, its variants, `JobProgress`, its fields, and `JobProgress::pending()` without changing enum values, field shape, serde attributes, or method behavior.
+- `git diff --check -- crates/kernel-jobs/src/model.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md` passed for the scoped slice.
+- `cargo check -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` could not run because `cargo` was not found in PowerShell, cmd, PATH Rust entries, user `.cargo\bin`, `rustup`, or common install locations checked during this session.
+- After the user asked to double-check the Rust environment, rechecked command resolution and installation traces: `Get-Command cargo,rustc,rustup`, `where.exe cargo/rustc/rustup`, PATH inspection, user `.cargo` / `.rustup`, common Rust/Chocolatey/Scoop paths, registry uninstall entries, and `D:\Software` / `D:\Tools` searches all found no usable `cargo.exe` or `rustc.exe`; `winget list` was inconclusive because the `msstore` source requires agreement before listing.
+- The user confirmed Rust is not installed on this machine, so AT-2026-05-14-110 remains blocked by missing local Rust tooling rather than by an unknown PATH issue.
+- The user showed the `rustup-init` installation prompt; advised choosing option 1 / pressing Enter because the default `x86_64-pc-windows-msvc` stable toolchain with PATH modification matches this Windows Tauri/Rust workspace.
+- The user installed Rust; `cargo.exe`, `rustc.exe`, and `rustup.exe` are now visible in PATH from `C:\Users\Helsincy\.cargo\bin`.
+- Confirmed `cargo 1.95.0 (f2d3ce0bd 2026-03-21)` and `rustc 1.95.0 (59807616e 2026-04-14)` in the current shell.
+- Re-ran `cargo check -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`; Cargo downloaded the locked dependencies and the `launcher-kernel-jobs` library check finished successfully.
+- Marked AT-2026-05-14-110 complete after the Rust validation gate passed.
+- Stop hook reported 26/27 phases done after AT-2026-05-14-110 because Phase 23 is an intentionally ongoing backend comment rollout. The next safe move is to open a separate narrow `kernel-jobs` contract-comment slice rather than widening AT-110.
+- Started AT-2026-05-14-111 after re-reading task-plan and confirming Phase 23 is still the active unfinished rollout.
+- Constrained AT-2026-05-14-111 to `AcceptedJob` and `EnqueueJobRequest<E>` comments in `crates/kernel-jobs/src/model.rs`, leaving restore and snapshot contracts for later slices.
+- Added Chinese declaration comments to `AcceptedJob`, `EnqueueJobRequest<E>`, and their public fields without changing struct field shape, serde defaults, generic parameters, or runtime behavior.
+- Validated AT-2026-05-14-111 with `cargo check -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`; the `launcher-kernel-jobs` library check passed.
+- Confirmed scoped `git diff --check` returned clean for `crates/kernel-jobs/src/model.rs` and the touched `.artifacts/ai` records.
+- Marked AT-2026-05-14-111 complete after the focused validation.
+- The user asked whether moving `.artifacts/ai` task records back to the repo root would help after `pwf-doctor` reported `active plan: missing` and `planning files: missing`.
+- Chose the safer repair path: keep `.artifacts/ai` as the only authoritative task surface and fix repo-local PWF path detection instead of recreating root planning files.
+- Started AT-2026-05-14-109 and constrained it to `.codex/hooks/planning_state.py` plus task-record updates.
+- Ran a RED resolver assertion proving `planning_state.planning_paths(Path.cwd())` returned `None` before the fix.
+- Updated `.codex/hooks/planning_state.py` so `.artifacts/ai/task-plan.md` is recognized as the active plan surface and the hyphenated task plan filename maps into `PlanningPaths`.
+- Re-ran the resolver assertion successfully; it now returns `.artifacts/ai` with `task-plan.md`, `progress.md`, and `findings.md`.
+- Re-ran `python .codex\skills\planning-with-files\scripts\plan.py doctor`; it now reports `active plan: ok D:\DEV\MyEpicLauncher\.artifacts\ai`, `planning files: ok`, and `attestation: not set`.
 - Published AT-2026-05-08-107 as commit `a17e9f7` after the scoped diff check, selective staging, commit, and push all succeeded.
 - The user then requested the Windsurf compatibility layer to use `.windsurf/rules` instead of the repo-root `.windsurfrules` file.
 - Started AT-2026-05-08-108 and constrained it to a one-file relocation into `.windsurf/rules/repo-workflow.md` plus task-record updates so the workspace does not keep two parallel Windsurf rule entrypoints.
@@ -642,3 +669,188 @@
 | What's the goal? | Keep turning the remaining runtime/backend gaps into explicit shared infrastructure one narrow route at a time |
 | What have I learned? | The narrowest persistence/recovery move after AT-044 is snapshot persistence itself; full restore orchestration, lease handling, and driver registry still belong to later slices |
 | What have I done? | See the session timeline above |
+### Auto Record: 2026-05-14 00:09:56
+- Tool: apply_patch
+- Phase: Phase 26 - External Agent Compatibility
+- Files:
+  - `D:\DEV\MyEpicLauncher\.codex\hooks\planning_state.py` (update)
+
+### Auto Record: 2026-05-14 00:11:16
+- Tool: apply_patch
+- Phase: Phase 26 - External Agent Compatibility
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-14 00:11:38
+- Tool: apply_patch
+- Phase: Phase 27 - PWF Doctor Compatibility Repair
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-14 00:11:58
+- Tool: apply_patch
+- Phase: Phase 27 - PWF Doctor Compatibility Repair
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-14 00:12:10
+- Tool: apply_patch
+- Phase: Phase 27 - PWF Doctor Compatibility Repair
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-14 00:12:22
+- Tool: apply_patch
+- Phase: Phase 27 - PWF Doctor Compatibility Repair
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (delete)
+
+### Auto Record: 2026-05-14 00:16:00
+- Tool: apply_patch
+- Phase: Phase 27 - PWF Doctor Compatibility Repair
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-14 00:16:11
+- Tool: apply_patch
+- Phase: Phase 27 - PWF Doctor Compatibility Repair
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-14 00:16:23
+- Tool: apply_patch
+- Phase: Phase 27 - PWF Doctor Compatibility Repair
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\kernel-jobs\src\model.rs` (update)
+
+### Auto Record: 2026-05-14 00:19:21
+- Tool: apply_patch
+- Phase: Phase 27 - PWF Doctor Compatibility Repair
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-14 00:19:48
+- Tool: apply_patch
+- Phase: Phase 27 - PWF Doctor Compatibility Repair
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-14 00:20:04
+- Tool: apply_patch
+- Phase: Phase 27 - PWF Doctor Compatibility Repair
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-14 00:20:17
+- Tool: apply_patch
+- Phase: Phase 27 - PWF Doctor Compatibility Repair
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-14 00:20:29
+- Tool: apply_patch
+- Phase: Phase 27 - PWF Doctor Compatibility Repair
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (delete)
+
+### Auto Record: 2026-05-14 00:30:34
+- Tool: apply_patch
+- Phase: Phase 27 - PWF Doctor Compatibility Repair
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-14 00:32:15
+- Tool: apply_patch
+- Phase: Phase 27 - PWF Doctor Compatibility Repair
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-14 00:34:31
+- Tool: apply_patch
+- Phase: Phase 27 - PWF Doctor Compatibility Repair
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-14 01:23:59
+- Tool: apply_patch
+- Phase: Phase 27 - PWF Doctor Compatibility Repair
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-14 01:24:13
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-14 01:24:26
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-14 01:24:38
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-14 01:24:50
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (delete)
+
+### Auto Record: 2026-05-14 01:25:45
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-14 01:26:28
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-14 01:26:36
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-14 01:26:48
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\kernel-jobs\src\model.rs` (update)
+
+### Auto Record: 2026-05-14 01:27:14
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-14 01:27:38
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-14 01:27:47
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-14 01:27:58
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-14 01:28:11
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (delete)

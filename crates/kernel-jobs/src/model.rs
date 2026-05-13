@@ -53,20 +53,29 @@ pub enum JobUiState {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
+/// 表示共享运行时调度队列使用的通用优先级。
 pub enum JobPriority {
+    /// 低优先级作业，适合后台补偿或非交互任务。
     Low,
+    /// 默认优先级作业，适合普通用户触发的后台任务。
     Normal,
+    /// 高优先级作业，适合需要更快进入执行窗口的用户可见任务。
     High,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+/// 表示共享作业快照中跨模块复用的聚合进度。
 pub struct JobProgress {
+    /// 已完成的通用步骤数，不承载模块专属 checkpoint 语义。
     pub completed_steps: u32,
+    /// 可选总步骤数；未知总量的流式任务可以保持为空。
     pub total_steps: Option<u32>,
+    /// 面向调试或界面摘要的短文本详情，不替代模块业务状态。
     pub detail: Option<String>,
 }
 
 impl JobProgress {
+    /// 构造一个尚未产生可量化进度的初始进度快照。
     pub fn pending() -> Self {
         Self {
             completed_steps: 0,
@@ -77,21 +86,33 @@ impl JobProgress {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+/// 表示运行时接受入队请求后返回给调用方的稳定确认结果。
 pub struct AcceptedJob {
+    /// 被接受作业的全局稳定标识。
     pub job_id: JobId,
+    /// 拥有该作业业务语义的模块名。
     pub module: String,
+    /// 模块内用于区分作业类型的稳定名称。
     pub kind: String,
+    /// 运行时接受该作业进入队列的 UTC 时间。
     pub queued_at: IsoDateTime,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+/// 表示模块 facade 提交给共享运行时的通用入队请求。
 pub struct EnqueueJobRequest<E> {
+    /// 调用方生成并用于后续查询、控制和恢复的作业标识。
     pub job_id: JobId,
+    /// 提交作业的模块名，运行时只把它作为调度和投影维度。
     pub module: String,
+    /// 模块内的作业类型名称，运行时不解释其业务细节。
     pub kind: String,
+    /// 进入共享队列时使用的通用调度优先级。
     pub priority: JobPriority,
+    /// 标记该作业是否允许在崩溃或重启后尝试恢复。
     #[serde(default = "default_recoverable")]
     pub recoverable: bool,
+    /// 模块保留的扩展快照数据；共享运行时只持久化和回传，不解释内容。
     pub extension: Option<E>,
 }
 

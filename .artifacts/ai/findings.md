@@ -17,6 +17,19 @@
 - A single `.windsurf/rules/repo-workflow.md` file is enough for the current repository because the existing Windsurf compatibility content is one cohesive workflow rule set rather than multiple independently scoped rule families.
 - The Windsurf translation must preserve `.artifacts/ai` as the only authoritative workflow record set and must not revive root `task_plan.md`, `progress.md`, or `findings.md` as active files.
 
+- `pwf-doctor` originally reported `active plan: missing` and `planning files: missing` even though `.artifacts/ai/active-task.md`, `task-plan.md`, `progress.md`, `findings.md`, and `handoff.md` were present.
+- The root cause was a path resolver mismatch: `.codex/hooks/planning_state.py` only recognized `.planning/<plan>/task_plan.md` or legacy root `task_plan.md`, while this repo intentionally keeps the active task plan at `.artifacts/ai/task-plan.md`.
+- Moving `.artifacts/ai` files back to the repo root would revive the legacy planning surface and still would not match every repo-specific filename, so the safer fix is to make the repo-local resolver understand `.artifacts/ai`.
+- The successful repair is to recognize `.artifacts/ai/task-plan.md` as the active plan directory and map `PlanningPaths.task_plan` to the existing hyphenated filename when root artifacts planning is active.
+
+- After AT-2026-05-14-109, the stop hook correctly reported Phase 23 as the remaining incomplete phase rather than a failure of the PWF doctor repair.
+- `crates/kernel-jobs/src/model.rs` remains the right local area for the next backend comment rollout slice because AT-2026-05-08-106 only covered `JobState` and `JobUiState`.
+- `JobPriority` plus `JobProgress` is the smallest next public contract cluster in that file; `AcceptedJob`, `EnqueueJobRequest`, `RestoreDisposition`, `JobSnapshot`, and `JobSnapshotDto` should remain separate follow-up slices.
+- The current shell cannot run the Rust validation gate because `cargo` is not available through PowerShell, cmd, `rustup`, the PATH, or the checked user/default install locations, so AT-2026-05-14-110 must remain blocked until `cargo` is exposed.
+- After the user installed Rust through `rustup-init`, `cargo 1.95.0` and `rustc 1.95.0` became available in PATH, and the `launcher-kernel-jobs` lib check passed for AT-2026-05-14-110.
+- After AT-2026-05-14-110, `AcceptedJob` and `EnqueueJobRequest<E>` became the next smallest public contract cluster in `crates/kernel-jobs/src/model.rs` because they share the job acceptance/enqueue boundary and are smaller than the restore/snapshot model cluster.
+- The safe AT-2026-05-14-111 move was to add only Chinese declaration comments to those two structs and their fields, preserving `serde(default = "default_recoverable")`, the extension generic, and the runtime enqueue behavior.
+
 - `crates/kernel-jobs/src/model.rs` is the strongest next slice after the published kernel-jobs crate entry because it is the next smallest production file in that crate, and the shared state vocabulary sits at the top of the file as the smallest documented declaration cluster.
 - Within this file, `JobState` and `JobUiState` are the safest immediate candidates because they are smaller than `AcceptedJob`, `EnqueueJobRequest`, and `JobSnapshot`, while still directly defining the shared runtime/UI state semantics.
 - The safest move is to add only Chinese declaration comments to those two enums and their variants, leaving enum values, serde rename rules, and the adjacent English `JobSnapshotDto` comment unchanged.
