@@ -2,31 +2,32 @@
 
 ## Identity
 
-- task id: AT-2026-05-14-115
-- title: Annotate kernel-jobs runtime queue policy
+- task id: AT-2026-05-14-116
+- title: Annotate kernel-jobs driver contract
 - status: completed
 
 ## Goal
 
-继续 Phase 23 Backend Comment Rollout，在不改变共享作业运行时队列策略结构或构造行为的前提下，为 `crates/kernel-jobs/src/runtime.rs` 中的 `RuntimeQueuePolicy` 契约补齐中文声明注释。
+继续 Phase 23 Backend Comment Rollout，在不改变共享作业驱动 trait API 或恢复行为的前提下，为 `crates/kernel-jobs/src/runtime.rs` 中的 `JobDriver<E>` 契约补齐中文声明注释。
 
 本轮只覆盖：
 
-- `RuntimeQueuePolicy`
-- `RuntimeQueuePolicy::new`
+- `JobDriver<E>`
+- `JobDriver<E>::module`
+- `JobDriver<E>::kind`
+- `JobDriver<E>::restore`
 
 ## Scope
 
 - in scope:
-  - add Chinese declaration comments to `RuntimeQueuePolicy`
-  - add a Chinese field comment for `max_concurrent_jobs`
-  - add a Chinese method comment for `RuntimeQueuePolicy::new`
+  - add Chinese declaration comments to `JobDriver<E>`
+  - add Chinese method comments for the trait methods
   - update `.artifacts/ai/active-task.md`
   - update `.artifacts/ai/task-plan.md`
   - update `.artifacts/ai/progress.md`
 - out of scope:
-  - change queue scheduling behavior, validation rules, struct fields, trait APIs, or runtime host behavior
-  - document `JobDriver`, `JobDriverRegistry`, `JobSnapshotStore`, `SharedJobRuntimeHost`, or `JobRuntime` in this slice
+  - change trait bounds, method signatures, restore semantics, driver registry behavior, or runtime host behavior
+  - document `JobDriverRegistry`, `JobSnapshotStore`, `SharedJobRuntimeHost`, or `JobRuntime` in this slice
   - modify model, adapter, frontend, database, transport, or composition files
   - touch unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, or `src/` changes already present in the worktree
 
@@ -50,7 +51,7 @@
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If this slice only adds high-signal Chinese declaration comments to `RuntimeQueuePolicy`, then the queue-policy contract will match the repository comment standard while preserving the compiled public API and runtime behavior.
+- falsifiable local hypothesis: If this slice only adds high-signal Chinese declaration comments to `JobDriver<E>` and its methods, then the module-driver routing and restore boundary will match the repository comment standard while preserving the compiled public API and runtime behavior.
 
 ## Cheap Check
 
@@ -69,15 +70,15 @@
 
 ## Notes
 
-- AT-2026-05-14-114 completed and was pushed as commit `76132f4`.
-- `RuntimeQueuePolicy` is the smallest remaining `kernel-jobs` runtime surface and maps directly to the shared runtime design's queue-policy responsibility.
+- AT-2026-05-14-115 completed and was pushed as commit `390fc9b`.
+- `JobDriver<E>` is the next smallest runtime contract surface after the queue policy and maps to the shared runtime design's module driver registry boundary.
 
 ## 安全恢复点
 
-- AT-2026-05-14-115 is validated and ready for publication. If work resumes before publishing, rerun the scoped `cargo check` and `git diff --check`, then publish only `crates/kernel-jobs/src/runtime.rs` plus the touched `.artifacts/ai` records.
+- AT-2026-05-14-116 is validated and ready for publication. If work resumes before publishing, rerun the scoped `cargo check` and `git diff --check`, then publish only `crates/kernel-jobs/src/runtime.rs` plus the touched `.artifacts/ai` records.
 
 ## Completion Summary
 
-- `RuntimeQueuePolicy`, `max_concurrent_jobs`, and `RuntimeQueuePolicy::new` now have Chinese declaration comments.
-- The slice preserves queue policy fields, derives, constructor behavior, and runtime scheduling behavior.
+- `JobDriver<E>` and its `module`, `kind`, and `restore` methods now have Chinese declaration comments.
+- The slice preserves trait bounds, method signatures, driver routing semantics, and restore behavior.
 - `cargo check -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed.

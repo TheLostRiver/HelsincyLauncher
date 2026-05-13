@@ -25,9 +25,15 @@ impl RuntimeQueuePolicy {
     }
 }
 
+/// 表示模块提供给共享作业运行时的作业驱动边界。
+///
+/// 运行时只用 `module` 与 `kind` 做路由，并在恢复阶段回调驱动；具体业务执行和 checkpoint 仍由模块拥有。
 pub trait JobDriver<E>: Send + Sync {
+    /// 返回该驱动所属的稳定模块名。
     fn module(&self) -> &'static str;
+    /// 返回该驱动能够处理的模块内稳定作业类型名。
     fn kind(&self) -> &'static str;
+    /// 基于持久化快照尝试恢复模块作业，并返回运行时应采用的恢复处置。
     fn restore(&self, snapshot: &JobSnapshot<E>) -> AppResult<RestoreDisposition>;
 }
 
