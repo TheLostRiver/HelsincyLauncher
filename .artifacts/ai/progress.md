@@ -999,6 +999,20 @@
 - Validation passed: `cargo check -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`.
 - Scoped `git diff --check` passed for `crates/kernel-jobs/src/runtime.rs`, `.artifacts/ai/active-task.md`, `.artifacts/ai/task-plan.md`, and `.artifacts/ai/progress.md`.
 
+## 2026-05-14 - AT-2026-05-14-117 started
+
+- Published AT-2026-05-14-116 as commit `3cc8995`, then continued Phase 23 because the next backend-only slice is clear.
+- Selected `JobDriverRegistry<E>` as the next smallest runtime contract surface in `crates/kernel-jobs/src/runtime.rs`.
+- Scoped AT-2026-05-14-117 to the registry struct, internal driver map, and `new`, `register`, and `resolve` methods.
+- Out of scope for this slice: snapshot store behavior, runtime host methods, `JobRuntime`, and any registry lookup behavior changes.
+
+## 2026-05-14 - AT-2026-05-14-117 completed
+
+- Added Chinese declaration comments to `JobDriverRegistry<E>`, its internal driver map, and the `new`, `register`, and `resolve` methods.
+- Preserved registry key shape, driver ownership, duplicate registration behavior, lookup behavior, and runtime behavior.
+- Validation passed: `cargo check -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`.
+- Scoped `git diff --check` passed for `crates/kernel-jobs/src/runtime.rs`, `.artifacts/ai/active-task.md`, `.artifacts/ai/task-plan.md`, and `.artifacts/ai/progress.md`.
+
 ### Auto Record: 2026-05-14 01:45:06
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
@@ -1138,6 +1152,54 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
 
 ### Auto Record: 2026-05-14 01:55:40
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-14 01:57:34
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-14 01:58:02
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-14 01:58:12
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-14 01:58:24
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\kernel-jobs\src\runtime.rs` (update)
+
+### Auto Record: 2026-05-14 01:58:33
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-14 01:59:08
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-14 01:59:18
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-14 01:59:31
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
 - Files:

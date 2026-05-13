@@ -37,7 +37,9 @@ pub trait JobDriver<E>: Send + Sync {
     fn restore(&self, snapshot: &JobSnapshot<E>) -> AppResult<RestoreDisposition>;
 }
 
+/// 表示共享运行时用于按模块和作业类型查找驱动的注册表。
 pub struct JobDriverRegistry<E> {
+    /// 以 `(module, kind)` 作为稳定路由键保存模块驱动。
     drivers: HashMap<(String, String), Arc<dyn JobDriver<E>>>,
 }
 
@@ -50,10 +52,12 @@ impl<E: 'static> Default for JobDriverRegistry<E> {
 }
 
 impl<E: 'static> JobDriverRegistry<E> {
+    /// 构造一个尚未注册任何模块驱动的空注册表。
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// 注册一个模块驱动；相同 `(module, kind)` 的后注册驱动会覆盖旧驱动。
     pub fn register(&mut self, driver: Arc<dyn JobDriver<E>>) {
         self.drivers.insert(
             (driver.module().to_string(), driver.kind().to_string()),
@@ -61,6 +65,7 @@ impl<E: 'static> JobDriverRegistry<E> {
         );
     }
 
+    /// 按模块名和作业类型解析驱动，找不到时返回空结果。
     pub fn resolve(&self, module: &str, kind: &str) -> Option<&dyn JobDriver<E>> {
         self.drivers
             .get(&(module.to_string(), kind.to_string()))
