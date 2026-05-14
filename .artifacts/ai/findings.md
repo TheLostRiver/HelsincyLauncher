@@ -384,3 +384,9 @@
 ## Visual/Browser Findings
 
 - None in this slice.
+
+## Phase 28 Backend Recovery Findings
+
+- AT-2026-05-15-150 selected a verification-only backend host slice after AT-149: `downloads_start`, `downloads_pause`, and `downloads_cancel` should be covered through `src-tauri/tests/transport_wiring_smoke.rs` because README lists `cargo test -p my-epic-launcher-desktop transport_wiring_smoke` as a backend baseline, and CONTRIBUTING marks `src-tauri/` as the desktop host/transport boundary.
+- `docs/TauriDownloadRuntimeDesign.md` keeps pause/resume/cancel as downloads facade commands while assigning task lifecycle and checkpoint ownership to the backend, so this smoke test should call the host handler path and avoid putting any lifecycle truth in frontend code.
+- `docs/TauriKernelJobsRuntimeDesign.md` defines pause/resume/cancel as shared job runtime control-port behavior; because `resume_download` still returns `AcceptedJob`, AT-150 should not change resume semantics and should stop at start/pause/cancel coverage.

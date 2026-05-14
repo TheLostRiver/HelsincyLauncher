@@ -3,6 +3,10 @@ use std::pin::pin;
 use std::task::{Context, Poll, RawWaker, RawWakerVTable, Waker};
 
 use launcher_kernel_foundation::PageRequest;
+use launcher_kernel_jobs::JobPriority;
+use launcher_module_downloads::contracts::{
+    CancelDownloadRequestDto, PauseDownloadRequestDto, StartDownloadRequestDto,
+};
 use launcher_module_engines::contracts::RunEngineVerificationRequestDto;
 use launcher_module_fab::contracts::FabInventoryListQueryDto;
 use my_epic_launcher_desktop::{build_desktop_host_bootstrap, commands};
@@ -32,6 +36,50 @@ fn transport_wiring_smoke() {
         commands::QueryResultDto::Failure { error } => {
             panic!("transport command path should stay callable, got {}", error.code);
         }
+    }
+
+    let download_start = block_on_ready(commands::downloads::downloads_start(
+        bootstrap.services.services(),
+        StartDownloadRequestDto {
+            target_id: "ue-5.4".into(),
+            kind: "engine".into(),
+            install_intent: None,
+            priority: JobPriority::Normal,
+        },
+    ));
+
+    let download_job_id = match download_start {
+        commands::CommandResultDto::Success { data } => {
+            assert!(data.accepted);
+            assert_eq!(data.module, "downloads");
+            assert_eq!(data.kind, "download");
+            data.job_id
+        }
+        commands::CommandResultDto::Failure { error } => {
+            panic!("downloads start command path should stay callable, got {}", error.code);
+        }
+    };
+
+    let pause = block_on_ready(commands::downloads::downloads_pause(
+        bootstrap.services.services(),
+        PauseDownloadRequestDto {
+            job_id: download_job_id.clone(),
+        },
+    ));
+
+    if let commands::CommandResultDto::Failure { error } = pause {
+        panic!("downloads pause command path should stay callable, got {}", error.code);
+    }
+
+    let cancel = block_on_ready(commands::downloads::downloads_cancel(
+        bootstrap.services.services(),
+        CancelDownloadRequestDto {
+            job_id: download_job_id,
+        },
+    ));
+
+    if let commands::CommandResultDto::Failure { error } = cancel {
+        panic!("downloads cancel command path should stay callable, got {}", error.code);
     }
 
     let verification = block_on_ready(commands::engines::engines_run_verification(

@@ -2645,3 +2645,78 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-15 01:22:17
+- Tool: apply_patch
+- Phase: Phase 28 - Backend Development Scope Recovery
+- Files:
+  - `src-tauri/tests/transport_wiring_smoke.rs` (update)
+
+## Agent Note: 2026-05-15 01:24 CST
+
+- Resumed from AT-2026-05-15-149 after confirming local commit `e774628`.
+- Safety review rejected running the user-profile `session-catchup.py`; recovery continued from repo-local `.artifacts/ai` records, git log, and scoped file reads instead.
+- Selected AT-2026-05-15-150 as a backend-only verification slice: add downloads start/pause/cancel coverage to `src-tauri/tests/transport_wiring_smoke.rs`.
+- Re-read README, CONTRIBUTING, `docs/TauriDownloadRuntimeDesign.md`, `docs/TauriKernelJobsRuntimeDesign.md`, the downloads transport handler, downloads command DTOs, and the shared job runtime control implementation in small batches before editing.
+- Added the first test edit to call `downloads_start`, then use the accepted `job_id` for `downloads_pause` and `downloads_cancel`.
+
+## Agent Note: 2026-05-15 01:30 CST
+
+- AT-2026-05-15-150 validation passed:
+  - `cargo test -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml transport_wiring_smoke` passed with 1 integration test.
+  - Scoped `git diff --check` passed for `src-tauri/tests/transport_wiring_smoke.rs` plus `.artifacts/ai` records; Git only reported Windows LF-to-CRLF working-copy warnings.
+- Reviewed the scoped diff: production code is unchanged; the smoke test now covers downloads start accepted-job projection plus pause/cancel command paths.
+
+### Auto Record: 2026-05-15 07:27:59
+- Tool: apply_patch
+- Phase: Phase 28 - Backend Development Scope Recovery
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+
+### Auto Record: 2026-05-15 07:28:57
+- Tool: apply_patch
+- Phase: Phase 28 - Backend Development Scope Recovery
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 07:29:06
+- Tool: apply_patch
+- Phase: Phase 28 - Backend Development Scope Recovery
+- Files:
+  - `.artifacts/ai/findings.md` (update)
+
+### Auto Record: 2026-05-15 07:29:15
+- Tool: apply_patch
+- Phase: Phase 28 - Backend Development Scope Recovery
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 07:29:27
+- Tool: apply_patch
+- Phase: Phase 28 - Backend Development Scope Recovery
+- Files:
+  - `.artifacts/ai/handoff.md` (delete)
+
+### Auto Record: 2026-05-15 07:30:15
+- Tool: apply_patch
+- Phase: Phase 28 - Backend Development Scope Recovery
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+
+### Auto Record: 2026-05-15 07:30:26
+- Tool: apply_patch
+- Phase: Phase 28 - Backend Development Scope Recovery
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 07:30:33
+- Tool: apply_patch
+- Phase: Phase 28 - Backend Development Scope Recovery
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 07:30:45
+- Tool: apply_patch
+- Phase: Phase 28 - Backend Development Scope Recovery
+- Files:
+  - `.artifacts/ai/handoff.md` (update)
