@@ -1945,6 +1945,26 @@
     - `cargo check -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`
     - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- src-tauri/src/commands/downloads.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md`
 
+### Agent Note: 2026-05-14 13:47
+
+- AT-2026-05-14-131 publication:
+  - committed locally as `af04875` (`docs: localize downloads transport comments`)
+  - direct `origin/main` push remains blocked by safety review; continuing per user instruction to skip push when it is not possible
+- AT-2026-05-14-132 started:
+  - scope: localize `crates/module-fab/src/driver.rs` restore driver comments only
+  - allowed files: `crates/module-fab/src/driver.rs`, `.artifacts/ai/active-task.md`, `.artifacts/ai/task-plan.md`, `.artifacts/ai/progress.md`
+  - docs checked in small batches: `docs/TauriStartupPipelineDesign.md`, `docs/TauriKernelJobsRuntimeDesign.md`, `docs/TauriFabInventoryLoadingDesign.md`
+  - key finding: startup stage 2 restores existing resumable jobs and must not start new optional warmup; current Fab drivers intentionally resume both registered job kinds without adding business checkpoint reads in this slice.
+
+### Agent Note: 2026-05-14 13:52
+
+- AT-2026-05-14-132 completed:
+  - localized `crates/module-fab/src/driver.rs` module and driver comments to Chinese
+  - preserved `module()`, `kind()`, and `restore()` implementations plus current `RestoreDisposition::Resumed` behavior
+  - validation passed:
+    - `cargo check -p launcher-module-fab --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`
+    - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- crates/module-fab/src/driver.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md`
+
 ### Auto Record: 2026-05-14 13:07:02
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
@@ -1989,6 +2009,23 @@
   - `src-tauri/src/commands/downloads.rs` (update)
 
 ### Auto Record: 2026-05-14 13:24:57
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-14 14:19:54
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `crates/module-fab/src/driver.rs` (update)
+
+### Auto Record: 2026-05-14 14:21:17
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
 - Files:
