@@ -90,7 +90,8 @@ Phase 28 - Backend Development Scope Recovery
 - AT-2026-05-14-139 completed after adding Chinese companion comments for the shared transport mapper cluster in `src-tauri/src/commands/mod.rs`, then validating `my-epic-launcher-desktop`.
 - AT-2026-05-15-148 completed and was committed locally as `a13a2e6`, recording backend comment rollout completion and starting Phase 28 backend scope recovery.
 - AT-2026-05-15-149 completed and was committed locally as `e774628`, wiring downloads pause/cancel facade methods to shared runtime control ports while leaving resume out of scope.
-- AT-2026-05-15-150 completed after adding host transport smoke coverage for downloads start/pause/cancel without changing production behavior or resume semantics.
+- AT-2026-05-15-150 completed and was committed locally as `958a0e6`, adding host transport smoke coverage for downloads start/pause/cancel without changing production behavior or resume semantics.
+- AT-2026-05-15-151 completed after refreshing the downloads facade file header so it matches the current start/pause/cancel wiring state.
 
 ## Phases
 
@@ -260,7 +261,7 @@ Phase 28 - Backend Development Scope Recovery
 ### Phase 28: Backend Development Scope Recovery
 
 - Outcome: after completing backend comment rollout, re-read the current README, architecture, collaboration, and module documents in small batches, identify the next backend-only development slice, and keep frontend/unrelated dirty work untouched.
-- Atomic tasks: AT-2026-05-15-148, AT-2026-05-15-149, AT-2026-05-15-150
+- Atomic tasks: AT-2026-05-15-148, AT-2026-05-15-149, AT-2026-05-15-150, AT-2026-05-15-151
 - **Status:** in_progress
 
 ## Atomic Task Ledger
@@ -409,6 +410,7 @@ Phase 28 - Backend Development Scope Recovery
 142. AT-2026-05-15-148 - completed - recorded backend comment rollout completion and transitioned recovery state toward backend development scope planning.
 143. AT-2026-05-15-149 - completed - wired downloads pause/cancel facade methods to shared runtime control ports while leaving resume out of scope.
 144. AT-2026-05-15-150 - completed - added downloads start/pause/cancel host transport smoke coverage without changing production behavior or resume semantics.
+145. AT-2026-05-15-151 - completed - refreshed the downloads facade file header so it no longer describes pause/cancel as C2 stubs.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
@@ -427,7 +429,7 @@ Phase 28 - Backend Development Scope Recovery
 
 ## Follow-up Queue
 
-1. Publish AT-2026-05-15-150 by committing only the scoped test and `.artifacts/ai` records, then continue Phase 28 with the next backend-only slice after rereading the relevant docs in small batches.
+1. Publish AT-2026-05-15-151 by committing only the facade comment and `.artifacts/ai` records.
 2. Leave unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, and `src/` changes untouched unless the user explicitly scopes them into a task.
 
 ## Legacy Note

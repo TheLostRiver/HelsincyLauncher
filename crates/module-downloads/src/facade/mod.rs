@@ -1,9 +1,9 @@
 //! downloads 模块的公开 facade 边界。
 //!
 //! 这里集中暴露下载任务的命令入口、最小持久化记录契约和依赖束，供
-//! composition root 与宿主传输层装配。当前只有 `start_download` 已返回
-//! 后端拥有的 accepted job；其余查询、暂停和策略入口仍保留 C2 阶段的
-//! `DOWNLOADS_NOT_WIRED` stub 语义。
+//! composition root 与宿主传输层装配。当前 `start_download` 已返回后端拥有的
+//! accepted job，`pause_download` / `cancel_download` 已转接 shared job runtime；
+//! 恢复、查询和策略入口仍保留 `DOWNLOADS_NOT_WIRED` stub 语义。
 
 use launcher_kernel_foundation::{
     AppError, AppErrorSeverity, AppResult, CorrelationId, JobId,
