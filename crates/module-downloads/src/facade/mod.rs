@@ -127,10 +127,9 @@ impl<J: DownloadJobRepository, C, M, S, R: JobRuntime<Extension = ()>> DownloadF
         self.deps.job_runtime.enqueue(enqueue_request)
     }
 
-    /// 预留暂停入口；当前仍由模块边界返回未接线错误。
+    /// 请求共享 runtime 暂停已有下载作业。
     pub fn pause_download(&self, request: PauseDownloadRequestDto) -> AppResult<()> {
-        let _ = request;
-        Err(not_wired("pause_download"))
+        self.deps.job_runtime.pause(&request.job_id)
     }
 
     /// 预留恢复入口；当前仍由模块边界返回未接线错误。
@@ -139,10 +138,9 @@ impl<J: DownloadJobRepository, C, M, S, R: JobRuntime<Extension = ()>> DownloadF
         Err(not_wired("resume_download"))
     }
 
-    /// 预留取消入口；当前仍由模块边界返回未接线错误。
+    /// 请求共享 runtime 取消已有下载作业。
     pub fn cancel_download(&self, request: CancelDownloadRequestDto) -> AppResult<()> {
-        let _ = request;
-        Err(not_wired("cancel_download"))
+        self.deps.job_runtime.cancel(&request.job_id)
     }
 
     /// 预留任务列表查询；当前仍由模块边界返回未接线错误。
@@ -198,7 +196,9 @@ mod tests {
         DownloadFacade, DownloadJobRecord, DownloadJobRecordState, DownloadJobRepository,
         DownloadModuleDeps,
     };
-    use crate::contracts::StartDownloadRequestDto;
+    use crate::contracts::{
+        CancelDownloadRequestDto, PauseDownloadRequestDto, StartDownloadRequestDto,
+    };
 
     #[derive(Default)]
     struct RecordingDownloadJobRepository {
@@ -251,6 +251,8 @@ mod tests {
     #[derive(Default)]
     struct RecordingJobRuntime {
         enqueued_requests: Mutex<Vec<launcher_kernel_jobs::EnqueueJobRequest<()>>>,
+        paused_job_ids: Mutex<Vec<JobId>>,
+        canceled_job_ids: Mutex<Vec<JobId>>,
     }
 
     impl RecordingJobRuntime {
@@ -258,6 +260,20 @@ mod tests {
             self.enqueued_requests
                 .lock()
                 .expect("enqueued requests mutex should not be poisoned")
+                .clone()
+        }
+
+        fn paused_job_ids(&self) -> Vec<JobId> {
+            self.paused_job_ids
+                .lock()
+                .expect("paused job ids mutex should not be poisoned")
+                .clone()
+        }
+
+        fn canceled_job_ids(&self) -> Vec<JobId> {
+            self.canceled_job_ids
+                .lock()
+                .expect("canceled job ids mutex should not be poisoned")
                 .clone()
         }
     }
@@ -293,7 +309,11 @@ mod tests {
             }))
         }
 
-        fn pause(&self, _job_id: &JobId) -> AppResult<()> {
+        fn pause(&self, job_id: &JobId) -> AppResult<()> {
+            self.paused_job_ids
+                .lock()
+                .expect("paused job ids mutex should not be poisoned")
+                .push(job_id.clone());
             Ok(())
         }
 
@@ -301,7 +321,11 @@ mod tests {
             Ok(())
         }
 
-        fn cancel(&self, _job_id: &JobId) -> AppResult<()> {
+        fn cancel(&self, job_id: &JobId) -> AppResult<()> {
+            self.canceled_job_ids
+                .lock()
+                .expect("canceled job ids mutex should not be poisoned")
+                .push(job_id.clone());
             Ok(())
         }
     }
@@ -347,5 +371,45 @@ mod tests {
         assert_eq!(enqueued_request.job_id, accepted.job_id);
         assert_eq!(enqueued_request.priority, request.priority);
         assert_eq!(enqueued_request.kind, "download");
+    }
+
+    #[test]
+    fn pause_download_delegates_to_runtime_control() {
+        let facade = DownloadFacade::new(DownloadModuleDeps {
+            job_repo: RecordingDownloadJobRepository::default(),
+            checkpoint_repo: (),
+            manifest_provider: (),
+            staging_store: (),
+            job_runtime: RecordingJobRuntime::default(),
+        });
+        let job_id = JobId::generate();
+
+        facade
+            .pause_download(PauseDownloadRequestDto {
+                job_id: job_id.clone(),
+            })
+            .expect("pause_download should delegate to the runtime control port");
+
+        assert_eq!(facade.deps().job_runtime.paused_job_ids(), vec![job_id]);
+    }
+
+    #[test]
+    fn cancel_download_delegates_to_runtime_control() {
+        let facade = DownloadFacade::new(DownloadModuleDeps {
+            job_repo: RecordingDownloadJobRepository::default(),
+            checkpoint_repo: (),
+            manifest_provider: (),
+            staging_store: (),
+            job_runtime: RecordingJobRuntime::default(),
+        });
+        let job_id = JobId::generate();
+
+        facade
+            .cancel_download(CancelDownloadRequestDto {
+                job_id: job_id.clone(),
+            })
+            .expect("cancel_download should delegate to the runtime control port");
+
+        assert_eq!(facade.deps().job_runtime.canceled_job_ids(), vec![job_id]);
     }
 }

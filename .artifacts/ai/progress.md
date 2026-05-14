@@ -2403,6 +2403,20 @@
   - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/handoff.md`
   - backend Rust comment-block scan under `crates` and `src-tauri/src` returned no English-only comment blocks lacking Chinese text.
 
+## 2026-05-15 - AT-149 RED tests
+
+- AT-2026-05-15-148 was committed locally as `a13a2e6` with message `docs: record comment rollout completion`.
+- Read README, CONTRIBUTING, current-repo architecture overview, architecture principles, AI transaction protocol, and module docs for Downloads/Fab/Engines/kernel-jobs before choosing a backend development slice.
+- Selected a narrow backend slice: wire `DownloadFacade::pause_download` and `DownloadFacade::cancel_download` to `JobRuntime::pause/cancel`.
+- `resume_download` is explicitly out of scope because it currently returns `AcceptedJob` and needs a separate resume-acceptance design.
+- Added RED tests in `crates/module-downloads/src/facade/mod.rs` expecting pause/cancel to delegate to the runtime control port.
+- RED observed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml download_delegates_to_runtime_control` failed with both tests returning `DOWNLOADS_NOT_WIRED`.
+- Implemented minimal facade delegation for `pause_download -> JobRuntime::pause` and `cancel_download -> JobRuntime::cancel`; `resume_download` remains unchanged.
+- GREEN validation passed:
+  - `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml download_delegates_to_runtime_control`
+  - `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 5 tests.
+  - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- crates/module-downloads/src/facade/mod.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/handoff.md`
+
 ### Auto Record: 2026-05-14 23:55:13
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
@@ -2598,6 +2612,32 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
 
 ### Auto Record: 2026-05-15 01:08:16
+- Tool: apply_patch
+- Phase: Phase 28 - Backend Development Scope Recovery
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-15 01:15:08
+- Tool: apply_patch
+- Phase: Phase 28 - Backend Development Scope Recovery
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-15 01:15:41
+- Tool: apply_patch
+- Phase: Phase 28 - Backend Development Scope Recovery
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-15 01:16:44
 - Tool: apply_patch
 - Phase: Phase 28 - Backend Development Scope Recovery
 - Files:

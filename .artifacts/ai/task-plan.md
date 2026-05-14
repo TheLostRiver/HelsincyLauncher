@@ -257,7 +257,7 @@ Phase 28 - Backend Development Scope Recovery
 ### Phase 28: Backend Development Scope Recovery
 
 - Outcome: after completing backend comment rollout, re-read the current README, architecture, collaboration, and module documents in small batches, identify the next backend-only development slice, and keep frontend/unrelated dirty work untouched.
-- Atomic tasks: AT-2026-05-15-148
+- Atomic tasks: AT-2026-05-15-148, AT-2026-05-15-149
 - **Status:** in_progress
 
 ## Atomic Task Ledger
@@ -404,6 +404,7 @@ Phase 28 - Backend Development Scope Recovery
 140. AT-2026-05-14-146 - completed - added Chinese companion comments for startup unit-test driver registry comments while preserving test behavior.
 141. AT-2026-05-15-147 - completed - added Chinese companion comments for startup unit-test section headers while preserving test behavior.
 142. AT-2026-05-15-148 - completed - recorded backend comment rollout completion and transitioned recovery state toward backend development scope planning.
+143. AT-2026-05-15-149 - completed - wired downloads pause/cancel facade methods to shared runtime control ports while leaving resume out of scope.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
