@@ -2311,3 +2311,23 @@
   - `.artifacts/ai/active-task.md` (update)
   - `.artifacts/ai/task-plan.md` (update)
   - `.artifacts/ai/progress.md` (update)
+
+## 2026-05-14 - Resume and AT-140 kickoff
+
+- AT-2026-05-14-139 was committed locally as `d2877d4` with message `docs: add transport mapper chinese comments`.
+- Direct push to `origin/main` remains skipped because earlier direct-main push attempts were blocked by safety review; per user rule, continue without bypassing that review.
+- Read small slices of `README.md`, `docs/README.md`, `docs/TauriCodeCommentStandard.md`, `docs/TauriCompositionRootWiringDesign.md`, and `.artifacts/ai/findings.md`.
+- Started AT-2026-05-14-140 to add Chinese companion comments to `crates/composition-root/src/bootstrap.rs` while preserving existing English comments and composition-root behavior.
+- Added Chinese companion comments to the bootstrap module entry, concrete desktop alias cluster, `DesktopBootstrapConfig`, `DesktopAppServices`, and their current public fields/methods.
+- Validation passed:
+  - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`
+  - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- crates/composition-root/src/bootstrap.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/handoff.md`
+
+### Auto Record: 2026-05-14 23:55:13
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)

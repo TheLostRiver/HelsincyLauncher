@@ -1,9 +1,13 @@
 //! Composition-root assembly owner for the current desktop backend baseline.
+//! 当前桌面后端基线的 composition-root 装配 owner。
 //!
 //! This module is the only place that knows the concrete adapter/runtime types used
 //! by the desktop host. It assembles the shared job runtime, storage/provider
 //! adapters, module facades, startup pipeline, and the final facade-only service
 //! aggregation exposed to `src-tauri`.
+//! 本模块是桌面宿主唯一了解具体 adapter/runtime 类型的地方；它负责组装共享任务
+//! runtime、storage/provider adapter、模块 facade、启动管线，以及最终暴露给
+//! `src-tauri` 的 facade-only 服务聚合。
 
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -30,6 +34,8 @@ use crate::startup::StartupPipelineFacade;
 
 // Concrete desktop aliases keep the public service aggregation readable while the
 // concrete adapter/runtime graph remains private to composition-root.
+// 这些具体桌面别名让公开服务聚合保持可读，同时把真实 adapter/runtime 图继续收在
+// composition-root 内部。
 type DesktopFabFacade = FabFacade<
     SqliteFabInventoryProjectionRepository,
     SqliteFabSyncCursorRepository,
@@ -49,35 +55,45 @@ type DesktopDownloadFacade = DownloadFacade<
 type DesktopEngineFacade = EngineFacade<(), (), SharedJobRuntimeHost>;
 
 /// Wiring configuration owned by composition-root for the current desktop baseline.
+/// 当前桌面基线中由 composition-root 持有的接线配置。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DesktopBootstrapConfig {
     /// Root directory for durable app-owned data.
+    /// 应用自有持久化数据的根目录。
     pub app_data_dir: PathBuf,
 
     /// Root directory for cache data that can be rebuilt.
+    /// 可重建缓存数据的根目录。
     pub cache_dir: PathBuf,
 
     /// Root directory for desktop host logs.
+    /// 桌面宿主日志文件的根目录。
     pub logs_dir: PathBuf,
 
     /// SQLite database path used by the current storage adapters and snapshot store.
+    /// 当前 storage adapter 与 snapshot store 共用的 SQLite 数据库路径。
     pub sqlite_path: PathBuf,
 
     /// Whether Fab wiring should be exposed in the assembled service graph.
+    /// 控制装配后的服务图是否暴露 Fab 接线。
     pub enable_fab: bool,
 
     /// Whether downloads wiring should be exposed in the assembled service graph.
+    /// 控制装配后的服务图是否暴露 downloads 接线。
     pub enable_downloads: bool,
 
     /// Whether startup stage 3 should schedule Fab prewarm when supported.
+    /// 控制 startup stage 3 在能力可用时是否调度 Fab prewarm。
     pub enable_startup_prewarm: bool,
 
     /// Shared runtime queue width used for current download/job scheduling.
+    /// 当前 download/job 调度使用的共享 runtime 队列宽度。
     pub default_download_slots: u16,
 }
 
 impl DesktopBootstrapConfig {
     /// Creates a desktop bootstrap config with the current baseline feature toggles.
+    /// 使用当前基线功能开关创建桌面 bootstrap 配置。
     pub fn new(
         app_data_dir: impl Into<PathBuf>,
         cache_dir: impl Into<PathBuf>,
@@ -99,32 +115,40 @@ impl DesktopBootstrapConfig {
 
 impl Default for DesktopBootstrapConfig {
     /// Returns the local baseline bootstrap config used by smoke tests and the host shell.
+    /// 返回 smoke test 与宿主 shell 使用的本地基线 bootstrap 配置。
     fn default() -> Self {
         Self::new("app-data", "cache", "logs", "launcher.sqlite3")
     }
 }
 
 /// Facade-only desktop services exposed to the host after composition-root assembly.
+/// composition-root 装配后暴露给宿主的 facade-only 桌面服务集合。
 #[derive(Clone)]
 pub struct DesktopAppServices<F = DesktopFabFacade, D = DesktopDownloadFacade, E = DesktopEngineFacade> {
     /// Fab module facade wired with the current desktop storage/provider/runtime stack.
+    /// 使用当前桌面 storage/provider/runtime 栈接线的 Fab 模块 facade。
     pub fab: Arc<F>,
 
     /// Downloads module facade wired with the current desktop storage/runtime stack.
+    /// 使用当前桌面 storage/runtime 栈接线的 Downloads 模块 facade。
     pub downloads: Arc<D>,
 
     /// Engines module facade wired with the shared runtime host.
+    /// 使用共享 runtime host 接线的 Engines 模块 facade。
     pub engines: Arc<E>,
 
     /// Startup pipeline facade that owns staged restore/prewarm entry points.
+    /// 持有分阶段 restore/prewarm 入口的启动管线 facade。
     pub startup: Arc<StartupPipelineFacade>,
 
     /// Shared snapshot store projected for host/runtime inspection surfaces.
+    /// 投射给宿主/runtime 检视面的共享 snapshot store。
     pub snapshot_store: Arc<dyn JobSnapshotStore<()>>,
 }
 
 impl<F, D, E> DesktopAppServices<F, D, E> {
     /// Creates the facade-only desktop service aggregation returned to the host.
+    /// 创建返回给宿主的 facade-only 桌面服务聚合。
     pub fn new(
         fab: Arc<F>,
         downloads: Arc<D>,

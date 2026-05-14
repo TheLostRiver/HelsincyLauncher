@@ -1,35 +1,32 @@
 # Handoff
 
-## Latest Validated Atomic Task
+## Latest Published Atomic Task
 
 - task id: AT-2026-05-14-139
 - title: Add Chinese transport mapper comments
-- status: validated and staged, not committed
+- status: committed locally as `d2877d4`
 
-## Stop Reason
+## Current In-progress Atomic Task
 
-- User requested: "记录下任务信息 然后停止运行".
-- Do not continue into a new task on resume until the staged AT-2026-05-14-139 publication state is resolved.
+- task id: AT-2026-05-14-140
+- title: Add composition-root bootstrap Chinese companion comments
+- status: validated and ready for publication
 
-## Validated Slice
+## Current Slice
 
-- `src-tauri/src/commands/mod.rs`
+- `crates/composition-root/src/bootstrap.rs`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
+- `.artifacts/ai/handoff.md`
 
 ## Validation
 
-- `cargo check -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed.
-- `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- src-tauri/src/commands/mod.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md` passed.
+- `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed.
+- `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- crates/composition-root/src/bootstrap.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/handoff.md` passed; Git only reported Windows LF-to-CRLF working-copy warnings.
 
 ## Current Git State To Preserve
 
-- Staged for AT-2026-05-14-139:
-  - `.artifacts/ai/active-task.md`
-  - `.artifacts/ai/progress.md`
-  - `.artifacts/ai/task-plan.md`
-  - `src-tauri/src/commands/mod.rs`
 - Unrelated unstaged/unknown work remains present and must not be committed with AT-2026-05-14-139:
   - `Cargo.lock`
   - `MyEpicLauncher.pen`
@@ -40,7 +37,6 @@
 
 ## Next Resume Point
 
-1. Confirm the staged file list still matches AT-2026-05-14-139.
-2. Commit the staged AT-2026-05-14-139 files, unless the user explicitly says not to.
+1. Commit only `crates/composition-root/src/bootstrap.rs` plus the touched `.artifacts/ai` records.
 3. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.
-4. If continuing Phase 23 after publication, use small batches only and preserve existing English comments by adding Chinese companion comments.
+4. Continue Phase 23 in small backend-only batches and preserve existing English comments by adding Chinese companion comments.
