@@ -2393,6 +2393,16 @@
   - `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml startup::tests` passed with 5 tests.
   - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- crates/composition-root/src/startup.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/handoff.md`
 
+## 2026-05-15 - AT-148 comment rollout completion
+
+- AT-2026-05-15-147 was committed locally as `41ae41f` with message `docs: add startup test section chinese comments`.
+- Re-ran the backend Rust comment-block scan under `crates` and `src-tauri/src`; it returned no English-only comment blocks lacking Chinese text.
+- Phase 23 Backend Comment Rollout is now marked complete.
+- Started Phase 28 Backend Development Scope Recovery so the next backend task begins with small-batch reading of README, architecture, collaboration, and module docs before any implementation.
+- Validation passed:
+  - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/handoff.md`
+  - backend Rust comment-block scan under `crates` and `src-tauri/src` returned no English-only comment blocks lacking Chinese text.
+
 ### Auto Record: 2026-05-14 23:55:13
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
@@ -2566,6 +2576,30 @@
 ### Auto Record: 2026-05-15 01:04:23
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-15 01:07:27
+- Tool: apply_patch
+- Phase: Phase 28 - Backend Development Scope Recovery
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-15 01:07:37
+- Tool: apply_patch
+- Phase: Phase 28 - Backend Development Scope Recovery
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-15 01:08:16
+- Tool: apply_patch
+- Phase: Phase 28 - Backend Development Scope Recovery
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)

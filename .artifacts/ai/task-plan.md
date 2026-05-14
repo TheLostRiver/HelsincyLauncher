@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 23 - Backend Comment Rollout
+Phase 28 - Backend Development Scope Recovery
 
 ## Current Focus
 
@@ -227,7 +227,8 @@ Phase 23 - Backend Comment Rollout
 
 - Outcome: apply the new repository comment standard to backend Rust/Tauri files in small, commit-sized slices of one or two files.
 - Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062, AT-2026-05-04-063, AT-2026-05-04-064, AT-2026-05-04-065, AT-2026-05-04-066, AT-2026-05-04-067, AT-2026-05-04-068, AT-2026-05-05-071, AT-2026-05-05-072, AT-2026-05-05-073, AT-2026-05-05-074, AT-2026-05-05-075, AT-2026-05-05-076, AT-2026-05-05-077, AT-2026-05-05-078, AT-2026-05-05-079, AT-2026-05-05-080, AT-2026-05-05-081, AT-2026-05-06-082, AT-2026-05-06-083, AT-2026-05-06-084, AT-2026-05-06-085, AT-2026-05-06-086, AT-2026-05-06-087, AT-2026-05-06-088, AT-2026-05-06-089, AT-2026-05-14-110, AT-2026-05-14-111, AT-2026-05-14-112, AT-2026-05-14-113, AT-2026-05-14-114, AT-2026-05-14-115, AT-2026-05-14-116, AT-2026-05-14-117, AT-2026-05-14-118, AT-2026-05-14-119, AT-2026-05-14-120, AT-2026-05-14-121, AT-2026-05-14-122, AT-2026-05-14-123, AT-2026-05-14-124, AT-2026-05-14-125, AT-2026-05-14-126, AT-2026-05-14-127, AT-2026-05-14-128, AT-2026-05-14-129, AT-2026-05-14-130, AT-2026-05-14-131, AT-2026-05-14-132, AT-2026-05-14-133, AT-2026-05-14-134, AT-2026-05-14-135, AT-2026-05-14-136, AT-2026-05-14-137, AT-2026-05-14-138, AT-2026-05-14-139
-- **Status:** in_progress
+- Additional completion sweep: AT-2026-05-14-140, AT-2026-05-14-141, AT-2026-05-14-142, AT-2026-05-14-143, AT-2026-05-14-144, AT-2026-05-14-145, AT-2026-05-14-146, AT-2026-05-15-147
+- **Status:** complete
 
 ### Phase 24: Comment Language Controls
 
@@ -252,6 +253,12 @@ Phase 23 - Backend Comment Rollout
 - Outcome: make the repo-local Plan With Files doctor recognize `.artifacts/ai` as the active task record surface without recreating root planning files or `.planning` state.
 - Atomic tasks: AT-2026-05-14-109
 - **Status:** complete
+
+### Phase 28: Backend Development Scope Recovery
+
+- Outcome: after completing backend comment rollout, re-read the current README, architecture, collaboration, and module documents in small batches, identify the next backend-only development slice, and keep frontend/unrelated dirty work untouched.
+- Atomic tasks: AT-2026-05-15-148
+- **Status:** in_progress
 
 ## Atomic Task Ledger
 
@@ -396,6 +403,7 @@ Phase 23 - Backend Comment Rollout
 139. AT-2026-05-14-145 - completed - added Chinese companion comments for composition-root smoke-test step comments while preserving test behavior.
 140. AT-2026-05-14-146 - completed - added Chinese companion comments for startup unit-test driver registry comments while preserving test behavior.
 141. AT-2026-05-15-147 - completed - added Chinese companion comments for startup unit-test section headers while preserving test behavior.
+142. AT-2026-05-15-148 - completed - recorded backend comment rollout completion and transitioned recovery state toward backend development scope planning.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
@@ -414,7 +422,7 @@ Phase 23 - Backend Comment Rollout
 
 ## Follow-up Queue
 
-1. Continue Phase 23 with the next narrow backend comment slice after publishing AT-2026-05-14-139; push only with explicit approval for direct `origin/main` mutation.
+1. Continue with Phase 28 by reading the README plus relevant architecture, collaboration, and module documents in small batches before selecting the next backend-only development slice.
 2. Leave unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, and `src/` changes untouched unless the user explicitly scopes them into a task.
 
 ## Legacy Note
