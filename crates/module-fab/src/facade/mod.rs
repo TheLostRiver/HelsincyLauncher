@@ -1,9 +1,8 @@
-//! Fab module facade boundary for projection reads and accepted-job handoff.
+//! Fab 模块的 facade 边界，负责投影读取与 accepted-job 交接。
 //!
-//! This surface owns the backend-facing semantics for three current Fab flows:
-//! reading inventory summaries from the local projection, returning a backend-owned
-//! cold-start detail placeholder, and accepting sync/prewarm jobs through the job
-//! runtime boundary without leaking transport or adapter details.
+//! 该 surface 汇总当前 Fab 后端语义：从本地 projection 读取库存摘要、在详情缓存未热时
+//! 返回后端拥有的 cold-start 占位结果，并通过 job runtime 接收 sync/prewarm 作业，
+//! 同时不向 transport 暴露 adapter 或运行时细节。
 
 use launcher_kernel_foundation::{AppResult, AssetId, IsoDateTime, JobId};
 use launcher_kernel_jobs::{
@@ -15,44 +14,44 @@ use crate::contracts::{
     FabInventoryPrewarmRequestDto, FabInventorySyncRequestDto,
 };
 
-/// Concrete dependencies needed by the current Fab facade boundary.
+/// 当前 Fab facade 边界所需的具体依赖束。
 #[derive(Debug, Clone)]
 pub struct FabModuleDeps<P, C, M, J, K> {
-    /// Reads inventory summary pages and cached detail snapshots from the local projection.
+    /// 从本地 projection 读取库存摘要分页与已缓存的详情快照。
     pub projection_repo: P,
-    /// Persists incremental sync cursor state for restart-safe Fab synchronization.
+    /// 持久化增量同步 cursor，保证 Fab 同步可跨重启恢复。
     pub cursor_repo: C,
-    /// Resolves thumbnail and preview metadata without pushing media concerns into the list model.
+    /// 解析缩略图与预览元数据，避免把媒体细节塞进列表 read model。
     pub media_repo: M,
-    /// Accepts Fab long-running jobs and exposes their backend-owned accepted-job result.
+    /// 接收 Fab 长任务，并返回后端拥有的 accepted-job 结果。
     pub job_runtime: J,
-    /// Talks to the upstream Fab provider behind the module boundary.
+    /// 在模块边界之后访问上游 Fab provider。
     pub catalog_provider: K,
 }
 
-/// Public Fab use-case entry point exposed to composition-root and host transport.
+/// 暴露给 composition-root 与宿主 transport 的 Fab 用例入口。
 pub struct FabFacade<P, C, M, J, K> {
     deps: FabModuleDeps<P, C, M, J, K>,
 }
 
-/// Projection-backed inventory page returned by the local Fab read model.
+/// 由本地 Fab read model 返回、以 projection 为事实来源的库存分页。
 pub type FabInventoryProjectionPage = FabInventoryPageDto;
 
-/// Reads Fab inventory summaries and cached detail snapshots from the local projection.
+/// 从本地 projection 读取 Fab 库存摘要与已缓存详情快照。
 pub trait FabInventoryProjectionRepository {
-    /// Returns a stable inventory page without consulting the upstream provider on the read path.
+    /// 返回稳定库存分页，读取路径不直接访问上游 provider。
     fn list_page(&self, query: FabInventoryListQueryDto) -> AppResult<FabInventoryProjectionPage>;
 
-    /// Returns a cached detail snapshot when the local projection has already been hydrated.
+    /// 在本地 projection 已完成水合时返回缓存详情快照。
     fn get_asset_detail_snapshot(&self, asset_id: &AssetId) -> AppResult<Option<FabAssetDetailDto>>;
 }
 
-/// Accepts a Fab inventory sync request and returns the backend-owned accepted job.
+/// 接收 Fab 库存同步请求，并返回后端拥有的 accepted job。
 pub trait FabSyncJobAcceptance {
     fn accept_sync_job(&self, request: FabInventorySyncRequestDto) -> AppResult<AcceptedJob>;
 }
 
-/// Accepts a startup prewarm request and returns the backend-owned accepted job.
+/// 接收启动阶段库存预热请求，并返回后端拥有的 accepted job。
 pub trait FabStartupPrewarmJobAcceptance {
     fn accept_startup_prewarm_job(
         &self,

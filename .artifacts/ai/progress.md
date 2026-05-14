@@ -1965,6 +1965,26 @@
     - `cargo check -p launcher-module-fab --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`
     - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- crates/module-fab/src/driver.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md`
 
+### Agent Note: 2026-05-14 14:30
+
+- AT-2026-05-14-132 publication:
+  - committed locally as `8444c7f` (`docs: localize fab restore driver comments`)
+  - direct `origin/main` push remains blocked by safety review; continuing per user instruction to skip push when it is not possible
+- AT-2026-05-14-133 started:
+  - scope: localize only the first `crates/module-fab/src/facade/mod.rs` facade boundary comments
+  - allowed files: `crates/module-fab/src/facade/mod.rs`, `.artifacts/ai/active-task.md`, `.artifacts/ai/task-plan.md`, `.artifacts/ai/progress.md`
+  - docs checked in a small batch: `docs/TauriFirstCrateApiDrafts.md`
+  - key finding: this facade boundary exposes projection reads and accepted-job handoff to composition-root and host transport without leaking provider, storage, or runtime internals.
+
+### Agent Note: 2026-05-14 14:35
+
+- AT-2026-05-14-133 completed:
+  - localized the first `crates/module-fab/src/facade/mod.rs` facade boundary comments to Chinese
+  - preserved public contracts, dependency types, and behavior
+  - validation passed:
+    - `cargo check -p launcher-module-fab --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`
+    - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- crates/module-fab/src/facade/mod.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md`
+
 ### Auto Record: 2026-05-14 13:07:02
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
@@ -2026,6 +2046,23 @@
   - `crates/module-fab/src/driver.rs` (update)
 
 ### Auto Record: 2026-05-14 14:21:17
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-14 20:00:05
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `crates/module-fab/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-14 20:01:30
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
 - Files:
