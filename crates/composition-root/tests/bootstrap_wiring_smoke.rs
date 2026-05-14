@@ -92,6 +92,7 @@ fn noop_raw_waker() -> RawWaker {
 fn runtime_snapshot_persists_across_rebuilds() {
     let tmp_path = std::env::temp_dir().join("at045_runtime_snapshot_test.sqlite3");
     // Clean up any leftover file from a previous run so the test is idempotent.
+    // 清理上一次运行可能残留的文件，让该测试保持幂等。
     let _ = std::fs::remove_file(&tmp_path);
 
     let config = DesktopBootstrapConfig {
@@ -100,6 +101,7 @@ fn runtime_snapshot_persists_across_rebuilds() {
     };
 
     // First build: enqueue a Fab prewarm job.
+    // 第一次构建：入队一个 Fab prewarm job。
     let services1 = build_desktop_services(config.clone())
         .expect("first build_desktop_services should succeed");
 
@@ -113,6 +115,7 @@ fn runtime_snapshot_persists_across_rebuilds() {
     let job_id = accepted.job_id.clone();
 
     // Verify the snapshot is already readable in the first instance.
+    // 确认第一次实例中已经可以读取该 snapshot。
     services1
         .fab
         .deps()
@@ -122,9 +125,11 @@ fn runtime_snapshot_persists_across_rebuilds() {
         .expect("snapshot should exist in first runtime host");
 
     // Drop the first services to release the sqlite connection.
+    // 丢弃第一次服务图以释放 sqlite 连接。
     drop(services1);
 
     // Second build: rebuild with the same sqlite path.
+    // 第二次构建：使用同一个 sqlite 路径重新装配。
     let services2 = build_desktop_services(config)
         .expect("second build_desktop_services should succeed");
 
@@ -142,6 +147,7 @@ fn runtime_snapshot_persists_across_rebuilds() {
     );
 
     // Clean up temp file.
+    // 清理临时文件。
     let _ = std::fs::remove_file(&tmp_path);
 }
 
@@ -156,6 +162,7 @@ fn stage2_restore_reads_resumable_snapshots() {
     };
 
     // Build services, enqueue a job, then call stage-2 restore — it should not error.
+    // 构建服务、入队作业，然后调用 stage-2 restore；该路径不应报错。
     let services = build_desktop_services(config.clone())
         .expect("build_desktop_services should succeed for stage-2 test");
 

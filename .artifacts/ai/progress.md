@@ -2363,6 +2363,16 @@
   - `cargo check -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --bin my-epic-launcher-desktop`
   - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- src-tauri/src/main.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/handoff.md`
 
+## 2026-05-14 - AT-145 kickoff
+
+- AT-2026-05-14-144 was committed locally as `df71e95` with message `docs: add desktop binary entry comment`.
+- Ran a capped backend Rust comment-candidate scan and found remaining unpaired English step comments in `crates/composition-root/tests/bootstrap_wiring_smoke.rs`.
+- Started AT-2026-05-14-145 to add Chinese companion comments for those smoke-test step comments without changing test behavior.
+- Added Chinese companion comments for existing English smoke-test step comments while preserving all test behavior.
+- Validation passed:
+  - `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --test bootstrap_wiring_smoke` passed with 7 tests.
+  - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- crates/composition-root/tests/bootstrap_wiring_smoke.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/handoff.md`
+
 ### Auto Record: 2026-05-14 23:55:13
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
@@ -2459,6 +2469,31 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
 
 ### Auto Record: 2026-05-15 00:09:54
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-15 00:46:35
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\composition-root\tests\bootstrap_wiring_smoke.rs` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-15 00:46:44
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-15 00:47:28
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
 - Files:
