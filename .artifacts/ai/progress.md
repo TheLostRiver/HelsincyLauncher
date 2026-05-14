@@ -2681,6 +2681,19 @@
   - scoped `git diff --check` for `crates/module-downloads/src/facade/mod.rs` plus `.artifacts/ai` records
 - Only the facade header comment changed in production source; behavior remains unchanged.
 
+## Agent Note: 2026-05-15 Stop Hook Resume
+
+- Stop hook reported planning-with-files task incomplete: 27/28 phases done.
+- Resuming from the latest local commit state after AT-2026-05-15-151.
+- Next action is to reread `.artifacts/ai/task-plan.md` in a small slice, verify current handoff/status, and continue Phase 28 with a backend-only task if the next slice is clear.
+
+## Agent Note: 2026-05-15 Phase 28 Closeout
+
+- Reread the Phase 28 section of `.artifacts/ai/task-plan.md` and `.artifacts/ai/handoff.md`.
+- Confirmed AT-2026-05-15-151 was already committed locally as `a6fc28a`.
+- The only remaining Phase 28 gap was record drift: task-plan still marked Phase 28 in progress and handoff still described AT-151 as ready for publication.
+- Selected AT-2026-05-15-152 as a record-only closeout slice: mark Phase 28 complete and keep `resume_download` as the next checkpoint-aware backend design/RED-test candidate.
+
 ### Auto Record: 2026-05-15 07:27:59
 - Tool: apply_patch
 - Phase: Phase 28 - Backend Development Scope Recovery
@@ -2806,3 +2819,33 @@
 - Phase: Phase 28 - Backend Development Scope Recovery
 - Files:
   - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-15 07:38:47
+- Tool: apply_patch
+- Phase: Phase 28 - Backend Development Scope Recovery
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 07:39:53
+- Tool: apply_patch
+- Phase: Phase 28 - Backend Development Scope Recovery
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+
+### Auto Record: 2026-05-15 07:40:07
+- Tool: apply_patch
+- Phase: Phase 28 - Backend Development Scope Recovery
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 07:40:15
+- Tool: apply_patch
+- Phase: Phase 28 - Backend Development Scope Recovery
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 07:40:26
+- Tool: apply_patch
+- Phase: Phase 28 - Backend Development Scope Recovery
+- Files:
+  - `.artifacts/ai/handoff.md` (delete)
