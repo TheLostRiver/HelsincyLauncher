@@ -1,9 +1,8 @@
-//! Host transport handlers for the downloads module.
+//! downloads 模块的宿主 transport handler。
 //!
-//! This boundary adapts IPC-facing downloads commands and queries onto the
-//! backend-owned downloads facade exposed through `DesktopServices`. Until the
-//! full downloads read path is wired everywhere, the query handlers also own the
-//! temporary `DOWNLOADS_NOT_WIRED` fallback projections returned to the shell.
+//! 该边界把 IPC 侧下载命令和查询转接到 `DesktopServices` 暴露的后端 downloads facade。
+//! 在完整 read path 尚未全部接线前，查询 handler 仍负责把明确的
+//! `DOWNLOADS_NOT_WIRED` 错误投影为 shell 可消费的临时 fallback。
 
 use launcher_kernel_foundation::PageSlice;
 use launcher_module_downloads::contracts::{
@@ -18,7 +17,7 @@ use super::{
     DesktopServices, QueryResultDto,
 };
 
-/// Starts a backend-owned download job and projects the accepted job envelope.
+/// 提交后端拥有的下载作业，并投影 accepted-job envelope。
 pub async fn downloads_start(
     services: &DesktopServices,
     request: StartDownloadRequestDto,
@@ -26,7 +25,7 @@ pub async fn downloads_start(
     map_accepted_job_result(services.downloads.start_download(request))
 }
 
-/// Pauses an existing backend-owned download job.
+/// 请求暂停已有的后端下载作业。
 pub async fn downloads_pause(
     services: &DesktopServices,
     request: PauseDownloadRequestDto,
@@ -34,7 +33,7 @@ pub async fn downloads_pause(
     map_command_result(services.downloads.pause_download(request))
 }
 
-/// Resumes a paused backend-owned download job and projects the accepted job envelope.
+/// 请求恢复已暂停的后端下载作业，并投影 accepted-job envelope。
 pub async fn downloads_resume(
     services: &DesktopServices,
     request: ResumeDownloadRequestDto,
@@ -42,7 +41,7 @@ pub async fn downloads_resume(
     map_accepted_job_result(services.downloads.resume_download(request))
 }
 
-/// Cancels an existing backend-owned download job.
+/// 请求取消已有的后端下载作业。
 pub async fn downloads_cancel(
     services: &DesktopServices,
     request: CancelDownloadRequestDto,
@@ -50,7 +49,7 @@ pub async fn downloads_cancel(
     map_command_result(services.downloads.cancel_download(request))
 }
 
-/// Lists projected download jobs and falls back to an empty page on the current host stub path.
+/// 读取下载作业投影列表，并在当前 host stub 路径上回退为空分页。
 pub async fn downloads_list_jobs(
     services: &DesktopServices,
     query: ListDownloadJobsQueryDto,
@@ -60,7 +59,7 @@ pub async fn downloads_list_jobs(
     })
 }
 
-/// Gets one projected download job snapshot and falls back to `None` on the current host stub path.
+/// 读取单个下载作业快照投影，并在当前 host stub 路径上回退为空结果。
 pub async fn downloads_get_job_snapshot(
     services: &DesktopServices,
     query: GetDownloadJobQueryDto,
@@ -72,7 +71,7 @@ pub async fn downloads_get_job_snapshot(
     )
 }
 
-/// Reads the downloads policy projection and falls back to the current host-owned placeholder policy.
+/// 读取下载策略投影，并在当前 host stub 路径上回退为宿主占位策略。
 pub async fn downloads_get_policy(
     services: &DesktopServices,
     query: GetDownloadPolicyQueryDto,
@@ -86,7 +85,7 @@ pub async fn downloads_get_policy(
     })
 }
 
-/// Updates the backend-owned downloads policy.
+/// 更新后端拥有的下载策略。
 pub async fn downloads_update_policy(
     services: &DesktopServices,
     request: UpdateDownloadPolicyRequestDto,

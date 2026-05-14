@@ -1925,6 +1925,26 @@
     - `cargo check -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`
     - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- src-tauri/src/commands/fab.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md`
 
+### Agent Note: 2026-05-14 13:33
+
+- AT-2026-05-14-130 publication:
+  - committed locally as `4d0e1f2` (`docs: localize fab transport comments`)
+  - direct `origin/main` push remains blocked by safety review; continuing per user instruction to skip push when it is not possible
+- AT-2026-05-14-131 started:
+  - scope: localize `src-tauri/src/commands/downloads.rs` transport comments only
+  - allowed files: `src-tauri/src/commands/downloads.rs`, `.artifacts/ai/active-task.md`, `.artifacts/ai/task-plan.md`, `.artifacts/ai/progress.md`
+  - docs checked: `docs/TauriCodeCommentStandard.md`, `docs/TauriIPCAndStateContractsDesign.md`, `docs/TauriCurrentRepoArchitectureOverview.md`, `docs/TauriBackendSkeletonImplementationDesign.md`, `docs/TauriDownloadRuntimeDesign.md`, `docs/modules/downloads/README_ARCH.md`, `docs/modules/downloads/README_API.md`, `docs/modules/downloads/README_FLOW.md`
+  - key finding: downloads transport must remain an intent/projection layer; backend facade/runtime owns accepted jobs, scheduler/checkpoint details, and current `DOWNLOADS_NOT_WIRED` stub semantics.
+
+### Agent Note: 2026-05-14 13:37
+
+- AT-2026-05-14-131 completed:
+  - localized `src-tauri/src/commands/downloads.rs` module and handler comments to Chinese
+  - preserved handler implementation, `DOWNLOADS_NOT_WIRED` fallback payloads, policy stub defaults, and accepted-job projection behavior
+  - validation passed:
+    - `cargo check -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`
+    - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- src-tauri/src/commands/downloads.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md`
+
 ### Auto Record: 2026-05-14 13:07:02
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
@@ -1952,6 +1972,23 @@
   - `src-tauri/src/commands/fab.rs` (update)
 
 ### Auto Record: 2026-05-14 13:11:41
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-14 13:17:53
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `src-tauri/src/commands/downloads.rs` (update)
+
+### Auto Record: 2026-05-14 13:24:57
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
 - Files:

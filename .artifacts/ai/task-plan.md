@@ -69,6 +69,8 @@ Phase 23 - Backend Comment Rollout
 - AT-2026-05-14-129 completed after localizing `src-tauri/src/commands/jobs.rs` shared jobs query comments and validating `my-epic-launcher-desktop`.
 - AT-2026-05-14-129 was committed locally as `f7155cd`; direct `origin/main` push remains blocked by safety review, so continue without bypassing it.
 - AT-2026-05-14-130 completed after localizing `src-tauri/src/commands/fab.rs` transport comments and validating `my-epic-launcher-desktop`.
+- AT-2026-05-14-130 was committed locally as `4d0e1f2`; direct `origin/main` push remains blocked by safety review, so continue without bypassing it.
+- AT-2026-05-14-131 completed after localizing `src-tauri/src/commands/downloads.rs` transport comments and validating `my-epic-launcher-desktop`.
 
 ## Phases
 
@@ -207,7 +209,7 @@ Phase 23 - Backend Comment Rollout
 ### Phase 23: Backend Comment Rollout
 
 - Outcome: apply the new repository comment standard to backend Rust/Tauri files in small, commit-sized slices of one or two files.
-- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062, AT-2026-05-04-063, AT-2026-05-04-064, AT-2026-05-04-065, AT-2026-05-04-066, AT-2026-05-04-067, AT-2026-05-04-068, AT-2026-05-05-071, AT-2026-05-05-072, AT-2026-05-05-073, AT-2026-05-05-074, AT-2026-05-05-075, AT-2026-05-05-076, AT-2026-05-05-077, AT-2026-05-05-078, AT-2026-05-05-079, AT-2026-05-05-080, AT-2026-05-05-081, AT-2026-05-06-082, AT-2026-05-06-083, AT-2026-05-06-084, AT-2026-05-06-085, AT-2026-05-06-086, AT-2026-05-06-087, AT-2026-05-06-088, AT-2026-05-06-089, AT-2026-05-14-110, AT-2026-05-14-111, AT-2026-05-14-112, AT-2026-05-14-113, AT-2026-05-14-114, AT-2026-05-14-115, AT-2026-05-14-116, AT-2026-05-14-117, AT-2026-05-14-118, AT-2026-05-14-119, AT-2026-05-14-120, AT-2026-05-14-121, AT-2026-05-14-122, AT-2026-05-14-123, AT-2026-05-14-124, AT-2026-05-14-125, AT-2026-05-14-126, AT-2026-05-14-127, AT-2026-05-14-128, AT-2026-05-14-129, AT-2026-05-14-130
+- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062, AT-2026-05-04-063, AT-2026-05-04-064, AT-2026-05-04-065, AT-2026-05-04-066, AT-2026-05-04-067, AT-2026-05-04-068, AT-2026-05-05-071, AT-2026-05-05-072, AT-2026-05-05-073, AT-2026-05-05-074, AT-2026-05-05-075, AT-2026-05-05-076, AT-2026-05-05-077, AT-2026-05-05-078, AT-2026-05-05-079, AT-2026-05-05-080, AT-2026-05-05-081, AT-2026-05-06-082, AT-2026-05-06-083, AT-2026-05-06-084, AT-2026-05-06-085, AT-2026-05-06-086, AT-2026-05-06-087, AT-2026-05-06-088, AT-2026-05-06-089, AT-2026-05-14-110, AT-2026-05-14-111, AT-2026-05-14-112, AT-2026-05-14-113, AT-2026-05-14-114, AT-2026-05-14-115, AT-2026-05-14-116, AT-2026-05-14-117, AT-2026-05-14-118, AT-2026-05-14-119, AT-2026-05-14-120, AT-2026-05-14-121, AT-2026-05-14-122, AT-2026-05-14-123, AT-2026-05-14-124, AT-2026-05-14-125, AT-2026-05-14-126, AT-2026-05-14-127, AT-2026-05-14-128, AT-2026-05-14-129, AT-2026-05-14-130, AT-2026-05-14-131
 - **Status:** in_progress
 
 ### Phase 24: Comment Language Controls
@@ -360,6 +362,7 @@ Phase 23 - Backend Comment Rollout
 122. AT-2026-05-14-128 - completed - localized engines transport command comments while preserving handler signature and accepted-job projection behavior.
 123. AT-2026-05-14-129 - completed - localized shared jobs transport query comments while preserving `JobSnapshotStore::list_resumable` semantics.
 124. AT-2026-05-14-130 - completed - localized Fab transport command comments while preserving `FAB_NOT_WIRED` fallback and accepted-job projection behavior.
+125. AT-2026-05-14-131 - completed - localized downloads transport command comments while preserving `DOWNLOADS_NOT_WIRED` fallback and accepted-job projection behavior.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
@@ -378,7 +381,7 @@ Phase 23 - Backend Comment Rollout
 
 ## Follow-up Queue
 
-1. Continue Phase 23 with the next narrow backend comment slice after publishing AT-2026-05-14-130; push only with explicit approval for direct `origin/main` mutation.
+1. Continue Phase 23 with the next narrow backend comment slice after publishing AT-2026-05-14-131; push only with explicit approval for direct `origin/main` mutation.
 2. Leave unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, and `src/` changes untouched unless the user explicitly scopes them into a task.
 
 ## Legacy Note
