@@ -2,24 +2,23 @@
 
 ## Identity
 
-- task id: AT-2026-05-14-140
-- title: Add composition-root bootstrap Chinese companion comments
+- task id: AT-2026-05-14-141
+- title: Add composition-root builder Chinese companion comments
 - status: completed
 
 ## Goal
 
-继续 Phase 23 Backend Comment Rollout，在保留既有英文注释且不改变 composition-root 装配行为的前提下，为 `crates/composition-root/src/bootstrap.rs` 中 bootstrap 文件入口、配置和 facade-only 服务聚合注释补充中文说明。
+继续 Phase 23 Backend Comment Rollout，在保留既有英文注释且不改变 composition-root 装配行为的前提下，为 `crates/composition-root/src/bootstrap.rs` 中 service graph builder 与 private helper 边界注释补充中文说明。
 
 本轮只覆盖：
 
-- `crates/composition-root/src/bootstrap.rs` bootstrap entry/config/services declaration cluster
+- `crates/composition-root/src/bootstrap.rs` service graph builder/helper comment cluster
 
 ## Scope
 
 - in scope:
-  - add Chinese companion comments for the composition-root module entry comments
-  - add Chinese companion comments for `DesktopBootstrapConfig` and its public fields
-  - add Chinese companion comments for `DesktopAppServices` and its public facade handles
+  - add Chinese companion comments for `build_desktop_services`
+  - add Chinese companion comments for storage/provider/module/runtime/startup builder helper comments
   - preserve all existing English comments in the touched range
   - update `.artifacts/ai/active-task.md`
   - update `.artifacts/ai/task-plan.md`
@@ -68,15 +67,15 @@
 
 ## Notes
 
-- AT-2026-05-14-139 completed and was committed locally as `d2877d4`.
+- AT-2026-05-14-140 completed and was committed locally as `b925f16`.
 - Push remains blocked for direct `origin/main` mutation; per user rule, continue without bypassing push review.
 - Existing English comments must be preserved; this task only adds Chinese companion comments.
 
 ## 安全恢复点
 
-- AT-2026-05-14-140 is validated and ready for publication. If work resumes before publishing, inspect only `crates/composition-root/src/bootstrap.rs` plus the touched `.artifacts/ai` records, then commit those files only.
+- AT-2026-05-14-141 is validated and ready for publication. If work resumes before publishing, inspect only `crates/composition-root/src/bootstrap.rs` plus the touched `.artifacts/ai` records, then commit those files only.
 
 ## Completion Summary
 
-- Added Chinese companion comments for the composition-root bootstrap module entry, desktop concrete alias cluster, `DesktopBootstrapConfig`, `DesktopAppServices`, and their current public fields/methods.
+- Added Chinese companion comments for `build_desktop_services` and the composition-root storage/provider/module/runtime/startup/error builder helper comments while preserving existing English comments.
 - The source diff only adds comments and preserves bootstrap assembly behavior.

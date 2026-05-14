@@ -167,6 +167,7 @@ impl<F, D, E> DesktopAppServices<F, D, E> {
 }
 
 /// Assembles the current desktop service graph without starting background work.
+/// 装配当前桌面服务图，但不在构建过程中启动后台任务。
 pub fn build_desktop_services(config: DesktopBootstrapConfig) -> AppResult<DesktopAppServices> {
     let sqlite_config = build_storage_config(&config)?;
     let fab_provider = build_fab_provider_adapter()?;
@@ -192,6 +193,7 @@ pub fn build_desktop_services(config: DesktopBootstrapConfig) -> AppResult<Deskt
 }
 
 // Validate storage inputs before concrete adapters and snapshot stores are created.
+// 在创建具体 adapter 与 snapshot store 前，先校验 storage 输入。
 fn build_storage_config(config: &DesktopBootstrapConfig) -> AppResult<SqliteStorageAdapterConfig> {
     if config.sqlite_path.as_os_str().is_empty() {
         return Err(invalid_builder_input(
@@ -204,6 +206,7 @@ fn build_storage_config(config: &DesktopBootstrapConfig) -> AppResult<SqliteStor
 }
 
 // Provider wiring stays centralized here so host/transport layers never see adapter details.
+// Provider 接线集中在这里，确保 host/transport 层永远不接触 adapter 细节。
 fn build_fab_provider_adapter() -> AppResult<EpicFabCatalogProviderAdapter> {
     let provider_config = EpicFabCatalogProviderConfig::new(
         "https://www.fab.com",
@@ -221,6 +224,7 @@ fn build_fab_provider_adapter() -> AppResult<EpicFabCatalogProviderAdapter> {
 }
 
 // Module builders pin concrete dependencies locally while the public service surface stays facade-only.
+// 模块 builder 在本地固定具体依赖，同时让公开服务面保持 facade-only。
 fn build_fab_module(
     sqlite_config: SqliteStorageAdapterConfig,
     fab_provider: EpicFabCatalogProviderAdapter,
@@ -258,6 +262,7 @@ fn build_engines_module(job_runtime: SharedJobRuntimeHost) -> DesktopEngineFacad
 }
 
 // The shared runtime host is assembled once and then fanned out to all queued-job modules.
+// 共享 runtime host 只装配一次，然后分发给所有 queued-job 模块。
 fn build_job_runtime(config: &DesktopBootstrapConfig) -> AppResult<(SharedJobRuntimeHost, Arc<SqliteJobSnapshotStore>)> {
     if config.default_download_slots == 0 {
         return Err(invalid_builder_input(
@@ -277,6 +282,7 @@ fn build_job_runtime(config: &DesktopBootstrapConfig) -> AppResult<(SharedJobRun
 }
 
 // Restore drivers are registered centrally so startup stage 2 can rehydrate queued jobs.
+// Restore driver 在这里集中注册，让 startup stage 2 能恢复 queued jobs。
 fn build_job_driver_registry(
     download_checkpoint_repo: Arc<dyn DownloadCheckpointRepository>,
 ) -> Arc<JobDriverRegistry<()>> {
@@ -289,6 +295,7 @@ fn build_job_driver_registry(
 }
 
 // Startup only depends on assembled facades/runtime surfaces, not concrete repository types.
+// Startup 只依赖已装配的 facade/runtime 表面，不依赖具体 repository 类型。
 fn build_startup_pipeline(
     config: &DesktopBootstrapConfig,
     fab: Arc<DesktopFabFacade>,
@@ -304,6 +311,7 @@ fn build_startup_pipeline(
 }
 
 // Builder validation failures are normalized into one composition-root owned error shape.
+// Builder 校验失败会统一归一化为 composition-root 持有的错误形状。
 fn invalid_builder_input(builder: &str, detail: &str) -> AppError {
     AppError::new(
         "COMPOSITION_ROOT_INVALID_CONFIG",

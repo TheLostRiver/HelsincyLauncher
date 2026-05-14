@@ -2,14 +2,14 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-14-139
-- title: Add Chinese transport mapper comments
-- status: committed locally as `d2877d4`
+- task id: AT-2026-05-14-140
+- title: Add composition-root bootstrap Chinese companion comments
+- status: committed locally as `b925f16`
 
 ## Current In-progress Atomic Task
 
-- task id: AT-2026-05-14-140
-- title: Add composition-root bootstrap Chinese companion comments
+- task id: AT-2026-05-14-141
+- title: Add composition-root builder Chinese companion comments
 - status: validated and ready for publication
 
 ## Current Slice

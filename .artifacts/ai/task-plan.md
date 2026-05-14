@@ -389,6 +389,7 @@ Phase 23 - Backend Comment Rollout
 132. AT-2026-05-14-138 - completed - added Chinese companion comments for transport result envelopes and accepted-job DTO while preserving existing English comments.
 133. AT-2026-05-14-139 - completed - added Chinese companion comments for the shared transport mapper cluster while preserving existing English comments.
 134. AT-2026-05-14-140 - completed - added Chinese companion comments for the composition-root bootstrap entry, config, and facade-only service aggregation while preserving existing English comments.
+135. AT-2026-05-14-141 - completed - added Chinese companion comments for the composition-root service graph builder and private helper boundary comments while preserving existing English comments.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
