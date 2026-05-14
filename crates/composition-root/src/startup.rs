@@ -314,6 +314,7 @@ mod tests {
     }
 
     // ── driver registry test ──────────────────────────────────────────────────
+    // 驱动注册表测试：验证 queued job 的 driver restore 处置。
     struct AlwaysFailDriver;
     impl JobDriver<()> for AlwaysFailDriver {
         fn module(&self) -> &'static str { "test" }
@@ -330,6 +331,7 @@ mod tests {
         let store = Arc::new(TestSnapshotStore::default());
         let job_id = JobId::generate();
         // Seed a Queued job (already in clean state, no orphan reset needed).
+        // 写入一个 Queued job；它已经处于干净状态，不需要 orphan reset。
         store.create(&JobSnapshot {
             job_id: job_id.clone(),
             module: "test".into(),

@@ -2,19 +2,19 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-14-144
-- title: Add desktop binary entry comment
-- status: committed locally as `df71e95`
+- task id: AT-2026-05-14-145
+- title: Add composition-root smoke test Chinese comments
+- status: committed locally as `dba5607`
 
 ## Current In-progress Atomic Task
 
-- task id: AT-2026-05-14-145
-- title: Add composition-root smoke test Chinese comments
+- task id: AT-2026-05-14-146
+- title: Add startup unit test Chinese comments
 - status: validated and ready for publication
 
 ## Current Slice
 
-- `crates/composition-root/tests/bootstrap_wiring_smoke.rs`
+- `crates/composition-root/src/startup.rs`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -22,8 +22,8 @@
 
 ## Validation
 
-- `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --test bootstrap_wiring_smoke` passed with 7 tests.
-- `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- crates/composition-root/tests/bootstrap_wiring_smoke.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/handoff.md` passed; Git only reported Windows LF-to-CRLF working-copy warnings.
+- `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml stage2_driver_marks_queued_job_failed_when_checkpoint_missing` passed.
+- `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- crates/composition-root/src/startup.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/handoff.md` passed; Git only reported Windows LF-to-CRLF working-copy warnings.
 
 ## Current Git State To Preserve
 
@@ -37,6 +37,6 @@
 
 ## Next Resume Point
 
-1. Commit only `crates/composition-root/tests/bootstrap_wiring_smoke.rs` plus the touched `.artifacts/ai` records.
+1. Commit only `crates/composition-root/src/startup.rs` plus the touched `.artifacts/ai` records.
 3. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.
 4. Continue Phase 23 in small backend-only batches and preserve existing English comments by adding Chinese companion comments.
