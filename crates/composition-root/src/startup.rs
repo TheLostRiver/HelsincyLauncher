@@ -1,9 +1,13 @@
 //! Startup pipeline boundary for staged restore and optional background warmup.
+//! 分阶段 restore 与可选后台 warmup 的 startup pipeline 边界。
 //!
 //! This module keeps startup policy explicit inside composition-root: stage 1 keeps
 //! the shell/backend baseline callable, stage 2 restores resumable runtime state,
 //! and stage 3 triggers optional background prewarm without hiding that work in
 //! constructors or module assembly.
+//! 本模块把启动策略显式收在 composition-root 内：stage 1 保持 shell/backend 基线
+//! 可调用，stage 2 恢复可续跑 runtime 状态，stage 3 触发可选后台预热，同时避免把
+//! 这些工作藏进构造函数或模块装配过程。
 
 use std::fmt::{Debug, Formatter};
 use std::sync::Arc;
@@ -19,8 +23,10 @@ use launcher_module_fab::{
 };
 
 /// Startup-stage port that can enqueue the Fab prewarm job without exposing concrete wiring.
+/// startup 阶段使用的端口，用于排入 Fab prewarm job，同时不暴露具体接线细节。
 pub trait FabStartupPrewarmPort: Send + Sync {
     /// Triggers the startup Fab prewarm path when stage 3 decides it is allowed.
+    /// 在 stage 3 判定允许时触发 Fab startup prewarm 路径。
     fn run_startup_prewarm(&self, request: FabInventoryPrewarmRequestDto) -> AppResult<AcceptedJob>;
 }
 
@@ -38,6 +44,7 @@ where
 }
 
 /// Staged startup facade exposed by composition-root to the desktop host.
+/// composition-root 暴露给桌面宿主的分阶段 startup facade。
 #[derive(Clone)]
 pub struct StartupPipelineFacade {
     enable_startup_prewarm: bool,
@@ -60,6 +67,7 @@ impl Debug for StartupPipelineFacade {
 
 impl Default for StartupPipelineFacade {
     /// Returns a no-op startup facade suitable for placeholder or test-only wiring.
+    /// 返回适合占位或测试专用接线的 no-op startup facade。
     fn default() -> Self {
         Self::new(false, None, None, None)
     }
@@ -67,6 +75,7 @@ impl Default for StartupPipelineFacade {
 
 impl StartupPipelineFacade {
     /// Creates a startup facade over the already-assembled startup-stage dependencies.
+    /// 基于已经装配好的 startup-stage 依赖创建 startup facade。
     pub fn new(
         enable_startup_prewarm: bool,
         fab_prewarm: Option<Arc<dyn FabStartupPrewarmPort>>,
@@ -82,15 +91,19 @@ impl StartupPipelineFacade {
     }
 
     /// Runs stage 1 of startup, which is currently a no-op once the shell/backend baseline exists.
+    /// 运行 startup stage 1；当前在 shell/backend 基线已存在后保持 no-op。
     pub async fn run_stage1_shell_ready(&self) -> AppResult<()> {
         Ok(())
     }
 
     /// Runs stage 2 restore before any optional warmup work begins.
+    /// 在任何可选 warmup 开始前运行 stage 2 restore。
     ///
     /// The current baseline repairs orphaned runtime state, consults registered
     /// restore drivers for queued jobs, and persists any resulting state changes
     /// back to the shared snapshot store.
+    /// 当前基线会修复 orphaned runtime 状态，为 queued jobs 咨询已注册的 restore
+    /// driver，并把由此产生的状态变化写回共享 snapshot store。
     pub async fn run_stage2_restore_runtime_state(&self) -> AppResult<()> {
         let orphaned_states = [
             JobState::Running,
@@ -131,6 +144,8 @@ impl StartupPipelineFacade {
 
                 // For Queued jobs, ask the registered driver whether they are
                 // actually resumable (e.g. their business checkpoint still exists).
+                // 对 Queued jobs，需要询问已注册 driver 是否确实可续跑，例如业务
+                // checkpoint 是否仍然存在。
                 if snapshot.state == JobState::Queued {
                     if let Some(registry) = self.driver_registry.as_ref() {
                         match registry.resolve(&snapshot.module, &snapshot.kind) {
@@ -170,8 +185,10 @@ impl StartupPipelineFacade {
     }
 
     /// Runs stage 3 optional background prewarm after restore has completed.
+    /// 在 restore 完成后运行 stage 3 的可选后台 prewarm。
     ///
     /// This stage must remain capability-gated and non-blocking for shell-first startup.
+    /// 该阶段必须保持能力门控，并且不能阻塞 shell-first 启动。
     pub async fn run_stage3_background_prewarm(&self) -> AppResult<()> {
         if !self.enable_startup_prewarm {
             return Ok(());

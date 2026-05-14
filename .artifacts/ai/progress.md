@@ -2333,6 +2333,16 @@
   - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`
   - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- crates/composition-root/src/bootstrap.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/handoff.md`
 
+## 2026-05-14 - AT-142 kickoff
+
+- AT-2026-05-14-141 was committed locally as `d66b23b` with message `docs: add composition builder chinese comments`.
+- Read a small slice of `docs/TauriStartupPipelineDesign.md` and `crates/composition-root/src/startup.rs`.
+- Started AT-2026-05-14-142 to add Chinese companion comments to the startup production boundary/stage comments while preserving existing English comments and startup behavior.
+- Added Chinese companion comments for the startup module entry, prewarm port, startup facade, stage methods, and queued-job restore note.
+- Validation passed:
+  - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`
+  - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- crates/composition-root/src/startup.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/handoff.md`
+
 ### Auto Record: 2026-05-14 23:55:13
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
@@ -2360,6 +2370,25 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
 
 ### Auto Record: 2026-05-14 23:58:32
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-15 00:01:59
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\composition-root\src\startup.rs` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-15 00:02:39
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
 - Files:
