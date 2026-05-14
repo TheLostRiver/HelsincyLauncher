@@ -127,9 +127,11 @@ impl From<AcceptedJob> for AcceptedJobDto {
 }
 
 /// Shared desktop service aggregation exposed to concrete command handlers.
+/// 暴露给具体 command handler 的共享桌面服务聚合。
 pub type DesktopServices = DesktopAppServices;
 
 /// Maps a backend command result into the shared desktop command envelope.
+/// 将后端 command 结果映射为共享桌面 command envelope。
 pub fn map_command_result<T>(result: AppResult<T>) -> CommandResultDto<T> {
     match result {
         Ok(data) => CommandResultDto::Success { data },
@@ -140,10 +142,13 @@ pub fn map_command_result<T>(result: AppResult<T>) -> CommandResultDto<T> {
 }
 
 /// Maps a backend query result into the shared desktop query envelope.
+/// 将后端 query 结果映射为共享桌面 query envelope。
 ///
 /// Some transport queries remain callable before their read model is fully wired;
 /// those paths can project a temporary backend-owned stub when the error code matches
 /// the explicitly allowed `not_wired_code`.
+/// 某些 transport query 在 read model 尚未完整接线时仍需保持可调用；
+/// 当错误码匹配显式允许的 `not_wired_code` 时，这些路径可以投影临时的后端拥有 stub。
 pub fn map_query_result_or_stub<T>(
     result: AppResult<T>,
     not_wired_code: &str,
@@ -156,6 +161,7 @@ pub fn map_query_result_or_stub<T>(
         },
         Err(error) if error.code == not_wired_code => QueryResultDto::Success {
             // Preserve a stable transport contract while the read path is still stubbed.
+            // 在 read path 仍为 stub 时，保持稳定 transport contract。
             data: stub(),
             as_of: Some(IsoDateTime::now()),
         },
@@ -166,6 +172,7 @@ pub fn map_query_result_or_stub<T>(
 }
 
 /// Maps an accepted backend job into the shared desktop command envelope.
+/// 将后端 accepted job 映射为共享桌面 command envelope。
 pub fn map_accepted_job_result(result: AppResult<AcceptedJob>) -> CommandResultDto<AcceptedJobDto> {
     match result {
         Ok(job) => CommandResultDto::Success { data: job.into() },

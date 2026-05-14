@@ -2192,6 +2192,36 @@
     - `cargo check -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`
     - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- src-tauri/src/commands/mod.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md`
 
+### Agent Note: 2026-05-14 20:47
+
+- AT-2026-05-14-138 publication:
+  - committed locally as `c32f12f` (`docs: add transport result chinese comments`)
+  - direct `origin/main` push remains blocked by safety review; continuing per user instruction to skip push when it is not possible
+- AT-2026-05-14-139 started:
+  - scope: add Chinese companion comments for the shared transport mapper cluster in `src-tauri/src/commands/mod.rs`
+  - allowed files: `src-tauri/src/commands/mod.rs`, `.artifacts/ai/active-task.md`, `.artifacts/ai/task-plan.md`, `.artifacts/ai/progress.md`
+
+### Agent Note: 2026-05-14 20:51
+
+- AT-2026-05-14-139 completed:
+  - added Chinese companion comments for `DesktopServices` and shared transport mapper helpers while preserving existing English comments
+  - preserved command/query/accepted-job mapper behavior
+  - validation passed:
+    - `cargo check -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`
+    - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- src-tauri/src/commands/mod.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md`
+
+### Agent Note: 2026-05-14 20:56
+
+- Stop requested by user after AT-2026-05-14-139 validation.
+- Current state:
+  - AT-2026-05-14-139 is validated and staged, but not committed.
+  - Staged files: `.artifacts/ai/active-task.md`, `.artifacts/ai/progress.md`, `.artifacts/ai/task-plan.md`, `src-tauri/src/commands/mod.rs`.
+  - `.artifacts/ai/handoff.md` has been updated with the resume point.
+- Resume instruction:
+  - First confirm staged files, then commit AT-2026-05-14-139 unless the user says otherwise.
+  - Continue using small batches only.
+  - Preserve existing English comments and add Chinese companion comments instead of replacing English comments.
+
 ### Auto Record: 2026-05-14 20:09:12
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
@@ -2258,6 +2288,23 @@
   - `src-tauri/src/commands/mod.rs` (update)
 
 ### Auto Record: 2026-05-14 20:23:12
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-14 20:26:02
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `src-tauri/src/commands/mod.rs` (update)
+
+### Auto Record: 2026-05-14 20:26:58
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
 - Files:
