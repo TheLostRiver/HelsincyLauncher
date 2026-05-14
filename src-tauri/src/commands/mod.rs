@@ -1,9 +1,12 @@
 //! Shared desktop transport contracts and mapping helpers.
+//! 共享桌面 transport contract 与映射 helper。
 //!
 //! This module is the narrow host-facing boundary between Rust backend services
 //! and the Tauri command layer: it owns registered command names, stable result
 //! envelopes, and the common mapping helpers that keep command/query handlers from
 //! leaking raw internal errors across IPC.
+//! 该模块是 Rust 后端服务与 Tauri command 层之间的窄宿主边界，集中拥有命令名注册、
+//! 稳定结果 envelope，以及避免 handler 泄露内部错误的公共映射 helper。
 
 use launcher_composition_root::DesktopAppServices;
 use launcher_kernel_foundation::{AppError, AppResult, IsoDateTime, JobId};
@@ -15,6 +18,7 @@ pub mod fab;
 pub mod jobs;
 
 /// Command names exposed by the current desktop host transport boundary.
+/// 当前桌面宿主 transport 边界公开的命令名集合。
 pub const REGISTERED_COMMANDS: &[&str] = &[
     "fab_list_inventory",
     "fab_get_asset_detail",
