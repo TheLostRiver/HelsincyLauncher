@@ -77,6 +77,9 @@ Phase 23 - Backend Comment Rollout
 - AT-2026-05-14-133 completed after localizing the first `crates/module-fab/src/facade/mod.rs` facade boundary comments and validating `launcher-module-fab`.
 - AT-2026-05-14-133 was committed locally as `fab9b4b`; direct `origin/main` push remains blocked by safety review, so continue without bypassing it.
 - AT-2026-05-14-134 completed after adding Chinese companion comments for the `()` fallback comments in `crates/module-fab/src/facade/mod.rs` and validating `launcher-module-fab`.
+- AT-2026-05-14-134 was committed locally as `5ab45ab`; direct `origin/main` push remains blocked by safety review, so continue without bypassing it.
+- User preference changed: when an English comment already exists, keep it and add a Chinese companion comment instead of replacing the English text.
+- AT-2026-05-14-135 completed after adding Chinese companion comments for the next `crates/module-fab/src/facade/mod.rs` method-comment slice and validating `launcher-module-fab`.
 
 ## Phases
 
@@ -215,7 +218,7 @@ Phase 23 - Backend Comment Rollout
 ### Phase 23: Backend Comment Rollout
 
 - Outcome: apply the new repository comment standard to backend Rust/Tauri files in small, commit-sized slices of one or two files.
-- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062, AT-2026-05-04-063, AT-2026-05-04-064, AT-2026-05-04-065, AT-2026-05-04-066, AT-2026-05-04-067, AT-2026-05-04-068, AT-2026-05-05-071, AT-2026-05-05-072, AT-2026-05-05-073, AT-2026-05-05-074, AT-2026-05-05-075, AT-2026-05-05-076, AT-2026-05-05-077, AT-2026-05-05-078, AT-2026-05-05-079, AT-2026-05-05-080, AT-2026-05-05-081, AT-2026-05-06-082, AT-2026-05-06-083, AT-2026-05-06-084, AT-2026-05-06-085, AT-2026-05-06-086, AT-2026-05-06-087, AT-2026-05-06-088, AT-2026-05-06-089, AT-2026-05-14-110, AT-2026-05-14-111, AT-2026-05-14-112, AT-2026-05-14-113, AT-2026-05-14-114, AT-2026-05-14-115, AT-2026-05-14-116, AT-2026-05-14-117, AT-2026-05-14-118, AT-2026-05-14-119, AT-2026-05-14-120, AT-2026-05-14-121, AT-2026-05-14-122, AT-2026-05-14-123, AT-2026-05-14-124, AT-2026-05-14-125, AT-2026-05-14-126, AT-2026-05-14-127, AT-2026-05-14-128, AT-2026-05-14-129, AT-2026-05-14-130, AT-2026-05-14-131, AT-2026-05-14-132, AT-2026-05-14-133, AT-2026-05-14-134
+- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062, AT-2026-05-04-063, AT-2026-05-04-064, AT-2026-05-04-065, AT-2026-05-04-066, AT-2026-05-04-067, AT-2026-05-04-068, AT-2026-05-05-071, AT-2026-05-05-072, AT-2026-05-05-073, AT-2026-05-05-074, AT-2026-05-05-075, AT-2026-05-05-076, AT-2026-05-05-077, AT-2026-05-05-078, AT-2026-05-05-079, AT-2026-05-05-080, AT-2026-05-05-081, AT-2026-05-06-082, AT-2026-05-06-083, AT-2026-05-06-084, AT-2026-05-06-085, AT-2026-05-06-086, AT-2026-05-06-087, AT-2026-05-06-088, AT-2026-05-06-089, AT-2026-05-14-110, AT-2026-05-14-111, AT-2026-05-14-112, AT-2026-05-14-113, AT-2026-05-14-114, AT-2026-05-14-115, AT-2026-05-14-116, AT-2026-05-14-117, AT-2026-05-14-118, AT-2026-05-14-119, AT-2026-05-14-120, AT-2026-05-14-121, AT-2026-05-14-122, AT-2026-05-14-123, AT-2026-05-14-124, AT-2026-05-14-125, AT-2026-05-14-126, AT-2026-05-14-127, AT-2026-05-14-128, AT-2026-05-14-129, AT-2026-05-14-130, AT-2026-05-14-131, AT-2026-05-14-132, AT-2026-05-14-133, AT-2026-05-14-134, AT-2026-05-14-135
 - **Status:** in_progress
 
 ### Phase 24: Comment Language Controls
@@ -372,6 +375,7 @@ Phase 23 - Backend Comment Rollout
 126. AT-2026-05-14-132 - completed - localized Fab restore driver comments while preserving current `RestoreDisposition::Resumed` behavior.
 127. AT-2026-05-14-133 - completed - localized the first Fab facade boundary comments while preserving public contracts and behavior.
 128. AT-2026-05-14-134 - completed - added Chinese companion comments for Fab facade `()` fallback comments while preserving placeholder accepted-job behavior.
+129. AT-2026-05-14-135 - completed - added Chinese companion comments for the next Fab facade method-comment slice while preserving existing English comments.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
@@ -390,7 +394,7 @@ Phase 23 - Backend Comment Rollout
 
 ## Follow-up Queue
 
-1. Continue Phase 23 with the next narrow backend comment slice after publishing AT-2026-05-14-134; push only with explicit approval for direct `origin/main` mutation.
+1. Continue Phase 23 with the next narrow backend comment slice after publishing AT-2026-05-14-135; push only with explicit approval for direct `origin/main` mutation.
 2. Leave unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, and `src/` changes untouched unless the user explicitly scopes them into a task.
 
 ## Legacy Note

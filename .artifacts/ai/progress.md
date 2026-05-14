@@ -2114,3 +2114,45 @@
   - `.artifacts/ai/task-plan.md` (update)
   - `.artifacts/ai/progress.md` (update)
   - `crates/module-fab/src/facade/mod.rs` (update)
+
+### Agent Note: 2026-05-14 20:12
+
+- AT-2026-05-14-134 publication:
+  - committed locally as `5ab45ab` (`docs: add fab facade fallback chinese comments`)
+  - direct `origin/main` push remains blocked by safety review; continuing per user instruction to skip push when it is not possible
+- User preference update:
+  - when English comments already exist, preserve them and add Chinese companion comments instead of replacing English comments
+- AT-2026-05-14-135 started:
+  - scope: add Chinese companion comments for `crates/module-fab/src/facade/mod.rs` lines 114-165
+  - allowed files: `crates/module-fab/src/facade/mod.rs`, `.artifacts/ai/active-task.md`, `.artifacts/ai/task-plan.md`, `.artifacts/ai/progress.md`
+
+### Agent Note: 2026-05-14 20:17
+
+- AT-2026-05-14-135 completed:
+  - added Chinese companion comments for the Fab facade method-comment slice while preserving existing English comments
+  - preserved facade method implementations and cold-start detail behavior
+  - validation passed:
+    - `cargo check -p launcher-module-fab --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`
+    - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- crates/module-fab/src/facade/mod.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md`
+
+### Auto Record: 2026-05-14 20:09:12
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+  - `crates/module-fab/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-14 20:09:57
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-14 20:10:58
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)

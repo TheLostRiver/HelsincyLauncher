@@ -2,29 +2,29 @@
 
 ## Identity
 
-- task id: AT-2026-05-14-134
-- title: Add Chinese Fab facade fallback comments
+- task id: AT-2026-05-14-135
+- title: Add Chinese Fab facade method comments
 - status: completed
 
 ## Goal
 
-继续 Phase 23 Backend Comment Rollout，在不改变 Fab facade placeholder runtime 行为、且保留已有英文注释的前提下，为 `crates/module-fab/src/facade/mod.rs` 中 `()` fallback 相关注释补充中文说明。
+继续 Phase 23 Backend Comment Rollout，在保留既有英文注释且不改变 Fab facade 行为的前提下，为 `crates/module-fab/src/facade/mod.rs` 公开方法与 cold-start detail 边界补充中文注释。
 
 本轮只覆盖：
 
-- `crates/module-fab/src/facade/mod.rs` lines 62 and 84 comment cluster
+- `crates/module-fab/src/facade/mod.rs` lines 114-165
 
 ## Scope
 
 - in scope:
-  - add Chinese companion comments above `impl FabSyncJobAcceptance for ()` while preserving the existing English comment
-  - add Chinese companion comments above `impl FabStartupPrewarmJobAcceptance for ()` while preserving the existing English comment
+  - add Chinese companion comments for `new`, `deps`, `run_startup_prewarm`, `list_inventory`, `get_asset_detail`, and `sync_inventory`
+  - add a Chinese companion comment for the cold-start detail read-path body comment
+  - preserve all existing English comments in the touched range
   - update `.artifacts/ai/active-task.md`
   - update `.artifacts/ai/task-plan.md`
   - update `.artifacts/ai/progress.md`
 - out of scope:
-  - change fallback return values, real runtime impls, facade methods, tests, DTO shape, trait signatures, or runtime behavior
-  - localize other comments in `facade/mod.rs`
+  - change facade method implementations, fallback payloads, tests, DTO shape, trait signatures, or runtime behavior
   - modify Fab contracts, composition-root, provider/storage adapters, transport handlers, or frontend files
   - touch unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, or `src/` changes already present in the worktree
 
@@ -46,7 +46,7 @@
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If this slice only adds Chinese companion comments to the existing `()` fallback comments and leaves code untouched, then Fab facade fallback documentation will match the repository comment policy while preserving placeholder accepted-job behavior.
+- falsifiable local hypothesis: If this slice only adds Chinese companion comments to the existing Fab facade method comments and leaves code untouched, then the facade documentation will follow the updated bilingual comment preference while preserving compiled behavior.
 
 ## Cheap Check
 
@@ -65,15 +65,15 @@
 
 ## Notes
 
-- AT-2026-05-14-133 completed and was committed locally as `fab9b4b`.
+- AT-2026-05-14-134 completed and was committed locally as `5ab45ab`.
 - Push remains blocked for direct `origin/main` mutation; per user rule, continue without bypassing push review.
-- The `()` fallback keeps Fab facade command paths callable before a real `SharedJobRuntimeHost` is injected.
+- User preference from now on: keep existing English comments and add Chinese comments beside them instead of replacing them.
 
 ## 安全恢复点
 
-- AT-2026-05-14-134 is validated and ready for publication. If work resumes before publishing, rerun the scoped `cargo check` and `git diff --check`, then publish only `crates/module-fab/src/facade/mod.rs` plus the touched `.artifacts/ai` records.
+- AT-2026-05-14-135 is validated and ready for publication. If work resumes before publishing, rerun the scoped `cargo check` and `git diff --check`, then publish only `crates/module-fab/src/facade/mod.rs` plus the touched `.artifacts/ai` records.
 
 ## Completion Summary
 
-- The `()` fallback comments in `crates/module-fab/src/facade/mod.rs` now keep the original English comments and add Chinese companion comments.
-- The localized comments preserve placeholder accepted-job behavior before real runtime wiring is injected.
+- Added Chinese companion comments for the Fab facade method-comment slice while preserving existing English comments.
+- The source diff only adds comments and preserves facade behavior.

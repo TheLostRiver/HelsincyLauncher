@@ -113,11 +113,13 @@ impl FabStartupPrewarmJobAcceptance for SharedJobRuntimeHost {
 
 impl<P, C, M, J, K> FabFacade<P, C, M, J, K> {
     /// Creates a Fab facade over already-assembled module dependencies.
+    /// 使用已经完成装配的模块依赖束创建 Fab facade。
     pub fn new(deps: FabModuleDeps<P, C, M, J, K>) -> Self {
         Self { deps }
     }
 
     /// Exposes the assembled dependency bundle for composition-root smoke tests and wiring checks.
+    /// 暴露已装配的依赖束，服务 composition-root smoke test 与 wiring 检查。
     pub fn deps(&self) -> &FabModuleDeps<P, C, M, J, K> {
         &self.deps
     }
@@ -128,6 +130,7 @@ where
     J: FabStartupPrewarmJobAcceptance,
 {
     /// Accepts a startup prewarm request through the configured job runtime boundary.
+    /// 通过已配置的 job runtime 边界接收启动预热请求。
     pub fn run_startup_prewarm(
         &self,
         request: FabInventoryPrewarmRequestDto,
@@ -142,11 +145,13 @@ where
     J: FabSyncJobAcceptance,
 {
     /// Returns an inventory page from the local Fab projection.
+    /// 从本地 Fab projection 返回库存分页。
     pub fn list_inventory(&self, query: FabInventoryListQueryDto) -> AppResult<FabInventoryPageDto> {
         self.deps.projection_repo.list_page(query)
     }
 
     /// Returns the cached detail snapshot or a backend-owned cold-start placeholder.
+    /// 返回已缓存的详情快照，或后端拥有的 cold-start 占位详情。
     pub fn get_asset_detail(&self, query: FabAssetDetailQueryDto) -> AppResult<FabAssetDetailDto> {
         Ok(self
             .deps
@@ -156,12 +161,14 @@ where
     }
 
     /// Accepts an inventory sync job without leaking runtime details to callers.
+    /// 接收库存同步作业，同时不向调用方泄露 runtime 细节。
     pub fn sync_inventory(&self, request: FabInventorySyncRequestDto) -> AppResult<AcceptedJob> {
         self.deps.job_runtime.accept_sync_job(request)
     }
 }
 
 // The detail read path must stay backend-owned even when the local projection is still cold.
+// 即使本地 projection 仍未热起来，详情读取路径也必须保持由后端拥有。
 fn cold_start_asset_detail(asset_id: AssetId) -> FabAssetDetailDto {
     FabAssetDetailDto {
         asset_id,
