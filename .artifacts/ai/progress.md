@@ -2173,6 +2173,25 @@
     - `cargo check -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`
     - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- src-tauri/src/commands/mod.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md`
 
+### Agent Note: 2026-05-14 20:39
+
+- AT-2026-05-14-137 publication:
+  - committed locally as `0b727de` (`docs: add transport error chinese comments`)
+  - direct `origin/main` push remains blocked by safety review; continuing per user instruction to skip push when it is not possible
+- AT-2026-05-14-138 started:
+  - scope: add Chinese companion comments for result envelopes and `AcceptedJobDto` in `src-tauri/src/commands/mod.rs`
+  - allowed files: `src-tauri/src/commands/mod.rs`, `.artifacts/ai/active-task.md`, `.artifacts/ai/task-plan.md`, `.artifacts/ai/progress.md`
+  - docs checked in a small batch: `docs/TauriIPCAndStateContractsDesign.md`
+
+### Agent Note: 2026-05-14 20:43
+
+- AT-2026-05-14-138 completed:
+  - added Chinese companion comments for `CommandResultDto`, `QueryResultDto`, `AcceptedJobDto`, and accepted-job fields while preserving existing English comments
+  - preserved result envelope shape and behavior
+  - validation passed:
+    - `cargo check -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`
+    - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- src-tauri/src/commands/mod.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md`
+
 ### Auto Record: 2026-05-14 20:09:12
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
@@ -2222,6 +2241,23 @@
   - `src-tauri/src/commands/mod.rs` (update)
 
 ### Auto Record: 2026-05-14 20:18:37
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-14 20:22:11
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `src-tauri/src/commands/mod.rs` (update)
+
+### Auto Record: 2026-05-14 20:23:12
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
 - Files:

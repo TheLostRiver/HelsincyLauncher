@@ -74,6 +74,7 @@ impl From<AppError> for AppErrorDto {
 }
 
 /// Command result envelope used by IPC handlers that mutate backend-owned state or jobs.
+/// 供会修改后端拥有状态或作业的 IPC handler 使用的 command result envelope。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CommandResultDto<T> {
     Success { data: T },
@@ -81,6 +82,7 @@ pub enum CommandResultDto<T> {
 }
 
 /// Query result envelope used by IPC handlers that return a read model snapshot.
+/// 供返回 read model 快照的 IPC handler 使用的 query result envelope。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum QueryResultDto<T> {
     Success { data: T, as_of: Option<IsoDateTime> },
@@ -88,21 +90,27 @@ pub enum QueryResultDto<T> {
 }
 
 /// Accepted-job projection exposed to transport callers after long-running work is queued.
+/// 长任务入队后暴露给 transport 调用方的 accepted-job 投影。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AcceptedJobDto {
     /// Marker that the backend accepted the request for asynchronous processing.
+    /// 标记后端已接收该请求并将异步处理。
     pub accepted: bool,
 
     /// Backend-generated job identifier.
+    /// 后端生成的作业标识。
     pub job_id: JobId,
 
     /// Module that owns the accepted job.
+    /// 拥有该 accepted job 的模块。
     pub module: String,
 
     /// Job kind within the owning module.
+    /// 拥有模块内部的作业类型。
     pub kind: String,
 
     /// Time when the backend queued the job.
+    /// 后端将作业入队的时间。
     pub queued_at: IsoDateTime,
 }
 

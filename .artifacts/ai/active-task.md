@@ -2,29 +2,29 @@
 
 ## Identity
 
-- task id: AT-2026-05-14-137
-- title: Add Chinese transport error envelope comments
+- task id: AT-2026-05-14-138
+- title: Add Chinese transport result envelope comments
 - status: completed
 
 ## Goal
 
-继续 Phase 23 Backend Comment Rollout，在保留既有英文注释且不改变 IPC error envelope 结构的前提下，为 `src-tauri/src/commands/mod.rs` 中 `AppErrorDto` 及其字段补充中文注释。
+继续 Phase 23 Backend Comment Rollout，在保留既有英文注释且不改变 IPC result envelope 结构的前提下，为 `src-tauri/src/commands/mod.rs` 中 result envelope 与 accepted-job DTO 注释补充中文说明。
 
 本轮只覆盖：
 
-- `src-tauri/src/commands/mod.rs` `AppErrorDto` declaration cluster
+- `src-tauri/src/commands/mod.rs` `CommandResultDto`, `QueryResultDto`, and `AcceptedJobDto` declaration cluster
 
 ## Scope
 
 - in scope:
-  - add Chinese companion comments for `AppErrorDto`
-  - add Chinese companion comments for `code`, `message`, `retryable`, `severity`, and `correlation_id`
+  - add Chinese companion comments for `CommandResultDto`, `QueryResultDto`, and `AcceptedJobDto`
+  - add Chinese companion comments for `AcceptedJobDto` fields
   - preserve all existing English comments in the touched range
   - update `.artifacts/ai/active-task.md`
   - update `.artifacts/ai/task-plan.md`
   - update `.artifacts/ai/progress.md`
 - out of scope:
-  - change DTO fields, `From<AppError>` mapping, result envelopes, mapper behavior, command modules, or Tauri wiring
+  - change DTO fields, enum variants, conversion mapping, mapper behavior, command modules, or Tauri wiring
   - localize later comments in `commands/mod.rs`
   - touch unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, or `src/` changes already present in the worktree
 
@@ -46,7 +46,7 @@
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If this slice only adds Chinese companion comments to the existing `AppErrorDto` comments and leaves code untouched, then transport error envelope documentation will follow the updated bilingual comment preference while preserving compiled behavior.
+- falsifiable local hypothesis: If this slice only adds Chinese companion comments to the existing result envelope comments and leaves code untouched, then transport result envelope documentation will follow the updated bilingual comment preference while preserving compiled behavior.
 
 ## Cheap Check
 
@@ -65,15 +65,15 @@
 
 ## Notes
 
-- AT-2026-05-14-136 completed and was committed locally as `ec00e89`.
+- AT-2026-05-14-137 completed and was committed locally as `0b727de`.
 - Push remains blocked for direct `origin/main` mutation; per user rule, continue without bypassing push review.
 - Existing English comments must be preserved; this task only adds Chinese companion comments.
 
 ## 安全恢复点
 
-- AT-2026-05-14-137 is validated and ready for publication. If work resumes before publishing, rerun the scoped `cargo check` and `git diff --check`, then publish only `src-tauri/src/commands/mod.rs` plus the touched `.artifacts/ai` records.
+- AT-2026-05-14-138 is validated and ready for publication. If work resumes before publishing, rerun the scoped `cargo check` and `git diff --check`, then publish only `src-tauri/src/commands/mod.rs` plus the touched `.artifacts/ai` records.
 
 ## Completion Summary
 
-- Added Chinese companion comments for `AppErrorDto` and its fields while preserving existing English comments.
-- The source diff only adds comments and preserves the error envelope shape and mapping behavior.
+- Added Chinese companion comments for `CommandResultDto`, `QueryResultDto`, `AcceptedJobDto`, and accepted-job fields while preserving existing English comments.
+- The source diff only adds comments and preserves result envelope behavior.
