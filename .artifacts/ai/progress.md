@@ -1112,6 +1112,20 @@
 - Validation passed: `cargo check -p launcher-adapter-storage-sqlite --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`.
 - Scoped `git diff --check` passed for `crates/adapter-storage-sqlite/src/lib.rs`, `.artifacts/ai/active-task.md`, `.artifacts/ai/task-plan.md`, and `.artifacts/ai/progress.md`.
 
+## 2026-05-14 - AT-2026-05-14-125 started
+
+- Published AT-2026-05-14-124 as commit `454c36d`, then continued Phase 23 because the next backend-only slice is clear.
+- Read `docs/TauriIPCAndStateContractsDesign.md` and `docs/TauriStartupPipelineDesign.md` before editing the desktop host state file.
+- Selected `src-tauri/src/state.rs` because it still contained English module and declaration comments around the host service handle.
+- Scoped AT-2026-05-14-125 to comment localization only; `Arc` ownership, deref behavior, composition-root service graph ownership, and command handlers must remain unchanged.
+
+## 2026-05-14 - AT-2026-05-14-125 completed
+
+- Localized `src-tauri/src/state.rs` module comments and host state handle declaration comments to Chinese.
+- Preserved `Arc` ownership, deref behavior, composition-root service graph ownership, command handlers, and bootstrap behavior.
+- Validation passed: `cargo check -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`.
+- Scoped `git diff --check` passed for `src-tauri/src/state.rs`, `.artifacts/ai/active-task.md`, `.artifacts/ai/task-plan.md`, and `.artifacts/ai/progress.md`.
+
 ### Auto Record: 2026-05-14 01:45:06
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
@@ -1635,6 +1649,54 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
 
 ### Auto Record: 2026-05-14 07:53:41
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-14 07:56:29
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-14 07:57:02
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-14 07:57:15
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-14 07:57:37
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\src-tauri\src\state.rs` (update)
+
+### Auto Record: 2026-05-14 07:58:28
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-14 07:59:31
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-14 07:59:40
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-14 07:59:52
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
 - Files:
