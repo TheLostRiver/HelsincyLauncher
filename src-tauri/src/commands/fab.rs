@@ -1,9 +1,8 @@
-//! Host transport handlers for the Fab module.
+//! Fab 模块的宿主 transport handler。
 //!
-//! This boundary adapts IPC-facing Fab queries and commands onto the backend
-//! Fab facade exposed through `DesktopServices`. The query handlers still own
-//! temporary `FAB_NOT_WIRED` fallback projections, while command handlers
-//! project backend-owned accepted jobs into the shared host transport envelope.
+//! 该边界把 IPC 侧 Fab 查询和命令转接到 `DesktopServices` 暴露的后端 Fab facade。
+//! 查询路径在 facade/read model 尚未完全接线时保留 `FAB_NOT_WIRED` fallback 投影，
+//! 命令路径把后端 accepted job 投影进共享宿主 transport envelope。
 
 use launcher_kernel_foundation::PageSlice;
 use launcher_module_fab::contracts::{
@@ -16,7 +15,7 @@ use super::{
     QueryResultDto,
 };
 
-/// Lists Fab inventory summaries and falls back to an empty page on the current host stub path.
+/// 读取 Fab 库存摘要分页，并在当前 host stub 路径上回退为空分页。
 pub async fn fab_list_inventory(
     services: &DesktopServices,
     query: FabInventoryListQueryDto,
@@ -26,7 +25,7 @@ pub async fn fab_list_inventory(
     })
 }
 
-/// Gets one Fab asset detail projection and falls back to the current transport-owned placeholder detail.
+/// 读取单个 Fab 资产详情投影，并在当前 transport stub 路径上回退为占位详情。
 pub async fn fab_get_asset_detail(
     services: &DesktopServices,
     query: FabAssetDetailQueryDto,
@@ -43,7 +42,7 @@ pub async fn fab_get_asset_detail(
     })
 }
 
-/// Starts startup prewarm through the backend Fab facade and projects the accepted job envelope.
+/// 通过后端 Fab facade 启动库存预热作业，并投影 accepted-job envelope。
 pub async fn fab_run_startup_prewarm(
     services: &DesktopServices,
     request: FabInventoryPrewarmRequestDto,
@@ -51,7 +50,7 @@ pub async fn fab_run_startup_prewarm(
     map_accepted_job_result(services.fab.run_startup_prewarm(request))
 }
 
-/// Starts inventory sync through the backend Fab facade and projects the accepted job envelope.
+/// 通过后端 Fab facade 启动库存同步作业，并投影 accepted-job envelope。
 pub async fn fab_sync_inventory(
     services: &DesktopServices,
     request: FabInventorySyncRequestDto,

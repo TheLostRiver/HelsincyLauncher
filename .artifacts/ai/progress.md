@@ -1905,6 +1905,26 @@
     - `cargo check -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`
     - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- src-tauri/src/commands/jobs.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md`
 
+### Agent Note: 2026-05-14 13:22
+
+- AT-2026-05-14-129 publication:
+  - committed locally as `f7155cd` (`docs: localize shared jobs transport comments`)
+  - direct `origin/main` push remains blocked by safety review; continuing per user instruction to skip push when it is not possible
+- AT-2026-05-14-130 started:
+  - scope: localize `src-tauri/src/commands/fab.rs` transport comments only
+  - allowed files: `src-tauri/src/commands/fab.rs`, `.artifacts/ai/active-task.md`, `.artifacts/ai/task-plan.md`, `.artifacts/ai/progress.md`
+  - docs checked: `docs/TauriCodeCommentStandard.md`, `docs/TauriIPCAndStateContractsDesign.md`, `docs/TauriCurrentRepoArchitectureOverview.md`, `docs/TauriBackendSkeletonImplementationDesign.md`, `docs/modules/fab-inventory/README_ARCH.md`, `docs/modules/fab-inventory/README_API.md`, `docs/modules/fab-inventory/README_FLOW.md`
+  - key finding: Fab query handlers preserve callable transport surfaces through `FAB_NOT_WIRED` stubs, while command handlers stay thin projections over backend-owned accepted jobs.
+
+### Agent Note: 2026-05-14 13:25
+
+- AT-2026-05-14-130 completed:
+  - localized `src-tauri/src/commands/fab.rs` module and handler comments to Chinese
+  - preserved handler implementation, `FAB_NOT_WIRED` fallback payloads, and accepted-job projection behavior
+  - validation passed:
+    - `cargo check -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`
+    - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- src-tauri/src/commands/fab.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md`
+
 ### Auto Record: 2026-05-14 13:07:02
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
@@ -1915,6 +1935,23 @@
   - `src-tauri/src/commands/jobs.rs` (update)
 
 ### Auto Record: 2026-05-14 13:07:50
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-14 13:11:02
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `src-tauri/src/commands/fab.rs` (update)
+
+### Auto Record: 2026-05-14 13:11:41
 - Tool: apply_patch
 - Phase: Phase 23 - Backend Comment Rollout
 - Files:
