@@ -60,6 +60,7 @@ pub trait FabStartupPrewarmJobAcceptance {
 }
 
 // The unit fallback keeps the facade callable before a real runtime host is injected.
+// `()` fallback 让真实 runtime host 注入前的 facade 命令路径仍可调用。
 impl FabSyncJobAcceptance for () {
     fn accept_sync_job(&self, request: FabInventorySyncRequestDto) -> AppResult<AcceptedJob> {
         let _ = request;
@@ -82,6 +83,7 @@ impl FabSyncJobAcceptance for SharedJobRuntimeHost {
 }
 
 // The unit fallback lets startup prewarm stay backend-owned before runtime wiring lands.
+// `()` fallback 让启动预热在 runtime wiring 落地前仍保持后端拥有的 accepted-job 语义。
 impl FabStartupPrewarmJobAcceptance for () {
     fn accept_startup_prewarm_job(
         &self,

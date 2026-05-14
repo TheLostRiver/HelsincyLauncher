@@ -2,29 +2,29 @@
 
 ## Identity
 
-- task id: AT-2026-05-14-133
-- title: Localize Fab facade boundary comments
+- task id: AT-2026-05-14-134
+- title: Add Chinese Fab facade fallback comments
 - status: completed
 
 ## Goal
 
-继续 Phase 23 Backend Comment Rollout，在不改变 Fab facade 行为、依赖束类型或 trait 合约的前提下，把 `crates/module-fab/src/facade/mod.rs` 前段 facade 边界注释改为高信号中文注释。
+继续 Phase 23 Backend Comment Rollout，在不改变 Fab facade placeholder runtime 行为、且保留已有英文注释的前提下，为 `crates/module-fab/src/facade/mod.rs` 中 `()` fallback 相关注释补充中文说明。
 
 本轮只覆盖：
 
-- `crates/module-fab/src/facade/mod.rs` lines 1-61
+- `crates/module-fab/src/facade/mod.rs` lines 62 and 84 comment cluster
 
 ## Scope
 
 - in scope:
-  - replace English module comments in the facade file header
-  - replace English comments for `FabModuleDeps`, `FabFacade`, `FabInventoryProjectionPage`, `FabInventoryProjectionRepository`, `FabSyncJobAcceptance`, and `FabStartupPrewarmJobAcceptance`
+  - add Chinese companion comments above `impl FabSyncJobAcceptance for ()` while preserving the existing English comment
+  - add Chinese companion comments above `impl FabStartupPrewarmJobAcceptance for ()` while preserving the existing English comment
   - update `.artifacts/ai/active-task.md`
   - update `.artifacts/ai/task-plan.md`
   - update `.artifacts/ai/progress.md`
 - out of scope:
-  - change facade methods, fallback implementations, tests, DTO shape, trait signatures, or runtime behavior
-  - localize later comments in the same file outside the 1-61 line slice
+  - change fallback return values, real runtime impls, facade methods, tests, DTO shape, trait signatures, or runtime behavior
+  - localize other comments in `facade/mod.rs`
   - modify Fab contracts, composition-root, provider/storage adapters, transport handlers, or frontend files
   - touch unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, or `src/` changes already present in the worktree
 
@@ -42,12 +42,11 @@
 3. docs/README.md
 4. docs/TauriCodeCommentStandard.md
 5. docs/TauriFirstCrateApiDrafts.md
-6. docs/TauriFabInventoryLoadingDesign.md
-7. .artifacts/ai/task-plan.md
+6. .artifacts/ai/task-plan.md
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If this slice only localizes the first `crates/module-fab/src/facade/mod.rs` facade boundary comments and leaves code untouched, then Fab facade documentation will better match repository comment policy while preserving compiled behavior and public contracts.
+- falsifiable local hypothesis: If this slice only adds Chinese companion comments to the existing `()` fallback comments and leaves code untouched, then Fab facade fallback documentation will match the repository comment policy while preserving placeholder accepted-job behavior.
 
 ## Cheap Check
 
@@ -66,15 +65,15 @@
 
 ## Notes
 
-- AT-2026-05-14-132 completed and was committed locally as `8444c7f`.
+- AT-2026-05-14-133 completed and was committed locally as `fab9b4b`.
 - Push remains blocked for direct `origin/main` mutation; per user rule, continue without bypassing push review.
-- This slice intentionally stays before fallback implementations so the next pass can remain small.
+- The `()` fallback keeps Fab facade command paths callable before a real `SharedJobRuntimeHost` is injected.
 
 ## 安全恢复点
 
-- AT-2026-05-14-133 is validated and ready for publication. If work resumes before publishing, rerun the scoped `cargo check` and `git diff --check`, then publish only `crates/module-fab/src/facade/mod.rs` plus the touched `.artifacts/ai` records.
+- AT-2026-05-14-134 is validated and ready for publication. If work resumes before publishing, rerun the scoped `cargo check` and `git diff --check`, then publish only `crates/module-fab/src/facade/mod.rs` plus the touched `.artifacts/ai` records.
 
 ## Completion Summary
 
-- The first `crates/module-fab/src/facade/mod.rs` facade boundary comments are now Chinese.
-- The localized comments preserve public contracts, dependency types, and behavior.
+- The `()` fallback comments in `crates/module-fab/src/facade/mod.rs` now keep the original English comments and add Chinese companion comments.
+- The localized comments preserve placeholder accepted-job behavior before real runtime wiring is injected.
