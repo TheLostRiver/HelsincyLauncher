@@ -392,6 +392,7 @@ Phase 23 - Backend Comment Rollout
 135. AT-2026-05-14-141 - completed - added Chinese companion comments for the composition-root service graph builder and private helper boundary comments while preserving existing English comments.
 136. AT-2026-05-14-142 - completed - added Chinese companion comments for the composition-root startup pipeline production boundary and stage comments while preserving existing English comments.
 137. AT-2026-05-14-143 - completed - added the missing Chinese crate-entry comment to composition-root while preserving module declarations and re-exports.
+138. AT-2026-05-14-144 - completed - added the missing Chinese binary-entry comment to the desktop host main entry while preserving startup delegation.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
