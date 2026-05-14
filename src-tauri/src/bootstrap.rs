@@ -1,26 +1,24 @@
-//! Desktop host bootstrap entry for the current Tauri backend baseline.
+//! 当前 Tauri 后端基线的桌面宿主 bootstrap 入口。
 //!
-//! This module is intentionally small: it asks composition-root to assemble the
-//! concrete service graph, projects that graph into a host-owned handle, and
-//! exposes the registered command list that the desktop transport layer should
-//! publish.
+//! 该模块刻意保持很薄：它请求 composition-root 装配具体服务图，
+//! 再把服务图投影成宿主拥有的句柄，并暴露桌面 transport 层需要发布的 command 列表。
 
 use launcher_composition_root::{build_desktop_services, DesktopBootstrapConfig};
 use launcher_kernel_foundation::AppResult;
 
 use crate::{commands, state::DesktopAppServicesHandle};
 
-/// Host-owned bootstrap bundle returned after composition-root wiring succeeds.
+/// 表示 composition-root 接线成功后返回给宿主的 bootstrap 聚合结果。
 #[derive(Clone)]
 pub struct DesktopHostBootstrap {
-    /// Desktop services projected into the host state handle consumed by commands.
+    /// 投影成宿主 state handle 的桌面服务集合，供 command handler 消费。
     pub services: DesktopAppServicesHandle,
 
-    /// Command names that the host should register on the desktop transport boundary.
+    /// 宿主应在桌面 transport 边界注册的 command 名称列表。
     pub registered_commands: &'static [&'static str],
 }
 
-/// Builds the current desktop host bootstrap from the composition-root baseline.
+/// 基于当前 composition-root 基线构造桌面宿主 bootstrap。
 pub fn build_desktop_host_bootstrap() -> AppResult<DesktopHostBootstrap> {
     let services = build_desktop_services(DesktopBootstrapConfig::default())?;
 
@@ -30,10 +28,10 @@ pub fn build_desktop_host_bootstrap() -> AppResult<DesktopHostBootstrap> {
     })
 }
 
-/// Runs the current desktop host startup path.
+/// 运行当前桌面宿主启动路径。
 ///
-/// The present baseline only verifies that host bootstrap wiring succeeds; the
-/// wider Tauri runtime loop is intentionally deferred to a later slice.
+/// 当前基线只验证宿主 bootstrap 接线可以成功；更完整的 Tauri runtime loop
+/// 仍按计划留给后续切片接入。
 pub fn run_desktop_host() -> AppResult<()> {
     let _bootstrap = build_desktop_host_bootstrap()?;
     Ok(())
