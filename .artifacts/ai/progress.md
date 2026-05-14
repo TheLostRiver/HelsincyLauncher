@@ -1884,3 +1884,40 @@
 - Phase: Phase 23 - Backend Comment Rollout
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Agent Note: 2026-05-14 13:11
+
+- AT-2026-05-14-128 publication:
+  - committed locally as `206e603` (`docs: localize engine transport comments`)
+  - direct `origin/main` push remains blocked by safety review; continuing per user instruction to skip push when it is not possible
+- AT-2026-05-14-129 started:
+  - scope: localize `src-tauri/src/commands/jobs.rs` shared jobs query comments only
+  - allowed files: `src-tauri/src/commands/jobs.rs`, `.artifacts/ai/active-task.md`, `.artifacts/ai/task-plan.md`, `.artifacts/ai/progress.md`
+  - docs checked: `docs/TauriCodeCommentStandard.md`, `docs/TauriIPCAndStateContractsDesign.md`, `docs/TauriCurrentRepoArchitectureOverview.md`, `docs/TauriBackendSkeletonImplementationDesign.md`
+  - key finding: `jobs_list_active` currently reads `JobSnapshotStore::list_resumable`, so the localized comment should describe resumable snapshot visibility rather than all non-terminal jobs.
+
+### Agent Note: 2026-05-14 13:14
+
+- AT-2026-05-14-129 completed:
+  - localized `src-tauri/src/commands/jobs.rs` comments to Chinese
+  - preserved handler implementation and `JobSnapshotStore::list_resumable` query behavior
+  - validation passed:
+    - `cargo check -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`
+    - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- src-tauri/src/commands/jobs.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md`
+
+### Auto Record: 2026-05-14 13:07:02
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `src-tauri/src/commands/jobs.rs` (update)
+
+### Auto Record: 2026-05-14 13:07:50
+- Tool: apply_patch
+- Phase: Phase 23 - Backend Comment Rollout
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
