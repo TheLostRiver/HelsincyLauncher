@@ -37,21 +37,27 @@ pub const REGISTERED_COMMANDS: &[&str] = &[
 ];
 
 /// Stable error envelope projected from backend `AppError` values into IPC-safe fields.
+/// 从后端 `AppError` 投影到 IPC 安全字段的稳定错误 envelope。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AppErrorDto {
     /// Stable machine-readable error code.
+    /// 稳定、机器可读的错误码。
     pub code: String,
 
     /// Human-readable message safe to surface at the transport boundary.
+    /// 可安全暴露到 transport 边界的人类可读错误消息。
     pub message: String,
 
     /// Whether the caller can retry the command/query without changing inputs.
+    /// 调用方是否可以在不修改输入的情况下重试该 command/query。
     pub retryable: bool,
 
     /// Lowercased severity label projected from backend error severity.
+    /// 从后端错误严重级别投影出的 lowercase 严重性标签。
     pub severity: String,
 
     /// Correlation identifier used to join frontend failures with backend logs.
+    /// 用于把前端失败与后端日志关联起来的 correlation 标识。
     pub correlation_id: String,
 }
 
