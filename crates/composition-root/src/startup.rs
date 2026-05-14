@@ -222,6 +222,7 @@ mod tests {
     use super::{FabStartupPrewarmPort, StartupPipelineFacade};
 
     // ── minimal in-test snapshot store ──────────────────────────────────────
+    // 测试内最小 snapshot store：支撑 stage-2 恢复分支的纯内存断言。
     #[derive(Debug, Default, Clone)]
     struct TestSnapshotStore {
         snapshots: Arc<Mutex<HashMap<JobId, JobSnapshot<()>>>>,
@@ -279,6 +280,7 @@ mod tests {
     }
 
     // ── orphaned lease reset tests ───────────────────────────────────────────
+    // orphaned lease reset 测试：覆盖可恢复与不可恢复 Running 作业的降级路径。
     #[test]
     fn stage2_resets_orphaned_recoverable_running_job_to_queued() {
         let store = Arc::new(TestSnapshotStore::default());
@@ -363,6 +365,7 @@ mod tests {
     }
 
     // ── existing stage-3 tests ────────────────────────────────────────────────
+    // 既有 stage-3 测试：验证能力门控后的后台 prewarm 触发行为。
     #[derive(Debug, Default)]
     struct RecordingFabPrewarmPort {
         captured_requests: Mutex<Vec<FabInventoryPrewarmRequestDto>>,

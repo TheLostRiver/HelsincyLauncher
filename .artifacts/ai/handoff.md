@@ -2,14 +2,14 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-14-145
-- title: Add composition-root smoke test Chinese comments
-- status: committed locally as `dba5607`
+- task id: AT-2026-05-14-146
+- title: Add startup unit test Chinese comments
+- status: committed locally as `1973c3d`
 
 ## Current In-progress Atomic Task
 
-- task id: AT-2026-05-14-146
-- title: Add startup unit test Chinese comments
+- task id: AT-2026-05-15-147
+- title: Add startup test section Chinese comments
 - status: validated and ready for publication
 
 ## Current Slice
@@ -22,7 +22,7 @@
 
 ## Validation
 
-- `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml stage2_driver_marks_queued_job_failed_when_checkpoint_missing` passed.
+- `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml startup::tests` passed with 5 tests.
 - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- crates/composition-root/src/startup.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/handoff.md` passed; Git only reported Windows LF-to-CRLF working-copy warnings.
 
 ## Current Git State To Preserve

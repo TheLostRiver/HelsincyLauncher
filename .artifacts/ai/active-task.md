@@ -2,23 +2,23 @@
 
 ## Identity
 
-- task id: AT-2026-05-14-146
-- title: Add startup unit test Chinese comments
+- task id: AT-2026-05-15-147
+- title: Add startup test section Chinese comments
 - status: completed
 
 ## Goal
 
-继续 Phase 23 Backend Comment Rollout，在保留既有英文测试步骤注释且不改变测试逻辑的前提下，为 `crates/composition-root/src/startup.rs` 中 startup 单元测试的 driver registry 注释补充中文说明。
+继续 Phase 23 Backend Comment Rollout，在保留既有英文测试分段注释且不改变测试逻辑的前提下，为 `crates/composition-root/src/startup.rs` 中 startup 单元测试分段标题补充中文说明。
 
 本轮只覆盖：
 
-- `crates/composition-root/src/startup.rs` startup unit-test driver registry comments
+- `crates/composition-root/src/startup.rs` startup unit-test section comments
 
 ## Scope
 
 - in scope:
-  - add Chinese companion comments for existing driver-registry test step comments
-  - preserve the existing test setup, assertions, driver fake, and helper logic
+  - add Chinese companion comments for existing startup test section headers
+  - preserve the existing test setup, assertions, fakes, and helper logic
   - update `.artifacts/ai/active-task.md`
   - update `.artifacts/ai/task-plan.md`
   - update `.artifacts/ai/progress.md`
@@ -47,34 +47,34 @@
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If this slice only adds Chinese companion comments to existing startup unit-test comments and leaves code untouched, then the startup unit tests keep the same behavior while becoming easier for Chinese readers to follow.
+- falsifiable local hypothesis: If this slice only adds Chinese companion comments to existing startup unit-test section headers and leaves code untouched, then the startup unit tests keep the same behavior while becoming easier for Chinese readers to follow.
 
 ## Cheap Check
 
-- `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml stage2_driver_marks_queued_job_failed_when_checkpoint_missing`
+- `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml startup::tests`
 
 ## Validation Gate
 
-1. `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml stage2_driver_marks_queued_job_failed_when_checkpoint_missing`
+1. `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml startup::tests`
 2. `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- crates/composition-root/src/startup.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/handoff.md`
 
 ## Validation Result
 
 - passed
-- `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml stage2_driver_marks_queued_job_failed_when_checkpoint_missing` passed.
+- `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml startup::tests` passed with 5 tests.
 - `git diff --check` passed for the scoped file set; Git only reported Windows LF-to-CRLF working-copy warnings.
 
 ## Notes
 
-- AT-2026-05-14-145 completed and was committed locally as `dba5607`.
+- AT-2026-05-14-146 completed and was committed locally as `1973c3d`.
 - Push remains blocked for direct `origin/main` mutation; per user rule, continue without bypassing push review.
 - Existing English comments must be preserved; this task only adds Chinese companion comments.
 
 ## 安全恢复点
 
-- AT-2026-05-14-146 is validated and ready for publication. If work resumes before publishing, inspect only `crates/composition-root/src/startup.rs` plus the touched `.artifacts/ai` records, then commit those files only.
+- AT-2026-05-15-147 is validated and ready for publication. If work resumes before publishing, inspect only `crates/composition-root/src/startup.rs` plus the touched `.artifacts/ai` records, then commit those files only.
 
 ## Completion Summary
 
-- Added Chinese companion comments for the startup unit-test driver registry section and queued-job seed step while preserving English comments.
-- The source diff only adds comments and preserves all test setup, fake driver behavior, assertions, and helper logic.
+- Added Chinese companion comments for startup unit-test section headers while preserving existing English section markers.
+- The source diff only adds comments and preserves all test behavior.

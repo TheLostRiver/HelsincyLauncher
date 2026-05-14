@@ -395,6 +395,7 @@ Phase 23 - Backend Comment Rollout
 138. AT-2026-05-14-144 - completed - added the missing Chinese binary-entry comment to the desktop host main entry while preserving startup delegation.
 139. AT-2026-05-14-145 - completed - added Chinese companion comments for composition-root smoke-test step comments while preserving test behavior.
 140. AT-2026-05-14-146 - completed - added Chinese companion comments for startup unit-test driver registry comments while preserving test behavior.
+141. AT-2026-05-15-147 - completed - added Chinese companion comments for startup unit-test section headers while preserving test behavior.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
