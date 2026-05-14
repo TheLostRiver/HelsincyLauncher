@@ -62,6 +62,7 @@ Phase 23 - Backend Comment Rollout
 - AT-2026-05-14-123 completed after localizing downloads query contract comments in `crates/module-downloads/src/contracts/queries.rs` and validating `launcher-module-downloads`.
 - AT-2026-05-14-124 completed after localizing SQLite `job_snapshots.recoverable` migration comments in `crates/adapter-storage-sqlite/src/lib.rs` and validating `launcher-adapter-storage-sqlite`.
 - AT-2026-05-14-125 completed after localizing desktop host state comments in `src-tauri/src/state.rs` and validating `my-epic-launcher-desktop`.
+- AT-2026-05-14-126 completed after localizing desktop host crate entry comments in `src-tauri/src/lib.rs` and validating `my-epic-launcher-desktop`.
 
 ## Phases
 
@@ -200,7 +201,7 @@ Phase 23 - Backend Comment Rollout
 ### Phase 23: Backend Comment Rollout
 
 - Outcome: apply the new repository comment standard to backend Rust/Tauri files in small, commit-sized slices of one or two files.
-- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062, AT-2026-05-04-063, AT-2026-05-04-064, AT-2026-05-04-065, AT-2026-05-04-066, AT-2026-05-04-067, AT-2026-05-04-068, AT-2026-05-05-071, AT-2026-05-05-072, AT-2026-05-05-073, AT-2026-05-05-074, AT-2026-05-05-075, AT-2026-05-05-076, AT-2026-05-05-077, AT-2026-05-05-078, AT-2026-05-05-079, AT-2026-05-05-080, AT-2026-05-05-081, AT-2026-05-06-082, AT-2026-05-06-083, AT-2026-05-06-084, AT-2026-05-06-085, AT-2026-05-06-086, AT-2026-05-06-087, AT-2026-05-06-088, AT-2026-05-06-089, AT-2026-05-14-110, AT-2026-05-14-111, AT-2026-05-14-112, AT-2026-05-14-113, AT-2026-05-14-114, AT-2026-05-14-115, AT-2026-05-14-116, AT-2026-05-14-117, AT-2026-05-14-118, AT-2026-05-14-119, AT-2026-05-14-120, AT-2026-05-14-121, AT-2026-05-14-122, AT-2026-05-14-123, AT-2026-05-14-124, AT-2026-05-14-125
+- Atomic tasks: AT-2026-05-04-057, AT-2026-05-04-058, AT-2026-05-04-059, AT-2026-05-04-060, AT-2026-05-04-061, AT-2026-05-04-062, AT-2026-05-04-063, AT-2026-05-04-064, AT-2026-05-04-065, AT-2026-05-04-066, AT-2026-05-04-067, AT-2026-05-04-068, AT-2026-05-05-071, AT-2026-05-05-072, AT-2026-05-05-073, AT-2026-05-05-074, AT-2026-05-05-075, AT-2026-05-05-076, AT-2026-05-05-077, AT-2026-05-05-078, AT-2026-05-05-079, AT-2026-05-05-080, AT-2026-05-05-081, AT-2026-05-06-082, AT-2026-05-06-083, AT-2026-05-06-084, AT-2026-05-06-085, AT-2026-05-06-086, AT-2026-05-06-087, AT-2026-05-06-088, AT-2026-05-06-089, AT-2026-05-14-110, AT-2026-05-14-111, AT-2026-05-14-112, AT-2026-05-14-113, AT-2026-05-14-114, AT-2026-05-14-115, AT-2026-05-14-116, AT-2026-05-14-117, AT-2026-05-14-118, AT-2026-05-14-119, AT-2026-05-14-120, AT-2026-05-14-121, AT-2026-05-14-122, AT-2026-05-14-123, AT-2026-05-14-124, AT-2026-05-14-125, AT-2026-05-14-126
 - **Status:** in_progress
 
 ### Phase 24: Comment Language Controls
@@ -348,6 +349,7 @@ Phase 23 - Backend Comment Rollout
 117. AT-2026-05-14-123 - completed - localized downloads query contract comments and added the missing `job_id` field comment while preserving query DTO shape.
 118. AT-2026-05-14-124 - completed - localized SQLite `job_snapshots.recoverable` migration comments while preserving migration SQL and ignored-error behavior.
 119. AT-2026-05-14-125 - completed - localized desktop host state comments while preserving `Arc` ownership and composition-root service graph boundaries.
+120. AT-2026-05-14-126 - completed - localized desktop host crate entry comments while preserving module declarations and public re-exports.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
@@ -366,7 +368,7 @@ Phase 23 - Backend Comment Rollout
 
 ## Follow-up Queue
 
-1. Continue Phase 23 with the next narrow backend comment slice after publishing AT-2026-05-14-125.
+1. Continue Phase 23 with the next narrow backend comment slice after publishing AT-2026-05-14-126.
 2. Leave unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, and `src/` changes untouched unless the user explicitly scopes them into a task.
 
 ## Legacy Note

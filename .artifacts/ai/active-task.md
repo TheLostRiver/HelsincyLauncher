@@ -2,36 +2,33 @@
 
 ## Identity
 
-- task id: AT-2026-05-14-125
-- title: Localize desktop host state comments
+- task id: AT-2026-05-14-126
+- title: Localize desktop host crate entry comments
 - status: completed
 
 ## Goal
 
-继续 Phase 23 Backend Comment Rollout，在不改变桌面宿主 state handle 结构、共享所有权或访问行为的前提下，把 `src-tauri/src/state.rs` 中的英文注释改为高信号中文注释。
+继续 Phase 23 Backend Comment Rollout，在不改变桌面宿主 crate 公开入口、模块导出或 re-export 行为的前提下，把 `src-tauri/src/lib.rs` 中的英文注释改为高信号中文注释。
 
 本轮只覆盖：
 
-- `DesktopAppServicesHandle`
-- `DesktopAppServicesHandle::from_services`
-- `DesktopAppServicesHandle::services`
-- `DesktopAppServicesHandle::is_wired_to_composition_root`
+- `src-tauri/src/lib.rs`
 
 ## Scope
 
 - in scope:
-  - replace English module and declaration comments with Chinese comments
+  - replace English crate/module/re-export comments with Chinese comments
   - update `.artifacts/ai/active-task.md`
   - update `.artifacts/ai/task-plan.md`
   - update `.artifacts/ai/progress.md`
 - out of scope:
-  - change `Arc` ownership, deref behavior, host service aggregation, command handlers, bootstrap behavior, or frontend files
-  - modify composition-root, module crates, database files, or transport command files
+  - change module declarations, public exports, bootstrap behavior, state behavior, command handlers, or frontend files
+  - modify composition-root, module crates, database files, or transport command implementations
   - touch unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, or `src/` changes already present in the worktree
 
 ## Allowed Files
 
-1. src-tauri/src/state.rs
+1. src-tauri/src/lib.rs
 2. .artifacts/ai/active-task.md
 3. .artifacts/ai/task-plan.md
 4. .artifacts/ai/progress.md
@@ -49,7 +46,7 @@
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If this slice only localizes `src-tauri/src/state.rs` comments and leaves the handle implementation untouched, then desktop host state documentation will match the repository comment policy while preserving compiled behavior.
+- falsifiable local hypothesis: If this slice only localizes `src-tauri/src/lib.rs` comments and leaves all module declarations and re-exports untouched, then desktop host crate entry documentation will match the repository comment policy while preserving compiled behavior.
 
 ## Cheap Check
 
@@ -58,7 +55,7 @@
 ## Validation Gate
 
 1. `cargo check -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`
-2. `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- src-tauri/src/state.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md`
+2. `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- src-tauri/src/lib.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md`
 
 ## Validation Result
 
@@ -68,15 +65,15 @@
 
 ## Notes
 
-- AT-2026-05-14-124 completed and was pushed as commit `454c36d`.
-- The host state handle must keep composition-root as the service graph owner and avoid becoming a second backend truth source.
+- AT-2026-05-14-125 completed and was pushed as commit `ed938cb`.
+- This crate entry should remain a thin public surface that re-exports testable bootstrap and shared host state handles.
 
 ## 安全恢复点
 
-- AT-2026-05-14-125 is validated and ready for publication. If work resumes before publishing, rerun the scoped `cargo check` and `git diff --check`, then publish only `src-tauri/src/state.rs` plus the touched `.artifacts/ai` records.
+- AT-2026-05-14-126 is validated and ready for publication. If work resumes before publishing, rerun the scoped `cargo check` and `git diff --check`, then publish only `src-tauri/src/lib.rs` plus the touched `.artifacts/ai` records.
 
 ## Completion Summary
 
-- `src-tauri/src/state.rs` module comments and host state handle comments are now Chinese.
-- The slice preserves `Arc` ownership, deref behavior, composition-root service graph ownership, command handlers, and bootstrap behavior.
+- `src-tauri/src/lib.rs` crate-entry, module, and re-export comments are now Chinese.
+- The slice preserves module declarations, public re-exports, bootstrap behavior, state behavior, and command handlers.
 - `cargo check -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed.

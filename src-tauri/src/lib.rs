@@ -1,19 +1,19 @@
-//! Public crate entry for the desktop host.
+//! 桌面宿主的公开 crate 入口。
 //!
-//! This surface re-exports the testable bootstrap entrypoints and shared host
-//! state handle used by the binary entrypoint and host transport smoke tests.
+//! 该入口重新导出可测试的 bootstrap 入口和共享宿主状态句柄，
+//! 供二进制入口与宿主 transport smoke tests 使用。
 
-/// Desktop host bootstrap assembly and startup entrypoints.
+/// 桌面宿主 bootstrap 装配与启动入口。
 pub mod bootstrap;
 
-/// Typed IPC command/query handlers and shared transport envelopes.
+/// typed IPC command/query handler 与共享 transport envelope。
 pub mod commands;
 
-/// Shared host state wrappers around composition-root services.
+/// 围绕 composition-root 服务聚合的共享宿主状态包装。
 pub mod state;
 
-/// Re-export the testable desktop host bootstrap surface for callers and tests.
+/// 为调用方和测试重新导出可测试的桌面宿主 bootstrap surface。
 pub use bootstrap::{build_desktop_host_bootstrap, run_desktop_host, DesktopHostBootstrap};
 
-/// Re-export the shared desktop host services handle attached to state.
+/// 重新导出挂载到 state 的共享桌面宿主服务句柄。
 pub use state::DesktopAppServicesHandle;
