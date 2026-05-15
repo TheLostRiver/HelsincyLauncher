@@ -2,40 +2,40 @@
 
 ## Identity
 
-- task id: AT-2026-05-15-160
-- title: Add downloads resume manifest provider boundary
+- task id: AT-2026-05-15-161
+- title: Document downloads resume segment checkpoint shape
 - status: complete
 
 ## Goal
 
-在 `resume_download` 已经完成 job lookup、checkpoint lookup 和 staging validation 之后，补上最小 manifest provider 端口边界，并证明 facade 会在 runtime enqueue 之前重建或读取 manifest plan。
+在继续实现 completed-segment sealing 之前，把 downloads resume 需要的 manifest segment、segment checkpoint、resume decision 三层数据形状和不变量写入模块实现文档。
 
 本轮只覆盖：
 
-- `DownloadManifestProviderPort` 的最小 trait 边界
-- `DownloadManifestPlan` 的最小句柄
-- `resume_download` 在 staging 之后调用 manifest provider
-- 保持完整 runtime resume enqueue 仍为后续切片
+- 更新 `docs/modules/downloads/README_IMPL.md`
+- 记录 AT-160 后的 manifest provider 现状
+- 明确下一轮代码的最小数据契约和验证入口
 
 ## Scope
 
 - in scope:
-  - update `crates/module-downloads/src/facade/mod.rs`
+  - update `docs/modules/downloads/README_IMPL.md`
   - update `.artifacts/ai/active-task.md`
   - update `.artifacts/ai/task-plan.md`
   - update `.artifacts/ai/progress.md`
   - update `.artifacts/ai/findings.md`
   - update `.artifacts/ai/handoff.md`
 - out of scope:
+  - change Rust production code
   - change frontend files
   - change host transport or composition-root wiring
-  - implement concrete provider/adapter behavior
+  - implement concrete SQLite schema changes
   - enqueue resumed runtime jobs
   - change sqlite files, `Cargo.lock`, `.codex`, `src/`, or other unrelated dirty worktree files
 
 ## Allowed Files
 
-1. crates/module-downloads/src/facade/mod.rs
+1. docs/modules/downloads/README_IMPL.md
 2. .artifacts/ai/active-task.md
 3. .artifacts/ai/task-plan.md
 4. .artifacts/ai/progress.md
@@ -57,33 +57,31 @@
 11. docs/TauriKernelJobsRuntimeDesign.md
 12. docs/TauriTestingStrategyAndQualityGateDesign.md
 13. docs/TauriAIDevelopmentTransactionProtocolDesign.md
-14. docs/TauriCodeCommentStandard.md
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If `resume_download` has a manifest provider port, a focused facade test can prove the flow reaches manifest reconstruction only after module job record, checkpoint, and staging are present, while the operation still returns `DOWNLOADS_NOT_WIRED` until runtime resume enqueue is explicitly designed.
+- falsifiable local hypothesis: If README_IMPL names the minimal segment/checkpoint/resume-decision shape and invariants, the next code slice can write a focused RED test for completed-segment sealing without inventing segment fields inside implementation.
 
 ## Cheap Check
 
-- `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_download_reconstructs_manifest_after_staging_is_valid`
+- `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- docs/modules/downloads/README_IMPL.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md`
 
 ## Validation Gate
 
-1. Read README, collaboration docs, downloads module docs, `README_IMPL.md`, and related backend/runtime/testing docs before code.
-2. Write a RED facade test for manifest reconstruction after staging.
-3. Implement the smallest port/plan boundary and keep `()` placeholder compatibility.
-4. Run focused resume test, full `launcher-module-downloads` tests, and scoped diff checks.
+1. Read README, collaboration docs, downloads module docs, README_IMPL, download runtime, first crate API, kernel jobs runtime, testing, and AI transaction docs before editing.
+2. Update README_IMPL only as the module-local implementation guide.
+3. Keep the update aligned with existing `TauriDownloadRuntimeDesign.md` segment/checkpoint fields.
+4. Run scoped `git diff --check`.
 
 ## Validation Result
 
 - passed
-- RED compile failure was observed first: the focused test failed because `DownloadManifestPlan` and `DownloadManifestProviderPort` did not exist.
-- Focused GREEN test passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_download_reconstructs_manifest_after_staging_is_valid` reported 1 passed, 0 failed.
-- Full module test passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` reported 10 passed, 0 failed.
-- Scoped whitespace validation passed: `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- crates/module-downloads/src/facade/mod.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md`.
+- Updated `docs/modules/downloads/README_IMPL.md` with manifest segment, segment checkpoint, and resume decision data-shape guidance.
+- Confirmed key anchors exist with `rg -n "Resume Segment Data Shape|seal_completed|resume_partial|queue_remaining|reject_mismatch|DownloadManifestProviderPort" docs\modules\downloads\README_IMPL.md`.
+- Scoped whitespace validation passed: `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- docs/modules/downloads/README_IMPL.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md`.
+- No cargo test was required because this slice changed documentation and task records only.
 
 ## Notes
 
-- AT-2026-05-15-159 completed and was committed locally as `c6c6f44`.
-- User requires module docs under `docs/modules` and implementation docs to be read before module backend code.
-- User prefers preserving existing English comments and adding Chinese companions; new code comments in this slice should be bilingual where declaration-level comments are added.
+- AT-2026-05-15-160 completed and was committed locally as `0d9689a`.
+- The current code has only `DownloadCheckpointRecord { job_id }`; completed-segment sealing needs explicit shape before code.

@@ -73,7 +73,8 @@ Implementation truth should move through module facade and ports first. Do not p
 | `resume_download` job lookup | returns `DL_JOB_NOT_FOUND` when module job record is missing | module facade test |
 | `resume_download` checkpoint lookup | returns `DL_CHECKPOINT_MISSING` when checkpoint is missing | module facade test |
 | `resume_download` staging boundary | calls `DownloadStagingObjectStore::ensure_staging_root()` after job and checkpoint exist | module facade test |
-| `resume_download` manifest/runtime orchestration | not wired yet, still returns `DOWNLOADS_NOT_WIRED` after staging | future slices |
+| `resume_download` manifest boundary | calls `DownloadManifestProviderPort::fetch_manifest()` after staging is valid | module facade test |
+| `resume_download` segment sealing/runtime orchestration | not wired yet, still returns `DOWNLOADS_NOT_WIRED` after manifest reconstruction | future slices |
 | list/get/policy surfaces | not wired yet | future slices |
 
 ---
@@ -98,8 +99,9 @@ Current slice boundary:
 1. Job record lookup is implemented.
 2. Checkpoint lookup is implemented.
 3. Staging boundary is implemented as a minimal port call.
-4. Manifest reconstruction is the next likely backend slice.
-5. Runtime enqueue-resume must wait until manifest/staging inputs are explicit enough to test.
+4. Manifest reconstruction is implemented as a minimal provider port call.
+5. Completed-segment sealing is the next likely backend slice, but it must not start until segment/checkpoint data shape is explicit.
+6. Runtime enqueue-resume must wait until sealed and remaining segment decisions are explicit enough to test.
 
 Do not skip directly from checkpoint to `JobRuntime::resume`. The module owns business checkpoint and resume reconstruction.
 
@@ -112,7 +114,7 @@ Do not skip directly from checkpoint to `JobRuntime::resume`. The module owns bu
 | `DownloadJobRepository` | defined in facade module | concrete SQLite shell exists |
 | `DownloadCheckpointRepository` | defined in driver module | concrete SQLite shell exists |
 | `DownloadStagingObjectStore` | minimal facade port exists | `()` placeholder keeps composition wiring stable |
-| `DownloadManifestProviderPort` | not defined in code yet | likely next resume/start implementation boundary |
+| `DownloadManifestProviderPort` | minimal facade port exists | currently returns a minimal `DownloadManifestPlan` handle |
 | `JobRuntime` | shared kernel-jobs runtime trait exists | current resume does not enqueue yet |
 
 When adding a port:
@@ -124,7 +126,71 @@ When adding a port:
 
 ---
 
-## 7. Error Semantics
+## 7. Resume Segment Data Shape
+
+Completed-segment sealing needs three separate shapes. Keep them separate so provider details, persisted checkpoint facts, and runtime resume decisions do not collapse into one mutable blob.
+
+### 7.1 Manifest Segment
+
+Manifest segments come from `DownloadManifestProviderPort` or a later planner. They describe what could be downloaded, not what has already been written.
+
+Minimum fields:
+
+| Field | Purpose |
+|-------|---------|
+| `segment_id` | stable segment identifier inside the manifest plan |
+| `file_id` | stable logical file identifier for multi-file downloads |
+| `offset` | byte offset inside the logical file |
+| `length` | expected segment length in bytes |
+| `source_locator` | provider-specific source reference kept behind the module boundary |
+| `expected_hash` | optional segment integrity expectation when available |
+| `write_target` | staging-relative target path or object key |
+
+### 7.2 Segment Checkpoint
+
+Segment checkpoints are module-owned persisted facts. They should be loaded through downloads checkpoint/repository code, not through `kernel-jobs`, host transport, or frontend state.
+
+Minimum fields:
+
+| Field | Purpose |
+|-------|---------|
+| `job_id` | stable downloads job identifier |
+| `segment_id` | segment identifier that must match the manifest segment |
+| `file_id` | logical file identifier used to guard against stale manifest/checkpoint mismatches |
+| `offset` | checkpointed offset used to validate the manifest segment boundary |
+| `length` | checkpointed length used to validate completion and resume range |
+| `downloaded_bytes` | persisted progress inside this segment |
+| `status` | module-owned status such as `pending`, `in_progress`, `completed`, or `failed` |
+| `partial_path` | staging-relative partial file path when one exists |
+| `etag` | provider validator used only when the provider supports safe range resume |
+| `hash_state_ref` | reference to incremental hash state when hashing cannot be recomputed cheaply |
+
+### 7.3 Resume Segment Decision
+
+Resume decisions are derived in memory from manifest segments plus segment checkpoints. They should not be stored as the source of truth.
+
+Minimum decision actions:
+
+| Action | Meaning |
+|--------|---------|
+| `seal_completed` | checkpoint proves the segment is complete and matches the manifest boundary, so it must not be re-enqueued |
+| `resume_partial` | checkpoint has partial bytes and provider validators still allow safe range resume |
+| `queue_remaining` | segment has no safe completed or partial checkpoint and must be queued from the beginning |
+| `reject_mismatch` | manifest/checkpoint boundary or validator mismatch prevents safe automatic resume |
+
+Required invariants:
+
+1. Match manifest and checkpoint segments by `segment_id`, then verify `file_id`, `offset`, and `length`.
+2. Only seal when `status` is completed and `downloaded_bytes == length`.
+3. Only resume partial bytes when `downloaded_bytes < length` and provider validators such as `etag` still match.
+4. Treat stale or mismatched segment facts as a downloads-domain resume failure or attention state, not as a silent full-job restart.
+5. Do not expose segment-level decisions through frontend IPC until a separate projection design says they are safe to surface.
+
+The next code slice should prove only the first derived behavior: completed checkpoints become sealed resume decisions and are not candidates for runtime enqueue. It should still avoid concrete SQLite schema changes and real runtime resume enqueue unless explicitly scoped.
+
+---
+
+## 8. Error Semantics
 
 Downloads-domain errors use `DL_*` codes when they become stable public classifications.
 
@@ -139,7 +205,7 @@ Current stable resume errors:
 
 ---
 
-## 8. Required Validation
+## 9. Required Validation
 
 For downloads backend implementation slices, prefer the narrowest proof first:
 
@@ -158,7 +224,7 @@ Every behavior change must follow RED/GREEN:
 
 ---
 
-## 9. Non-goals
+## 10. Non-goals
 
 Do not use this module implementation document to:
 

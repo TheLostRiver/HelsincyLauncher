@@ -446,3 +446,11 @@
 - `docs/TauriFirstCrateApiDrafts.md` names `DownloadManifestProviderPort` as a fixed internal port for `module-downloads`, but the current code still keeps `manifest_provider: M` as an unconstrained placeholder.
 - `docs/TauriTestingStrategyAndQualityGateDesign.md` makes module facade tests the right cheap validation layer for this slice.
 - The smallest document-backed change is to define a minimal manifest plan/port, keep `()` placeholder compatibility for current wiring, and prove `resume_download` calls the provider only after job, checkpoint, and staging are present.
+
+## Phase 36 Resume Segment Shape Findings
+
+- AT-2026-05-15-160 is committed as `0d9689a` and now defines `DownloadManifestProviderPort`, but `DownloadManifestPlan` still only carries `target_id`.
+- `docs/TauriDownloadRuntimeDesign.md` defines logical segment fields (`segment_id`, `file_id`, `offset`, `length`, `source_locator`, `expected_hash`, `write_target`) and checkpoint fields (`downloaded_bytes`, `status`, `partial_path`, `etag`, `hash_state_ref`), but README_IMPL has not yet converted them into module-local implementation guidance.
+- `crates/module-downloads/src/driver.rs` currently exposes `DownloadCheckpointRecord { job_id }`, so completed-segment sealing cannot be coded safely without deciding whether segment checkpoint data lives inside that record, beside it, or behind a new repository method.
+- `docs/TauriKernelJobsRuntimeDesign.md` keeps segment offset checkpoint and download resume reconstruction inside `module-downloads`; therefore the next data-shape guidance must not move segment details into `kernel-jobs`, host transport, or frontend state.
+- The narrow next step is documentation, not production code: define the minimal segment/checkpoint/resume-decision shape and invariants in `docs/modules/downloads/README_IMPL.md`, then code can follow with a focused RED test.

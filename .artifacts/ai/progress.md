@@ -3700,3 +3700,102 @@
 - Phase: Phase 35 - Downloads Resume Manifest Boundary
 - Files:
   - `.artifacts/ai/handoff.md` (delete)
+
+## 2026-05-15 - AT-2026-05-15-161 Start
+
+- Recovered from AT-2026-05-15-160 at commit `0d9689a`.
+- Re-read the relevant downloads docs and code slices in small batches before editing:
+  - `docs/modules/downloads/README_IMPL.md`
+  - `docs/TauriDownloadRuntimeDesign.md`
+  - `docs/TauriBackendCrateLayoutAndUseCaseStubDesign.md`
+  - `docs/TauriFirstCrateApiDrafts.md`
+  - `docs/TauriKernelJobsRuntimeDesign.md`
+  - `crates/module-downloads/src/driver.rs`
+  - `crates/module-downloads/src/facade/mod.rs`
+- Finding: current `DownloadCheckpointRecord` only carries `job_id`, while the runtime design already names job checkpoint and segment checkpoint fields.
+- Selected a docs-only prerequisite slice: update README_IMPL with minimal segment/checkpoint/resume-decision data shape before writing completed-segment sealing code.
+
+## 2026-05-15 - AT-2026-05-15-161 Validation
+
+- Updated `docs/modules/downloads/README_IMPL.md` with manifest segment, segment checkpoint, resume decision actions, and invariants.
+- Confirmed the new README_IMPL anchors exist with `rg -n "Resume Segment Data Shape|seal_completed|resume_partial|queue_remaining|reject_mismatch|DownloadManifestProviderPort" docs\modules\downloads\README_IMPL.md`.
+- Scoped whitespace validation passed for the AT-2026-05-15-161 slice.
+- No cargo validation was required because this task changed documentation and task records only.
+- Next code candidate is now explicit: prove completed checkpoints become sealed resume decisions and are not candidates for runtime enqueue.
+
+## 2026-05-15 - AT-2026-05-15-161 Publication Handoff
+
+- Created the local AT-2026-05-15-161 commit and updated handoff so the next recovery point treats the slice as published in the current HEAD.
+- Direct `origin/main` push was not retried because prior direct-push attempts are recorded as blocked by safety review and require explicit approval before another attempt.
+
+### Auto Record: 2026-05-15 21:05:54
+- Tool: apply_patch
+- Phase: Phase 35 - Downloads Resume Manifest Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+
+### Auto Record: 2026-05-15 21:06:04
+- Tool: apply_patch
+- Phase: Phase 36 - Downloads Resume Segment Shape Documentation
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 21:06:13
+- Tool: apply_patch
+- Phase: Phase 36 - Downloads Resume Segment Shape Documentation
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 21:06:26
+- Tool: apply_patch
+- Phase: Phase 36 - Downloads Resume Segment Shape Documentation
+- Files:
+  - `.artifacts/ai/findings.md` (update)
+
+### Auto Record: 2026-05-15 21:06:39
+- Tool: apply_patch
+- Phase: Phase 36 - Downloads Resume Segment Shape Documentation
+- Files:
+  - `.artifacts/ai/handoff.md` (delete)
+
+### Auto Record: 2026-05-15 21:07:08
+- Tool: apply_patch
+- Phase: Phase 36 - Downloads Resume Segment Shape Documentation
+- Files:
+  - `docs/modules/downloads/README_IMPL.md` (update)
+
+### Auto Record: 2026-05-15 21:07:36
+- Tool: apply_patch
+- Phase: Phase 36 - Downloads Resume Segment Shape Documentation
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+
+### Auto Record: 2026-05-15 21:07:47
+- Tool: apply_patch
+- Phase: Phase 36 - Downloads Resume Segment Shape Documentation
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 21:07:55
+- Tool: apply_patch
+- Phase: Phase 36 - Downloads Resume Segment Shape Documentation
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 21:08:08
+- Tool: apply_patch
+- Phase: Phase 36 - Downloads Resume Segment Shape Documentation
+- Files:
+  - `.artifacts/ai/handoff.md` (delete)
+
+### Auto Record: 2026-05-15 21:09:29
+- Tool: apply_patch
+- Phase: Phase 36 - Downloads Resume Segment Shape Documentation
+- Files:
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-15 21:09:39
+- Tool: apply_patch
+- Phase: Phase 36 - Downloads Resume Segment Shape Documentation
+- Files:
+  - `.artifacts/ai/progress.md` (update)

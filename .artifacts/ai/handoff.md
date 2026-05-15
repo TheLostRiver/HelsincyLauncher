@@ -2,9 +2,9 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-15-160
-- title: Add downloads resume manifest provider boundary
-- status: committed locally in the current HEAD after publication
+- task id: AT-2026-05-15-161
+- title: Document downloads resume segment checkpoint shape
+- status: committed locally in the current HEAD
 
 ## Current In-progress Atomic Task
 
@@ -12,7 +12,7 @@
 
 ## Current Slice
 
-- `crates/module-downloads/src/facade/mod.rs`
+- `docs/modules/downloads/README_IMPL.md`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -22,16 +22,15 @@
 ## Validation
 
 - Passed:
-  - RED compile failure observed for missing `DownloadManifestPlan` / `DownloadManifestProviderPort`
-  - focused `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_download_reconstructs_manifest_after_staging_is_valid`
-  - full `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`
-  - scoped `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- crates/module-downloads/src/facade/mod.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md`
-- Not used as a gate:
-  - package-wide `cargo fmt --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --package launcher-module-downloads --check` because it exposes pre-existing formatting drift in files outside the current slice
+  - updated README_IMPL with manifest segment, segment checkpoint, and resume decision shapes
+  - confirmed key README_IMPL anchors with `rg`
+  - scoped `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- docs/modules/downloads/README_IMPL.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md`
+- Not required:
+  - cargo tests, because this slice changed documentation and task records only
 
 ## Current Git State To Preserve
 
-- Unrelated unstaged/unknown work remains present and must not be committed with AT-2026-05-15-160:
+- Unrelated unstaged/unknown work remains present and must not be committed with AT-2026-05-15-161:
   - `Cargo.lock`
   - `MyEpicLauncher.pen`
   - frontend files under `app/` and `components/`
@@ -41,6 +40,6 @@
 
 ## Next Resume Point
 
-1. Do not continue directly into runtime resume enqueue from AT-2026-05-15-160.
-2. Likely next candidate is completed-segment sealing after manifest reconstruction, but it needs a deliberate segment/checkpoint data-shape decision before coding.
+1. Next code candidate: prove completed checkpoints become sealed resume decisions and are not candidates for runtime enqueue.
+2. Before coding, read `README.md`, `CONTRIBUTING.md`, `docs/README.md`, all downloads module docs including README_IMPL, and the related backend/runtime/testing/collaboration docs.
 3. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.
