@@ -3764,6 +3764,27 @@
 - Created the local AT-2026-05-15-162 commit and updated handoff so the next recovery point treats the slice as published in the current HEAD.
 - Direct `origin/main` push was not retried because prior direct-push attempts are recorded as blocked by safety review and require explicit approval before another attempt.
 
+## 2026-05-15 - AT-2026-05-15-163 Start
+
+- Recovered from AT-2026-05-15-162 at commit `f7afcd2`.
+- Re-read `docs/modules/downloads/README_IMPL.md` segment decision guidance, the download runtime resume principles, and the current `build_resume_segment_decisions` implementation before code.
+- Selected a narrow TDD slice: matching partial segment checkpoints should derive `ResumePartial` and remain runtime enqueue candidates.
+- Runtime enqueue, persistence changes, and mismatch error projection remain out of scope.
+
+## 2026-05-15 - AT-2026-05-15-163 RED/GREEN
+
+- RED passed as expected: focused test failed because the current decision was `QueueRemaining` instead of `ResumePartial`.
+- GREEN implementation added only the partial branch for matching `InProgress` checkpoints with `0 < downloaded_bytes < length`, `partial_path`, and `etag`.
+- Focused validation passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_segment_decisions_resume_partial_checkpoint_segments` reported 1 passed, 0 failed.
+- Full downloads module validation passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` reported 12 passed, 0 failed.
+- `crates/module-downloads/src/facade/mod.rs` passed `rustfmt --check`.
+- Scoped whitespace validation passed for the AT-2026-05-15-163 slice.
+
+## 2026-05-15 - AT-2026-05-15-163 Publication Handoff
+
+- Created the local AT-2026-05-15-163 commit and updated handoff so the next recovery point treats the slice as published in the current HEAD.
+- Direct `origin/main` push was not retried because prior direct-push attempts are recorded as blocked by safety review and require explicit approval before another attempt.
+
 ### Auto Record: 2026-05-15 21:05:54
 - Tool: apply_patch
 - Phase: Phase 35 - Downloads Resume Manifest Boundary
@@ -3985,3 +4006,81 @@
 - Phase: Phase 37 - Downloads Resume Sealed Segment Decision
 - Files:
   - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-15 21:32:15
+- Tool: apply_patch
+- Phase: Phase 37 - Downloads Resume Sealed Segment Decision
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+
+### Auto Record: 2026-05-15 21:32:26
+- Tool: apply_patch
+- Phase: Phase 38 - Downloads Resume Partial Segment Decision
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 21:32:36
+- Tool: apply_patch
+- Phase: Phase 38 - Downloads Resume Partial Segment Decision
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 21:32:48
+- Tool: apply_patch
+- Phase: Phase 38 - Downloads Resume Partial Segment Decision
+- Files:
+  - `.artifacts/ai/findings.md` (update)
+
+### Auto Record: 2026-05-15 21:33:03
+- Tool: apply_patch
+- Phase: Phase 38 - Downloads Resume Partial Segment Decision
+- Files:
+  - `.artifacts/ai/handoff.md` (delete)
+
+### Auto Record: 2026-05-15 21:33:17
+- Tool: apply_patch
+- Phase: Phase 38 - Downloads Resume Partial Segment Decision
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-15 21:33:37
+- Tool: apply_patch
+- Phase: Phase 38 - Downloads Resume Partial Segment Decision
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-15 21:34:55
+- Tool: apply_patch
+- Phase: Phase 38 - Downloads Resume Partial Segment Decision
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+
+### Auto Record: 2026-05-15 21:35:08
+- Tool: apply_patch
+- Phase: Phase 38 - Downloads Resume Partial Segment Decision
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 21:35:20
+- Tool: apply_patch
+- Phase: Phase 38 - Downloads Resume Partial Segment Decision
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 21:35:32
+- Tool: apply_patch
+- Phase: Phase 38 - Downloads Resume Partial Segment Decision
+- Files:
+  - `.artifacts/ai/handoff.md` (delete)
+
+### Auto Record: 2026-05-15 21:36:29
+- Tool: apply_patch
+- Phase: Phase 38 - Downloads Resume Partial Segment Decision
+- Files:
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-15 21:36:39
+- Tool: apply_patch
+- Phase: Phase 38 - Downloads Resume Partial Segment Decision
+- Files:
+  - `.artifacts/ai/progress.md` (update)

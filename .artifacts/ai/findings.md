@@ -462,3 +462,10 @@
 - The SQLite checkpoint adapter currently stores only `download_job_checkpoints(job_id)`; this slice can preserve compile-time compatibility by returning empty segment lists without adding tables or columns.
 - The first behavior should be a pure module decision: matching `segment_id`, `file_id`, `offset`, `length`, `status=completed`, and `downloaded_bytes == length` produces `seal_completed` and not a runtime enqueue candidate.
 - Partial resume, stale manifest/checkpoint mismatch handling, concrete segment persistence, and runtime enqueue remain later slices.
+
+## Phase 38 Resume Partial Segment Decision Findings
+
+- AT-2026-05-15-162 is committed as `f7afcd2` and intentionally leaves partial checkpoints falling through to `QueueRemaining`.
+- README_IMPL and `TauriDownloadRuntimeDesign.md` both require partial segment checkpoints to resume from the interrupted byte range when provider validators allow it.
+- The current in-memory decision shape already has `DownloadResumeSegmentAction::ResumePartial` and treats it as a runtime enqueue candidate; the missing behavior is the derivation branch.
+- The narrow next change is a single focused test plus the branch for matching `0 < downloaded_bytes < length` checkpoints, without persistence, runtime enqueue, or mismatch error projection.

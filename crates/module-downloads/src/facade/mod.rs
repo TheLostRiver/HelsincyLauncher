@@ -220,6 +220,15 @@ pub fn build_resume_segment_decisions(
                 {
                     DownloadResumeSegmentAction::SealCompleted
                 }
+                Some(checkpoint)
+                    if checkpoint.status == DownloadSegmentCheckpointStatus::InProgress
+                        && checkpoint.downloaded_bytes > 0
+                        && checkpoint.downloaded_bytes < segment.length
+                        && checkpoint.partial_path.is_some()
+                        && checkpoint.etag.is_some() =>
+                {
+                    DownloadResumeSegmentAction::ResumePartial
+                }
                 _ => DownloadResumeSegmentAction::QueueRemaining,
             };
 
@@ -931,6 +940,49 @@ mod tests {
         assert!(
             !decisions[0].is_runtime_enqueue_candidate(),
             "sealed completed segments must not be runtime enqueue candidates"
+        );
+    }
+
+    #[test]
+    fn resume_segment_decisions_resume_partial_checkpoint_segments() {
+        let job_id = JobId::generate();
+        let manifest = DownloadManifestPlan {
+            target_id: "asset-123".into(),
+            segments: vec![DownloadManifestSegment {
+                segment_id: "segment-1".into(),
+                file_id: "file-1".into(),
+                offset: 0,
+                length: 1024,
+                source_locator: "https://example.invalid/file.bin".into(),
+                expected_hash: Some("sha256:segment".into()),
+                write_target: "file.bin.part".into(),
+            }],
+        };
+        let checkpoints = vec![DownloadSegmentCheckpointRecord {
+            job_id,
+            segment_id: "segment-1".into(),
+            file_id: "file-1".into(),
+            offset: 0,
+            length: 1024,
+            downloaded_bytes: 512,
+            status: DownloadSegmentCheckpointStatus::InProgress,
+            partial_path: Some("file.bin.part".into()),
+            etag: Some("etag-1".into()),
+            hash_state_ref: Some("hash-state-1".into()),
+        }];
+
+        let decisions = build_resume_segment_decisions(&manifest, &checkpoints)
+            .expect("matching partial checkpoint should produce resume decisions");
+
+        assert_eq!(decisions.len(), 1);
+        assert_eq!(decisions[0].segment_id, "segment-1");
+        assert_eq!(
+            decisions[0].action,
+            DownloadResumeSegmentAction::ResumePartial
+        );
+        assert!(
+            decisions[0].is_runtime_enqueue_candidate(),
+            "partial segments should remain runtime enqueue candidates"
         );
     }
 
