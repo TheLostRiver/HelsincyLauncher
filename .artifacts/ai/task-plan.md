@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 40 - Downloads Resume Queue Remaining Coverage
+Phase 41 - Downloads Resume Runtime Enqueue Boundary Documentation
 
 ## Current Focus
 
@@ -119,6 +119,8 @@ Phase 40 - Downloads Resume Queue Remaining Coverage
 - AT-2026-05-15-164 completed after adding focused mismatch rejection coverage; the test passed without production edits because the safety branch already existed.
 - AT-2026-05-15-165 is in progress after the implementation guide made the next decision gap explicit: `queue_remaining` must be covered before runtime enqueue work.
 - AT-2026-05-15-165 completed after adding focused queue-remaining coverage; the test passed without production edits because the fallback branch already existed.
+- AT-2026-05-15-166 is in progress to document the runtime-enqueue boundary before any Rust code starts handing resume decisions to `JobRuntime`.
+- AT-2026-05-15-166 completed and committed locally after updating README_IMPL with the job-level runtime-enqueue boundary and passing scoped doc/Git validation.
 
 ## Phases
 
@@ -363,6 +365,12 @@ Phase 40 - Downloads Resume Queue Remaining Coverage
 - Atomic tasks: AT-2026-05-15-165
 - **Status:** complete
 
+### Phase 41: Downloads Resume Runtime Enqueue Boundary Documentation
+
+- Outcome: document the minimal job-level runtime enqueue boundary for `resume_download` after segment decisions are complete, without opening Rust code, persistence, host, or frontend changes.
+- Atomic tasks: AT-2026-05-15-166
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -524,6 +532,7 @@ Phase 40 - Downloads Resume Queue Remaining Coverage
 157. AT-2026-05-15-163 - completed - added the minimal partial-segment resume decision without runtime enqueue or persistence changes.
 158. AT-2026-05-15-164 - completed - added focused mismatch rejection coverage for stale segment checkpoint facts without runtime enqueue or persistence changes.
 159. AT-2026-05-15-165 - completed - added focused queue-remaining coverage for manifest segments without safe checkpoints before runtime enqueue work.
+160. AT-2026-05-15-166 - completed - documented the minimal downloads resume runtime-enqueue boundary in README_IMPL, including job-level request shape, decision mapping, and out-of-scope scheduler/persistence/transport boundaries; committed locally.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
@@ -542,7 +551,7 @@ Phase 40 - Downloads Resume Queue Remaining Coverage
 
 ## Follow-up Queue
 
-1. Move to the runtime-enqueue design slice only after AT-2026-05-15-165 is committed and a new atomic task scopes the next backend boundary.
+1. Start AT-2026-05-15-167 as a Rust RED-test slice for the documented downloads resume runtime-enqueue boundary.
 2. Leave unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, and `src/` changes untouched unless the user explicitly scopes them into a task.
 
 ## Legacy Note

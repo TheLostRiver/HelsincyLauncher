@@ -489,3 +489,13 @@
 - `docs/modules/downloads/README_ARCH.md`, `README_API.md`, and `README_FLOW.md` keep frontend at aggregate projection and command intent level; AT-165 must not expose segment decisions through IPC or UI.
 - Current `build_resume_segment_decisions` already uses `QueueRemaining` as the fallback action and marks it as a runtime enqueue candidate, but there is no focused test for a manifest segment without a checkpoint.
 - The next implementation step is coverage-only in `crates/module-downloads/src/facade/mod.rs`; runtime enqueue, concrete persistence, host transport, and frontend stay out of scope.
+
+## Phase 41 Resume Runtime Enqueue Boundary Findings
+
+- AT-2026-05-15-165 is committed as `491add7` and completes focused coverage for all four segment decision actions: `SealCompleted`, `ResumePartial`, `QueueRemaining`, and `RejectMismatch`.
+- `docs/modules/downloads/README_IMPL.md` still has stale wording that says completed-segment sealing is the next code slice; this must be refreshed before runtime enqueue code begins.
+- Current `JobRuntime` accepts job-level `EnqueueJobRequest<Extension>`; the current `SharedJobRuntimeHost` and `DownloadFacade` use `Extension = ()`, so the first resume enqueue slice should not invent a segment payload inside `kernel-jobs`.
+- `docs/TauriKernelJobsRuntimeDesign.md` explicitly keeps download segment plans/checkpoints out of `kernel-jobs`; runtime snapshot state is not a replacement for downloads business checkpoint state.
+- `docs/TauriDownloadRuntimeDesign.md` orders resume as: load checkpoint, validate staging, reconstruct manifest, seal completed segments, enqueue remaining segments only, then continue scheduler loop.
+- `docs/modules/downloads/README_ARCH.md`, `README_API.md`, and `README_FLOW.md` keep UI at aggregate projection/intent level; AT-166 must not expose segment decisions or runtime enqueue details through frontend IPC.
+- The smallest safe next document update is to define that `resume_download` should enqueue the existing downloads job id with module `downloads`, kind `download`, original priority, `recoverable = true`, and `extension = None` only after decision derivation finds runtime enqueue candidates and no mismatch rejection.

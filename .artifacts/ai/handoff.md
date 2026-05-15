@@ -2,17 +2,19 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-15-165
-- title: Add downloads resume queue remaining coverage
-- status: committed locally in the current HEAD
+- task id: AT-2026-05-15-166
+- title: Document downloads resume runtime enqueue boundary
+- status: committed locally as current HEAD
 
 ## Current In-progress Atomic Task
 
-- none
+- task id: none
+- title: none
+- status: no active task; next suggested task is AT-2026-05-15-167
 
 ## Current Slice
 
-- `crates/module-downloads/src/facade/mod.rs`
+- `docs/modules/downloads/README_IMPL.md`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -21,11 +23,11 @@
 
 ## Validation
 
-- Passed for AT-2026-05-15-165:
-  - focused `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_segment_decisions_queue_remaining_without_checkpoint` reported 1 passed, 0 failed.
-  - full `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` reported 14 passed, 0 failed, plus 0 doctests.
-  - `rustfmt --check crates\module-downloads\src\facade\mod.rs`
-  - scoped `git diff --check` over the AT-165 files; only LF/CRLF warnings were emitted.
+- Passed for AT-2026-05-15-166:
+  - README_IMPL runtime-enqueue section was updated.
+  - Readback confirmed the new current-state rows, minimum job-level runtime request, decision mapping, and non-goals.
+  - Scoped `git diff --check` passed with CRLF conversion warnings only.
+  - Scoped diff stat/status confirmed only the AT-166 allowed files are in scope.
 
 ## Current Git State To Preserve
 
@@ -39,5 +41,6 @@
 
 ## Next Resume Point
 
-1. Next backend boundary should be a new runtime-enqueue design slice.
-2. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.
+1. Start AT-2026-05-15-167 as the Rust RED-test slice for the documented runtime-enqueue boundary.
+2. Keep AT-166 docs-only; Rust implementation starts in the following atomic task.
+3. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.

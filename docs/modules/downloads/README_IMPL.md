@@ -74,7 +74,8 @@ Implementation truth should move through module facade and ports first. Do not p
 | `resume_download` checkpoint lookup | returns `DL_CHECKPOINT_MISSING` when checkpoint is missing | module facade test |
 | `resume_download` staging boundary | calls `DownloadStagingObjectStore::ensure_staging_root()` after job and checkpoint exist | module facade test |
 | `resume_download` manifest boundary | calls `DownloadManifestProviderPort::fetch_manifest()` after staging is valid | module facade test |
-| `resume_download` segment sealing/runtime orchestration | not wired yet, still returns `DOWNLOADS_NOT_WIRED` after manifest reconstruction | future slices |
+| `resume_download` segment decisions | derives `seal_completed`, `resume_partial`, `queue_remaining`, and `reject_mismatch` from manifest/checkpoint facts | module decision tests |
+| `resume_download` runtime enqueue boundary | not wired yet, still returns `DOWNLOADS_NOT_WIRED` after decision derivation | next runtime-enqueue slice |
 | list/get/policy surfaces | not wired yet | future slices |
 
 ---
@@ -100,8 +101,9 @@ Current slice boundary:
 2. Checkpoint lookup is implemented.
 3. Staging boundary is implemented as a minimal port call.
 4. Manifest reconstruction is implemented as a minimal provider port call.
-5. Completed-segment sealing is the next likely backend slice, but it must not start until segment/checkpoint data shape is explicit.
-6. Runtime enqueue-resume must wait until sealed and remaining segment decisions are explicit enough to test.
+5. Segment decision derivation is implemented for completed sealing, partial resume, queue remaining, and mismatch rejection.
+6. Runtime enqueue-resume is the next backend boundary and must stay job-level until a downloads-owned scheduler/driver payload is explicitly introduced.
+7. Concrete segment persistence, scheduler execution, host transport, and frontend projection remain later slices.
 
 Do not skip directly from checkpoint to `JobRuntime::resume`. The module owns business checkpoint and resume reconstruction.
 
@@ -115,7 +117,7 @@ Do not skip directly from checkpoint to `JobRuntime::resume`. The module owns bu
 | `DownloadCheckpointRepository` | defined in driver module | concrete SQLite shell exists |
 | `DownloadStagingObjectStore` | minimal facade port exists | `()` placeholder keeps composition wiring stable |
 | `DownloadManifestProviderPort` | minimal facade port exists | currently returns a minimal `DownloadManifestPlan` handle |
-| `JobRuntime` | shared kernel-jobs runtime trait exists | current resume does not enqueue yet |
+| `JobRuntime` | shared kernel-jobs runtime trait exists | current resume does not enqueue yet; first resume enqueue slice should use job-level `EnqueueJobRequest<()>` |
 
 When adding a port:
 
@@ -186,7 +188,51 @@ Required invariants:
 4. Treat stale or mismatched segment facts as a downloads-domain resume failure or attention state, not as a silent full-job restart.
 5. Do not expose segment-level decisions through frontend IPC until a separate projection design says they are safe to surface.
 
-The next code slice should prove only the first derived behavior: completed checkpoints become sealed resume decisions and are not candidates for runtime enqueue. It should still avoid concrete SQLite schema changes and real runtime resume enqueue unless explicitly scoped.
+Current decision coverage:
+
+1. `seal_completed` is covered and must not be a runtime enqueue candidate.
+2. `resume_partial` is covered and must be a runtime enqueue candidate.
+3. `queue_remaining` is covered and must be a runtime enqueue candidate.
+4. `reject_mismatch` is covered and must not be a runtime enqueue candidate.
+
+### 7.4 Runtime Enqueue Boundary
+
+The first runtime enqueue slice should connect `resume_download` to the existing shared job runtime without moving segment details into `kernel-jobs`.
+
+Minimum job-level runtime request:
+
+| Field | Value |
+|-------|-------|
+| `job_id` | existing `ResumeDownloadRequestDto.job_id`; resume must not generate a new job id |
+| `module` | `downloads` |
+| `kind` | `download`, matching the normal downloads job driver route |
+| `priority` | priority from the persisted `DownloadJobRecord` |
+| `recoverable` | `true` |
+| `extension` | `None` while `DownloadFacade` and `SharedJobRuntimeHost` use `JobRuntime<Extension = ()>` |
+
+Decision mapping:
+
+| Decision action | Runtime enqueue behavior |
+|-----------------|--------------------------|
+| `seal_completed` | do not enqueue this segment |
+| `resume_partial` | candidate for the downloads-owned scheduler/driver to continue from checkpoint bytes |
+| `queue_remaining` | candidate for the downloads-owned scheduler/driver to start from segment offset |
+| `reject_mismatch` | do not enqueue; later slice should project a downloads-domain failure or needs-attention state |
+
+The first code slice after this document should prove only the job-level enqueue boundary:
+
+1. `resume_download` loads job, checkpoint, staging, and manifest.
+2. It derives segment decisions.
+3. If there is at least one runtime enqueue candidate and no `reject_mismatch`, it calls `JobRuntime::enqueue()` with the existing job id and persisted priority.
+4. It returns the runtime `AcceptedJob`.
+
+That slice must not:
+
+1. store segment decisions as source of truth;
+2. add SQLite segment tables or columns;
+3. put segment payloads into `kernel-jobs` extension fields;
+4. expose segment decisions through host transport or frontend IPC;
+5. implement actual fetch/write/verify scheduler execution.
 
 ---
 

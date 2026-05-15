@@ -4296,3 +4296,141 @@
 - Phase: Phase 40 - Downloads Resume Queue Remaining Coverage
 - Files:
   - `.artifacts/ai/progress.md` (update)
+
+## Phase 41 - Downloads Resume Runtime Enqueue Boundary Documentation
+
+### Agent Record: 2026-05-15 23:26
+
+- Started AT-2026-05-15-166 after the user asked to start implementation.
+- Interpreted "implementation" as implementing the next documented workflow slice: update `docs/modules/downloads/README_IMPL.md` first, because runtime enqueue Rust code is not yet specified enough to satisfy the project's doc-first backend rule.
+- Current HEAD at task start: `491add7 test: cover resume queue remaining decision`.
+- Unrelated dirty files to preserve remain present: `Cargo.lock`, `MyEpicLauncher.pen`, frontend files under `app/` and `components/`, sqlite files, `.codex`, and `src/`.
+- Read required context in small batches before editing:
+  - `README.md`
+  - `CONTRIBUTING.md`
+  - `docs/README.md`
+  - `docs/modules/downloads/README_ARCH.md`
+  - `docs/modules/downloads/README_API.md`
+  - `docs/modules/downloads/README_FLOW.md`
+  - `docs/modules/downloads/README_IMPL.md`
+  - focused snippets from `docs/TauriDownloadRuntimeDesign.md`, `docs/TauriKernelJobsRuntimeDesign.md`, `docs/TauriBackendCrateLayoutAndUseCaseStubDesign.md`, `docs/TauriFirstCrateApiDrafts.md`, `docs/TauriTestingStrategyAndQualityGateDesign.md`, and `docs/TauriAIDevelopmentTransactionProtocolDesign.md`
+  - focused snippets from current `crates/module-downloads/src/facade/mod.rs` and `crates/kernel-jobs/src/runtime.rs`.
+- Key scope decision: first runtime-enqueue implementation should use the existing job-level `EnqueueJobRequest<()>` shape; segment-level execution details must remain owned by downloads and not be stuffed into `kernel-jobs`.
+
+### Agent Record: 2026-05-15 23:34
+
+- Updated `docs/modules/downloads/README_IMPL.md`:
+  - refreshed current implementation state for segment decisions and runtime enqueue;
+  - refreshed resume slice order after decision coverage completion;
+  - clarified `JobRuntime` should use job-level `EnqueueJobRequest<()>` in the first resume enqueue slice;
+  - added `Runtime Enqueue Boundary` with minimum request fields, decision mapping, next code-slice requirements, and explicit non-goals.
+- Readback with `rg` confirmed the new current-state rows, runtime-enqueue section, minimum request table, decision mapping, and out-of-scope list.
+- Blocker: scoped `git diff --check`, diff stat, and status commands were rejected by the automatic approval reviewer with a Codex usage-limit message. This prevented final validation and commit.
+- AT-166 is left blocked, not complete. Resume by running the scoped validation commands for `docs/modules/downloads/README_IMPL.md` plus the five PWF files, then commit if clean.
+
+### Auto Record: 2026-05-15 23:11:51
+- Tool: apply_patch
+- Phase: Phase 40 - Downloads Resume Queue Remaining Coverage
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+
+### Auto Record: 2026-05-15 23:12:04
+- Tool: apply_patch
+- Phase: Phase 41 - Downloads Resume Runtime Enqueue Boundary Documentation
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 23:12:16
+- Tool: apply_patch
+- Phase: Phase 41 - Downloads Resume Runtime Enqueue Boundary Documentation
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 23:12:29
+- Tool: apply_patch
+- Phase: Phase 41 - Downloads Resume Runtime Enqueue Boundary Documentation
+- Files:
+  - `.artifacts/ai/findings.md` (update)
+
+### Auto Record: 2026-05-15 23:12:42
+- Tool: apply_patch
+- Phase: Phase 41 - Downloads Resume Runtime Enqueue Boundary Documentation
+- Files:
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-15 23:13:14
+- Tool: apply_patch
+- Phase: Phase 41 - Downloads Resume Runtime Enqueue Boundary Documentation
+- Files:
+  - `docs/modules/downloads/README_IMPL.md` (update)
+
+### Auto Record: 2026-05-15 23:13:50
+- Tool: apply_patch
+- Phase: Phase 41 - Downloads Resume Runtime Enqueue Boundary Documentation
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+
+### Auto Record: 2026-05-15 23:14:01
+- Tool: apply_patch
+- Phase: Phase 41 - Downloads Resume Runtime Enqueue Boundary Documentation
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 23:14:12
+- Tool: apply_patch
+- Phase: Phase 41 - Downloads Resume Runtime Enqueue Boundary Documentation
+- Files:
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-15 23:14:24
+- Tool: apply_patch
+- Phase: Phase 41 - Downloads Resume Runtime Enqueue Boundary Documentation
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Agent Record: 2026-05-15 23:22:28 +08:00
+- Resumed AT-2026-05-15-166 after hook/user request.
+- Current task remains blocked only on scoped validation and commit; continuing with README_IMPL plus PWF-file validation before any commit.
+
+### Agent Record: 2026-05-15 23:22:28 +08:00
+- Completed scoped validation for AT-2026-05-15-166.
+- `git diff --check` passed for README_IMPL and PWF files with CRLF conversion warnings only.
+- `rg` readback confirmed `Runtime Enqueue Boundary`, minimum job-level runtime request, decision mapping, and first-code-slice requirements in `docs/modules/downloads/README_IMPL.md`.
+- Scoped diff stat/status confirmed only the AT-166 allowed files are modified in this slice.
+
+### Agent Record: 2026-05-15 23:22:28 +08:00
+- Committed AT-2026-05-15-166 locally with message `docs: define resume runtime enqueue boundary`.
+- Final PWF records avoid embedding a self-referential commit hash because amend changes the commit object id.
+
+### Auto Record: 2026-05-15 23:22:48
+- Tool: apply_patch
+- Phase: Phase 41 - Downloads Resume Runtime Enqueue Boundary Documentation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-15 23:24:18
+- Tool: apply_patch
+- Phase: Phase 41 - Downloads Resume Runtime Enqueue Boundary Documentation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-15 23:25:31
+- Tool: apply_patch
+- Phase: Phase 41 - Downloads Resume Runtime Enqueue Boundary Documentation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-15 23:26:26
+- Tool: apply_patch
+- Phase: Phase 41 - Downloads Resume Runtime Enqueue Boundary Documentation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)

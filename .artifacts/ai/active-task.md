@@ -2,40 +2,41 @@
 
 ## Identity
 
-- task id: AT-2026-05-15-165
-- title: Add downloads resume queue remaining coverage
-- status: complete
+- task id: AT-2026-05-15-166
+- title: Document downloads resume runtime enqueue boundary
+- status: completed
 
 ## Goal
 
-补上 downloads resume segment decision 的 `queue_remaining` 覆盖：当 manifest segment 没有可用 segment checkpoint 时，必须推导为 `queue_remaining`，并且是 runtime enqueue candidate。
+在 downloads 模块实现文档中固化 `resume_download` 下一步 runtime enqueue 的最小边界：先明确 job-level runtime request、segment decision 到 enqueue 的映射、以及仍然留在后续切片的 scheduler/persistence/error projection 内容，然后再进入 Rust 代码切片。
 
 本轮只覆盖：
 
-- focused module test for queueing a segment with no checkpoint
-- 验证现有 `build_resume_segment_decisions` fallback branch
-- 保持 completed sealing、partial resume、reject mismatch、runtime enqueue 行为不扩大
+- update `docs/modules/downloads/README_IMPL.md`
+- update PWF records
+- no Rust production/test code changes
 
 ## Scope
 
 - in scope:
-  - update `crates/module-downloads/src/facade/mod.rs`
+  - update `docs/modules/downloads/README_IMPL.md`
   - update `.artifacts/ai/active-task.md`
   - update `.artifacts/ai/task-plan.md`
   - update `.artifacts/ai/progress.md`
   - update `.artifacts/ai/findings.md`
   - update `.artifacts/ai/handoff.md`
 - out of scope:
+  - change Rust production code
+  - change Rust tests
   - change frontend files
   - change host transport or composition-root wiring
   - change driver or SQLite adapter persistence
-  - enqueue resumed runtime jobs
   - implement runtime resume execution
   - change sqlite database files, `Cargo.lock`, `.codex`, `src/`, or other unrelated dirty worktree files
 
 ## Allowed Files
 
-1. crates/module-downloads/src/facade/mod.rs
+1. docs/modules/downloads/README_IMPL.md
 2. .artifacts/ai/active-task.md
 3. .artifacts/ai/task-plan.md
 4. .artifacts/ai/progress.md
@@ -57,34 +58,33 @@
 11. docs/TauriKernelJobsRuntimeDesign.md
 12. docs/TauriTestingStrategyAndQualityGateDesign.md
 13. docs/TauriAIDevelopmentTransactionProtocolDesign.md
-14. docs/TauriCodeCommentStandard.md
+14. current `crates/module-downloads/src/facade/mod.rs` and `crates/kernel-jobs/src/runtime.rs` snippets for existing code shape
 
 ## Hypothesis
 
-- falsifiable local hypothesis: Given a manifest segment with no matching segment checkpoint, a focused module test can prove the derived resume decision is `queue_remaining` and remains a runtime enqueue candidate, without touching runtime enqueue or persistence.
+- falsifiable local hypothesis: README_IMPL can define the next runtime-enqueue slice narrowly enough that AT-167 can add a RED module test for job-level resume enqueue without inventing segment persistence, scheduler execution, host transport, or frontend projection.
 
 ## Cheap Check
 
-- `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_segment_decisions_queue_remaining_without_checkpoint`
+- read back the updated README_IMPL runtime-enqueue section and run scoped `git diff --check`.
 
 ## Validation Gate
 
-1. Read required module docs and related backend/runtime/testing/collaboration docs before code.
-2. Add the focused queue-remaining coverage test first.
-3. Change production code only if the focused test exposes a real gap.
-4. Run focused test, full `launcher-module-downloads` tests, scoped rustfmt check, and scoped diff checks.
+1. Read required module docs and related backend/runtime/testing/collaboration docs before editing.
+2. Update README_IMPL only.
+3. Verify the new section states the job-level enqueue request, decision mapping, and out-of-scope boundaries.
+4. Run scoped doc readback, scoped `git diff --check`, and scoped `git status --short`.
 
 ## Validation Result
 
 - passed
-- Focused coverage test passed immediately: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_segment_decisions_queue_remaining_without_checkpoint` reported 1 passed, 0 failed.
-- Because the focused test passed without production edits, AT-2026-05-15-165 is confirmed as safety coverage for existing `QueueRemaining` fallback behavior rather than a new behavior branch.
-- Full downloads module test passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` reported 14 passed, 0 failed, plus 0 doctests.
-- `crates/module-downloads/src/facade/mod.rs` passed `rustfmt --check`.
-- Scoped whitespace validation passed for the AT-2026-05-15-165 slice; Git only reported Windows LF/CRLF conversion warnings.
+- README_IMPL runtime-enqueue section was updated and read back with `rg`; the readback confirmed the new current-state rows, `Runtime Enqueue Boundary` section, minimum job-level runtime request table, decision mapping table, and out-of-scope list.
+- Scoped `git diff --check` passed for README_IMPL and PWF files with CRLF conversion warnings only.
+- Scoped diff stat and scoped status confirmed only the AT-166 allowed files are in scope.
+- Committed locally.
 
 ## Notes
 
-- AT-2026-05-15-164 completed and was committed locally as current HEAD `ba06e7c`.
-- Current code already falls back to `QueueRemaining`; this slice documents and verifies that behavior before runtime enqueue work.
+- AT-2026-05-15-165 completed and was committed locally as current HEAD `491add7`.
 - Direct `origin/main` push remains intentionally skipped without explicit approval.
+- Resume point: start AT-167 as a Rust RED-test slice for the documented runtime-enqueue boundary.
