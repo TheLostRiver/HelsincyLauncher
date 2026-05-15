@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 31 - Downloads Resume Missing Checkpoint Semantics
+Phase 32 - Downloads Resume Job Lookup Semantics
 
 ## Current Focus
 
@@ -97,8 +97,10 @@ Phase 31 - Downloads Resume Missing Checkpoint Semantics
 - AT-2026-05-15-154 completed and was committed locally as `71b0ee1`, closing Phase 29 records and keeping `resume_download` implementation gated on design approval.
 - AT-2026-05-15-155 completed after adding the checkpoint-aware `resume_download` RED test and minimal checkpoint read while leaving full resume orchestration out of scope.
 - AT-2026-05-15-155 was committed locally as `645dd93`.
-- AT-2026-05-15-156 is in progress after the user approved the missing-checkpoint error-semantics slice for `resume_download`.
 - AT-2026-05-15-156 completed after adding stable `DL_CHECKPOINT_MISSING` semantics to `resume_download` while keeping full resume orchestration out of scope.
+- AT-2026-05-15-156 was committed locally as `b3bfb1f`.
+- AT-2026-05-15-157 is in progress after selecting the next document-backed resume slice: module job lookup before checkpoint.
+- AT-2026-05-15-157 completed after adding stable `DL_JOB_NOT_FOUND` semantics before checkpoint loading while keeping staging, manifest, and runtime resume orchestration out of scope.
 
 ## Phases
 
@@ -289,6 +291,12 @@ Phase 31 - Downloads Resume Missing Checkpoint Semantics
 - Atomic tasks: AT-2026-05-15-156
 - **Status:** complete
 
+### Phase 32: Downloads Resume Job Lookup Semantics
+
+- Outcome: make explicit user `resume_download` check the module-owned download job record before checkpoint loading, returning a stable downloads-domain error when the job record is missing.
+- Atomic tasks: AT-2026-05-15-157
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -441,6 +449,7 @@ Phase 31 - Downloads Resume Missing Checkpoint Semantics
 148. AT-2026-05-15-154 - completed - closed Phase 29 records after AT-153 publication and kept `resume_download` implementation gated on design approval.
 149. AT-2026-05-15-155 - completed - added checkpoint-aware `resume_download` RED test and minimal checkpoint read while leaving full resume orchestration out of scope.
 150. AT-2026-05-15-156 - completed - added stable missing-checkpoint error semantics to `resume_download` while keeping full resume orchestration out of scope.
+151. AT-2026-05-15-157 - completed - added stable missing-job error semantics to `resume_download` while keeping staging, manifest, and runtime resume orchestration out of scope.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
@@ -459,7 +468,7 @@ Phase 31 - Downloads Resume Missing Checkpoint Semantics
 
 ## Follow-up Queue
 
-1. Continue with the next downloads resume slice only after selecting the next explicit document-backed behavior boundary; likely candidate is full accepted-job resume orchestration with job lookup, staging validation, manifest reconstruction, and runtime enqueue ports.
+1. Continue with the next downloads resume slice only after selecting the next explicit document-backed behavior boundary; likely candidate is staging validation or manifest reconstruction before runtime enqueue.
 2. Leave unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, and `src/` changes untouched unless the user explicitly scopes them into a task.
 
 ## Legacy Note

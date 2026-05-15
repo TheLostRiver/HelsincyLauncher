@@ -3243,3 +3243,115 @@
 - Phase: Phase 31 - Downloads Resume Missing Checkpoint Semantics
 - Files:
   - `.artifacts/ai/progress.md` (update)
+
+## 2026-05-15 - AT-2026-05-15-157 Start
+
+- Confirmed AT-2026-05-15-156 is committed locally as current HEAD `b3bfb1f` and the previous allowed slice files have no residual diff.
+- Re-read the required README/CONTRIBUTING/docs map, architecture, testing, downloads runtime, backend crate layout, first crate API draft, IPC/error docs, downloads module docs, current facade code, and recent findings in small batches before coding.
+- Selected the next backend-only slice: `resume_download` must read `DownloadJobRepository` before checkpoint and return stable `DL_JOB_NOT_FOUND` when the module job record is absent.
+- Opened Phase 32 and AT-2026-05-15-157 in `.artifacts/ai/active-task.md` and `.artifacts/ai/task-plan.md`.
+- Scope remains limited to `crates/module-downloads/src/facade/mod.rs` plus PWF records; staging, manifest, runtime enqueue, host transport, frontend, sqlite, `Cargo.lock`, `.codex`, and `src/` remain out of scope.
+
+## 2026-05-15 - AT-2026-05-15-157 RED
+
+- Added `resume_download_returns_stable_error_when_job_record_is_missing` in `crates/module-downloads/src/facade/mod.rs`.
+- Updated the local test fake to record `DownloadJobRepository::get_job()` calls and seeded existing resume tests with a module job record so they continue to express checkpoint behavior after the new job precondition lands.
+- RED observed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_download` ran 3 focused tests; the new test failed because `resume_download` did not call `DownloadJobRepository::get_job()` before checkpoint.
+
+## 2026-05-15 - AT-2026-05-15-157 GREEN and Validation
+
+- Added the minimal production branch in `resume_download`: when `DownloadJobRepository::get_job()` returns `None`, the facade returns `DL_JOB_NOT_FOUND` with `retryable = false` and `severity = error`.
+- Kept existing checkpoint-present and checkpoint-missing branches intact after seeding their tests with a module job record.
+- Added bilingual English/Chinese comments on the new production job lookup boundary, per user preference.
+- GREEN focused validation passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_download` ran 3 tests and passed.
+- Module validation passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` ran 8 tests and passed.
+- Scoped whitespace check passed for the allowed AT-157 files; Git only reported expected Windows LF-to-CRLF working-copy warnings.
+
+## 2026-05-15 - AT-2026-05-15-157 Publication Handoff
+
+- Created the local AT-2026-05-15-157 commit and then updated `.artifacts/ai/handoff.md` so the next recovery point treats the slice as published.
+- Direct `origin/main` push was not retried because prior direct-push attempts are recorded as blocked by safety review and require explicit approval before another attempt.
+
+### Auto Record: 2026-05-15 13:41:40
+- Tool: apply_patch
+- Phase: Phase 31 - Downloads Resume Missing Checkpoint Semantics
+- Files:
+  - `.artifacts/ai/findings.md` (update)
+
+### Auto Record: 2026-05-15 13:42:41
+- Tool: apply_patch
+- Phase: Phase 31 - Downloads Resume Missing Checkpoint Semantics
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+
+### Auto Record: 2026-05-15 13:43:10
+- Tool: apply_patch
+- Phase: Phase 32 - Downloads Resume Job Lookup Semantics
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 13:43:25
+- Tool: apply_patch
+- Phase: Phase 32 - Downloads Resume Job Lookup Semantics
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 13:43:43
+- Tool: apply_patch
+- Phase: Phase 32 - Downloads Resume Job Lookup Semantics
+- Files:
+  - `.artifacts/ai/handoff.md` (delete)
+
+### Auto Record: 2026-05-15 13:44:19
+- Tool: apply_patch
+- Phase: Phase 32 - Downloads Resume Job Lookup Semantics
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-15 13:44:40
+- Tool: apply_patch
+- Phase: Phase 32 - Downloads Resume Job Lookup Semantics
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 13:44:59
+- Tool: apply_patch
+- Phase: Phase 32 - Downloads Resume Job Lookup Semantics
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-15 13:45:41
+- Tool: apply_patch
+- Phase: Phase 32 - Downloads Resume Job Lookup Semantics
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+
+### Auto Record: 2026-05-15 13:45:55
+- Tool: apply_patch
+- Phase: Phase 32 - Downloads Resume Job Lookup Semantics
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 13:46:06
+- Tool: apply_patch
+- Phase: Phase 32 - Downloads Resume Job Lookup Semantics
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 13:46:20
+- Tool: apply_patch
+- Phase: Phase 32 - Downloads Resume Job Lookup Semantics
+- Files:
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-15 13:47:58
+- Tool: apply_patch
+- Phase: Phase 32 - Downloads Resume Job Lookup Semantics
+- Files:
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-15 13:48:12
+- Tool: apply_patch
+- Phase: Phase 32 - Downloads Resume Job Lookup Semantics
+- Files:
+  - `.artifacts/ai/progress.md` (update)

@@ -172,14 +172,19 @@ impl<J: DownloadJobRepository, C, M, S, R: JobRuntime<Extension = ()>> DownloadF
 impl<J: DownloadJobRepository, C: DownloadCheckpointRepository, M, S, R: JobRuntime<Extension = ()>>
     DownloadFacade<J, C, M, S, R>
 {
-    /// Loads the module checkpoint before any later resume decision.
-    /// 显式读取模块 checkpoint 后再进入后续恢复决策。
+    /// Loads the module job record, then its checkpoint, before later resume decisions.
+    /// 先读取模块 job 记录，再读取 checkpoint，然后才进入后续恢复决策。
     ///
-    /// Missing checkpoint is a stable downloads-domain failure; full staging,
+    /// Missing module state is a stable downloads-domain failure; full staging,
     /// manifest, and runtime resume orchestration stays in a later slice.
-    /// 缺失 checkpoint 是稳定的 downloads 域失败；完整 staging、manifest
+    /// 缺失模块状态是稳定的 downloads 域失败；完整 staging、manifest
     /// 与 runtime 恢复编排仍留给后续切片。
     pub fn resume_download(&self, request: ResumeDownloadRequestDto) -> AppResult<AcceptedJob> {
+        let _job = match self.deps.job_repo.get_job(&request.job_id)? {
+            Some(job) => job,
+            None => return Err(missing_job_record(&request.job_id)),
+        };
+
         let checkpoint = self.deps.checkpoint_repo.load(&request.job_id)?;
         if checkpoint.is_none() {
             return Err(missing_checkpoint(&request.job_id));
@@ -187,6 +192,18 @@ impl<J: DownloadJobRepository, C: DownloadCheckpointRepository, M, S, R: JobRunt
 
         Err(not_wired("resume_download"))
     }
+}
+
+// Verifies the command targets a module-owned download record before resume work continues.
+// 在继续恢复流程前，先确认命令指向 downloads 模块拥有的下载记录。
+fn missing_job_record(job_id: &JobId) -> AppError {
+    AppError::new(
+        "DL_JOB_NOT_FOUND",
+        format!("download job record missing for job {job_id}; resume cannot continue"),
+        false,
+        AppErrorSeverity::Error,
+        CorrelationId::generate(),
+    )
 }
 
 // Keeps the missing-checkpoint branch owned by downloads instead of leaking into runtime.
@@ -233,13 +250,28 @@ mod tests {
     #[derive(Default)]
     struct RecordingDownloadJobRepository {
         created_jobs: Mutex<Vec<DownloadJobRecord>>,
+        looked_up_job_ids: Mutex<Vec<JobId>>,
     }
 
     impl RecordingDownloadJobRepository {
+        fn with_job(job: DownloadJobRecord) -> Self {
+            Self {
+                created_jobs: Mutex::new(vec![job]),
+                looked_up_job_ids: Mutex::new(Vec::new()),
+            }
+        }
+
         fn created_jobs(&self) -> Vec<DownloadJobRecord> {
             self.created_jobs
                 .lock()
                 .expect("created jobs mutex should not be poisoned")
+                .clone()
+        }
+
+        fn looked_up_job_ids(&self) -> Vec<JobId> {
+            self.looked_up_job_ids
+                .lock()
+                .expect("looked-up job ids mutex should not be poisoned")
                 .clone()
         }
     }
@@ -254,6 +286,11 @@ mod tests {
         }
 
         fn get_job(&self, job_id: &JobId) -> AppResult<Option<DownloadJobRecord>> {
+            self.looked_up_job_ids
+                .lock()
+                .expect("looked-up job ids mutex should not be poisoned")
+                .push(job_id.clone());
+
             Ok(self
                 .created_jobs
                 .lock()
@@ -275,6 +312,17 @@ mod tests {
             }
 
             Ok(())
+        }
+    }
+
+    fn make_download_job(job_id: JobId) -> DownloadJobRecord {
+        DownloadJobRecord {
+            job_id,
+            target_id: "asset-123".into(),
+            kind: "engine".into(),
+            install_intent: Some("install".into()),
+            priority: JobPriority::Normal,
+            state: DownloadJobRecordState::Paused,
         }
     }
 
@@ -468,14 +516,14 @@ mod tests {
 
     #[test]
     fn resume_download_reads_checkpoint_before_resume_decision() {
+        let job_id = JobId::generate();
         let facade = DownloadFacade::new(DownloadModuleDeps {
-            job_repo: RecordingDownloadJobRepository::default(),
+            job_repo: RecordingDownloadJobRepository::with_job(make_download_job(job_id.clone())),
             checkpoint_repo: RecordingCheckpointRepository::default(),
             manifest_provider: (),
             staging_store: (),
             job_runtime: RecordingJobRuntime::default(),
         });
-        let job_id = JobId::generate();
 
         let result = facade.resume_download(ResumeDownloadRequestDto {
             job_id: job_id.clone(),
@@ -492,9 +540,32 @@ mod tests {
 
     #[test]
     fn resume_download_returns_stable_error_when_checkpoint_is_missing() {
+        let job_id = JobId::generate();
+        let facade = DownloadFacade::new(DownloadModuleDeps {
+            job_repo: RecordingDownloadJobRepository::with_job(make_download_job(job_id.clone())),
+            checkpoint_repo: RecordingCheckpointRepository::missing(),
+            manifest_provider: (),
+            staging_store: (),
+            job_runtime: RecordingJobRuntime::default(),
+        });
+
+        let error = facade
+            .resume_download(ResumeDownloadRequestDto {
+                job_id: job_id.clone(),
+            })
+            .expect_err("missing checkpoint should stop resume before later orchestration");
+
+        assert_eq!(facade.deps().checkpoint_repo.loaded_job_ids(), vec![job_id]);
+        assert_eq!(error.code, "DL_CHECKPOINT_MISSING");
+        assert!(!error.retryable);
+        assert_eq!(error.severity, AppErrorSeverity::Error);
+    }
+
+    #[test]
+    fn resume_download_returns_stable_error_when_job_record_is_missing() {
         let facade = DownloadFacade::new(DownloadModuleDeps {
             job_repo: RecordingDownloadJobRepository::default(),
-            checkpoint_repo: RecordingCheckpointRepository::missing(),
+            checkpoint_repo: RecordingCheckpointRepository::default(),
             manifest_provider: (),
             staging_store: (),
             job_runtime: RecordingJobRuntime::default(),
@@ -505,10 +576,14 @@ mod tests {
             .resume_download(ResumeDownloadRequestDto {
                 job_id: job_id.clone(),
             })
-            .expect_err("missing checkpoint should stop resume before later orchestration");
+            .expect_err("missing job record should stop resume before checkpoint lookup");
 
-        assert_eq!(facade.deps().checkpoint_repo.loaded_job_ids(), vec![job_id]);
-        assert_eq!(error.code, "DL_CHECKPOINT_MISSING");
+        assert_eq!(facade.deps().job_repo.looked_up_job_ids(), vec![job_id]);
+        assert!(
+            facade.deps().checkpoint_repo.loaded_job_ids().is_empty(),
+            "missing job record must stop before checkpoint lookup"
+        );
+        assert_eq!(error.code, "DL_JOB_NOT_FOUND");
         assert!(!error.retryable);
         assert_eq!(error.severity, AppErrorSeverity::Error);
     }

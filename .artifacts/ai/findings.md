@@ -412,3 +412,12 @@
 - `docs/TauriErrorHandlingAndProjectionDesign.md` requires facade/application errors to converge into stable `AppError` fields, and module-level tests should verify key error `code`, `retryable`, and `severity` classifications.
 - `docs/TauriIPCAndStateContractsDesign.md` recommends `DL_*` for downloads-domain error codes, so a missing checkpoint branch should use a stable downloads code instead of `DOWNLOADS_NOT_WIRED`.
 - The smallest document-backed next slice is to make `resume_download` return a stable missing-checkpoint `AppError` when `checkpoint_repo.load()` returns `None`; full job lookup, staging validation, manifest reconstruction, and runtime enqueue remain later slices.
+
+## Phase 32 Resume Job Lookup Findings
+
+- AT-2026-05-15-156 is committed locally as current HEAD and gives `resume_download` a stable `DL_CHECKPOINT_MISSING` branch.
+- `docs/TauriBackendCrateLayoutAndUseCaseStubDesign.md` sketches `ResumeDownloadUseCase` as `jobs.get_job(...)` before checkpoint, staging, manifest, and runtime enqueue.
+- `docs/TauriFirstCrateApiDrafts.md` keeps `DownloadJobRepository` in the fixed internal port set for `module-downloads`, so explicit user resume should not proceed from checkpoint alone.
+- The current facade still reads checkpoint before checking `DownloadJobRepository`, so a requested job with no module job record can incorrectly reach later checkpoint/not-wired branches.
+- The next smallest document-backed slice is to make `resume_download` read `DownloadJobRepository` first and return stable `DL_JOB_NOT_FOUND` without touching checkpoint when no module record exists.
+- Full staging validation, manifest reconstruction, and runtime enqueue remain out of scope for this slice.
