@@ -421,3 +421,12 @@
 - The current facade still reads checkpoint before checking `DownloadJobRepository`, so a requested job with no module job record can incorrectly reach later checkpoint/not-wired branches.
 - The next smallest document-backed slice is to make `resume_download` read `DownloadJobRepository` first and return stable `DL_JOB_NOT_FOUND` without touching checkpoint when no module record exists.
 - Full staging validation, manifest reconstruction, and runtime enqueue remain out of scope for this slice.
+
+## Phase 33 Resume Staging Validation Findings
+
+- AT-2026-05-15-157 is committed locally as current HEAD and gives `resume_download` stable job lookup semantics before checkpoint loading.
+- `docs/TauriDownloadRuntimeDesign.md` orders the next resume step after checkpoint as validating that staging artifacts still exist.
+- `docs/TauriBackendCrateLayoutAndUseCaseStubDesign.md` sketches `self.staging.ensure_staging_root(&request.job_id)?` before manifest reconstruction and runtime enqueue.
+- `docs/TauriFirstCrateApiDrafts.md` names `DownloadStagingObjectStore` as part of the fixed `module-downloads` internal port set.
+- Current code only stores a generic `staging_store: S` dependency without a trait, so the next narrow slice should define the minimal staging object-store port and prove `resume_download` calls it after job and checkpoint are present.
+- Real filesystem validation, staging cleanup, manifest reconstruction, and runtime enqueue remain out of scope for this slice.

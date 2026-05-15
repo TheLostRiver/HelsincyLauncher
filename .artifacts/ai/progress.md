@@ -3355,3 +3355,121 @@
 - Phase: Phase 32 - Downloads Resume Job Lookup Semantics
 - Files:
   - `.artifacts/ai/progress.md` (update)
+
+## 2026-05-15 - AT-2026-05-15-158 Start
+
+- Confirmed AT-2026-05-15-157 is committed locally as current HEAD `2dc46c4` and the previous allowed slice files have no residual diff.
+- Re-read the relevant README/CONTRIBUTING excerpts, downloads runtime resume flow, backend crate layout resume skeleton, first crate API port list, downloads module docs, current facade code, and recent findings in small batches before coding.
+- Selected the next backend-only slice: define the minimal `DownloadStagingObjectStore` boundary and prove `resume_download` calls staging validation after job and checkpoint are present.
+- Opened Phase 33 and AT-2026-05-15-158 in `.artifacts/ai/active-task.md` and `.artifacts/ai/task-plan.md`.
+- Scope remains limited to `crates/module-downloads/src/facade/mod.rs` plus PWF records; real filesystem validation, manifest reconstruction, runtime enqueue, host transport, frontend, sqlite, `Cargo.lock`, `.codex`, and `src/` remain out of scope.
+
+## 2026-05-15 - AT-2026-05-15-158 RED
+
+- Added `resume_download_validates_staging_after_checkpoint_is_present` in `crates/module-downloads/src/facade/mod.rs`.
+- RED observed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_download` failed to compile because `DownloadStagingObjectStore` and `DownloadStagingRoot` were not defined yet.
+
+## 2026-05-15 - AT-2026-05-15-158 GREEN and Validation
+
+- Added the minimal `DownloadStagingObjectStore` port and `DownloadStagingRoot` handle in `crates/module-downloads/src/facade/mod.rs`.
+- Added a `()` placeholder implementation so current composition-root wiring can remain untouched until a real staging adapter lands.
+- Updated `resume_download` to call `staging_store.ensure_staging_root(&job_id)` after job and checkpoint are present, while preserving the post-staging `DOWNLOADS_NOT_WIRED` placeholder.
+- Added bilingual English/Chinese comments on the new staging boundary, per user preference.
+- GREEN focused validation passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_download` ran 4 tests and passed.
+- Module validation passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` ran 9 tests and passed.
+- Scoped whitespace check passed for the allowed AT-158 files; Git only reported expected Windows LF-to-CRLF working-copy warnings.
+
+## 2026-05-15 - AT-2026-05-15-158 Publication Handoff
+
+- Created the local AT-2026-05-15-158 commit and then updated `.artifacts/ai/handoff.md` so the next recovery point treats the slice as published.
+- Direct `origin/main` push was not retried because prior direct-push attempts are recorded as blocked by safety review and require explicit approval before another attempt.
+
+### Auto Record: 2026-05-15 19:55:22
+- Tool: apply_patch
+- Phase: Phase 32 - Downloads Resume Job Lookup Semantics
+- Files:
+  - `.artifacts/ai/findings.md` (update)
+
+### Auto Record: 2026-05-15 19:55:42
+- Tool: apply_patch
+- Phase: Phase 32 - Downloads Resume Job Lookup Semantics
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+
+### Auto Record: 2026-05-15 19:55:56
+- Tool: apply_patch
+- Phase: Phase 33 - Downloads Resume Staging Validation Boundary
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 19:56:05
+- Tool: apply_patch
+- Phase: Phase 33 - Downloads Resume Staging Validation Boundary
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 19:56:19
+- Tool: apply_patch
+- Phase: Phase 33 - Downloads Resume Staging Validation Boundary
+- Files:
+  - `.artifacts/ai/handoff.md` (delete)
+
+### Auto Record: 2026-05-15 19:56:46
+- Tool: apply_patch
+- Phase: Phase 33 - Downloads Resume Staging Validation Boundary
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-15 19:57:06
+- Tool: apply_patch
+- Phase: Phase 33 - Downloads Resume Staging Validation Boundary
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 19:57:32
+- Tool: apply_patch
+- Phase: Phase 33 - Downloads Resume Staging Validation Boundary
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-15 19:57:52
+- Tool: apply_patch
+- Phase: Phase 33 - Downloads Resume Staging Validation Boundary
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-15 19:58:28
+- Tool: apply_patch
+- Phase: Phase 33 - Downloads Resume Staging Validation Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+
+### Auto Record: 2026-05-15 19:58:38
+- Tool: apply_patch
+- Phase: Phase 33 - Downloads Resume Staging Validation Boundary
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 19:58:53
+- Tool: apply_patch
+- Phase: Phase 33 - Downloads Resume Staging Validation Boundary
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 19:59:07
+- Tool: apply_patch
+- Phase: Phase 33 - Downloads Resume Staging Validation Boundary
+- Files:
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-15 20:00:09
+- Tool: apply_patch
+- Phase: Phase 33 - Downloads Resume Staging Validation Boundary
+- Files:
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-15 20:00:19
+- Tool: apply_patch
+- Phase: Phase 33 - Downloads Resume Staging Validation Boundary
+- Files:
+  - `.artifacts/ai/progress.md` (update)

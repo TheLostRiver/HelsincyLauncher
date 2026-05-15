@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 32 - Downloads Resume Job Lookup Semantics
+Phase 33 - Downloads Resume Staging Validation Boundary
 
 ## Current Focus
 
@@ -101,6 +101,9 @@ Phase 32 - Downloads Resume Job Lookup Semantics
 - AT-2026-05-15-156 was committed locally as `b3bfb1f`.
 - AT-2026-05-15-157 is in progress after selecting the next document-backed resume slice: module job lookup before checkpoint.
 - AT-2026-05-15-157 completed after adding stable `DL_JOB_NOT_FOUND` semantics before checkpoint loading while keeping staging, manifest, and runtime resume orchestration out of scope.
+- AT-2026-05-15-157 was committed locally as `2dc46c4`.
+- AT-2026-05-15-158 is in progress after selecting the next document-backed resume slice: staging validation boundary after job and checkpoint.
+- AT-2026-05-15-158 completed after adding the minimal `DownloadStagingObjectStore` boundary and proving `resume_download` reaches staging validation after job and checkpoint.
 
 ## Phases
 
@@ -297,6 +300,12 @@ Phase 32 - Downloads Resume Job Lookup Semantics
 - Atomic tasks: AT-2026-05-15-157
 - **Status:** complete
 
+### Phase 33: Downloads Resume Staging Validation Boundary
+
+- Outcome: introduce the minimal `DownloadStagingObjectStore` boundary and prove explicit user `resume_download` reaches staging validation after job and checkpoint are present.
+- Atomic tasks: AT-2026-05-15-158
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -450,6 +459,7 @@ Phase 32 - Downloads Resume Job Lookup Semantics
 149. AT-2026-05-15-155 - completed - added checkpoint-aware `resume_download` RED test and minimal checkpoint read while leaving full resume orchestration out of scope.
 150. AT-2026-05-15-156 - completed - added stable missing-checkpoint error semantics to `resume_download` while keeping full resume orchestration out of scope.
 151. AT-2026-05-15-157 - completed - added stable missing-job error semantics to `resume_download` while keeping staging, manifest, and runtime resume orchestration out of scope.
+152. AT-2026-05-15-158 - completed - added minimal staging validation boundary to `resume_download` while keeping manifest reconstruction and runtime enqueue out of scope.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
@@ -468,7 +478,7 @@ Phase 32 - Downloads Resume Job Lookup Semantics
 
 ## Follow-up Queue
 
-1. Continue with the next downloads resume slice only after selecting the next explicit document-backed behavior boundary; likely candidate is staging validation or manifest reconstruction before runtime enqueue.
+1. Continue with the next downloads resume slice only after selecting the next explicit document-backed behavior boundary; likely candidate is manifest reconstruction before runtime enqueue.
 2. Leave unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, and `src/` changes untouched unless the user explicitly scopes them into a task.
 
 ## Legacy Note

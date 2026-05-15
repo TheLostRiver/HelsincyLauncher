@@ -65,6 +65,33 @@ pub trait DownloadJobRepository: Send + Sync {
     fn update_state(&self, job_id: &JobId, state: DownloadJobRecordState) -> AppResult<()>;
 }
 
+/// Minimal staging root handle returned before later manifest/runtime resume work.
+/// 后续 manifest/runtime 恢复编排前返回的最小 staging 根句柄。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DownloadStagingRoot {
+    /// Stable job identifier whose staging area has been validated or prepared.
+    /// 已被校验或准备 staging 区的稳定任务标识。
+    pub job_id: JobId,
+}
+
+/// Port for validating or preparing staging artifacts needed by resume.
+/// 校验或准备恢复所需 staging 产物的端口。
+pub trait DownloadStagingObjectStore: Send + Sync {
+    /// Ensures the staging root for a resumable download is available.
+    /// 确认可恢复下载的 staging 根仍然可用。
+    fn ensure_staging_root(&self, job_id: &JobId) -> AppResult<DownloadStagingRoot>;
+}
+
+impl DownloadStagingObjectStore for () {
+    /// Keeps the current composition placeholder compatible until a real adapter lands.
+    /// 在真实 adapter 落地前，保持当前 composition 占位依赖可编译。
+    fn ensure_staging_root(&self, job_id: &JobId) -> AppResult<DownloadStagingRoot> {
+        Ok(DownloadStagingRoot {
+            job_id: job_id.clone(),
+        })
+    }
+}
+
 /// 组装 downloads facade 所需的依赖束。
 #[derive(Debug, Clone)]
 pub struct DownloadModuleDeps<J, C, M, S, R> {
@@ -169,16 +196,22 @@ impl<J: DownloadJobRepository, C, M, S, R: JobRuntime<Extension = ()>> DownloadF
     }
 }
 
-impl<J: DownloadJobRepository, C: DownloadCheckpointRepository, M, S, R: JobRuntime<Extension = ()>>
+impl<
+        J: DownloadJobRepository,
+        C: DownloadCheckpointRepository,
+        M,
+        S: DownloadStagingObjectStore,
+        R: JobRuntime<Extension = ()>,
+    >
     DownloadFacade<J, C, M, S, R>
 {
-    /// Loads the module job record, then its checkpoint, before later resume decisions.
-    /// 先读取模块 job 记录，再读取 checkpoint，然后才进入后续恢复决策。
+    /// Loads module state, checkpoint, and staging before later resume decisions.
+    /// 先读取模块状态、checkpoint 和 staging，然后才进入后续恢复决策。
     ///
-    /// Missing module state is a stable downloads-domain failure; full staging,
-    /// manifest, and runtime resume orchestration stays in a later slice.
-    /// 缺失模块状态是稳定的 downloads 域失败；完整 staging、manifest
-    /// 与 runtime 恢复编排仍留给后续切片。
+    /// Missing module state is a stable downloads-domain failure; full manifest
+    /// and runtime resume orchestration stays in a later slice.
+    /// 缺失模块状态是稳定的 downloads 域失败；完整 manifest 与 runtime
+    /// 恢复编排仍留给后续切片。
     pub fn resume_download(&self, request: ResumeDownloadRequestDto) -> AppResult<AcceptedJob> {
         let _job = match self.deps.job_repo.get_job(&request.job_id)? {
             Some(job) => job,
@@ -189,6 +222,8 @@ impl<J: DownloadJobRepository, C: DownloadCheckpointRepository, M, S, R: JobRunt
         if checkpoint.is_none() {
             return Err(missing_checkpoint(&request.job_id));
         }
+
+        let _staging_root = self.deps.staging_store.ensure_staging_root(&request.job_id)?;
 
         Err(not_wired("resume_download"))
     }
@@ -240,7 +275,7 @@ mod tests {
 
     use super::{
         DownloadFacade, DownloadJobRecord, DownloadJobRecordState, DownloadJobRepository,
-        DownloadModuleDeps,
+        DownloadModuleDeps, DownloadStagingObjectStore, DownloadStagingRoot,
     };
     use crate::contracts::{
         CancelDownloadRequestDto, PauseDownloadRequestDto, ResumeDownloadRequestDto,
@@ -366,6 +401,33 @@ mod tests {
 
         fn save(&self, _checkpoint: &DownloadCheckpointRecord) -> AppResult<()> {
             Ok(())
+        }
+    }
+
+    #[derive(Default)]
+    struct RecordingStagingObjectStore {
+        ensured_job_ids: Mutex<Vec<JobId>>,
+    }
+
+    impl RecordingStagingObjectStore {
+        fn ensured_job_ids(&self) -> Vec<JobId> {
+            self.ensured_job_ids
+                .lock()
+                .expect("ensured job ids mutex should not be poisoned")
+                .clone()
+        }
+    }
+
+    impl DownloadStagingObjectStore for RecordingStagingObjectStore {
+        fn ensure_staging_root(&self, job_id: &JobId) -> AppResult<DownloadStagingRoot> {
+            self.ensured_job_ids
+                .lock()
+                .expect("ensured job ids mutex should not be poisoned")
+                .push(job_id.clone());
+
+            Ok(DownloadStagingRoot {
+                job_id: job_id.clone(),
+            })
         }
     }
 
@@ -586,6 +648,30 @@ mod tests {
         assert_eq!(error.code, "DL_JOB_NOT_FOUND");
         assert!(!error.retryable);
         assert_eq!(error.severity, AppErrorSeverity::Error);
+    }
+
+    #[test]
+    fn resume_download_validates_staging_after_checkpoint_is_present() {
+        let job_id = JobId::generate();
+        let facade = DownloadFacade::new(DownloadModuleDeps {
+            job_repo: RecordingDownloadJobRepository::with_job(make_download_job(job_id.clone())),
+            checkpoint_repo: RecordingCheckpointRepository::default(),
+            manifest_provider: (),
+            staging_store: RecordingStagingObjectStore::default(),
+            job_runtime: RecordingJobRuntime::default(),
+        });
+
+        let result = facade.resume_download(ResumeDownloadRequestDto {
+            job_id: job_id.clone(),
+        });
+
+        assert_eq!(
+            facade.deps().staging_store.ensured_job_ids(),
+            vec![job_id],
+            "resume_download must validate staging before later manifest/runtime resume work"
+        );
+        let error = result.expect_err("full resume orchestration should remain out of scope");
+        assert_eq!(error.code, "DOWNLOADS_NOT_WIRED");
     }
 
     #[test]
