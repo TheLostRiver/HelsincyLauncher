@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 29 - Downloads Resume Design Boundary
+Phase 30 - Downloads Resume Checkpoint Slice
 
 ## Current Focus
 
@@ -94,7 +94,8 @@ Phase 29 - Downloads Resume Design Boundary
 - AT-2026-05-15-151 completed and was committed locally as `a6fc28a`, refreshing the downloads facade file header so it matches the current start/pause/cancel wiring state.
 - AT-2026-05-15-152 completed and was committed locally as `1397ec7`, closing Phase 28 backend recovery records and leaving `resume_download` as the next checkpoint-aware design/RED-test candidate.
 - AT-2026-05-15-153 completed and was committed locally as `c05d132`, recording the docs-first resume-download design boundary and confirming the next implementation slice must start with a checkpoint-loading RED test.
-- AT-2026-05-15-154 completed Phase 29 record closeout and kept `resume_download` implementation gated on design approval.
+- AT-2026-05-15-154 completed and was committed locally as `71b0ee1`, closing Phase 29 records and keeping `resume_download` implementation gated on design approval.
+- AT-2026-05-15-155 completed after adding the checkpoint-aware `resume_download` RED test and minimal checkpoint read while leaving full resume orchestration out of scope.
 
 ## Phases
 
@@ -273,6 +274,12 @@ Phase 29 - Downloads Resume Design Boundary
 - Atomic tasks: AT-2026-05-15-153, AT-2026-05-15-154
 - **Status:** complete
 
+### Phase 30: Downloads Resume Checkpoint Slice
+
+- Outcome: start the approved backend implementation by proving `resume_download` explicitly reads `DownloadCheckpointRepository` before any full manifest/staging/runtime resume orchestration is attempted.
+- Atomic tasks: AT-2026-05-15-155
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -423,6 +430,7 @@ Phase 29 - Downloads Resume Design Boundary
 146. AT-2026-05-15-152 - completed - marked Phase 28 backend recovery complete and recorded checkpoint-aware `resume_download` as the next design/RED-test candidate.
 147. AT-2026-05-15-153 - completed - read the required backend/module docs for `resume_download` and confirmed the next implementation slice must prove explicit checkpoint loading with a RED test before changing behavior.
 148. AT-2026-05-15-154 - completed - closed Phase 29 records after AT-153 publication and kept `resume_download` implementation gated on design approval.
+149. AT-2026-05-15-155 - completed - added checkpoint-aware `resume_download` RED test and minimal checkpoint read while leaving full resume orchestration out of scope.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
@@ -441,7 +449,7 @@ Phase 29 - Downloads Resume Design Boundary
 
 ## Follow-up Queue
 
-1. Start the `resume_download` implementation only after approving a checkpoint-aware design: first RED test should prove `resume_download` consults `DownloadCheckpointRepository`, while full manifest/staging enqueue-resume remains a later slice.
+1. Continue with the next downloads resume slice only after selecting the next explicit document-backed behavior boundary; likely candidate is missing-checkpoint error semantics or full accepted-job resume orchestration with manifest/staging ports.
 2. Leave unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, and `src/` changes untouched unless the user explicitly scopes them into a task.
 
 ## Legacy Note

@@ -10,6 +10,7 @@ use launcher_kernel_foundation::{
 };
 use launcher_kernel_jobs::{AcceptedJob, EnqueueJobRequest, JobRuntime, JobPriority};
 
+use crate::driver::DownloadCheckpointRepository;
 use crate::contracts::{
     CancelDownloadRequestDto, DownloadJobListDto, DownloadJobSnapshotDto, DownloadPolicyDto,
     GetDownloadJobQueryDto, GetDownloadPolicyQueryDto, ListDownloadJobsQueryDto,
@@ -132,12 +133,6 @@ impl<J: DownloadJobRepository, C, M, S, R: JobRuntime<Extension = ()>> DownloadF
         self.deps.job_runtime.pause(&request.job_id)
     }
 
-    /// 预留恢复入口；当前仍由模块边界返回未接线错误。
-    pub fn resume_download(&self, request: ResumeDownloadRequestDto) -> AppResult<AcceptedJob> {
-        let _ = request;
-        Err(not_wired("resume_download"))
-    }
-
     /// 请求共享 runtime 取消已有下载作业。
     pub fn cancel_download(&self, request: CancelDownloadRequestDto) -> AppResult<()> {
         self.deps.job_runtime.cancel(&request.job_id)
@@ -174,6 +169,16 @@ impl<J: DownloadJobRepository, C, M, S, R: JobRuntime<Extension = ()>> DownloadF
     }
 }
 
+impl<J: DownloadJobRepository, C: DownloadCheckpointRepository, M, S, R: JobRuntime<Extension = ()>>
+    DownloadFacade<J, C, M, S, R>
+{
+    /// 显式读取模块 checkpoint 后再进入后续恢复决策；完整恢复编排仍留给后续切片。
+    pub fn resume_download(&self, request: ResumeDownloadRequestDto) -> AppResult<AcceptedJob> {
+        let _checkpoint = self.deps.checkpoint_repo.load(&request.job_id)?;
+        Err(not_wired("resume_download"))
+    }
+}
+
 // 在 facade 边界统一保留 C2 阶段的未接线错误码，避免宿主层自己发明 fallback。
 fn not_wired(operation: &str) -> AppError {
     AppError::new(
@@ -192,12 +197,15 @@ mod tests {
     use launcher_kernel_foundation::{AppResult, IsoDateTime, JobId};
     use launcher_kernel_jobs::{JobPriority, JobProgress, JobSnapshot, JobState, JobUiState};
 
+    use crate::driver::{DownloadCheckpointRecord, DownloadCheckpointRepository};
+
     use super::{
         DownloadFacade, DownloadJobRecord, DownloadJobRecordState, DownloadJobRepository,
         DownloadModuleDeps,
     };
     use crate::contracts::{
-        CancelDownloadRequestDto, PauseDownloadRequestDto, StartDownloadRequestDto,
+        CancelDownloadRequestDto, PauseDownloadRequestDto, ResumeDownloadRequestDto,
+        StartDownloadRequestDto,
     };
 
     #[derive(Default)]
@@ -244,6 +252,37 @@ mod tests {
                 job.state = state;
             }
 
+            Ok(())
+        }
+    }
+
+    #[derive(Default)]
+    struct RecordingCheckpointRepository {
+        loaded_job_ids: Mutex<Vec<JobId>>,
+    }
+
+    impl RecordingCheckpointRepository {
+        fn loaded_job_ids(&self) -> Vec<JobId> {
+            self.loaded_job_ids
+                .lock()
+                .expect("loaded job ids mutex should not be poisoned")
+                .clone()
+        }
+    }
+
+    impl DownloadCheckpointRepository for RecordingCheckpointRepository {
+        fn load(&self, job_id: &JobId) -> AppResult<Option<DownloadCheckpointRecord>> {
+            self.loaded_job_ids
+                .lock()
+                .expect("loaded job ids mutex should not be poisoned")
+                .push(job_id.clone());
+
+            Ok(Some(DownloadCheckpointRecord {
+                job_id: job_id.clone(),
+            }))
+        }
+
+        fn save(&self, _checkpoint: &DownloadCheckpointRecord) -> AppResult<()> {
             Ok(())
         }
     }
@@ -391,6 +430,30 @@ mod tests {
             .expect("pause_download should delegate to the runtime control port");
 
         assert_eq!(facade.deps().job_runtime.paused_job_ids(), vec![job_id]);
+    }
+
+    #[test]
+    fn resume_download_reads_checkpoint_before_resume_decision() {
+        let facade = DownloadFacade::new(DownloadModuleDeps {
+            job_repo: RecordingDownloadJobRepository::default(),
+            checkpoint_repo: RecordingCheckpointRepository::default(),
+            manifest_provider: (),
+            staging_store: (),
+            job_runtime: RecordingJobRuntime::default(),
+        });
+        let job_id = JobId::generate();
+
+        let result = facade.resume_download(ResumeDownloadRequestDto {
+            job_id: job_id.clone(),
+        });
+
+        assert_eq!(
+            facade.deps().checkpoint_repo.loaded_job_ids(),
+            vec![job_id],
+            "resume_download must read the module checkpoint before deciding how to resume"
+        );
+        let error = result.expect_err("full resume orchestration should remain out of scope");
+        assert_eq!(error.code, "DOWNLOADS_NOT_WIRED");
     }
 
     #[test]

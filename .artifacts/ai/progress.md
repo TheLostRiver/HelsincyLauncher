@@ -2734,6 +2734,22 @@
 - No Rust or frontend files are part of this closeout.
 - AT-2026-05-15-154 scoped `git diff --check` passed for `.artifacts/ai` records; Git only reported Windows LF-to-CRLF working-copy warnings.
 
+## Agent Note: 2026-05-15 AT-155 Start
+
+- User approved starting the checkpoint-aware first implementation slice for `resume_download`.
+- Confirmed latest local commit is `71b0ee1` and unrelated dirty files remain outside this task.
+- Opened AT-2026-05-15-155 with scope limited to `crates/module-downloads/src/facade/mod.rs` plus `.artifacts/ai` records.
+- TDD rule for this task: write the checkpoint-read test first, run it to observe RED, then implement the minimal checkpoint read.
+
+## Agent Note: 2026-05-15 AT-155 RED/GREEN
+
+- Added `resume_download_reads_checkpoint_before_resume_decision` in `crates/module-downloads/src/facade/mod.rs`.
+- RED observed: focused `resume_download` test failed because `loaded_job_ids` was empty, proving the existing stub did not read `DownloadCheckpointRepository`.
+- Minimal implementation added a separate `resume_download` impl requiring `C: DownloadCheckpointRepository`, loading the checkpoint first, and then returning the existing `DOWNLOADS_NOT_WIRED` placeholder.
+- GREEN passed: focused `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_download`.
+- Module validation passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` with 6 tests.
+- Scoped `git diff --check` passed for `crates/module-downloads/src/facade/mod.rs` and `.artifacts/ai` records; Git only reported Windows LF-to-CRLF working-copy warnings.
+
 ### Auto Record: 2026-05-15 07:27:59
 - Tool: apply_patch
 - Phase: Phase 28 - Backend Development Scope Recovery
@@ -2989,5 +3005,120 @@
 ### Auto Record: 2026-05-15 13:03:06
 - Tool: apply_patch
 - Phase: Phase 29 - Downloads Resume Design Boundary
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 13:13:28
+- Tool: apply_patch
+- Phase: Phase 29 - Downloads Resume Design Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+
+### Auto Record: 2026-05-15 13:13:50
+- Tool: apply_patch
+- Phase: Phase 30 - Downloads Resume Checkpoint Slice
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 13:14:00
+- Tool: apply_patch
+- Phase: Phase 30 - Downloads Resume Checkpoint Slice
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 13:14:16
+- Tool: apply_patch
+- Phase: Phase 30 - Downloads Resume Checkpoint Slice
+- Files:
+  - `.artifacts/ai/handoff.md` (delete)
+
+### Auto Record: 2026-05-15 13:14:34
+- Tool: apply_patch
+- Phase: Phase 30 - Downloads Resume Checkpoint Slice
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-15 13:15:12
+- Tool: apply_patch
+- Phase: Phase 30 - Downloads Resume Checkpoint Slice
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-15 13:16:05
+- Tool: apply_patch
+- Phase: Phase 30 - Downloads Resume Checkpoint Slice
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+
+### Auto Record: 2026-05-15 13:16:15
+- Tool: apply_patch
+- Phase: Phase 30 - Downloads Resume Checkpoint Slice
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 13:16:25
+- Tool: apply_patch
+- Phase: Phase 30 - Downloads Resume Checkpoint Slice
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 13:16:38
+- Tool: apply_patch
+- Phase: Phase 30 - Downloads Resume Checkpoint Slice
+- Files:
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-15 13:17:02
+- Tool: apply_patch
+- Phase: Phase 30 - Downloads Resume Checkpoint Slice
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+
+### Auto Record: 2026-05-15 13:17:09
+- Tool: apply_patch
+- Phase: Phase 30 - Downloads Resume Checkpoint Slice
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 13:17:19
+- Tool: apply_patch
+- Phase: Phase 30 - Downloads Resume Checkpoint Slice
+- Files:
+  - `.artifacts/ai/handoff.md` (update)
+
+## 2026-05-15 - AT-2026-05-15-155 Fresh Pre-commit Validation
+
+- Re-read the active PWF recovery slice and confirmed AT-2026-05-15-155 is the current publication target.
+- Updated `.artifacts/ai/active-task.md` from `in_progress` to `complete` after the checkpoint-aware resume slice validated.
+- Fresh focused validation passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_download` ran 1 test and passed.
+- Fresh module validation passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` ran 6 tests and passed.
+- Scoped whitespace check passed for the allowed AT-155 files; Git only reported expected Windows LF-to-CRLF working-copy warnings.
+
+## 2026-05-15 - AT-2026-05-15-155 Publication Handoff
+
+- Created the local AT-2026-05-15-155 commit, then updated `.artifacts/ai/handoff.md` so the next recovery point does not treat the validated slice as still in progress.
+- No direct `origin/main` push was retried because the handoff records previous direct-push safety-review blocks and requires explicit approval before another retry.
+
+### Auto Record: 2026-05-15 13:19:34
+- Tool: apply_patch
+- Phase: Phase 30 - Downloads Resume Checkpoint Slice
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+
+### Auto Record: 2026-05-15 13:20:25
+- Tool: apply_patch
+- Phase: Phase 30 - Downloads Resume Checkpoint Slice
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 13:21:55
+- Tool: apply_patch
+- Phase: Phase 30 - Downloads Resume Checkpoint Slice
+- Files:
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-15 13:22:02
+- Tool: apply_patch
+- Phase: Phase 30 - Downloads Resume Checkpoint Slice
 - Files:
   - `.artifacts/ai/progress.md` (update)

@@ -2,18 +2,17 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-15-153
-- title: Prepare checkpoint-aware resume_download design boundary
-- status: committed locally as `c05d132`
+- task id: AT-2026-05-15-155
+- title: Add checkpoint-aware resume_download RED test
+- status: committed locally in the current HEAD
 
 ## Current In-progress Atomic Task
 
-- task id: AT-2026-05-15-154
-- title: Close Phase 29 resume design boundary records
-- status: validated and ready for publication
+- none
 
 ## Current Slice
 
+- `crates/module-downloads/src/facade/mod.rs`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -22,12 +21,14 @@
 ## Validation
 
 - Passed:
-  - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/handoff.md`
-- No Rust code changes are in this slice.
+  - RED observed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_download` failed because checkpoint loading was absent.
+  - GREEN passed: same focused command after minimal checkpoint read.
+  - `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 6 tests.
+  - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- crates/module-downloads/src/facade/mod.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/handoff.md`
 
 ## Current Git State To Preserve
 
-- Unrelated unstaged/unknown work remains present and must not be committed with AT-2026-05-15-154:
+- Unrelated unstaged/unknown work remains present and must not be committed with AT-2026-05-15-155:
   - `Cargo.lock`
   - `MyEpicLauncher.pen`
   - frontend files under `app/` and `components/`
@@ -37,10 +38,8 @@
 
 ## Next Resume Point
 
-1. Validate and commit AT-2026-05-15-154 as a record-only phase closeout task.
-2. Before editing Rust for `resume_download`, get explicit approval for the checkpoint-aware first implementation slice.
-3. Recommended next implementation after approval:
-   - add a RED module facade test proving `resume_download` consults `DownloadCheckpointRepository`
-   - keep full manifest/staging enqueue-resume out of the first slice
-   - run `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_download`
-4. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.
+1. Select the next backend-only downloads resume boundary from the document-backed follow-up queue.
+2. Likely candidates: missing-checkpoint error semantics or full accepted-job resume orchestration with manifest/staging ports.
+3. Re-read the relevant README/docs/module docs before coding the next slice.
+4. Leave full resume orchestration for a later explicit slice unless that is selected as the next active task.
+5. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.
