@@ -2720,6 +2720,20 @@
 - Conclusion: next backend implementation should not start by directly wiring `resume_download` to `JobRuntime::resume`; docs require a checkpoint-aware module slice. The narrow first implementation task should be a RED test proving `resume_download` reads `DownloadCheckpointRepository`.
 - AT-2026-05-15-153 scoped `git diff --check` passed for `.artifacts/ai` records; no Rust or frontend files were changed.
 
+## Agent Note: 2026-05-15 Stop Hook Resume After AT-153
+
+- Stop hook reported planning-with-files task incomplete: 28/29 phases done.
+- Resuming after local commit `c05d132` (`docs: record resume download design boundary`).
+- Next action is to reread `.artifacts/ai/task-plan.md`, close Phase 29 if it only contains the completed docs-first design boundary, and avoid Rust implementation until the checkpoint-aware `resume_download` design is approved.
+
+## Agent Note: 2026-05-15 Phase 29 Closeout
+
+- Reread `.artifacts/ai/task-plan.md` and `.artifacts/ai/handoff.md` after the stop hook reported 28/29 phases done.
+- Confirmed Phase 29 only contains AT-2026-05-15-153, and AT-153 is already committed locally as `c05d132`.
+- Selected AT-2026-05-15-154 as a record-only closeout slice: mark Phase 29 complete, update the ledger, and preserve the next Rust implementation gate.
+- No Rust or frontend files are part of this closeout.
+- AT-2026-05-15-154 scoped `git diff --check` passed for `.artifacts/ai` records; Git only reported Windows LF-to-CRLF working-copy warnings.
+
 ### Auto Record: 2026-05-15 07:27:59
 - Tool: apply_patch
 - Phase: Phase 28 - Backend Development Scope Recovery
@@ -2925,6 +2939,54 @@
   - `.artifacts/ai/handoff.md` (update)
 
 ### Auto Record: 2026-05-15 12:59:45
+- Tool: apply_patch
+- Phase: Phase 29 - Downloads Resume Design Boundary
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 13:01:17
+- Tool: apply_patch
+- Phase: Phase 29 - Downloads Resume Design Boundary
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 13:01:52
+- Tool: apply_patch
+- Phase: Phase 29 - Downloads Resume Design Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+
+### Auto Record: 2026-05-15 13:02:06
+- Tool: apply_patch
+- Phase: Phase 29 - Downloads Resume Design Boundary
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 13:02:16
+- Tool: apply_patch
+- Phase: Phase 29 - Downloads Resume Design Boundary
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 13:02:29
+- Tool: apply_patch
+- Phase: Phase 29 - Downloads Resume Design Boundary
+- Files:
+  - `.artifacts/ai/handoff.md` (delete)
+
+### Auto Record: 2026-05-15 13:02:51
+- Tool: apply_patch
+- Phase: Phase 29 - Downloads Resume Design Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+
+### Auto Record: 2026-05-15 13:02:59
+- Tool: apply_patch
+- Phase: Phase 29 - Downloads Resume Design Boundary
+- Files:
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-15 13:03:06
 - Tool: apply_patch
 - Phase: Phase 29 - Downloads Resume Design Boundary
 - Files:
