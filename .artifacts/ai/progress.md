@@ -4191,3 +4191,108 @@
 - Phase: Phase 39 - Downloads Resume Mismatch Rejection Coverage
 - Files:
   - `.artifacts/ai/progress.md` (update)
+
+## Phase 40 - Downloads Resume Queue Remaining Coverage
+
+### Agent Record: 2026-05-15 23:04
+
+- Started AT-2026-05-15-165 after the user confirmed the implementation document should determine the next task.
+- Current HEAD at task start: `ba06e7c test: cover resume mismatch decision`.
+- Unrelated dirty files to preserve remain present: `Cargo.lock`, `MyEpicLauncher.pen`, frontend files under `app/` and `components/`, sqlite files, `.codex`, and `src/`.
+- Read required context in small batches before coding:
+  - `README.md`
+  - `CONTRIBUTING.md`
+  - `docs/README.md`
+  - `docs/modules/downloads/README_ARCH.md`
+  - `docs/modules/downloads/README_API.md`
+  - `docs/modules/downloads/README_FLOW.md`
+  - `docs/modules/downloads/README_IMPL.md`
+  - focused snippets from `docs/TauriDownloadRuntimeDesign.md`, `docs/TauriKernelJobsRuntimeDesign.md`, `docs/TauriTestingStrategyAndQualityGateDesign.md`, `docs/TauriAIDevelopmentTransactionProtocolDesign.md`, `docs/TauriArchitecturePrinciplesDesign.md`, `docs/TauriBackendCrateLayoutAndUseCaseStubDesign.md`, and `docs/TauriFirstCrateApiDrafts.md`.
+- Key scope decision: `QueueRemaining` already exists as the fallback branch in `build_resume_segment_decisions`; AT-165 is focused coverage unless the test exposes a real implementation gap.
+
+### Agent Record: 2026-05-15 23:09
+
+- Added `resume_segment_decisions_queue_remaining_without_checkpoint` beside the existing resume segment decision tests.
+- The test uses one manifest segment with no checkpoints, then verifies `DownloadResumeSegmentAction::QueueRemaining` and `is_runtime_enqueue_candidate()`.
+- Focused test passed immediately, confirming the existing fallback branch already implements the decision.
+- Full `launcher-module-downloads` test passed with 14 tests passing and 0 failures.
+- `rustfmt --check crates\module-downloads\src\facade\mod.rs` passed.
+- Scoped `git diff --check` over the AT-165 files passed; Git only emitted LF/CRLF warnings.
+- Next backend boundary after commit should be a new runtime-enqueue design slice, not another segment-decision coverage slice.
+
+### Agent Record: 2026-05-15 23:12
+
+- Commit succeeded with per-command Git author identity override as `7f6e11c test: cover resume queue remaining decision`.
+- Handoff was updated afterward so the same task commit can be amended with an accurate current-HEAD recovery point.
+
+### Auto Record: 2026-05-15 22:59:55
+- Tool: apply_patch
+- Phase: Phase 39 - Downloads Resume Mismatch Rejection Coverage
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+
+### Auto Record: 2026-05-15 23:00:06
+- Tool: apply_patch
+- Phase: Phase 40 - Downloads Resume Queue Remaining Coverage
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 23:00:19
+- Tool: apply_patch
+- Phase: Phase 40 - Downloads Resume Queue Remaining Coverage
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 23:00:35
+- Tool: apply_patch
+- Phase: Phase 40 - Downloads Resume Queue Remaining Coverage
+- Files:
+  - `.artifacts/ai/findings.md` (update)
+
+### Auto Record: 2026-05-15 23:00:47
+- Tool: apply_patch
+- Phase: Phase 40 - Downloads Resume Queue Remaining Coverage
+- Files:
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-15 23:01:08
+- Tool: apply_patch
+- Phase: Phase 40 - Downloads Resume Queue Remaining Coverage
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-15 23:02:08
+- Tool: apply_patch
+- Phase: Phase 40 - Downloads Resume Queue Remaining Coverage
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+
+### Auto Record: 2026-05-15 23:02:17
+- Tool: apply_patch
+- Phase: Phase 40 - Downloads Resume Queue Remaining Coverage
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 23:02:31
+- Tool: apply_patch
+- Phase: Phase 40 - Downloads Resume Queue Remaining Coverage
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 23:02:44
+- Tool: apply_patch
+- Phase: Phase 40 - Downloads Resume Queue Remaining Coverage
+- Files:
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-15 23:03:46
+- Tool: apply_patch
+- Phase: Phase 40 - Downloads Resume Queue Remaining Coverage
+- Files:
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-15 23:03:53
+- Tool: apply_patch
+- Phase: Phase 40 - Downloads Resume Queue Remaining Coverage
+- Files:
+  - `.artifacts/ai/progress.md` (update)

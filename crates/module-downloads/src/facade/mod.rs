@@ -1030,6 +1030,37 @@ mod tests {
     }
 
     #[test]
+    fn resume_segment_decisions_queue_remaining_without_checkpoint() {
+        let manifest = DownloadManifestPlan {
+            target_id: "asset-123".into(),
+            segments: vec![DownloadManifestSegment {
+                segment_id: "segment-1".into(),
+                file_id: "file-1".into(),
+                offset: 0,
+                length: 1024,
+                source_locator: "https://example.invalid/file.bin".into(),
+                expected_hash: Some("sha256:segment".into()),
+                write_target: "file.bin.part".into(),
+            }],
+        };
+        let checkpoints = Vec::<DownloadSegmentCheckpointRecord>::new();
+
+        let decisions = build_resume_segment_decisions(&manifest, &checkpoints)
+            .expect("missing checkpoint should produce resume decisions");
+
+        assert_eq!(decisions.len(), 1);
+        assert_eq!(decisions[0].segment_id, "segment-1");
+        assert_eq!(
+            decisions[0].action,
+            DownloadResumeSegmentAction::QueueRemaining
+        );
+        assert!(
+            decisions[0].is_runtime_enqueue_candidate(),
+            "remaining segments should be runtime enqueue candidates"
+        );
+    }
+
+    #[test]
     fn cancel_download_delegates_to_runtime_control() {
         let facade = DownloadFacade::new(DownloadModuleDeps {
             job_repo: RecordingDownloadJobRepository::default(),

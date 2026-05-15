@@ -2,19 +2,19 @@
 
 ## Identity
 
-- task id: AT-2026-05-15-164
-- title: Add downloads resume mismatch rejection coverage
+- task id: AT-2026-05-15-165
+- title: Add downloads resume queue remaining coverage
 - status: complete
 
 ## Goal
 
-补上 downloads resume segment decision 的 stale manifest/checkpoint boundary 覆盖：当 `segment_id` 匹配但 `file_id`、`offset` 或 `length` 不匹配时，必须推导为 `reject_mismatch`，并且不能成为 runtime enqueue candidate。
+补上 downloads resume segment decision 的 `queue_remaining` 覆盖：当 manifest segment 没有可用 segment checkpoint 时，必须推导为 `queue_remaining`，并且是 runtime enqueue candidate。
 
 本轮只覆盖：
 
-- focused module test for mismatched segment checkpoint facts
-- 验证现有 `build_resume_segment_decisions` safety branch
-- 保持 completed sealing、partial resume、queue remaining、runtime enqueue 行为不扩大
+- focused module test for queueing a segment with no checkpoint
+- 验证现有 `build_resume_segment_decisions` fallback branch
+- 保持 completed sealing、partial resume、reject mismatch、runtime enqueue 行为不扩大
 
 ## Scope
 
@@ -30,7 +30,7 @@
   - change host transport or composition-root wiring
   - change driver or SQLite adapter persistence
   - enqueue resumed runtime jobs
-  - implement mismatch public error projection
+  - implement runtime resume execution
   - change sqlite database files, `Cargo.lock`, `.codex`, `src/`, or other unrelated dirty worktree files
 
 ## Allowed Files
@@ -61,30 +61,30 @@
 
 ## Hypothesis
 
-- falsifiable local hypothesis: Given a manifest segment and a checkpoint with the same `segment_id` but stale boundary facts, a focused module test can prove the derived resume decision is `reject_mismatch` and is not a runtime enqueue candidate, without touching runtime enqueue or persistence.
+- falsifiable local hypothesis: Given a manifest segment with no matching segment checkpoint, a focused module test can prove the derived resume decision is `queue_remaining` and remains a runtime enqueue candidate, without touching runtime enqueue or persistence.
 
 ## Cheap Check
 
-- `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_segment_decisions_reject_mismatched_checkpoint_segments`
+- `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_segment_decisions_queue_remaining_without_checkpoint`
 
 ## Validation Gate
 
 1. Read required module docs and related backend/runtime/testing/collaboration docs before code.
-2. Add the focused mismatch coverage test first.
+2. Add the focused queue-remaining coverage test first.
 3. Change production code only if the focused test exposes a real gap.
 4. Run focused test, full `launcher-module-downloads` tests, scoped rustfmt check, and scoped diff checks.
 
 ## Validation Result
 
 - passed
-- Focused coverage test passed immediately: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_segment_decisions_reject_mismatched_checkpoint_segments` reported 1 passed, 0 failed.
-- Because the focused test passed without production edits, AT-2026-05-15-164 is confirmed as safety coverage for existing `RejectMismatch` behavior rather than a new behavior branch.
-- Full downloads module test passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` reported 13 passed, 0 failed, plus 0 doctests.
+- Focused coverage test passed immediately: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_segment_decisions_queue_remaining_without_checkpoint` reported 1 passed, 0 failed.
+- Because the focused test passed without production edits, AT-2026-05-15-165 is confirmed as safety coverage for existing `QueueRemaining` fallback behavior rather than a new behavior branch.
+- Full downloads module test passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` reported 14 passed, 0 failed, plus 0 doctests.
 - `crates/module-downloads/src/facade/mod.rs` passed `rustfmt --check`.
-- Scoped whitespace validation passed for the AT-2026-05-15-164 slice; Git only reported Windows LF/CRLF conversion warnings.
+- Scoped whitespace validation passed for the AT-2026-05-15-165 slice; Git only reported Windows LF/CRLF conversion warnings.
 
 ## Notes
 
-- AT-2026-05-15-163 completed and was committed locally as `07ed4aa`.
-- Current code already contains a `RejectMismatch` branch; this slice documents and verifies that safety behavior rather than widening resume orchestration.
+- AT-2026-05-15-164 completed and was committed locally as current HEAD `ba06e7c`.
+- Current code already falls back to `QueueRemaining`; this slice documents and verifies that behavior before runtime enqueue work.
 - Direct `origin/main` push remains intentionally skipped without explicit approval.

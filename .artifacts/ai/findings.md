@@ -479,3 +479,13 @@
 - `docs/modules/downloads/README_ARCH.md`, `README_API.md`, and `README_FLOW.md` all preserve the front-end boundary: UI consumes aggregate projections and must not own checkpoint or segment resume logic.
 - Current `build_resume_segment_decisions` already has a `RejectMismatch` branch for matching `segment_id` with mismatched `file_id`, `offset`, or `length`, but there is no focused test proving it remains non-enqueueable.
 - The smallest safe next slice is coverage-only in `crates/module-downloads/src/facade/mod.rs`, plus PWF records; public error projection, runtime enqueue, concrete persistence, host transport, and frontend remain out of scope.
+
+## Phase 40 Resume Queue Remaining Coverage Findings
+
+- AT-2026-05-15-164 is committed as `ba06e7c` and added focused `RejectMismatch` coverage.
+- `docs/modules/downloads/README_IMPL.md` defines `queue_remaining` as the decision for a segment with no safe completed or partial checkpoint; runtime enqueue-resume must wait until sealed and remaining segment decisions are explicit enough to test.
+- `docs/TauriDownloadRuntimeDesign.md` orders resume reconstruction as manifest plan -> seal completed segments -> enqueue remaining segments only, and says unsafe resume conditions should requeue affected segments rather than restart the whole job.
+- `docs/TauriKernelJobsRuntimeDesign.md` keeps segment checkpoint and resume reconstruction in `module-downloads`, not `kernel-jobs`, so this coverage belongs in the module facade tests.
+- `docs/modules/downloads/README_ARCH.md`, `README_API.md`, and `README_FLOW.md` keep frontend at aggregate projection and command intent level; AT-165 must not expose segment decisions through IPC or UI.
+- Current `build_resume_segment_decisions` already uses `QueueRemaining` as the fallback action and marks it as a runtime enqueue candidate, but there is no focused test for a manifest segment without a checkpoint.
+- The next implementation step is coverage-only in `crates/module-downloads/src/facade/mod.rs`; runtime enqueue, concrete persistence, host transport, and frontend stay out of scope.
