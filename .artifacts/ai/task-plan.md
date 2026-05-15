@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 28 - Backend Development Scope Recovery
+Phase 29 - Downloads Resume Design Boundary
 
 ## Current Focus
 
@@ -92,7 +92,8 @@ Phase 28 - Backend Development Scope Recovery
 - AT-2026-05-15-149 completed and was committed locally as `e774628`, wiring downloads pause/cancel facade methods to shared runtime control ports while leaving resume out of scope.
 - AT-2026-05-15-150 completed and was committed locally as `958a0e6`, adding host transport smoke coverage for downloads start/pause/cancel without changing production behavior or resume semantics.
 - AT-2026-05-15-151 completed and was committed locally as `a6fc28a`, refreshing the downloads facade file header so it matches the current start/pause/cancel wiring state.
-- AT-2026-05-15-152 completed Phase 28 backend recovery records and left `resume_download` as the next checkpoint-aware design/RED-test candidate.
+- AT-2026-05-15-152 completed and was committed locally as `1397ec7`, closing Phase 28 backend recovery records and leaving `resume_download` as the next checkpoint-aware design/RED-test candidate.
+- AT-2026-05-15-153 completed the docs-first resume-download design boundary readthrough and confirmed the next implementation slice must start with a checkpoint-loading RED test.
 
 ## Phases
 
@@ -265,6 +266,12 @@ Phase 28 - Backend Development Scope Recovery
 - Atomic tasks: AT-2026-05-15-148, AT-2026-05-15-149, AT-2026-05-15-150, AT-2026-05-15-151, AT-2026-05-15-152
 - **Status:** complete
 
+### Phase 29: Downloads Resume Design Boundary
+
+- Outcome: begin the next backend-only downloads resume work by reading the required docs first, preserving frontend/composition-root boundaries, and selecting a checkpoint-aware RED-test slice before any behavior change.
+- Atomic tasks: AT-2026-05-15-153
+- **Status:** in_progress
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -413,6 +420,7 @@ Phase 28 - Backend Development Scope Recovery
 144. AT-2026-05-15-150 - completed - added downloads start/pause/cancel host transport smoke coverage without changing production behavior or resume semantics.
 145. AT-2026-05-15-151 - completed - refreshed the downloads facade file header so it no longer describes pause/cancel as C2 stubs.
 146. AT-2026-05-15-152 - completed - marked Phase 28 backend recovery complete and recorded checkpoint-aware `resume_download` as the next design/RED-test candidate.
+147. AT-2026-05-15-153 - completed - read the required backend/module docs for `resume_download` and confirmed the next implementation slice must prove explicit checkpoint loading with a RED test before changing behavior.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
@@ -431,7 +439,7 @@ Phase 28 - Backend Development Scope Recovery
 
 ## Follow-up Queue
 
-1. Start the next backend phase with a checkpoint-aware `resume_download` design/RED-test slice before changing behavior, because the docs require explicit checkpoint loading and the current facade returns `AcceptedJob`.
+1. Start the `resume_download` implementation only after approving a checkpoint-aware design: first RED test should prove `resume_download` consults `DownloadCheckpointRepository`, while full manifest/staging enqueue-resume remains a later slice.
 2. Leave unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, and `src/` changes untouched unless the user explicitly scopes them into a task.
 
 ## Legacy Note

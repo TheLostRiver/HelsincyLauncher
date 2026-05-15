@@ -2694,6 +2694,32 @@
 - The only remaining Phase 28 gap was record drift: task-plan still marked Phase 28 in progress and handoff still described AT-151 as ready for publication.
 - Selected AT-2026-05-15-152 as a record-only closeout slice: mark Phase 28 complete and keep `resume_download` as the next checkpoint-aware backend design/RED-test candidate.
 
+## Agent Note: 2026-05-15 Docs-first Resume Boundary
+
+- User re-emphasized that backend development must strictly read README, project constraints, architecture docs, collaboration docs, and module docs before coding.
+- Checked current git state first; unrelated dirty files remain in `Cargo.lock`, frontend paths, sqlite files, `.codex`, and `src/`, and must stay out of the next backend slice.
+- Read, in small batches:
+  - `README.md`
+  - `CONTRIBUTING.md`
+  - `docs/README.md`
+  - `docs/TauriAIDevelopmentTransactionProtocolDesign.md`
+  - `docs/TauriArchitecturePrinciplesDesign.md`
+  - `docs/TauriTestingStrategyAndQualityGateDesign.md`
+  - `docs/TauriCurrentRepoArchitectureOverview.md`
+  - `docs/TauriDownloadRuntimeDesign.md`
+  - `docs/TauriKernelJobsRuntimeDesign.md`
+  - `docs/TauriBackendCrateLayoutAndUseCaseStubDesign.md`
+  - `docs/TauriFirstCrateApiDrafts.md`
+  - `docs/modules/downloads/README_ARCH.md`
+  - `docs/modules/downloads/README_API.md`
+  - `docs/modules/downloads/README_FLOW.md`
+- Read current code boundaries:
+  - `crates/module-downloads/src/facade/mod.rs`
+  - `crates/module-downloads/src/driver.rs`
+  - `crates/adapter-storage-sqlite/src/lib.rs` checkpoint repository slice
+- Conclusion: next backend implementation should not start by directly wiring `resume_download` to `JobRuntime::resume`; docs require a checkpoint-aware module slice. The narrow first implementation task should be a RED test proving `resume_download` reads `DownloadCheckpointRepository`.
+- AT-2026-05-15-153 scoped `git diff --check` passed for `.artifacts/ai` records; no Rust or frontend files were changed.
+
 ### Auto Record: 2026-05-15 07:27:59
 - Tool: apply_patch
 - Phase: Phase 28 - Backend Development Scope Recovery
@@ -2849,3 +2875,57 @@
 - Phase: Phase 28 - Backend Development Scope Recovery
 - Files:
   - `.artifacts/ai/handoff.md` (delete)
+
+### Auto Record: 2026-05-15 12:57:11
+- Tool: apply_patch
+- Phase: Phase 28 - Backend Development Scope Recovery
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+
+### Auto Record: 2026-05-15 12:57:29
+- Tool: apply_patch
+- Phase: Phase 28 - Backend Development Scope Recovery
+- Files:
+  - `.artifacts/ai/findings.md` (update)
+
+### Auto Record: 2026-05-15 12:57:59
+- Tool: apply_patch
+- Phase: Phase 29 - Downloads Resume Design Boundary
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 12:58:33
+- Tool: apply_patch
+- Phase: Phase 29 - Downloads Resume Design Boundary
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 12:58:49
+- Tool: apply_patch
+- Phase: Phase 29 - Downloads Resume Design Boundary
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 12:59:06
+- Tool: apply_patch
+- Phase: Phase 29 - Downloads Resume Design Boundary
+- Files:
+  - `.artifacts/ai/handoff.md` (delete)
+
+### Auto Record: 2026-05-15 12:59:31
+- Tool: apply_patch
+- Phase: Phase 29 - Downloads Resume Design Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+
+### Auto Record: 2026-05-15 12:59:38
+- Tool: apply_patch
+- Phase: Phase 29 - Downloads Resume Design Boundary
+- Files:
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-15 12:59:45
+- Tool: apply_patch
+- Phase: Phase 29 - Downloads Resume Design Boundary
+- Files:
+  - `.artifacts/ai/progress.md` (update)
