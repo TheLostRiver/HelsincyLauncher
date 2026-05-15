@@ -402,3 +402,13 @@
 - `docs/TauriFirstCrateApiDrafts.md` explicitly requires `resume_download` to read checkpoint rather than letting runtime guess; its test matrix calls out a `resume_download` checkpoint-read unit test for `launcher-module-downloads`.
 - `docs/TauriBackendCrateLayoutAndUseCaseStubDesign.md` sketches full resume as job repo + checkpoint repo + staging store + manifest provider + runtime orchestration. Current repo ports only expose concrete behavior for job repo, checkpoint repo, and shared runtime; manifest/staging are still `()` placeholders, so full enqueue-resume execution needs a later design slice.
 - Current `crates/module-downloads/src/facade/mod.rs` has `resume_download` returning `DOWNLOADS_NOT_WIRED`; current `DownloadCheckpointRepository` already supports `load`, and sqlite adapter already implements `load_checkpoint`, so the smallest safe next task is to prove facade-level checkpoint loading before deciding full accepted-job resume semantics.
+
+## Phase 31 Resume Missing Checkpoint Findings
+
+- AT-2026-05-15-155 is committed locally as current HEAD and already proves `resume_download` explicitly reads `DownloadCheckpointRepository`.
+- `docs/TauriDownloadRuntimeDesign.md` orders resume as: load job checkpoint, validate staging artifacts, reconstruct manifest plan, then enqueue remaining segments. That makes missing checkpoint the first behavior branch after AT-155.
+- `docs/TauriKernelJobsRuntimeDesign.md` says downloads restore reads checkpoint and treats module business checkpoints as module-owned, not shared runtime snapshot state.
+- `crates/module-downloads/src/driver.rs` already treats missing checkpoint during stage-2 restore as `FailedAsUnrecoverable`, which supports giving the explicit user `resume` command a stable module-level failure instead of keeping a generic not-wired placeholder for that branch.
+- `docs/TauriErrorHandlingAndProjectionDesign.md` requires facade/application errors to converge into stable `AppError` fields, and module-level tests should verify key error `code`, `retryable`, and `severity` classifications.
+- `docs/TauriIPCAndStateContractsDesign.md` recommends `DL_*` for downloads-domain error codes, so a missing checkpoint branch should use a stable downloads code instead of `DOWNLOADS_NOT_WIRED`.
+- The smallest document-backed next slice is to make `resume_download` return a stable missing-checkpoint `AppError` when `checkpoint_repo.load()` returns `None`; full job lookup, staging validation, manifest reconstruction, and runtime enqueue remain later slices.

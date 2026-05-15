@@ -3122,3 +3122,124 @@
 - Phase: Phase 30 - Downloads Resume Checkpoint Slice
 - Files:
   - `.artifacts/ai/progress.md` (update)
+
+## 2026-05-15 - Next Slice Context Read
+
+- Confirmed AT-2026-05-15-155 is committed locally as current HEAD `645dd93`.
+- Re-read the relevant README/CONTRIBUTING/docs map, architecture, testing, AI transaction, downloads runtime, kernel-jobs runtime, backend crate layout, first API draft, downloads module docs, IPC/error docs, and current downloads Rust APIs in small scoped batches.
+- Recorded the next document-backed candidate in `.artifacts/ai/findings.md`: a missing-checkpoint `resume_download` error-semantics slice, with full manifest/staging/runtime resume orchestration left out of scope.
+
+## 2026-05-15 - AT-2026-05-15-156 Start
+
+- User approved option 1: implement the missing-checkpoint error-semantics slice for `resume_download`.
+- Opened Phase 31 and AT-2026-05-15-156 in `.artifacts/ai/active-task.md` and `.artifacts/ai/task-plan.md`.
+- Scope remains backend-only and limited to `crates/module-downloads/src/facade/mod.rs` plus PWF records.
+- TDD gate: write a missing-checkpoint facade test first, observe RED against current `DOWNLOADS_NOT_WIRED`, then add the minimal branch.
+
+## 2026-05-15 - AT-2026-05-15-156 RED
+
+- Added `resume_download_returns_stable_error_when_checkpoint_is_missing` in `crates/module-downloads/src/facade/mod.rs`.
+- RED observed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_download` ran 2 focused tests; the new test failed because the missing-checkpoint path returned `DOWNLOADS_NOT_WIRED` instead of `DL_CHECKPOINT_MISSING`.
+
+## 2026-05-15 - AT-2026-05-15-156 GREEN and Validation
+
+- Added the minimal production branch in `resume_download`: when `DownloadCheckpointRepository::load()` returns `None`, the facade returns `DL_CHECKPOINT_MISSING` with `retryable = false` and `severity = error`.
+- Added bilingual English/Chinese comments on the new production resume checkpoint boundary, per user preference.
+- GREEN focused validation passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_download` ran 2 tests and passed.
+- Module validation passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` ran 7 tests and passed.
+- Scoped whitespace check passed for the allowed AT-156 files; Git only reported expected Windows LF-to-CRLF working-copy warnings.
+
+## 2026-05-15 - AT-2026-05-15-156 Publication Handoff
+
+- Created the local AT-2026-05-15-156 commit and then updated `.artifacts/ai/handoff.md` so the next recovery point treats the slice as published.
+- Direct `origin/main` push was not retried because prior direct-push attempts are recorded as blocked by safety review and require explicit approval before another attempt.
+
+### Auto Record: 2026-05-15 13:26:58
+- Tool: apply_patch
+- Phase: Phase 30 - Downloads Resume Checkpoint Slice
+- Files:
+  - `.artifacts/ai/findings.md` (update)
+
+### Auto Record: 2026-05-15 13:27:05
+- Tool: apply_patch
+- Phase: Phase 30 - Downloads Resume Checkpoint Slice
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 13:30:20
+- Tool: apply_patch
+- Phase: Phase 30 - Downloads Resume Checkpoint Slice
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+
+### Auto Record: 2026-05-15 13:30:38
+- Tool: apply_patch
+- Phase: Phase 31 - Downloads Resume Missing Checkpoint Semantics
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 13:30:57
+- Tool: apply_patch
+- Phase: Phase 31 - Downloads Resume Missing Checkpoint Semantics
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 13:31:14
+- Tool: apply_patch
+- Phase: Phase 31 - Downloads Resume Missing Checkpoint Semantics
+- Files:
+  - `.artifacts/ai/handoff.md` (delete)
+
+### Auto Record: 2026-05-15 13:32:16
+- Tool: apply_patch
+- Phase: Phase 31 - Downloads Resume Missing Checkpoint Semantics
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-15 13:32:37
+- Tool: apply_patch
+- Phase: Phase 31 - Downloads Resume Missing Checkpoint Semantics
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 13:33:02
+- Tool: apply_patch
+- Phase: Phase 31 - Downloads Resume Missing Checkpoint Semantics
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-15 13:33:46
+- Tool: apply_patch
+- Phase: Phase 31 - Downloads Resume Missing Checkpoint Semantics
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+
+### Auto Record: 2026-05-15 13:33:57
+- Tool: apply_patch
+- Phase: Phase 31 - Downloads Resume Missing Checkpoint Semantics
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 13:34:06
+- Tool: apply_patch
+- Phase: Phase 31 - Downloads Resume Missing Checkpoint Semantics
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 13:34:18
+- Tool: apply_patch
+- Phase: Phase 31 - Downloads Resume Missing Checkpoint Semantics
+- Files:
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-15 13:35:47
+- Tool: apply_patch
+- Phase: Phase 31 - Downloads Resume Missing Checkpoint Semantics
+- Files:
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-15 13:36:00
+- Tool: apply_patch
+- Phase: Phase 31 - Downloads Resume Missing Checkpoint Semantics
+- Files:
+  - `.artifacts/ai/progress.md` (update)

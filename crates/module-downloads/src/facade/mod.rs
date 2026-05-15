@@ -172,11 +172,33 @@ impl<J: DownloadJobRepository, C, M, S, R: JobRuntime<Extension = ()>> DownloadF
 impl<J: DownloadJobRepository, C: DownloadCheckpointRepository, M, S, R: JobRuntime<Extension = ()>>
     DownloadFacade<J, C, M, S, R>
 {
-    /// 显式读取模块 checkpoint 后再进入后续恢复决策；完整恢复编排仍留给后续切片。
+    /// Loads the module checkpoint before any later resume decision.
+    /// 显式读取模块 checkpoint 后再进入后续恢复决策。
+    ///
+    /// Missing checkpoint is a stable downloads-domain failure; full staging,
+    /// manifest, and runtime resume orchestration stays in a later slice.
+    /// 缺失 checkpoint 是稳定的 downloads 域失败；完整 staging、manifest
+    /// 与 runtime 恢复编排仍留给后续切片。
     pub fn resume_download(&self, request: ResumeDownloadRequestDto) -> AppResult<AcceptedJob> {
-        let _checkpoint = self.deps.checkpoint_repo.load(&request.job_id)?;
+        let checkpoint = self.deps.checkpoint_repo.load(&request.job_id)?;
+        if checkpoint.is_none() {
+            return Err(missing_checkpoint(&request.job_id));
+        }
+
         Err(not_wired("resume_download"))
     }
+}
+
+// Keeps the missing-checkpoint branch owned by downloads instead of leaking into runtime.
+// 将缺失 checkpoint 的分支保留在 downloads 域内，避免泄露到 runtime 里猜测。
+fn missing_checkpoint(job_id: &JobId) -> AppError {
+    AppError::new(
+        "DL_CHECKPOINT_MISSING",
+        format!("download checkpoint missing for job {job_id}; resume cannot continue"),
+        false,
+        AppErrorSeverity::Error,
+        CorrelationId::generate(),
+    )
 }
 
 // 在 facade 边界统一保留 C2 阶段的未接线错误码，避免宿主层自己发明 fallback。
@@ -194,7 +216,7 @@ fn not_wired(operation: &str) -> AppError {
 mod tests {
     use std::sync::Mutex;
 
-    use launcher_kernel_foundation::{AppResult, IsoDateTime, JobId};
+    use launcher_kernel_foundation::{AppErrorSeverity, AppResult, IsoDateTime, JobId};
     use launcher_kernel_jobs::{JobPriority, JobProgress, JobSnapshot, JobState, JobUiState};
 
     use crate::driver::{DownloadCheckpointRecord, DownloadCheckpointRepository};
@@ -259,9 +281,17 @@ mod tests {
     #[derive(Default)]
     struct RecordingCheckpointRepository {
         loaded_job_ids: Mutex<Vec<JobId>>,
+        returns_missing: bool,
     }
 
     impl RecordingCheckpointRepository {
+        fn missing() -> Self {
+            Self {
+                loaded_job_ids: Mutex::new(Vec::new()),
+                returns_missing: true,
+            }
+        }
+
         fn loaded_job_ids(&self) -> Vec<JobId> {
             self.loaded_job_ids
                 .lock()
@@ -276,6 +306,10 @@ mod tests {
                 .lock()
                 .expect("loaded job ids mutex should not be poisoned")
                 .push(job_id.clone());
+
+            if self.returns_missing {
+                return Ok(None);
+            }
 
             Ok(Some(DownloadCheckpointRecord {
                 job_id: job_id.clone(),
@@ -454,6 +488,29 @@ mod tests {
         );
         let error = result.expect_err("full resume orchestration should remain out of scope");
         assert_eq!(error.code, "DOWNLOADS_NOT_WIRED");
+    }
+
+    #[test]
+    fn resume_download_returns_stable_error_when_checkpoint_is_missing() {
+        let facade = DownloadFacade::new(DownloadModuleDeps {
+            job_repo: RecordingDownloadJobRepository::default(),
+            checkpoint_repo: RecordingCheckpointRepository::missing(),
+            manifest_provider: (),
+            staging_store: (),
+            job_runtime: RecordingJobRuntime::default(),
+        });
+        let job_id = JobId::generate();
+
+        let error = facade
+            .resume_download(ResumeDownloadRequestDto {
+                job_id: job_id.clone(),
+            })
+            .expect_err("missing checkpoint should stop resume before later orchestration");
+
+        assert_eq!(facade.deps().checkpoint_repo.loaded_job_ids(), vec![job_id]);
+        assert_eq!(error.code, "DL_CHECKPOINT_MISSING");
+        assert!(!error.retryable);
+        assert_eq!(error.severity, AppErrorSeverity::Error);
     }
 
     #[test]
