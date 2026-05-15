@@ -430,3 +430,10 @@
 - `docs/TauriFirstCrateApiDrafts.md` names `DownloadStagingObjectStore` as part of the fixed `module-downloads` internal port set.
 - Current code only stores a generic `staging_store: S` dependency without a trait, so the next narrow slice should define the minimal staging object-store port and prove `resume_download` calls it after job and checkpoint are present.
 - Real filesystem validation, staging cleanup, manifest reconstruction, and runtime enqueue remain out of scope for this slice.
+
+## Phase 34 Module Implementation Documentation Findings
+
+- The existing module docs standard required `README_ARCH.md`, `README_API.md`, and `README_FLOW.md`, but did not define where backend implementation state and slice order should live.
+- `docs/modules/downloads/README_ARCH.md`, `README_API.md`, and `README_FLOW.md` describe module responsibility, public surface, and flows, but they intentionally do not track Rust facade/port implementation state.
+- Downloads backend implementation currently needs a single module-local implementation guide that points contributors to module docs first, then runtime/use-case/API/testing/collaboration docs before coding.
+- `README_IMPL.md` should not replace design docs or `.artifacts/ai`; it should summarize current landing zones, implemented behavior, next implementation slices, port status, and validation gates for module code work.

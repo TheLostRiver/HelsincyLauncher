@@ -113,8 +113,9 @@
 2. `docs/modules/*/README_ARCH.md`
 3. `docs/modules/*/README_API.md`
 4. `docs/modules/*/README_FLOW.md`
+5. `docs/modules/*/README_IMPL.md`：已经接入或即将接入后端/IPC/adapter/runtime 的模块必须有
 
-如果你在改具体模块，不要只读蓝图，直接进模块文档。
+如果你在改具体模块，不要只读蓝图，必须先读该模块目录下已有的模块文档，再读相关设计、测试和协作文档。
 
 ---
 

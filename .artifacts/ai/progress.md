@@ -3473,3 +3473,118 @@
 - Phase: Phase 33 - Downloads Resume Staging Validation Boundary
 - Files:
   - `.artifacts/ai/progress.md` (update)
+
+## 2026-05-15 - AT-2026-05-15-159 Start
+
+- User clarified that module code work must read the relevant `docs/modules/<module>/` documents before coding, plus module design docs, collaboration docs, and related architecture docs.
+- Confirmed AT-2026-05-15-158 is committed locally as current HEAD `cd5e848`.
+- Re-read `docs/ModuleDocumentationStandard.md`, `docs/README.md`, `docs/modules/downloads/README_ARCH.md`, `README_API.md`, `README_FLOW.md`, `docs/TauriDownloadRuntimeDesign.md`, `docs/TauriBackendCrateLayoutAndUseCaseStubDesign.md`, `docs/TauriFirstCrateApiDrafts.md`, `docs/TauriAIDevelopmentTransactionProtocolDesign.md`, and `docs/TauriTestingStrategyAndQualityGateDesign.md` in small batches before writing.
+- Opened Phase 34 and AT-2026-05-15-159 to add downloads module implementation documentation plus README_IMPL discoverability rules.
+
+## 2026-05-15 - AT-2026-05-15-159 Drafted
+
+- Added `docs/modules/downloads/README_IMPL.md` with required pre-code reading order, Rust landing zones, current implementation state, resume slice order, port status, error semantics, and validation gates.
+- Added `docs/modules/_template/README_IMPL.md` so future backend-connected modules can use the same implementation-document shape.
+- Updated `docs/ModuleDocumentationStandard.md` and `docs/README.md` so README_IMPL is discoverable and required for modules that are connected to backend, IPC, adapter, runtime, or persistence work.
+- Recorded the implementation-documentation rationale in `.artifacts/ai/findings.md`.
+
+## 2026-05-15 - AT-2026-05-15-159 Validation
+
+- Scoped whitespace validation passed for tracked documentation/PWF changes: `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- docs/ModuleDocumentationStandard.md docs/README.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md`.
+- Staged whitespace validation passed for the full AT-2026-05-15-159 slice, including new README_IMPL files: `git -c safe.directory=D:/DEV/MyEpicLauncher diff --cached --check`.
+
+## 2026-05-15 - AT-2026-05-15-159 Publication Handoff
+
+- Created the local AT-2026-05-15-159 commit and then updated `.artifacts/ai/handoff.md` so the next recovery point treats the slice as published.
+- Direct `origin/main` push was not retried because prior direct-push attempts are recorded as blocked by safety review and require explicit approval before another attempt.
+
+### Auto Record: 2026-05-15 20:20:45
+- Tool: apply_patch
+- Phase: Phase 33 - Downloads Resume Staging Validation Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+
+### Auto Record: 2026-05-15 20:21:07
+- Tool: apply_patch
+- Phase: Phase 34 - Downloads Module Implementation Documentation
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 20:21:17
+- Tool: apply_patch
+- Phase: Phase 34 - Downloads Module Implementation Documentation
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 20:21:31
+- Tool: apply_patch
+- Phase: Phase 34 - Downloads Module Implementation Documentation
+- Files:
+  - `.artifacts/ai/handoff.md` (delete)
+
+### Auto Record: 2026-05-15 20:22:26
+- Tool: apply_patch
+- Phase: Phase 34 - Downloads Module Implementation Documentation
+- Files:
+  - `docs/modules/downloads/README_IMPL.md` (add)
+  - `docs/modules/_template/README_IMPL.md` (add)
+
+### Auto Record: 2026-05-15 20:22:39
+- Tool: apply_patch
+- Phase: Phase 34 - Downloads Module Implementation Documentation
+- Files:
+  - `docs/ModuleDocumentationStandard.md` (update)
+
+### Auto Record: 2026-05-15 20:22:44
+- Tool: apply_patch
+- Phase: Phase 34 - Downloads Module Implementation Documentation
+- Files:
+  - `docs/README.md` (update)
+
+### Auto Record: 2026-05-15 20:23:10
+- Tool: apply_patch
+- Phase: Phase 34 - Downloads Module Implementation Documentation
+- Files:
+  - `.artifacts/ai/findings.md` (update)
+
+### Auto Record: 2026-05-15 20:23:22
+- Tool: apply_patch
+- Phase: Phase 34 - Downloads Module Implementation Documentation
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 20:23:46
+- Tool: apply_patch
+- Phase: Phase 34 - Downloads Module Implementation Documentation
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+
+### Auto Record: 2026-05-15 20:23:55
+- Tool: apply_patch
+- Phase: Phase 34 - Downloads Module Implementation Documentation
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 20:24:05
+- Tool: apply_patch
+- Phase: Phase 34 - Downloads Module Implementation Documentation
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 20:24:16
+- Tool: apply_patch
+- Phase: Phase 34 - Downloads Module Implementation Documentation
+- Files:
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-15 20:25:31
+- Tool: apply_patch
+- Phase: Phase 34 - Downloads Module Implementation Documentation
+- Files:
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-15 20:25:46
+- Tool: apply_patch
+- Phase: Phase 34 - Downloads Module Implementation Documentation
+- Files:
+  - `.artifacts/ai/progress.md` (update)

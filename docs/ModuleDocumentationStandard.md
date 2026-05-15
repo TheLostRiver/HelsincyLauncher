@@ -46,6 +46,10 @@
 2. README_API.md
 3. README_FLOW.md
 
+如果模块已经接入或即将接入后端实现、IPC、adapter、runtime 或持久化边界，还必须补充：
+
+4. README_IMPL.md
+
 职责如下：
 
 | File | Must Describe |
@@ -53,6 +57,7 @@
 | README_ARCH.md | 模块职责、边界、拥有的状态、依赖方向、禁止事项 |
 | README_API.md | 对外暴露的 props、hooks、commands、events、数据契约 |
 | README_FLOW.md | 关键交互流、状态迁移、异常分支、加载与空态处理 |
+| README_IMPL.md | 代码落点、实现切片顺序、port/adapter 状态、验证门槛 |
 
 建议位置：
 
@@ -62,7 +67,8 @@ docs/
    └─ <module-name>/
       ├─ README_ARCH.md
       ├─ README_API.md
-      └─ README_FLOW.md
+      ├─ README_FLOW.md
+      └─ README_IMPL.md   # backend/IPC/adapter/runtime 模块必须有
 ```
 
 ---
@@ -125,4 +131,5 @@ docs/
 
 1. 先建立统一模板和约束
 2. 再按模块逐步补 README_ARCH / README_API / README_FLOW
-3. 不把纯展示组件也硬拉进同一套重量级文档流程
+3. 对已经接入后端或即将写后端代码的模块补 README_IMPL
+4. 不把纯展示组件也硬拉进同一套重量级文档流程

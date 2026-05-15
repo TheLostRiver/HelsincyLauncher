@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 33 - Downloads Resume Staging Validation Boundary
+Phase 34 - Downloads Module Implementation Documentation
 
 ## Current Focus
 
@@ -104,6 +104,9 @@ Phase 33 - Downloads Resume Staging Validation Boundary
 - AT-2026-05-15-157 was committed locally as `2dc46c4`.
 - AT-2026-05-15-158 is in progress after selecting the next document-backed resume slice: staging validation boundary after job and checkpoint.
 - AT-2026-05-15-158 completed after adding the minimal `DownloadStagingObjectStore` boundary and proving `resume_download` reaches staging validation after job and checkpoint.
+- AT-2026-05-15-158 was committed locally as `cd5e848`.
+- AT-2026-05-15-159 is in progress after the user required module implementation docs and pre-code module-document reading rules.
+- AT-2026-05-15-159 completed after adding downloads `README_IMPL.md`, a module implementation template, and README_IMPL discoverability rules.
 
 ## Phases
 
@@ -306,6 +309,12 @@ Phase 33 - Downloads Resume Staging Validation Boundary
 - Atomic tasks: AT-2026-05-15-158
 - **Status:** complete
 
+### Phase 34: Downloads Module Implementation Documentation
+
+- Outcome: add a downloads module implementation document that records required pre-code reading order, Rust landing zones, current implementation state, and validation gates.
+- Atomic tasks: AT-2026-05-15-159
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -460,6 +469,7 @@ Phase 33 - Downloads Resume Staging Validation Boundary
 150. AT-2026-05-15-156 - completed - added stable missing-checkpoint error semantics to `resume_download` while keeping full resume orchestration out of scope.
 151. AT-2026-05-15-157 - completed - added stable missing-job error semantics to `resume_download` while keeping staging, manifest, and runtime resume orchestration out of scope.
 152. AT-2026-05-15-158 - completed - added minimal staging validation boundary to `resume_download` while keeping manifest reconstruction and runtime enqueue out of scope.
+153. AT-2026-05-15-159 - completed - added downloads module implementation documentation and README_IMPL discoverability rules.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
