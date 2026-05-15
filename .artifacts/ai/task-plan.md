@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 36 - Downloads Resume Segment Shape Documentation
+Phase 37 - Downloads Resume Sealed Segment Decision
 
 ## Current Focus
 
@@ -111,6 +111,8 @@ Phase 36 - Downloads Resume Segment Shape Documentation
 - AT-2026-05-15-160 completed after adding the minimal `DownloadManifestProviderPort` and proving `resume_download` reaches manifest reconstruction after staging validation while runtime enqueue remains out of scope.
 - AT-2026-05-15-161 is in progress after selecting the next document-backed prerequisite for completed-segment sealing: segment/checkpoint/resume-decision data shape documentation.
 - AT-2026-05-15-161 completed after documenting the manifest segment, segment checkpoint, resume decision actions, and invariants required before coding completed-segment sealing.
+- AT-2026-05-15-162 is in progress after selecting the first code slice from that data shape: completed checkpoint segments become sealed resume decisions and are not runtime enqueue candidates.
+- AT-2026-05-15-162 completed after adding manifest segment/checkpoint/decision types and proving completed segment checkpoints become sealed non-enqueue decisions.
 
 ## Phases
 
@@ -331,6 +333,12 @@ Phase 36 - Downloads Resume Segment Shape Documentation
 - Atomic tasks: AT-2026-05-15-161
 - **Status:** complete
 
+### Phase 37: Downloads Resume Sealed Segment Decision
+
+- Outcome: add the minimal in-memory data structures and pure resume decision behavior that marks matching completed segment checkpoints as sealed.
+- Atomic tasks: AT-2026-05-15-162
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -488,6 +496,7 @@ Phase 36 - Downloads Resume Segment Shape Documentation
 153. AT-2026-05-15-159 - completed - added downloads module implementation documentation and README_IMPL discoverability rules.
 154. AT-2026-05-15-160 - completed - added the minimal downloads resume manifest provider boundary after staging validation while keeping runtime enqueue out of scope.
 155. AT-2026-05-15-161 - completed - documented the downloads resume segment/checkpoint/resume-decision data shape before coding completed-segment sealing.
+156. AT-2026-05-15-162 - completed - added the minimal completed-segment sealing decision without runtime enqueue or SQLite schema changes.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
@@ -506,7 +515,7 @@ Phase 36 - Downloads Resume Segment Shape Documentation
 
 ## Follow-up Queue
 
-1. Continue with the next downloads resume slice by coding the first completed-segment sealing contract: completed checkpoints become sealed resume decisions and are not candidates for runtime enqueue.
+1. Continue with the next downloads resume slice by adding the next explicit decision branch, likely partial checkpoint -> `resume_partial`, still without runtime enqueue.
 2. Leave unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, and `src/` changes untouched unless the user explicitly scopes them into a task.
 
 ## Legacy Note

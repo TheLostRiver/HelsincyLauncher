@@ -2,45 +2,53 @@
 
 ## Identity
 
-- task id: AT-2026-05-15-161
-- title: Document downloads resume segment checkpoint shape
+- task id: AT-2026-05-15-162
+- title: Add downloads resume sealed segment decision
 - status: complete
 
 ## Goal
 
-在继续实现 completed-segment sealing 之前，把 downloads resume 需要的 manifest segment、segment checkpoint、resume decision 三层数据形状和不变量写入模块实现文档。
+按 AT-161 的 README_IMPL 数据形状，新增最小 completed-segment sealing 代码契约：completed segment checkpoint 应导出 `seal_completed` resume decision，且不是 runtime enqueue candidate。
 
 本轮只覆盖：
 
-- 更新 `docs/modules/downloads/README_IMPL.md`
-- 记录 AT-160 后的 manifest provider 现状
-- 明确下一轮代码的最小数据契约和验证入口
+- manifest segment 最小数据结构
+- segment checkpoint 最小数据结构与状态
+- resume segment decision/action 最小数据结构
+- 纯函数决策：completed checkpoint -> sealed decision
 
 ## Scope
 
 - in scope:
-  - update `docs/modules/downloads/README_IMPL.md`
+  - update `crates/module-downloads/src/driver.rs`
+  - update `crates/module-downloads/src/facade/mod.rs`
+  - update `crates/module-downloads/src/lib.rs`
+  - update `crates/adapter-storage-sqlite/src/lib.rs` only if needed to preserve `DownloadCheckpointRecord` compatibility without schema changes
   - update `.artifacts/ai/active-task.md`
   - update `.artifacts/ai/task-plan.md`
   - update `.artifacts/ai/progress.md`
   - update `.artifacts/ai/findings.md`
   - update `.artifacts/ai/handoff.md`
 - out of scope:
-  - change Rust production code
   - change frontend files
   - change host transport or composition-root wiring
-  - implement concrete SQLite schema changes
+  - change SQLite schema
+  - persist segment checkpoints in SQLite
   - enqueue resumed runtime jobs
-  - change sqlite files, `Cargo.lock`, `.codex`, `src/`, or other unrelated dirty worktree files
+  - implement partial resume or mismatch error semantics
+  - change sqlite database files, `Cargo.lock`, `.codex`, `src/`, or other unrelated dirty worktree files
 
 ## Allowed Files
 
-1. docs/modules/downloads/README_IMPL.md
-2. .artifacts/ai/active-task.md
-3. .artifacts/ai/task-plan.md
-4. .artifacts/ai/progress.md
-5. .artifacts/ai/findings.md
-6. .artifacts/ai/handoff.md
+1. crates/module-downloads/src/driver.rs
+2. crates/module-downloads/src/facade/mod.rs
+3. crates/module-downloads/src/lib.rs
+4. crates/adapter-storage-sqlite/src/lib.rs
+5. .artifacts/ai/active-task.md
+6. .artifacts/ai/task-plan.md
+7. .artifacts/ai/progress.md
+8. .artifacts/ai/findings.md
+9. .artifacts/ai/handoff.md
 
 ## 控制性文档
 
@@ -57,31 +65,35 @@
 11. docs/TauriKernelJobsRuntimeDesign.md
 12. docs/TauriTestingStrategyAndQualityGateDesign.md
 13. docs/TauriAIDevelopmentTransactionProtocolDesign.md
+14. docs/TauriCodeCommentStandard.md
 
 ## Hypothesis
 
-- falsifiable local hypothesis: If README_IMPL names the minimal segment/checkpoint/resume-decision shape and invariants, the next code slice can write a focused RED test for completed-segment sealing without inventing segment fields inside implementation.
+- falsifiable local hypothesis: Given a manifest segment and a matching completed segment checkpoint with `downloaded_bytes == length`, a focused module test can prove the derived resume decision is `seal_completed` and is not a runtime enqueue candidate, without touching SQLite schema or actual runtime enqueue.
 
 ## Cheap Check
 
-- `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- docs/modules/downloads/README_IMPL.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md`
+- `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_segment_decisions_seal_completed_checkpoint_segments`
 
 ## Validation Gate
 
-1. Read README, collaboration docs, downloads module docs, README_IMPL, download runtime, first crate API, kernel jobs runtime, testing, and AI transaction docs before editing.
-2. Update README_IMPL only as the module-local implementation guide.
-3. Keep the update aligned with existing `TauriDownloadRuntimeDesign.md` segment/checkpoint fields.
-4. Run scoped `git diff --check`.
+1. Read required module docs and related backend/runtime/testing/collaboration docs before code.
+2. Write the RED facade/module test first.
+3. Implement minimal data structures and pure decision function.
+4. Preserve current adapter compatibility without schema changes.
+5. Run focused test, full `launcher-module-downloads` tests, and scoped diff checks.
 
 ## Validation Result
 
 - passed
-- Updated `docs/modules/downloads/README_IMPL.md` with manifest segment, segment checkpoint, and resume decision data-shape guidance.
-- Confirmed key anchors exist with `rg -n "Resume Segment Data Shape|seal_completed|resume_partial|queue_remaining|reject_mismatch|DownloadManifestProviderPort" docs\modules\downloads\README_IMPL.md`.
-- Scoped whitespace validation passed: `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- docs/modules/downloads/README_IMPL.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md`.
-- No cargo test was required because this slice changed documentation and task records only.
+- RED compile failure was observed first: the focused test failed because segment manifest/checkpoint/decision types and `build_resume_segment_decisions` did not exist.
+- Focused GREEN test passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_segment_decisions_seal_completed_checkpoint_segments` reported 1 passed, 0 failed.
+- Full downloads module test passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` reported 11 passed, 0 failed.
+- Adapter compatibility test passed: `cargo test -p launcher-adapter-storage-sqlite --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`.
+- Touched module-downloads files passed scoped rustfmt checks: driver/facade directly, crate entry with `skip_children=true` to avoid unrelated contracts drift.
+- Scoped whitespace validation passed for the AT-2026-05-15-162 slice.
 
 ## Notes
 
-- AT-2026-05-15-160 completed and was committed locally as `0d9689a`.
-- The current code has only `DownloadCheckpointRecord { job_id }`; completed-segment sealing needs explicit shape before code.
+- AT-2026-05-15-161 completed and was committed locally as `5e08cd2`.
+- New comments should be bilingual for declaration-level additions, preserving existing English comments.

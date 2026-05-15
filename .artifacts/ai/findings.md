@@ -454,3 +454,11 @@
 - `crates/module-downloads/src/driver.rs` currently exposes `DownloadCheckpointRecord { job_id }`, so completed-segment sealing cannot be coded safely without deciding whether segment checkpoint data lives inside that record, beside it, or behind a new repository method.
 - `docs/TauriKernelJobsRuntimeDesign.md` keeps segment offset checkpoint and download resume reconstruction inside `module-downloads`; therefore the next data-shape guidance must not move segment details into `kernel-jobs`, host transport, or frontend state.
 - The narrow next step is documentation, not production code: define the minimal segment/checkpoint/resume-decision shape and invariants in `docs/modules/downloads/README_IMPL.md`, then code can follow with a focused RED test.
+
+## Phase 37 Resume Sealed Segment Decision Findings
+
+- AT-2026-05-15-161 is committed as `5e08cd2` and now makes the completed-segment sealing contract explicit in README_IMPL.
+- Current `DownloadCheckpointRecord` still only stores `job_id`, so the first code slice needs a module-owned segment checkpoint type and a compatibility path for current adapters.
+- The SQLite checkpoint adapter currently stores only `download_job_checkpoints(job_id)`; this slice can preserve compile-time compatibility by returning empty segment lists without adding tables or columns.
+- The first behavior should be a pure module decision: matching `segment_id`, `file_id`, `offset`, `length`, `status=completed`, and `downloaded_bytes == length` produces `seal_completed` and not a runtime enqueue candidate.
+- Partial resume, stale manifest/checkpoint mismatch handling, concrete segment persistence, and runtime enqueue remain later slices.

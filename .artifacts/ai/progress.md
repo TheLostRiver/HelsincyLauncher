@@ -3728,6 +3728,42 @@
 - Created the local AT-2026-05-15-161 commit and updated handoff so the next recovery point treats the slice as published in the current HEAD.
 - Direct `origin/main` push was not retried because prior direct-push attempts are recorded as blocked by safety review and require explicit approval before another attempt.
 
+## 2026-05-15 - AT-2026-05-15-162 Start
+
+- Recovered from AT-2026-05-15-161 at commit `5e08cd2`.
+- Read the updated segment data-shape guidance in `docs/modules/downloads/README_IMPL.md`.
+- Re-read the current checkpoint record in `crates/module-downloads/src/driver.rs`, resume/manifest boundary in `crates/module-downloads/src/facade/mod.rs`, crate export surface in `crates/module-downloads/src/lib.rs`, and SQLite checkpoint adapter compatibility surface in `crates/adapter-storage-sqlite/src/lib.rs`.
+- Selected a narrow TDD slice: completed segment checkpoints become `seal_completed` resume decisions and are not runtime enqueue candidates.
+- Out of scope remains SQLite schema, persisted segment checkpoint storage, partial resume, mismatch errors, and runtime enqueue.
+
+## 2026-05-15 - AT-2026-05-15-162 RED/GREEN
+
+- RED passed as expected: focused test compile failed because `DownloadManifestSegment`, `DownloadSegmentCheckpointRecord`, `DownloadSegmentCheckpointStatus`, `DownloadResumeSegmentAction`, and `build_resume_segment_decisions` did not exist yet.
+- GREEN implementation added the minimal manifest segment, segment checkpoint, resume decision action, and in-memory decision structures.
+- `resume_download` now builds resume segment decisions after manifest reconstruction, but still returns `DOWNLOADS_NOT_WIRED` and does not enqueue runtime work.
+- SQLite adapter compatibility was preserved by returning `DownloadCheckpointRecord::empty(job_id)` without schema changes or segment persistence.
+- Scope correction before publication: removed the untested partial-checkpoint -> `ResumePartial` branch from AT-162 so the next partial-resume slice can still follow RED/GREEN.
+
+## 2026-05-15 - AT-2026-05-15-162 Validation
+
+- Focused validation passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_segment_decisions_seal_completed_checkpoint_segments` reported 1 passed, 0 failed.
+- Full downloads module validation passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` reported 11 passed, 0 failed.
+- Adapter compatibility validation passed: `cargo test -p launcher-adapter-storage-sqlite --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`.
+- Touched module-downloads files passed scoped rustfmt checks: driver/facade directly, crate entry with `skip_children=true` to avoid unrelated contracts drift.
+- Scoped whitespace validation passed for the AT-2026-05-15-162 slice.
+
+## 2026-05-15 - AT-2026-05-15-162 Publication Blocked
+
+- AT-2026-05-15-162 implementation and validation are complete, but selective staging was blocked by the automatic approval review because the environment hit its usage limit.
+- No workaround staging or commit was attempted after the rejection.
+- Recovery point: stage the AT-2026-05-15-162 allowed files and commit with `feat: add resume sealed segment decision` once tool approval is available again.
+
+## 2026-05-15 - AT-2026-05-15-162 Publication Handoff
+
+- Tool approval became available again after the user requested continuation.
+- Created the local AT-2026-05-15-162 commit and updated handoff so the next recovery point treats the slice as published in the current HEAD.
+- Direct `origin/main` push was not retried because prior direct-push attempts are recorded as blocked by safety review and require explicit approval before another attempt.
+
 ### Auto Record: 2026-05-15 21:05:54
 - Tool: apply_patch
 - Phase: Phase 35 - Downloads Resume Manifest Boundary
@@ -3799,3 +3835,153 @@
 - Phase: Phase 36 - Downloads Resume Segment Shape Documentation
 - Files:
   - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 21:11:41
+- Tool: apply_patch
+- Phase: Phase 36 - Downloads Resume Segment Shape Documentation
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+
+### Auto Record: 2026-05-15 21:11:52
+- Tool: apply_patch
+- Phase: Phase 37 - Downloads Resume Sealed Segment Decision
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 21:12:01
+- Tool: apply_patch
+- Phase: Phase 37 - Downloads Resume Sealed Segment Decision
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 21:12:13
+- Tool: apply_patch
+- Phase: Phase 37 - Downloads Resume Sealed Segment Decision
+- Files:
+  - `.artifacts/ai/findings.md` (update)
+
+### Auto Record: 2026-05-15 21:12:29
+- Tool: apply_patch
+- Phase: Phase 37 - Downloads Resume Sealed Segment Decision
+- Files:
+  - `.artifacts/ai/handoff.md` (delete)
+
+### Auto Record: 2026-05-15 21:12:46
+- Tool: apply_patch
+- Phase: Phase 37 - Downloads Resume Sealed Segment Decision
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-15 21:13:36
+- Tool: apply_patch
+- Phase: Phase 37 - Downloads Resume Sealed Segment Decision
+- Files:
+  - `crates/module-downloads/src/driver.rs` (update)
+
+### Auto Record: 2026-05-15 21:14:06
+- Tool: apply_patch
+- Phase: Phase 37 - Downloads Resume Sealed Segment Decision
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-15 21:14:12
+- Tool: apply_patch
+- Phase: Phase 37 - Downloads Resume Sealed Segment Decision
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-15 21:14:17
+- Tool: apply_patch
+- Phase: Phase 37 - Downloads Resume Sealed Segment Decision
+- Files:
+  - `crates/adapter-storage-sqlite/src/lib.rs` (update)
+
+### Auto Record: 2026-05-15 21:14:24
+- Tool: apply_patch
+- Phase: Phase 37 - Downloads Resume Sealed Segment Decision
+- Files:
+  - `crates/module-downloads/src/lib.rs` (update)
+
+### Auto Record: 2026-05-15 21:14:50
+- Tool: apply_patch
+- Phase: Phase 37 - Downloads Resume Sealed Segment Decision
+- Files:
+  - `crates/module-downloads/src/driver.rs` (update)
+
+### Auto Record: 2026-05-15 21:17:36
+- Tool: apply_patch
+- Phase: Phase 37 - Downloads Resume Sealed Segment Decision
+- Files:
+  - `crates/adapter-storage-sqlite/src/lib.rs` (update)
+
+### Auto Record: 2026-05-15 21:18:22
+- Tool: apply_patch
+- Phase: Phase 37 - Downloads Resume Sealed Segment Decision
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+
+### Auto Record: 2026-05-15 21:18:32
+- Tool: apply_patch
+- Phase: Phase 37 - Downloads Resume Sealed Segment Decision
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 21:18:43
+- Tool: apply_patch
+- Phase: Phase 37 - Downloads Resume Sealed Segment Decision
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 21:18:57
+- Tool: apply_patch
+- Phase: Phase 37 - Downloads Resume Sealed Segment Decision
+- Files:
+  - `.artifacts/ai/handoff.md` (delete)
+
+### Auto Record: 2026-05-15 21:19:52
+- Tool: apply_patch
+- Phase: Phase 37 - Downloads Resume Sealed Segment Decision
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 21:20:05
+- Tool: apply_patch
+- Phase: Phase 37 - Downloads Resume Sealed Segment Decision
+- Files:
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-15 21:26:41
+- Tool: apply_patch
+- Phase: Phase 37 - Downloads Resume Sealed Segment Decision
+- Files:
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-15 21:26:49
+- Tool: apply_patch
+- Phase: Phase 37 - Downloads Resume Sealed Segment Decision
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 21:27:46
+- Tool: apply_patch
+- Phase: Phase 37 - Downloads Resume Sealed Segment Decision
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-15 21:29:34
+- Tool: apply_patch
+- Phase: Phase 37 - Downloads Resume Sealed Segment Decision
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+
+### Auto Record: 2026-05-15 21:29:40
+- Tool: apply_patch
+- Phase: Phase 37 - Downloads Resume Sealed Segment Decision
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 21:30:03
+- Tool: apply_patch
+- Phase: Phase 37 - Downloads Resume Sealed Segment Decision
+- Files:
+  - `.artifacts/ai/handoff.md` (update)

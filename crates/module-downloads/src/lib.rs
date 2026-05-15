@@ -8,8 +8,13 @@ pub mod contracts;
 pub mod driver;
 pub mod facade;
 
-pub use driver::{DownloadCheckpointRecord, DownloadCheckpointRepository, DownloadJobDriver};
+pub use driver::{
+    DownloadCheckpointRecord, DownloadCheckpointRepository, DownloadJobDriver,
+    DownloadSegmentCheckpointRecord, DownloadSegmentCheckpointStatus,
+};
 pub use facade::{
-	DownloadFacade, DownloadJobRecord, DownloadJobRecordState, DownloadJobRepository,
-	DownloadModuleDeps,
+    build_resume_segment_decisions, DownloadFacade, DownloadJobRecord, DownloadJobRecordState,
+    DownloadJobRepository, DownloadManifestPlan, DownloadManifestProviderPort,
+    DownloadManifestSegment, DownloadModuleDeps, DownloadResumeSegmentAction,
+    DownloadResumeSegmentDecision,
 };

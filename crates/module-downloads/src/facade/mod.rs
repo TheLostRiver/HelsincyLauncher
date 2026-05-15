@@ -5,17 +5,17 @@
 //! accepted job，`pause_download` / `cancel_download` 已转接 shared job runtime；
 //! 恢复、查询和策略入口仍保留 `DOWNLOADS_NOT_WIRED` stub 语义。
 
-use launcher_kernel_foundation::{
-    AppError, AppErrorSeverity, AppResult, CorrelationId, JobId,
-};
-use launcher_kernel_jobs::{AcceptedJob, EnqueueJobRequest, JobRuntime, JobPriority};
+use launcher_kernel_foundation::{AppError, AppErrorSeverity, AppResult, CorrelationId, JobId};
+use launcher_kernel_jobs::{AcceptedJob, EnqueueJobRequest, JobPriority, JobRuntime};
 
-use crate::driver::DownloadCheckpointRepository;
 use crate::contracts::{
     CancelDownloadRequestDto, DownloadJobListDto, DownloadJobSnapshotDto, DownloadPolicyDto,
     GetDownloadJobQueryDto, GetDownloadPolicyQueryDto, ListDownloadJobsQueryDto,
     PauseDownloadRequestDto, ResumeDownloadRequestDto, StartDownloadRequestDto,
     UpdateDownloadPolicyRequestDto,
+};
+use crate::driver::{
+    DownloadCheckpointRepository, DownloadSegmentCheckpointRecord, DownloadSegmentCheckpointStatus,
 };
 
 /// 下载任务在模块仓储里的粗粒度持久化状态。
@@ -92,6 +92,33 @@ impl DownloadStagingObjectStore for () {
     }
 }
 
+/// Manifest segment shape used by resume planning before runtime enqueue.
+/// runtime 入队前用于恢复规划的 manifest segment 形状。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DownloadManifestSegment {
+    /// Stable segment identifier inside the manifest plan.
+    /// manifest plan 内稳定的 segment 标识。
+    pub segment_id: String,
+    /// Stable logical file identifier for multi-file downloads.
+    /// 多文件下载中的稳定逻辑文件标识。
+    pub file_id: String,
+    /// Byte offset inside the logical file.
+    /// 逻辑文件内的字节偏移。
+    pub offset: u64,
+    /// Expected segment length in bytes.
+    /// segment 预期字节长度。
+    pub length: u64,
+    /// Provider-specific source reference kept behind this module boundary.
+    /// 保留在模块边界内的 provider 专用来源引用。
+    pub source_locator: String,
+    /// Optional segment integrity expectation when available.
+    /// 可用时的 segment 完整性期望值。
+    pub expected_hash: Option<String>,
+    /// Staging-relative write target path or object key.
+    /// staging 相对写入目标路径或对象键。
+    pub write_target: String,
+}
+
 /// Minimal manifest handle needed before later runtime resume enqueue.
 /// 后续 runtime 恢复入队前所需的最小 manifest 句柄。
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -99,6 +126,9 @@ pub struct DownloadManifestPlan {
     /// Provider target identifier used to rebuild the resumable download plan.
     /// 用于重建可恢复下载计划的 provider 目标标识。
     pub target_id: String,
+    /// Logical segments that may become sealed or enqueued during resume.
+    /// 恢复时可能被封存或入队的逻辑 segment。
+    pub segments: Vec<DownloadManifestSegment>,
 }
 
 /// Port for reloading or reconstructing provider manifest data needed by resume.
@@ -115,8 +145,90 @@ impl DownloadManifestProviderPort for () {
     fn fetch_manifest(&self, target_id: &str) -> AppResult<DownloadManifestPlan> {
         Ok(DownloadManifestPlan {
             target_id: target_id.to_string(),
+            segments: Vec::new(),
         })
     }
+}
+
+/// Resume action derived from manifest segments plus persisted checkpoint facts.
+/// 根据 manifest segment 与持久化 checkpoint 事实推导出的恢复动作。
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DownloadResumeSegmentAction {
+    /// Completed checkpoint is valid and must not be enqueued again.
+    /// 已完成 checkpoint 有效，不能再次入队。
+    SealCompleted,
+    /// Partial checkpoint can later resume from an offset.
+    /// 部分 checkpoint 后续可从偏移继续恢复。
+    ResumePartial,
+    /// Segment should be queued from the beginning.
+    /// segment 应从头入队。
+    QueueRemaining,
+    /// Manifest/checkpoint mismatch prevents automatic resume.
+    /// manifest/checkpoint 不匹配，阻止自动恢复。
+    RejectMismatch,
+}
+
+/// In-memory resume decision for a single manifest segment.
+/// 单个 manifest segment 的内存态恢复决策。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DownloadResumeSegmentDecision {
+    /// Segment identifier the decision applies to.
+    /// 此决策适用的 segment 标识。
+    pub segment_id: String,
+    /// Derived action for this segment.
+    /// 此 segment 的推导动作。
+    pub action: DownloadResumeSegmentAction,
+}
+
+impl DownloadResumeSegmentDecision {
+    /// Returns whether this segment should be handed to runtime enqueue.
+    /// 返回此 segment 是否应该交给 runtime 入队。
+    pub fn is_runtime_enqueue_candidate(&self) -> bool {
+        matches!(
+            self.action,
+            DownloadResumeSegmentAction::ResumePartial
+                | DownloadResumeSegmentAction::QueueRemaining
+        )
+    }
+}
+
+/// Builds in-memory resume decisions from manifest segments and checkpoint facts.
+/// 根据 manifest segment 与 checkpoint 事实构建内存态恢复决策。
+pub fn build_resume_segment_decisions(
+    manifest: &DownloadManifestPlan,
+    checkpoints: &[DownloadSegmentCheckpointRecord],
+) -> AppResult<Vec<DownloadResumeSegmentDecision>> {
+    Ok(manifest
+        .segments
+        .iter()
+        .map(|segment| {
+            let matching_checkpoint = checkpoints
+                .iter()
+                .find(|checkpoint| checkpoint.segment_id == segment.segment_id);
+
+            let action = match matching_checkpoint {
+                Some(checkpoint)
+                    if checkpoint.file_id != segment.file_id
+                        || checkpoint.offset != segment.offset
+                        || checkpoint.length != segment.length =>
+                {
+                    DownloadResumeSegmentAction::RejectMismatch
+                }
+                Some(checkpoint)
+                    if checkpoint.status == DownloadSegmentCheckpointStatus::Completed
+                        && checkpoint.downloaded_bytes == segment.length =>
+                {
+                    DownloadResumeSegmentAction::SealCompleted
+                }
+                _ => DownloadResumeSegmentAction::QueueRemaining,
+            };
+
+            DownloadResumeSegmentDecision {
+                segment_id: segment.segment_id.clone(),
+                action,
+            }
+        })
+        .collect())
 }
 
 /// 组装 downloads facade 所需的依赖束。
@@ -151,7 +263,9 @@ impl<J, C, M, S, R> DownloadFacade<J, C, M, S, R> {
     }
 }
 
-impl<J: DownloadJobRepository, C, M, S, R: JobRuntime<Extension = ()>> DownloadFacade<J, C, M, S, R> {
+impl<J: DownloadJobRepository, C, M, S, R: JobRuntime<Extension = ()>>
+    DownloadFacade<J, C, M, S, R>
+{
     /// 记录用户下载意图并向共享 job runtime 提交后端拥有的下载任务。
     pub fn start_download(&self, request: StartDownloadRequestDto) -> AppResult<AcceptedJob> {
         let job_id = JobId::generate();
@@ -208,10 +322,7 @@ impl<J: DownloadJobRepository, C, M, S, R: JobRuntime<Extension = ()>> DownloadF
     }
 
     /// 预留下载策略读取；当前仍由模块边界返回未接线错误。
-    pub fn get_policy(
-        &self,
-        query: GetDownloadPolicyQueryDto,
-    ) -> AppResult<DownloadPolicyDto> {
+    pub fn get_policy(&self, query: GetDownloadPolicyQueryDto) -> AppResult<DownloadPolicyDto> {
         let _ = query;
         Err(not_wired("get_policy"))
     }
@@ -229,8 +340,7 @@ impl<
         M: DownloadManifestProviderPort,
         S: DownloadStagingObjectStore,
         R: JobRuntime<Extension = ()>,
-    >
-    DownloadFacade<J, C, M, S, R>
+    > DownloadFacade<J, C, M, S, R>
 {
     /// Loads module state, checkpoint, staging, and manifest before later resume decisions.
     /// 先读取模块状态、checkpoint、staging 和 manifest，然后才进入后续恢复决策。
@@ -246,13 +356,17 @@ impl<
             None => return Err(missing_job_record(&request.job_id)),
         };
 
-        let checkpoint = self.deps.checkpoint_repo.load(&request.job_id)?;
-        if checkpoint.is_none() {
-            return Err(missing_checkpoint(&request.job_id));
-        }
+        let checkpoint = match self.deps.checkpoint_repo.load(&request.job_id)? {
+            Some(checkpoint) => checkpoint,
+            None => return Err(missing_checkpoint(&request.job_id)),
+        };
 
-        let _staging_root = self.deps.staging_store.ensure_staging_root(&request.job_id)?;
-        let _manifest = self.deps.manifest_provider.fetch_manifest(&job.target_id)?;
+        let _staging_root = self
+            .deps
+            .staging_store
+            .ensure_staging_root(&request.job_id)?;
+        let manifest = self.deps.manifest_provider.fetch_manifest(&job.target_id)?;
+        let _resume_decisions = build_resume_segment_decisions(&manifest, &checkpoint.segments)?;
 
         Err(not_wired("resume_download"))
     }
@@ -303,14 +417,16 @@ mod tests {
     use crate::driver::{DownloadCheckpointRecord, DownloadCheckpointRepository};
 
     use super::{
-        DownloadFacade, DownloadJobRecord, DownloadJobRecordState, DownloadJobRepository,
-        DownloadManifestPlan, DownloadManifestProviderPort, DownloadModuleDeps,
+        build_resume_segment_decisions, DownloadFacade, DownloadJobRecord, DownloadJobRecordState,
+        DownloadJobRepository, DownloadManifestPlan, DownloadManifestProviderPort,
+        DownloadManifestSegment, DownloadModuleDeps, DownloadResumeSegmentAction,
         DownloadStagingObjectStore, DownloadStagingRoot,
     };
     use crate::contracts::{
         CancelDownloadRequestDto, PauseDownloadRequestDto, ResumeDownloadRequestDto,
         StartDownloadRequestDto,
     };
+    use crate::driver::{DownloadSegmentCheckpointRecord, DownloadSegmentCheckpointStatus};
 
     #[derive(Default)]
     struct RecordingDownloadJobRepository {
@@ -426,6 +542,7 @@ mod tests {
 
             Ok(Some(DownloadCheckpointRecord {
                 job_id: job_id.clone(),
+                segments: Vec::new(),
             }))
         }
 
@@ -484,6 +601,7 @@ mod tests {
 
             Ok(DownloadManifestPlan {
                 target_id: target_id.to_string(),
+                segments: Vec::new(),
             })
         }
     }
@@ -521,7 +639,10 @@ mod tests {
     impl launcher_kernel_jobs::JobRuntime for RecordingJobRuntime {
         type Extension = ();
 
-        fn enqueue(&self, request: launcher_kernel_jobs::EnqueueJobRequest<Self::Extension>) -> AppResult<launcher_kernel_jobs::AcceptedJob> {
+        fn enqueue(
+            &self,
+            request: launcher_kernel_jobs::EnqueueJobRequest<Self::Extension>,
+        ) -> AppResult<launcher_kernel_jobs::AcceptedJob> {
             self.enqueued_requests
                 .lock()
                 .expect("enqueued requests mutex should not be poisoned")
@@ -596,8 +717,16 @@ mod tests {
         let created_jobs = facade.deps().job_repo.created_jobs();
         let enqueued_requests = facade.deps().job_runtime.enqueued_requests();
 
-        assert_eq!(created_jobs.len(), 1, "start_download should persist a download job record");
-        assert_eq!(enqueued_requests.len(), 1, "start_download should enqueue one runtime job");
+        assert_eq!(
+            created_jobs.len(),
+            1,
+            "start_download should persist a download job record"
+        );
+        assert_eq!(
+            enqueued_requests.len(),
+            1,
+            "start_download should enqueue one runtime job"
+        );
 
         let created_job = &created_jobs[0];
         assert_eq!(created_job.job_id, accepted.job_id);
@@ -760,6 +889,49 @@ mod tests {
         );
         let error = result.expect_err("full resume orchestration should remain out of scope");
         assert_eq!(error.code, "DOWNLOADS_NOT_WIRED");
+    }
+
+    #[test]
+    fn resume_segment_decisions_seal_completed_checkpoint_segments() {
+        let job_id = JobId::generate();
+        let manifest = DownloadManifestPlan {
+            target_id: "asset-123".into(),
+            segments: vec![DownloadManifestSegment {
+                segment_id: "segment-1".into(),
+                file_id: "file-1".into(),
+                offset: 0,
+                length: 1024,
+                source_locator: "https://example.invalid/file.bin".into(),
+                expected_hash: Some("sha256:segment".into()),
+                write_target: "file.bin.part".into(),
+            }],
+        };
+        let checkpoints = vec![DownloadSegmentCheckpointRecord {
+            job_id,
+            segment_id: "segment-1".into(),
+            file_id: "file-1".into(),
+            offset: 0,
+            length: 1024,
+            downloaded_bytes: 1024,
+            status: DownloadSegmentCheckpointStatus::Completed,
+            partial_path: Some("file.bin.part".into()),
+            etag: Some("etag-1".into()),
+            hash_state_ref: None,
+        }];
+
+        let decisions = build_resume_segment_decisions(&manifest, &checkpoints)
+            .expect("matching completed checkpoint should produce resume decisions");
+
+        assert_eq!(decisions.len(), 1);
+        assert_eq!(decisions[0].segment_id, "segment-1");
+        assert_eq!(
+            decisions[0].action,
+            DownloadResumeSegmentAction::SealCompleted
+        );
+        assert!(
+            !decisions[0].is_runtime_enqueue_candidate(),
+            "sealed completed segments must not be runtime enqueue candidates"
+        );
     }
 
     #[test]

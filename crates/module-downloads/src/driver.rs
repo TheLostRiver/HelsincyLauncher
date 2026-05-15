@@ -8,6 +8,74 @@ use launcher_kernel_jobs::{JobDriver, JobSnapshot, RestoreDisposition};
 pub struct DownloadCheckpointRecord {
     /// 与该 checkpoint 关联的稳定下载任务标识。
     pub job_id: JobId,
+    /// Segment-level persisted facts owned by downloads resume logic.
+    /// downloads 恢复逻辑拥有的 segment 级持久化事实。
+    pub segments: Vec<DownloadSegmentCheckpointRecord>,
+}
+
+impl DownloadCheckpointRecord {
+    /// Builds an empty checkpoint that preserves current adapter compatibility.
+    /// 创建空 segment checkpoint，用于保持当前 adapter 兼容性。
+    pub fn empty(job_id: JobId) -> Self {
+        Self {
+            job_id,
+            segments: Vec::new(),
+        }
+    }
+}
+
+/// Persisted status for a single download segment checkpoint.
+/// 单个下载 segment checkpoint 的持久化状态。
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DownloadSegmentCheckpointStatus {
+    /// Segment has not started yet.
+    /// segment 尚未开始。
+    Pending,
+    /// Segment has partial bytes and may later resume.
+    /// segment 已有部分字节，后续可能继续恢复。
+    InProgress,
+    /// Segment completed and can be sealed when it still matches the manifest.
+    /// segment 已完成，且与 manifest 仍匹配时可封存。
+    Completed,
+    /// Segment failed and needs a later retry or attention decision.
+    /// segment 已失败，需要后续重试或注意状态决策。
+    Failed,
+}
+
+/// Segment-level persisted checkpoint fact owned by downloads.
+/// downloads 拥有的 segment 级持久化 checkpoint 事实。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DownloadSegmentCheckpointRecord {
+    /// Stable downloads job identifier.
+    /// 稳定的 downloads 作业标识。
+    pub job_id: JobId,
+    /// Stable segment identifier inside the manifest plan.
+    /// manifest plan 内稳定的 segment 标识。
+    pub segment_id: String,
+    /// Logical file identifier used to detect stale manifest boundaries.
+    /// 用于识别过期 manifest 边界的逻辑文件标识。
+    pub file_id: String,
+    /// Byte offset inside the logical file.
+    /// 逻辑文件内的字节偏移。
+    pub offset: u64,
+    /// Expected segment length in bytes.
+    /// segment 预期字节长度。
+    pub length: u64,
+    /// Persisted downloaded byte count inside this segment.
+    /// 此 segment 内已持久化的已下载字节数。
+    pub downloaded_bytes: u64,
+    /// Module-owned persisted segment status.
+    /// 模块拥有的 segment 持久化状态。
+    pub status: DownloadSegmentCheckpointStatus,
+    /// Staging-relative partial file path when available.
+    /// 可用时记录 staging 相对的临时分片路径。
+    pub partial_path: Option<String>,
+    /// Provider validator used for safe range resume when available.
+    /// 可用时用于安全 range resume 的 provider 校验值。
+    pub etag: Option<String>,
+    /// Reference to incremental hash state when recomputing is expensive.
+    /// 当重新计算成本较高时，指向增量 hash 状态的引用。
+    pub hash_state_ref: Option<String>,
 }
 
 /// 提供下载 checkpoint 读取与保存能力的最小仓储边界。
@@ -65,9 +133,7 @@ mod tests {
     use launcher_kernel_foundation::{IsoDateTime, JobId};
     use launcher_kernel_jobs::{JobDriver, JobProgress, JobState, JobUiState};
 
-    use super::{
-        DownloadCheckpointRecord, DownloadCheckpointRepository, DownloadJobDriver,
-    };
+    use super::{DownloadCheckpointRecord, DownloadCheckpointRepository, DownloadJobDriver};
 
     #[derive(Default)]
     struct InMemoryCheckpointRepository {
@@ -75,19 +141,23 @@ mod tests {
     }
 
     impl DownloadCheckpointRepository for InMemoryCheckpointRepository {
-        fn load(&self, job_id: &JobId) -> launcher_kernel_foundation::AppResult<Option<DownloadCheckpointRecord>> {
+        fn load(
+            &self,
+            job_id: &JobId,
+        ) -> launcher_kernel_foundation::AppResult<Option<DownloadCheckpointRecord>> {
             let has_checkpoint = self
                 .job_ids
                 .lock()
                 .expect("checkpoint mutex should not be poisoned")
                 .contains(job_id);
 
-            Ok(has_checkpoint.then(|| DownloadCheckpointRecord {
-                job_id: job_id.clone(),
-            }))
+            Ok(has_checkpoint.then(|| DownloadCheckpointRecord::empty(job_id.clone())))
         }
 
-        fn save(&self, checkpoint: &DownloadCheckpointRecord) -> launcher_kernel_foundation::AppResult<()> {
+        fn save(
+            &self,
+            checkpoint: &DownloadCheckpointRecord,
+        ) -> launcher_kernel_foundation::AppResult<()> {
             self.job_ids
                 .lock()
                 .expect("checkpoint mutex should not be poisoned")
@@ -135,10 +205,8 @@ mod tests {
         let driver = DownloadJobDriver::new(repo.clone());
         let snapshot = make_snapshot(JobId::generate());
 
-        repo.save(&DownloadCheckpointRecord {
-            job_id: snapshot.job_id.clone(),
-        })
-        .expect("saving a synthetic checkpoint should succeed");
+        repo.save(&DownloadCheckpointRecord::empty(snapshot.job_id.clone()))
+            .expect("saving a synthetic checkpoint should succeed");
 
         let disposition = driver
             .restore(&snapshot)

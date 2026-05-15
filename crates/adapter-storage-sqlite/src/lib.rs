@@ -421,9 +421,7 @@ impl SqliteDownloadCheckpointRepository {
             launcher_kernel_foundation::CorrelationId::generate(),
         ))?;
 
-        Ok(maybe_row.map(|_| DownloadCheckpointRecord {
-            job_id: job_id.clone(),
-        }))
+        Ok(maybe_row.map(|_| DownloadCheckpointRecord::empty(job_id.clone())))
     }
 
     /// 持久化最新的下载断点记录，供暂停和恢复链路复用。
