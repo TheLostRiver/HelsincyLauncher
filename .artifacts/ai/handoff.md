@@ -2,20 +2,19 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-15-168
-- title: Add downloads resume mismatch error projection
-- status: completed and committed locally; final PWF records amended into the AT-168 commit
+- task id: AT-2026-05-16-169
+- title: Document downloads resume all-sealed completion boundary
+- status: completed and committed locally
 
 ## Current In-progress Atomic Task
 
 - task id: none
 - title: none
-- status: no active task after AT-168 validation
+- status: no active task after AT-169 validation
 
 ## Current Slice
 
 - `docs/modules/downloads/README_IMPL.md`
-- `crates/module-downloads/src/facade/mod.rs`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -24,11 +23,10 @@
 
 ## Validation
 
-- Passed for AT-2026-05-15-168:
-  - RED focused test failed on the expected `DOWNLOADS_NOT_WIRED` placeholder.
-  - GREEN focused test passed after the minimal `DL_RESUME_SEGMENT_MISMATCH` branch.
-  - Full downloads module test passed with 16 passed, 0 failed after formatting.
-  - README_IMPL was refreshed so current state matches the wired mismatch error projection.
+- Passed for AT-2026-05-16-169:
+  - README_IMPL records the all-sealed no-enqueue boundary.
+  - README_IMPL records that current `AcceptedJob` / `AcceptedJobDto` semantics cannot safely represent already-complete no-enqueue outcomes.
+  - Scoped `git diff --check` passed with CRLF conversion warnings only.
 
 ## Current Git State To Preserve
 
@@ -42,6 +40,6 @@
 
 ## Next Resume Point
 
-1. Choose the next backend slice after mismatch projection before coding further.
-2. Likely candidates are all-sealed completion handling or a documented scheduler/driver payload boundary.
+1. Start the next Rust boundary slice by introducing a narrow module-owned resume outcome before changing all-sealed behavior.
+2. Keep frontend, IPC shape, SQLite schema, scheduler execution, and `kernel-jobs` payload changes out of scope unless a later task explicitly scopes them.
 3. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.

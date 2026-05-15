@@ -4694,3 +4694,50 @@
 - Phase: Phase 43 - Downloads Resume Mismatch Error Projection
 - Files:
   - `.artifacts/ai/active-task.md` (update)
+
+### Agent Record: 2026-05-16 00:12:25 +08:00
+- Started AT-2026-05-16-169 after choosing the next backend slice from the AT-168 recovery point.
+- Read root README/CONTRIBUTING/docs index, downloads module docs, README_IMPL, download runtime, crate layout/API drafts, kernel-jobs runtime, IPC/error/testing/collaboration docs, and current `AcceptedJob` runtime/model snippets.
+- Found that all-sealed resume cannot safely be represented by a fake `AcceptedJob`, because `AcceptedJob`/`AcceptedJobDto` means accepted/queued work, not already-complete no-enqueue outcome.
+- Set AT-169 as a docs-only implementation-boundary slice before Rust behavior changes.
+
+### Agent Record: 2026-05-16 00:14:17 +08:00
+- Updated `docs/modules/downloads/README_IMPL.md` with the all-sealed completion boundary.
+- Documented that all-sealed means every manifest segment maps to `seal_completed` with no runtime candidates or mismatch, and that it must not be faked as queued `AcceptedJob`.
+- Recorded the next Rust boundary: introduce a module-owned resume outcome before adapting public transport or DTO shape.
+
+### Agent Record: 2026-05-16 00:15:13 +08:00
+- Scoped README_IMPL/PWF readback confirmed the all-sealed boundary, `AcceptedJob` contract gap, and next Rust boundary wording.
+- Scoped `git diff --check` passed for AT-2026-05-16-169 files with CRLF conversion warnings only.
+- Marked AT-169 complete and ready for local commit as a docs/PWF slice.
+
+### Auto Record: 2026-05-16 00:13:23
+- Tool: apply_patch
+- Phase: Phase 44 - Downloads Resume All-Sealed Completion Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-16 00:14:04
+- Tool: apply_patch
+- Phase: Phase 44 - Downloads Resume All-Sealed Completion Boundary
+- Files:
+  - `docs/modules/downloads/README_IMPL.md` (update)
+
+### Auto Record: 2026-05-16 00:14:27
+- Tool: apply_patch
+- Phase: Phase 44 - Downloads Resume All-Sealed Completion Boundary
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-16 00:15:40
+- Tool: apply_patch
+- Phase: Phase 44 - Downloads Resume All-Sealed Completion Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)

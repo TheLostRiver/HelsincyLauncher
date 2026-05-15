@@ -77,6 +77,7 @@ Implementation truth should move through module facade and ports first. Do not p
 | `resume_download` segment decisions | derives `seal_completed`, `resume_partial`, `queue_remaining`, and `reject_mismatch` from manifest/checkpoint facts | module decision tests |
 | `resume_download` runtime enqueue boundary | enqueues the existing job through job-level `JobRuntime::enqueue()` when resume decisions contain runtime candidates and no mismatch rejection | module facade test |
 | `resume_download` mismatch error projection | returns `DL_RESUME_SEGMENT_MISMATCH` and skips runtime enqueue when derived decisions contain `reject_mismatch` | module facade test |
+| `resume_download` all-sealed completion boundary | documented as a distinct no-enqueue outcome that current `AcceptedJob` semantics cannot safely represent yet | README_IMPL |
 | list/get/policy surfaces | not wired yet | future slices |
 
 ---
@@ -104,7 +105,8 @@ Current slice boundary:
 4. Manifest reconstruction is implemented as a minimal provider port call.
 5. Segment decision derivation is implemented for completed sealing, partial resume, queue remaining, and mismatch rejection.
 6. Runtime enqueue-resume is implemented as the first job-level boundary and must stay job-level until a downloads-owned scheduler/driver payload is explicitly introduced.
-7. Concrete segment persistence, scheduler execution, host transport, and frontend projection remain later slices.
+7. The all-sealed no-enqueue outcome is documented below as a contract gap; do not fake it as queued `AcceptedJob`.
+8. Concrete segment persistence, scheduler execution, host transport, and frontend projection remain later slices.
 
 Do not skip directly from checkpoint to `JobRuntime::resume`. The module owns business checkpoint and resume reconstruction.
 
@@ -234,6 +236,31 @@ That slice must not:
 3. put segment payloads into `kernel-jobs` extension fields;
 4. expose segment decisions through host transport or frontend IPC;
 5. implement actual fetch/write/verify scheduler execution.
+
+### 7.5 All-Sealed Completion Boundary
+
+An all-sealed resume is the branch where every manifest segment maps to `seal_completed` and the derived decision set contains no `resume_partial`, no `queue_remaining`, and no `reject_mismatch`.
+
+In that branch, downloads has proven that no segment should be re-enqueued. This is distinct from runtime enqueue:
+
+1. `AcceptedJob` / `AcceptedJobDto` means a long job was accepted into the shared runtime queue.
+2. `queued_at` is created by `JobRuntime::enqueue()` while the runtime creates a queued `JobSnapshot`.
+3. A fully sealed resume is already complete from the downloads resume planner's point of view, so fabricating an `AcceptedJob` would blur "accepted/queued" with "already complete".
+
+Current safe rule:
+
+1. do not call `JobRuntime::enqueue()` solely to manufacture a queued snapshot for an all-sealed plan;
+2. do not create a synthetic `AcceptedJob` inside downloads with `IsoDateTime::now()`;
+3. do not put completion/segment payloads into `kernel-jobs` extension fields;
+4. do not expose segment-level completion details through host transport or frontend IPC in the same slice.
+
+Next Rust boundary:
+
+1. introduce a narrow module-owned resume outcome before changing behavior, for example an outcome that can distinguish "accepted for runtime work" from "already complete after sealing";
+2. add a focused module test that proves the all-sealed branch does not runtime enqueue and does not fall through to `DOWNLOADS_NOT_WIRED`;
+3. only then adapt host transport or shared DTO shape in a separately scoped slice if the public command result needs to expose the already-complete outcome.
+
+Until that outcome contract exists, `resume_download` must keep the placeholder branch for the no-runtime-candidate path rather than pretending completion is a queued job.
 
 ---
 

@@ -517,3 +517,12 @@
 - `docs/TauriIPCAndStateContractsDesign.md` keeps frontend-facing failures behind `AppErrorDto`; AT-168 should not add IPC fields or expose segment details.
 - `docs/TauriKernelJobsRuntimeDesign.md` keeps segment checkpoints out of `kernel-jobs`; mismatch classification belongs in `module-downloads`.
 - Current `resume_download` already detects `RejectMismatch` decisions but falls through to `DOWNLOADS_NOT_WIRED`, making a focused RED test possible.
+
+## Phase 44 Resume All-Sealed Completion Boundary Findings
+
+- `docs/TauriDownloadRuntimeDesign.md` says resume marks completed segments as sealed and enqueues remaining segments only; if every manifest segment seals, there are no remaining segment candidates.
+- `docs/TauriIPCAndStateContractsDesign.md` says `AcceptedJobDto` means a long job was accepted/queued and explicitly says start success is not task completion.
+- `crates/kernel-jobs/src/model.rs` mirrors that contract: `AcceptedJob` only carries `job_id`, `module`, `kind`, and `queued_at`, with no completed/no-op outcome.
+- `crates/kernel-jobs/src/runtime.rs` constructs `AcceptedJob` while creating a queued `JobSnapshot`, so fabricating `AcceptedJob` in downloads would blur an already-complete all-sealed resume with runtime queue acceptance.
+- `docs/TauriKernelJobsRuntimeDesign.md` says `kernel-jobs` must not store download segment checkpoint details or interpret module-specific resume plans; all-sealed classification stays in `module-downloads`.
+- The next safe slice is documentation-first: define the all-sealed outcome and current return-contract gap in `docs/modules/downloads/README_IMPL.md` before adding a Rust test or changing facade return semantics.
