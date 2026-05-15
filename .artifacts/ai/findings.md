@@ -526,3 +526,10 @@
 - `crates/kernel-jobs/src/runtime.rs` constructs `AcceptedJob` while creating a queued `JobSnapshot`, so fabricating `AcceptedJob` in downloads would blur an already-complete all-sealed resume with runtime queue acceptance.
 - `docs/TauriKernelJobsRuntimeDesign.md` says `kernel-jobs` must not store download segment checkpoint details or interpret module-specific resume plans; all-sealed classification stays in `module-downloads`.
 - The next safe slice is documentation-first: define the all-sealed outcome and current return-contract gap in `docs/modules/downloads/README_IMPL.md` before adding a Rust test or changing facade return semantics.
+
+## Phase 45 Module-Owned Resume Outcome Findings
+
+- AT-2026-05-16-169 documented the all-sealed contract gap and recommends introducing a narrow module-owned resume outcome before public transport/DTO adaptation.
+- Current `src-tauri/src/commands/downloads.rs` still maps `services.downloads.resume_download(request)` through `map_accepted_job_result`, so changing the existing public method return type would immediately widen into host transport.
+- A safer first code slice is to add `resume_download_outcome` beside the existing compatibility method, then keep `resume_download -> AppResult<AcceptedJob>` available for current host wiring.
+- The focused module test can use existing in-memory repositories/runtime helpers and assert that an all-sealed manifest/checkpoint pair returns `AlreadyComplete` and leaves runtime enqueue requests empty.

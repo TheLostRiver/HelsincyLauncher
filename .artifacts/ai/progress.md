@@ -4711,6 +4711,29 @@
 - Scoped `git diff --check` passed for AT-2026-05-16-169 files with CRLF conversion warnings only.
 - Marked AT-169 complete and ready for local commit as a docs/PWF slice.
 
+### Agent Record: 2026-05-16 00:18:08 +08:00
+- Committed AT-2026-05-16-169 locally as `4309840 docs: define all-sealed resume boundary`.
+- Started AT-2026-05-16-170 after confirming the next Rust boundary is now specific enough: add a module-owned resume outcome for all-sealed plans.
+- Read README_IMPL all-sealed section, current resume decision code, current `resume_download` implementation, and host transport call sites.
+- Found that changing the existing public `resume_download` return type would immediately affect `src-tauri` accepted-job mapping, so AT-170 keeps that method compatible and adds a narrower module-owned outcome method first.
+
+### Agent Record: 2026-05-16 00:20:04 +08:00
+- Added RED test `resume_download_outcome_returns_already_complete_when_all_segments_are_sealed`.
+- Focused RED command failed as expected: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_download_outcome_returns_already_complete_when_all_segments_are_sealed`.
+- Failure reason was the expected missing boundary: no `resume_download_outcome` method and no `DownloadResumeOutcome` type exist yet.
+
+### Agent Record: 2026-05-16 00:21:48 +08:00
+- Implemented the minimal module-owned outcome boundary with `DownloadResumeOutcome::{RuntimeAccepted, AlreadyComplete}` and `resume_download_outcome`.
+- Kept the existing `resume_download -> AppResult<AcceptedJob>` compatibility method for current host transport wiring.
+- Focused GREEN passed for `resume_download_outcome_returns_already_complete_when_all_segments_are_sealed`.
+- Updated README_IMPL so the current implementation state records the module-owned outcome boundary and leaves public transport/DTO adaptation to a later slice.
+
+### Agent Record: 2026-05-16 00:22:55 +08:00
+- Ran `cargo fmt --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml -p launcher-module-downloads` successfully.
+- Full downloads module validation passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` reported 17 passed, 0 failed.
+- Scoped `git diff --check` passed for AT-2026-05-16-170 files with CRLF conversion warnings only.
+- Marked AT-170 complete and ready for local commit as a code/docs/PWF slice.
+
 ### Auto Record: 2026-05-16 00:13:23
 - Tool: apply_patch
 - Phase: Phase 44 - Downloads Resume All-Sealed Completion Boundary
@@ -4736,6 +4759,56 @@
 ### Auto Record: 2026-05-16 00:15:40
 - Tool: apply_patch
 - Phase: Phase 44 - Downloads Resume All-Sealed Completion Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-16 00:19:01
+- Tool: apply_patch
+- Phase: Phase 45 - Downloads Module-Owned Resume Outcome Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-16 00:19:41
+- Tool: apply_patch
+- Phase: Phase 45 - Downloads Module-Owned Resume Outcome Boundary
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-16 00:20:15
+- Tool: apply_patch
+- Phase: Phase 45 - Downloads Module-Owned Resume Outcome Boundary
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-16 00:20:52
+- Tool: apply_patch
+- Phase: Phase 45 - Downloads Module-Owned Resume Outcome Boundary
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-16 00:21:25
+- Tool: apply_patch
+- Phase: Phase 45 - Downloads Module-Owned Resume Outcome Boundary
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-16 00:22:07
+- Tool: apply_patch
+- Phase: Phase 45 - Downloads Module-Owned Resume Outcome Boundary
+- Files:
+  - `docs/modules/downloads/README_IMPL.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-16 00:23:23
+- Tool: apply_patch
+- Phase: Phase 45 - Downloads Module-Owned Resume Outcome Boundary
 - Files:
   - `.artifacts/ai/active-task.md` (update)
   - `.artifacts/ai/task-plan.md` (update)

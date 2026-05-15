@@ -192,6 +192,28 @@ impl DownloadResumeSegmentDecision {
     }
 }
 
+/// Module-owned outcome for resume planning before host transport projection.
+/// host transport 投影前，downloads 模块自有的恢复规划结果。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum DownloadResumeOutcome {
+    /// Resume work was accepted by the shared runtime queue.
+    /// 恢复工作已被 shared runtime 队列接收。
+    RuntimeAccepted(AcceptedJob),
+    /// Resume planning found all segments already sealed and no runtime work remains.
+    /// 恢复规划发现所有 segment 已封存，且没有剩余 runtime 工作。
+    AlreadyComplete {
+        /// Completed job identifier owned by downloads.
+        /// downloads 拥有的已完成作业标识。
+        job_id: JobId,
+        /// Module name kept local until transport projection is explicitly designed.
+        /// 模块名在 transport 投影明确设计前保持为模块本地结果字段。
+        module: String,
+        /// Downloads job kind kept local until public DTO adaptation is scoped.
+        /// 下载作业类型在公开 DTO 适配被纳入范围前保持为本地字段。
+        kind: String,
+    },
+}
+
 /// Builds in-memory resume decisions from manifest segments and checkpoint facts.
 /// 根据 manifest segment 与 checkpoint 事实构建内存态恢复决策。
 pub fn build_resume_segment_decisions(
@@ -357,6 +379,18 @@ impl<
     /// Missing or unsafe module-owned resume facts are stable downloads-domain failures.
     /// 缺失或不安全的模块恢复事实会收敛为稳定的 downloads 域失败。
     pub fn resume_download(&self, request: ResumeDownloadRequestDto) -> AppResult<AcceptedJob> {
+        match self.resume_download_outcome(request)? {
+            DownloadResumeOutcome::RuntimeAccepted(accepted) => Ok(accepted),
+            DownloadResumeOutcome::AlreadyComplete { .. } => Err(not_wired("resume_download")),
+        }
+    }
+
+    /// Returns the module-owned resume outcome before public transport projection.
+    /// 在公开 transport 投影前，返回 downloads 模块自有的恢复结果。
+    pub fn resume_download_outcome(
+        &self,
+        request: ResumeDownloadRequestDto,
+    ) -> AppResult<DownloadResumeOutcome> {
         let job = match self.deps.job_repo.get_job(&request.job_id)? {
             Some(job) => job,
             None => return Err(missing_job_record(&request.job_id)),
@@ -379,6 +413,10 @@ impl<
         let has_reject_mismatch = resume_decisions
             .iter()
             .any(|decision| decision.action == DownloadResumeSegmentAction::RejectMismatch);
+        let is_all_sealed = !resume_decisions.is_empty()
+            && resume_decisions
+                .iter()
+                .all(|decision| decision.action == DownloadResumeSegmentAction::SealCompleted);
 
         if has_reject_mismatch {
             return Err(resume_segment_mismatch(&request.job_id));
@@ -387,13 +425,22 @@ impl<
         if has_runtime_enqueue_candidate {
             // Keep this first resume slice job-level; segment payloads stay in downloads.
             // 首个恢复切片只做 job-level 入队；segment payload 仍留在 downloads 内部。
-            return self.deps.job_runtime.enqueue(EnqueueJobRequest {
+            let accepted = self.deps.job_runtime.enqueue(EnqueueJobRequest {
                 job_id: request.job_id,
                 module: "downloads".to_string(),
                 kind: "download".to_string(),
                 priority: job.priority,
                 recoverable: true,
                 extension: None,
+            })?;
+            return Ok(DownloadResumeOutcome::RuntimeAccepted(accepted));
+        }
+
+        if is_all_sealed {
+            return Ok(DownloadResumeOutcome::AlreadyComplete {
+                job_id: request.job_id,
+                module: "downloads".to_string(),
+                kind: "download".to_string(),
             });
         }
 
@@ -462,8 +509,8 @@ mod tests {
     use super::{
         build_resume_segment_decisions, DownloadFacade, DownloadJobRecord, DownloadJobRecordState,
         DownloadJobRepository, DownloadManifestPlan, DownloadManifestProviderPort,
-        DownloadManifestSegment, DownloadModuleDeps, DownloadResumeSegmentAction,
-        DownloadStagingObjectStore, DownloadStagingRoot,
+        DownloadManifestSegment, DownloadModuleDeps, DownloadResumeOutcome,
+        DownloadResumeSegmentAction, DownloadStagingObjectStore, DownloadStagingRoot,
     };
     use crate::contracts::{
         CancelDownloadRequestDto, PauseDownloadRequestDto, ResumeDownloadRequestDto,
@@ -1012,6 +1059,61 @@ mod tests {
         assert_eq!(enqueued_request.priority, JobPriority::High);
         assert!(enqueued_request.recoverable);
         assert_eq!(enqueued_request.extension, None);
+    }
+
+    #[test]
+    fn resume_download_outcome_returns_already_complete_when_all_segments_are_sealed() {
+        let job_id = JobId::generate();
+        let facade = DownloadFacade::new(DownloadModuleDeps {
+            job_repo: RecordingDownloadJobRepository::with_job(make_download_job(job_id.clone())),
+            checkpoint_repo: RecordingCheckpointRepository::with_segments(vec![
+                DownloadSegmentCheckpointRecord {
+                    job_id: job_id.clone(),
+                    segment_id: "segment-1".into(),
+                    file_id: "file-1".into(),
+                    offset: 0,
+                    length: 1024,
+                    downloaded_bytes: 1024,
+                    status: DownloadSegmentCheckpointStatus::Completed,
+                    partial_path: Some("file.bin.part".into()),
+                    etag: Some("etag-1".into()),
+                    hash_state_ref: None,
+                },
+            ]),
+            manifest_provider: RecordingManifestProvider::with_segments(vec![
+                DownloadManifestSegment {
+                    segment_id: "segment-1".into(),
+                    file_id: "file-1".into(),
+                    offset: 0,
+                    length: 1024,
+                    source_locator: "https://example.invalid/file.bin".into(),
+                    expected_hash: Some("sha256:segment".into()),
+                    write_target: "file.bin.part".into(),
+                },
+            ]),
+            staging_store: RecordingStagingObjectStore::default(),
+            job_runtime: RecordingJobRuntime::default(),
+        });
+
+        let outcome = facade
+            .resume_download_outcome(ResumeDownloadRequestDto {
+                job_id: job_id.clone(),
+            })
+            .expect("all-sealed resume should return a module-owned completion outcome");
+
+        assert_eq!(
+            outcome,
+            DownloadResumeOutcome::AlreadyComplete {
+                job_id: job_id.clone(),
+                module: "downloads".into(),
+                kind: "download".into(),
+            }
+        );
+        assert_eq!(
+            facade.deps().job_runtime.enqueued_requests().len(),
+            0,
+            "all-sealed resume must not enqueue runtime work"
+        );
     }
 
     #[test]
