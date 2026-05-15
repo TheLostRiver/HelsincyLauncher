@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 42 - Downloads Resume Runtime Enqueue Boundary
+Phase 43 - Downloads Resume Mismatch Error Projection
 
 ## Current Focus
 
@@ -122,6 +122,7 @@ Phase 42 - Downloads Resume Runtime Enqueue Boundary
 - AT-2026-05-15-166 is in progress to document the runtime-enqueue boundary before any Rust code starts handing resume decisions to `JobRuntime`.
 - AT-2026-05-15-166 completed and committed locally after updating README_IMPL with the job-level runtime-enqueue boundary and passing scoped doc/Git validation.
 - AT-2026-05-15-167 completed and committed locally after adding the TDD-backed job-level runtime enqueue boundary inside `module-downloads` and refreshing README_IMPL current state.
+- AT-2026-05-15-168 completed and committed locally after adding a stable downloads-domain error projection for `resume_download` segment mismatch decisions.
 
 ## Phases
 
@@ -378,6 +379,12 @@ Phase 42 - Downloads Resume Runtime Enqueue Boundary
 - Atomic tasks: AT-2026-05-15-167
 - **Status:** complete
 
+### Phase 43: Downloads Resume Mismatch Error Projection
+
+- Outcome: prove and implement a stable downloads-domain error for `resume_download` when derived segment decisions contain `reject_mismatch`, without runtime enqueue, persistence, host transport, or frontend changes.
+- Atomic tasks: AT-2026-05-15-168
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -541,6 +548,7 @@ Phase 42 - Downloads Resume Runtime Enqueue Boundary
 159. AT-2026-05-15-165 - completed - added focused queue-remaining coverage for manifest segments without safe checkpoints before runtime enqueue work.
 160. AT-2026-05-15-166 - completed - documented the minimal downloads resume runtime-enqueue boundary in README_IMPL, including job-level request shape, decision mapping, and out-of-scope scheduler/persistence/transport boundaries; committed locally.
 161. AT-2026-05-15-167 - completed - added a TDD-backed downloads facade slice proving `resume_download` enqueues the existing job id through job-level runtime when resume decisions contain enqueue candidates and no mismatch rejection, refreshed README_IMPL current state, and committed locally.
+162. AT-2026-05-15-168 - completed - added a TDD-backed downloads facade slice proving `resume_download` returns `DL_RESUME_SEGMENT_MISMATCH` and does not runtime enqueue when segment checkpoint facts conflict with the manifest; committed locally.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
@@ -559,7 +567,7 @@ Phase 42 - Downloads Resume Runtime Enqueue Boundary
 
 ## Follow-up Queue
 
-1. Choose the next backend slice after job-level resume enqueue: mismatch/error projection, all-sealed completion handling, or a documented scheduler/driver payload boundary.
+1. Choose the next backend slice after mismatch projection: all-sealed completion handling or a documented scheduler/driver payload boundary.
 2. Leave unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, and `src/` changes untouched unless the user explicitly scopes them into a task.
 
 ## Legacy Note

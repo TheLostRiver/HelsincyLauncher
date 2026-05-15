@@ -2,24 +2,20 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-15-167
-- title: Add downloads resume runtime enqueue boundary
-- status: committed locally as current HEAD
+- task id: AT-2026-05-15-168
+- title: Add downloads resume mismatch error projection
+- status: completed and committed locally; final PWF records amended into the AT-168 commit
 
 ## Current In-progress Atomic Task
 
 - task id: none
 - title: none
-- status: no active task after AT-167 validation
+- status: no active task after AT-168 validation
 
 ## Current Slice
 
 - `docs/modules/downloads/README_IMPL.md`
 - `crates/module-downloads/src/facade/mod.rs`
-- `crates/module-downloads/src/contracts/commands.rs`
-- `crates/module-downloads/src/contracts/dto.rs`
-- `crates/module-downloads/src/contracts/events.rs`
-- `crates/module-downloads/src/contracts/mod.rs`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -28,11 +24,11 @@
 
 ## Validation
 
-- Passed for AT-2026-05-15-167:
-  - RED focused test failed on the expected `DOWNLOADS_NOT_WIRED` gap.
-  - GREEN focused test passed after the minimal job-level runtime enqueue branch.
-  - Full downloads module test passed with 15 passed, 0 failed after formatting.
-  - README_IMPL was refreshed so current state matches the wired job-level enqueue boundary.
+- Passed for AT-2026-05-15-168:
+  - RED focused test failed on the expected `DOWNLOADS_NOT_WIRED` placeholder.
+  - GREEN focused test passed after the minimal `DL_RESUME_SEGMENT_MISMATCH` branch.
+  - Full downloads module test passed with 16 passed, 0 failed after formatting.
+  - README_IMPL was refreshed so current state matches the wired mismatch error projection.
 
 ## Current Git State To Preserve
 
@@ -46,5 +42,6 @@
 
 ## Next Resume Point
 
-1. Choose the next backend slice after job-level resume enqueue before coding further.
-2. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.
+1. Choose the next backend slice after mismatch projection before coding further.
+2. Likely candidates are all-sealed completion handling or a documented scheduler/driver payload boundary.
+3. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.

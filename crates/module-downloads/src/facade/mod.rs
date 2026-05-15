@@ -351,14 +351,11 @@ impl<
         R: JobRuntime<Extension = ()>,
     > DownloadFacade<J, C, M, S, R>
 {
-    /// Loads module state, checkpoint, staging, and manifest before later resume decisions.
-    /// 先读取模块状态、checkpoint、staging 和 manifest，然后才进入后续恢复决策。
+    /// Loads module state, checkpoint, staging, and manifest before resume decisions.
+    /// 先读取模块状态、checkpoint、staging 和 manifest，然后才进入恢复决策。
     ///
-    /// Missing module state is a stable downloads-domain failure; full manifest
-    /// and runtime resume orchestration stays in a later slice.
-    /// Missing module state is a stable downloads-domain failure; runtime resume
-    /// enqueue still stays in a later slice.
-    /// 缺失模块状态是稳定的 downloads 域失败；runtime 恢复入队仍留给后续切片。
+    /// Missing or unsafe module-owned resume facts are stable downloads-domain failures.
+    /// 缺失或不安全的模块恢复事实会收敛为稳定的 downloads 域失败。
     pub fn resume_download(&self, request: ResumeDownloadRequestDto) -> AppResult<AcceptedJob> {
         let job = match self.deps.job_repo.get_job(&request.job_id)? {
             Some(job) => job,
@@ -383,7 +380,11 @@ impl<
             .iter()
             .any(|decision| decision.action == DownloadResumeSegmentAction::RejectMismatch);
 
-        if has_runtime_enqueue_candidate && !has_reject_mismatch {
+        if has_reject_mismatch {
+            return Err(resume_segment_mismatch(&request.job_id));
+        }
+
+        if has_runtime_enqueue_candidate {
             // Keep this first resume slice job-level; segment payloads stay in downloads.
             // 首个恢复切片只做 job-level 入队；segment payload 仍留在 downloads 内部。
             return self.deps.job_runtime.enqueue(EnqueueJobRequest {
@@ -406,6 +407,20 @@ fn missing_job_record(job_id: &JobId) -> AppError {
     AppError::new(
         "DL_JOB_NOT_FOUND",
         format!("download job record missing for job {job_id}; resume cannot continue"),
+        false,
+        AppErrorSeverity::Error,
+        CorrelationId::generate(),
+    )
+}
+
+// Projects unsafe segment checkpoint facts as a downloads-domain resume failure.
+// 将不安全的 segment checkpoint 事实投影为 downloads 域恢复失败。
+fn resume_segment_mismatch(job_id: &JobId) -> AppError {
+    AppError::new(
+        "DL_RESUME_SEGMENT_MISMATCH",
+        format!(
+            "download segment checkpoint mismatch for job {job_id}; resume cannot continue safely"
+        ),
         false,
         AppErrorSeverity::Error,
         CorrelationId::generate(),
@@ -997,6 +1012,56 @@ mod tests {
         assert_eq!(enqueued_request.priority, JobPriority::High);
         assert!(enqueued_request.recoverable);
         assert_eq!(enqueued_request.extension, None);
+    }
+
+    #[test]
+    fn resume_download_returns_stable_error_when_segment_checkpoint_mismatches_manifest() {
+        let job_id = JobId::generate();
+        let facade = DownloadFacade::new(DownloadModuleDeps {
+            job_repo: RecordingDownloadJobRepository::with_job(make_download_job(job_id.clone())),
+            checkpoint_repo: RecordingCheckpointRepository::with_segments(vec![
+                DownloadSegmentCheckpointRecord {
+                    job_id: job_id.clone(),
+                    segment_id: "segment-1".into(),
+                    file_id: "stale-file".into(),
+                    offset: 0,
+                    length: 1024,
+                    downloaded_bytes: 512,
+                    status: DownloadSegmentCheckpointStatus::InProgress,
+                    partial_path: Some("file.bin.part".into()),
+                    etag: Some("etag-1".into()),
+                    hash_state_ref: None,
+                },
+            ]),
+            manifest_provider: RecordingManifestProvider::with_segments(vec![
+                DownloadManifestSegment {
+                    segment_id: "segment-1".into(),
+                    file_id: "file-1".into(),
+                    offset: 0,
+                    length: 1024,
+                    source_locator: "https://example.invalid/file.bin".into(),
+                    expected_hash: Some("sha256:segment".into()),
+                    write_target: "file.bin.part".into(),
+                },
+            ]),
+            staging_store: RecordingStagingObjectStore::default(),
+            job_runtime: RecordingJobRuntime::default(),
+        });
+
+        let error = facade
+            .resume_download(ResumeDownloadRequestDto {
+                job_id: job_id.clone(),
+            })
+            .expect_err("mismatched checkpoint facts should stop automatic resume");
+
+        assert_eq!(
+            facade.deps().job_runtime.enqueued_requests().len(),
+            0,
+            "mismatched segment facts must not be handed to runtime enqueue"
+        );
+        assert_eq!(error.code, "DL_RESUME_SEGMENT_MISMATCH");
+        assert!(!error.retryable);
+        assert_eq!(error.severity, AppErrorSeverity::Error);
     }
 
     #[test]

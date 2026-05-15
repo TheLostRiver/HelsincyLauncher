@@ -2,30 +2,27 @@
 
 ## Identity
 
-- task id: AT-2026-05-15-167
-- title: Add downloads resume runtime enqueue boundary
+- task id: AT-2026-05-15-168
+- title: Add downloads resume mismatch error projection
 - status: completed
 
 ## Goal
 
-在 `module-downloads` 内用 TDD 证明 `resume_download` 的第一个 runtime enqueue 边界：当作业、checkpoint、staging、manifest 都可用，segment decision 中至少存在 runtime enqueue candidate 且没有 `reject_mismatch` 时，facade 使用现有 job id 和持久化 priority 调用 job-level `JobRuntime::enqueue()`，并返回 runtime `AcceptedJob`。
+在 `module-downloads` 内为 `resume_download` 的 `reject_mismatch` 决策补上稳定 downloads-domain 错误投影：当 manifest segment 与 checkpoint segment 的边界事实不匹配时，恢复流程必须停止、不得 runtime enqueue，并返回稳定错误码。
 
 本轮只覆盖后端：
 
-- first write a failing module facade test
-- then add the minimal production code needed to pass it
-- preserve segment decision ownership inside downloads
-- do not expose segment details through host transport or frontend
+- document the mismatch error boundary in README_IMPL before Rust changes
+- write a failing module facade test first
+- add the minimal production branch needed to pass it
+- keep segment details inside downloads
+- do not touch frontend, IPC, SQLite schema, scheduler execution, or kernel-jobs payloads
 
 ## Scope
 
 - in scope:
-  - `crates/module-downloads/src/facade/mod.rs`
-  - `crates/module-downloads/src/contracts/commands.rs`
-  - `crates/module-downloads/src/contracts/dto.rs`
-  - `crates/module-downloads/src/contracts/events.rs`
-  - `crates/module-downloads/src/contracts/mod.rs`
   - `docs/modules/downloads/README_IMPL.md`
+  - `crates/module-downloads/src/facade/mod.rs`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
   - `.artifacts/ai/progress.md`
@@ -37,21 +34,18 @@
   - SQLite schema or concrete segment persistence
   - concrete scheduler/fetch/write/verify execution
   - `kernel-jobs` segment payload extensions
+  - all-sealed completion handling
   - unrelated dirty worktree files
 
 ## Allowed Files
 
-1. crates/module-downloads/src/facade/mod.rs
-2. crates/module-downloads/src/contracts/commands.rs
-3. crates/module-downloads/src/contracts/dto.rs
-4. crates/module-downloads/src/contracts/events.rs
-5. crates/module-downloads/src/contracts/mod.rs
-6. docs/modules/downloads/README_IMPL.md
-7. .artifacts/ai/active-task.md
-8. .artifacts/ai/task-plan.md
-9. .artifacts/ai/progress.md
-10. .artifacts/ai/findings.md
-11. .artifacts/ai/handoff.md
+1. docs/modules/downloads/README_IMPL.md
+2. crates/module-downloads/src/facade/mod.rs
+3. .artifacts/ai/active-task.md
+4. .artifacts/ai/task-plan.md
+5. .artifacts/ai/progress.md
+6. .artifacts/ai/findings.md
+7. .artifacts/ai/handoff.md
 
 ## 控制性文档
 
@@ -68,38 +62,37 @@
 11. docs/TauriKernelJobsRuntimeDesign.md
 12. docs/TauriTestingStrategyAndQualityGateDesign.md
 13. docs/TauriAIDevelopmentTransactionProtocolDesign.md
-14. current `crates/module-downloads/src/facade/mod.rs` and `crates/kernel-jobs/src/runtime.rs` snippets for existing code shape
+14. current `crates/module-downloads/src/facade/mod.rs` snippets for existing code/test shape
 
 ## Hypothesis
 
-- falsifiable local hypothesis: a focused module facade test can force `resume_download` to call `JobRuntime::enqueue()` with the existing download job id, module `downloads`, kind `download`, persisted priority, recoverable `true`, and unit extension, without introducing segment payloads or scheduler execution.
+- falsifiable local hypothesis: a focused module facade test can force `resume_download` to return `DL_RESUME_SEGMENT_MISMATCH` and avoid runtime enqueue when any derived resume decision is `RejectMismatch`, without changing segment persistence, IPC, scheduler execution, or shared job runtime contracts.
 
 ## Cheap Check
 
-- run the focused `module-downloads` facade test first and confirm it fails for the expected missing runtime enqueue behavior.
+- update README_IMPL boundary, then run the focused RED test and confirm it fails because `resume_download` still falls through to `DOWNLOADS_NOT_WIRED`.
 
 ## Validation Gate
 
 1. Read required root, docs index, module, runtime, testing, collaboration, and implementation docs before editing Rust code.
-2. Add the RED test before production edits.
-3. Confirm RED fails for the expected enqueue/accepted-job boundary.
-4. Add only the minimal production code to make the test pass.
-5. Run focused test and then `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`.
-6. Update README_IMPL current-state notes if the runtime enqueue boundary becomes wired.
+2. Update README_IMPL with the stable mismatch error boundary before Rust changes.
+3. Add the RED test before production edits.
+4. Confirm RED fails for the expected missing mismatch error projection.
+5. Add only the minimal production branch to return the stable error and skip runtime enqueue.
+6. Run focused test, full `launcher-module-downloads` tests, formatter/checks, and scoped `git diff --check`.
 
 ## Validation Result
 
 - passed
-- RED confirmed with focused test failure: `resume_download_enqueues_existing_job_when_decisions_have_runtime_candidates` failed on `DOWNLOADS_NOT_WIRED`.
-- GREEN confirmed with focused test pass after the minimal runtime enqueue branch.
-- Full module validation passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` reported 15 passed, 0 failed.
+- RED confirmed with focused test failure: `resume_download_returns_stable_error_when_segment_checkpoint_mismatches_manifest` failed on `DOWNLOADS_NOT_WIRED` instead of `DL_RESUME_SEGMENT_MISMATCH`.
+- GREEN confirmed with focused test pass after the minimal mismatch error branch.
+- Full module validation passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` reported 16 passed, 0 failed after formatting.
 - `cargo fmt --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml -p launcher-module-downloads` completed successfully.
 - Scoped `git diff --check` passed for facade, README_IMPL, and PWF files with CRLF conversion warnings only.
-- The package formatter also normalized module contracts EOF/newline wrapping; those formatting-only files are included in the AT-167 allowed set.
-- Committed locally.
+- Code/docs and final PWF records are included in the same local AT-168 commit.
 
 ## Notes
 
-- AT-2026-05-15-166 completed the docs boundary and was current HEAD before this task.
-- Resume point: choose the next backend slice after job-level enqueue, likely either mismatch/error projection, all-sealed completion handling, or a documented scheduler/driver payload boundary.
+- AT-2026-05-15-167 committed the job-level runtime enqueue branch.
+- Resume point: choose the next backend slice after mismatch projection, likely all-sealed completion handling or a documented scheduler/driver payload boundary.
 - Direct `origin/main` push remains intentionally skipped without explicit approval.

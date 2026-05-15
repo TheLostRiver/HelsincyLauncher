@@ -76,6 +76,7 @@ Implementation truth should move through module facade and ports first. Do not p
 | `resume_download` manifest boundary | calls `DownloadManifestProviderPort::fetch_manifest()` after staging is valid | module facade test |
 | `resume_download` segment decisions | derives `seal_completed`, `resume_partial`, `queue_remaining`, and `reject_mismatch` from manifest/checkpoint facts | module decision tests |
 | `resume_download` runtime enqueue boundary | enqueues the existing job through job-level `JobRuntime::enqueue()` when resume decisions contain runtime candidates and no mismatch rejection | module facade test |
+| `resume_download` mismatch error projection | returns `DL_RESUME_SEGMENT_MISMATCH` and skips runtime enqueue when derived decisions contain `reject_mismatch` | module facade test |
 | list/get/policy surfaces | not wired yet | future slices |
 
 ---
@@ -217,7 +218,7 @@ Decision mapping:
 | `seal_completed` | do not enqueue this segment |
 | `resume_partial` | candidate for the downloads-owned scheduler/driver to continue from checkpoint bytes |
 | `queue_remaining` | candidate for the downloads-owned scheduler/driver to start from segment offset |
-| `reject_mismatch` | do not enqueue; later slice should project a downloads-domain failure or needs-attention state |
+| `reject_mismatch` | do not enqueue; returns `DL_RESUME_SEGMENT_MISMATCH` until a richer needs-attention projection is designed |
 
 The first runtime-enqueue code slice now proves only the job-level enqueue boundary:
 
@@ -246,8 +247,11 @@ Current stable resume errors:
 |------|---------|-----------|----------|
 | `DL_JOB_NOT_FOUND` | requested job has no downloads module record | false | error |
 | `DL_CHECKPOINT_MISSING` | requested job has no module checkpoint | false | error |
+| `DL_RESUME_SEGMENT_MISMATCH` | a persisted segment checkpoint matches a manifest `segment_id` but conflicts on `file_id`, `offset`, or `length` | false | error |
 
 `DOWNLOADS_NOT_WIRED` remains a temporary implementation placeholder, not a final domain error.
+
+`DL_RESUME_SEGMENT_MISMATCH` is the current narrow projection for stale or unsafe segment checkpoint facts. It must stop before runtime enqueue, must not silently restart the whole job, and must not expose segment internals through host transport or frontend IPC.
 
 ---
 

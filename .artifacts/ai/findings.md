@@ -509,3 +509,11 @@
 - `crates/module-downloads/src/facade/mod.rs` already derives segment decisions in `resume_download` but still returns `DOWNLOADS_NOT_WIRED`, making a focused RED test possible.
 - Existing test helpers already record job lookups, checkpoint loads, staging validations, manifest fetches, and runtime enqueue requests, so the narrow test can assert the existing job id, module, kind, persisted priority, recoverable flag, and empty extension.
 - AT-167 implemented the first job-level enqueue boundary and kept mismatch/no-candidate branches on the existing placeholder path, so the next slice needs an explicit design choice before coding deeper scheduler or error projection behavior.
+
+## Phase 43 Resume Mismatch Error Projection Findings
+
+- `docs/modules/downloads/README_IMPL.md` and `TauriDownloadRuntimeDesign.md` both require stale or mismatched segment facts to stop safe automatic resume rather than silently restart the whole job.
+- `docs/TauriErrorHandlingAndProjectionDesign.md` requires stable codes over message matching; downloads-domain errors should use the `DL_*` prefix and expose retryable/severity consistently.
+- `docs/TauriIPCAndStateContractsDesign.md` keeps frontend-facing failures behind `AppErrorDto`; AT-168 should not add IPC fields or expose segment details.
+- `docs/TauriKernelJobsRuntimeDesign.md` keeps segment checkpoints out of `kernel-jobs`; mismatch classification belongs in `module-downloads`.
+- Current `resume_download` already detects `RejectMismatch` decisions but falls through to `DOWNLOADS_NOT_WIRED`, making a focused RED test possible.

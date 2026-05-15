@@ -4555,3 +4555,142 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Agent Record: 2026-05-15 23:50:34 +08:00
+- Started AT-2026-05-15-168 after user approved the next backend slice.
+- Scope is backend-only and TDD-first: document and test stable mismatch error projection for `resume_download` before production Rust changes.
+- Current dirty worktree contains unrelated frontend, sqlite, Cargo.lock, `.codex`, and `src/` files that must remain untouched.
+
+### Agent Record: 2026-05-15 23:50:34 +08:00
+- Completed required AT-168 reading pass across root README, CONTRIBUTING, docs index, downloads module docs, README_IMPL, download runtime design, crate layout/API drafts, kernel-jobs runtime design, error projection, IPC envelope, testing strategy, AI transaction protocol, and current facade code/test snippets.
+- Confirmed the narrow boundary: `reject_mismatch` must return a stable downloads-domain error and skip runtime enqueue, without changing IPC, persistence, scheduler execution, or kernel-jobs payload shape.
+- Updated README_IMPL to define `DL_RESUME_SEGMENT_MISMATCH` before Rust code changes.
+
+### Agent Record: 2026-05-15 23:50:34 +08:00
+- Added RED test `resume_download_returns_stable_error_when_segment_checkpoint_mismatches_manifest`.
+- Focused RED command failed as expected: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_download_returns_stable_error_when_segment_checkpoint_mismatches_manifest`.
+- Failure reason was the expected missing projection: `resume_download` still returned `DOWNLOADS_NOT_WIRED` instead of `DL_RESUME_SEGMENT_MISMATCH`.
+
+### Agent Record: 2026-05-15 23:50:34 +08:00
+- Implemented the minimal `reject_mismatch` error projection in `resume_download`.
+- Focused GREEN passed for `resume_download_returns_stable_error_when_segment_checkpoint_mismatches_manifest`.
+- Full downloads module tests passed after formatting: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` reported 16 passed, 0 failed.
+- Updated README_IMPL so mismatch error projection is recorded as wired to `DL_RESUME_SEGMENT_MISMATCH`.
+
+### Agent Record: 2026-05-15 23:50:34 +08:00
+- Final full downloads module test passed after the last code cleanup: 16 passed, 0 failed.
+- Scoped `git diff --check` passed for AT-2026-05-15-168 files with CRLF conversion warnings only.
+- `rg` readback confirmed README_IMPL documents `DL_RESUME_SEGMENT_MISMATCH`, and facade/test code contains the mismatch error branch plus no-enqueue assertion.
+
+### Agent Record: 2026-05-15 23:50:34 +08:00
+- Committed AT-2026-05-15-168 locally with message `feat: project resume segment mismatches`.
+- Final PWF records avoid embedding a self-referential commit hash because amend changes the commit object id.
+
+### Agent Record: 2026-05-15 23:50:34 +08:00
+- Blocked while trying to validate/amend final PWF commit-status records for AT-2026-05-15-168.
+- Automatic approval review rejected the scoped Git validation commands with a Codex usage-limit message.
+- Do not attempt workaround commands; resume by running scoped PWF validation and amending local commit `0277059` once approvals are available again.
+
+### Auto Record: 2026-05-15 23:51:51
+- Tool: apply_patch
+- Phase: Phase 42 - Downloads Resume Runtime Enqueue Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-15 23:52:08
+- Tool: apply_patch
+- Phase: Phase 43 - Downloads Resume Mismatch Error Projection
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-15 23:52:25
+- Tool: apply_patch
+- Phase: Phase 43 - Downloads Resume Mismatch Error Projection
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-15 23:53:50
+- Tool: apply_patch
+- Phase: Phase 43 - Downloads Resume Mismatch Error Projection
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-15 23:54:12
+- Tool: apply_patch
+- Phase: Phase 43 - Downloads Resume Mismatch Error Projection
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-15 23:54:31
+- Tool: apply_patch
+- Phase: Phase 43 - Downloads Resume Mismatch Error Projection
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-15 23:54:53
+- Tool: apply_patch
+- Phase: Phase 43 - Downloads Resume Mismatch Error Projection
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-15 23:56:04
+- Tool: apply_patch
+- Phase: Phase 43 - Downloads Resume Mismatch Error Projection
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-15 23:56:34
+- Tool: apply_patch
+- Phase: Phase 43 - Downloads Resume Mismatch Error Projection
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-15 23:57:00
+- Tool: apply_patch
+- Phase: Phase 43 - Downloads Resume Mismatch Error Projection
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-15 23:58:22
+- Tool: apply_patch
+- Phase: Phase 43 - Downloads Resume Mismatch Error Projection
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-15 23:58:57
+- Tool: apply_patch
+- Phase: Phase 43 - Downloads Resume Mismatch Error Projection
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Agent Record: 2026-05-16 00:03:01 +08:00
+- Resumed AT-2026-05-15-168 from the approval-reviewer usage-limit blocker.
+- Scoped PWF validation was run for the AT-168 file set and reported no whitespace errors; CRLF conversion warnings only.
+- Updated active-task and handoff back to completed state so the final PWF records can be staged and amended into the same local AT-168 commit.
+
+### Auto Record: 2026-05-16 00:03:17
+- Tool: apply_patch
+- Phase: Phase 43 - Downloads Resume Mismatch Error Projection
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-16 00:03:27
+- Tool: apply_patch
+- Phase: Phase 43 - Downloads Resume Mismatch Error Projection
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
