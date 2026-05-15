@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 38 - Downloads Resume Partial Segment Decision
+Phase 39 - Downloads Resume Mismatch Rejection Coverage
 
 ## Current Focus
 
@@ -115,6 +115,8 @@ Phase 38 - Downloads Resume Partial Segment Decision
 - AT-2026-05-15-162 completed after adding manifest segment/checkpoint/decision types and proving completed segment checkpoints become sealed non-enqueue decisions.
 - AT-2026-05-15-163 is in progress after selecting the next explicit decision branch: partial checkpoint segments become `resume_partial` enqueue candidates without runtime enqueue.
 - AT-2026-05-15-163 completed after adding the partial checkpoint -> `ResumePartial` decision branch while keeping runtime enqueue out of scope.
+- AT-2026-05-15-164 is in progress after confirming the `RejectMismatch` branch already exists but lacks focused safety coverage for stale segment checkpoint facts.
+- AT-2026-05-15-164 completed after adding focused mismatch rejection coverage; the test passed without production edits because the safety branch already existed.
 
 ## Phases
 
@@ -347,6 +349,12 @@ Phase 38 - Downloads Resume Partial Segment Decision
 - Atomic tasks: AT-2026-05-15-163
 - **Status:** complete
 
+### Phase 39: Downloads Resume Mismatch Rejection Coverage
+
+- Outcome: add focused module coverage proving stale manifest/checkpoint boundary facts become `reject_mismatch` decisions and are not runtime enqueue candidates.
+- Atomic tasks: AT-2026-05-15-164
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -506,6 +514,7 @@ Phase 38 - Downloads Resume Partial Segment Decision
 155. AT-2026-05-15-161 - completed - documented the downloads resume segment/checkpoint/resume-decision data shape before coding completed-segment sealing.
 156. AT-2026-05-15-162 - completed - added the minimal completed-segment sealing decision without runtime enqueue or SQLite schema changes.
 157. AT-2026-05-15-163 - completed - added the minimal partial-segment resume decision without runtime enqueue or persistence changes.
+158. AT-2026-05-15-164 - completed - added focused mismatch rejection coverage for stale segment checkpoint facts without runtime enqueue or persistence changes.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
@@ -524,7 +533,7 @@ Phase 38 - Downloads Resume Partial Segment Decision
 
 ## Follow-up Queue
 
-1. Continue with the next downloads resume slice by adding mismatch rejection semantics or queue-remaining coverage, still without runtime enqueue.
+1. Continue with queue-remaining coverage or the next runtime-enqueue design slice, still without widening into concrete persistence or host/frontend changes until a new atomic task scopes it.
 2. Leave unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, and `src/` changes untouched unless the user explicitly scopes them into a task.
 
 ## Legacy Note

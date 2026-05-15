@@ -2,8 +2,8 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-15-163
-- title: Add downloads resume partial segment decision
+- task id: AT-2026-05-15-164
+- title: Add downloads resume mismatch rejection coverage
 - status: committed locally in the current HEAD
 
 ## Current In-progress Atomic Task
@@ -21,12 +21,11 @@
 
 ## Validation
 
-- Passed:
-  - RED focused test failed with `QueueRemaining` instead of `ResumePartial`
-  - focused `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_segment_decisions_resume_partial_checkpoint_segments`
-  - full `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`
-  - `crates/module-downloads/src/facade/mod.rs` `rustfmt --check`
-  - scoped `git diff --check`
+- Passed for AT-2026-05-15-164:
+  - focused `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_segment_decisions_reject_mismatched_checkpoint_segments` reported 1 passed, 0 failed.
+  - full `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` reported 13 passed, 0 failed, plus 0 doctests.
+  - `rustfmt --check crates\module-downloads\src\facade\mod.rs`
+  - scoped `git diff --check` over the AT-164 files; only LF/CRLF warnings were emitted.
 
 ## Current Git State To Preserve
 
@@ -40,5 +39,5 @@
 
 ## Next Resume Point
 
-1. Next code candidate: mismatch rejection semantics or queue-remaining coverage, still without runtime enqueue.
+1. Next candidate is queue-remaining coverage or a new runtime-enqueue design slice.
 2. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.

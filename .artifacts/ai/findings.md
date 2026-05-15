@@ -469,3 +469,13 @@
 - README_IMPL and `TauriDownloadRuntimeDesign.md` both require partial segment checkpoints to resume from the interrupted byte range when provider validators allow it.
 - The current in-memory decision shape already has `DownloadResumeSegmentAction::ResumePartial` and treats it as a runtime enqueue candidate; the missing behavior is the derivation branch.
 - The narrow next change is a single focused test plus the branch for matching `0 < downloaded_bytes < length` checkpoints, without persistence, runtime enqueue, or mismatch error projection.
+
+## Phase 39 Resume Mismatch Rejection Coverage Findings
+
+- AT-2026-05-15-163 is committed as `07ed4aa` and added the partial checkpoint -> `ResumePartial` decision branch.
+- `docs/modules/downloads/README_IMPL.md` requires manifest and checkpoint segments to match by `segment_id` and then validate `file_id`, `offset`, and `length`; stale or mismatched segment facts must not silently restart a whole job.
+- `docs/TauriDownloadRuntimeDesign.md` keeps resume reconstruction inside downloads and says completed segments should not re-download, partial segments may resume safely, and unsafe provider conditions should only requeue affected segments rather than collapse the whole job.
+- `docs/TauriKernelJobsRuntimeDesign.md` says `kernel-jobs` must not directly understand download segments, so mismatch safety belongs in `module-downloads`, not shared runtime.
+- `docs/modules/downloads/README_ARCH.md`, `README_API.md`, and `README_FLOW.md` all preserve the front-end boundary: UI consumes aggregate projections and must not own checkpoint or segment resume logic.
+- Current `build_resume_segment_decisions` already has a `RejectMismatch` branch for matching `segment_id` with mismatched `file_id`, `offset`, or `length`, but there is no focused test proving it remains non-enqueueable.
+- The smallest safe next slice is coverage-only in `crates/module-downloads/src/facade/mod.rs`, plus PWF records; public error projection, runtime enqueue, concrete persistence, host transport, and frontend remain out of scope.

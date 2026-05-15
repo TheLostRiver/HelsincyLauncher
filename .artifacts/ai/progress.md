@@ -4084,3 +4084,110 @@
 - Phase: Phase 38 - Downloads Resume Partial Segment Decision
 - Files:
   - `.artifacts/ai/progress.md` (update)
+
+## Phase 39 - Downloads Resume Mismatch Rejection Coverage
+
+### Agent Record: 2026-05-15 22:06
+
+- Started AT-2026-05-15-164 after the user asked to begin the next step.
+- Ran PWF recovery checks in small batches:
+  - user-global `session-catchup.py` path was missing, so the repo-local `.codex/skills/planning-with-files/scripts/session-catchup.py` was used instead.
+  - Git status required `git -c safe.directory=D:/DEV/MyEpicLauncher ...` because the repository owner differs from the current Windows user.
+- Current HEAD at task start: `07ed4aa`.
+- Unrelated dirty files to preserve remain present: `Cargo.lock`, `MyEpicLauncher.pen`, frontend files under `app/` and `components/`, sqlite files, `.codex`, and `src/`.
+- Read required context in batches before coding: `README.md`, `CONTRIBUTING.md`, `docs/README.md`, `docs/modules/downloads/README_ARCH.md`, `README_API.md`, `README_FLOW.md`, `README_IMPL.md`, and relevant snippets from the download runtime, backend crate layout, crate API draft, kernel jobs, testing, AI transaction, architecture principles, and code comment docs.
+- Key scope decision: `RejectMismatch` behavior is already present in `build_resume_segment_decisions`; AT-164 is focused safety coverage unless the test exposes a real implementation gap.
+
+### Agent Record: 2026-05-15 22:12
+
+- Added `resume_segment_decisions_reject_mismatched_checkpoint_segments` beside the existing sealed and partial resume decision tests.
+- The test uses a matching `segment_id` but stale `file_id`, then verifies `DownloadResumeSegmentAction::RejectMismatch` and `!is_runtime_enqueue_candidate()`.
+- Focused test passed immediately, confirming the existing production branch already implements the safety behavior.
+- Full `launcher-module-downloads` test passed with 13 tests passing and 0 failures.
+- `rustfmt --check crates\module-downloads\src\facade\mod.rs` passed.
+- Scoped `git diff --check` over the AT-164 files passed; Git only emitted LF/CRLF warnings.
+- Next candidate after commit: queue-remaining coverage or a new design slice for runtime enqueue, depending on how much behavior the next atomic task is allowed to open.
+
+### Agent Record: 2026-05-15 22:16
+
+- Initial `git commit` failed because this environment has no configured Git author identity.
+- Resolution: keep global Git config untouched and retry the commit with per-command `user.name` / `user.email` overrides.
+- Commit succeeded with the per-command identity override; handoff was updated afterward so the same task commit can be amended with an accurate current-HEAD recovery point.
+
+### Auto Record: 2026-05-15 22:49:01
+- Tool: apply_patch
+- Phase: Phase 38 - Downloads Resume Partial Segment Decision
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+
+### Auto Record: 2026-05-15 22:49:27
+- Tool: apply_patch
+- Phase: Phase 39 - Downloads Resume Mismatch Rejection Coverage
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 22:49:37
+- Tool: apply_patch
+- Phase: Phase 39 - Downloads Resume Mismatch Rejection Coverage
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 22:49:51
+- Tool: apply_patch
+- Phase: Phase 39 - Downloads Resume Mismatch Rejection Coverage
+- Files:
+  - `.artifacts/ai/findings.md` (update)
+
+### Auto Record: 2026-05-15 22:50:04
+- Tool: apply_patch
+- Phase: Phase 39 - Downloads Resume Mismatch Rejection Coverage
+- Files:
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-15 22:50:27
+- Tool: apply_patch
+- Phase: Phase 39 - Downloads Resume Mismatch Rejection Coverage
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-15 22:51:42
+- Tool: apply_patch
+- Phase: Phase 39 - Downloads Resume Mismatch Rejection Coverage
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+
+### Auto Record: 2026-05-15 22:51:52
+- Tool: apply_patch
+- Phase: Phase 39 - Downloads Resume Mismatch Rejection Coverage
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 22:52:05
+- Tool: apply_patch
+- Phase: Phase 39 - Downloads Resume Mismatch Rejection Coverage
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 22:52:20
+- Tool: apply_patch
+- Phase: Phase 39 - Downloads Resume Mismatch Rejection Coverage
+- Files:
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-15 22:53:47
+- Tool: apply_patch
+- Phase: Phase 39 - Downloads Resume Mismatch Rejection Coverage
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 22:54:45
+- Tool: apply_patch
+- Phase: Phase 39 - Downloads Resume Mismatch Rejection Coverage
+- Files:
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-15 22:54:50
+- Tool: apply_patch
+- Phase: Phase 39 - Downloads Resume Mismatch Rejection Coverage
+- Files:
+  - `.artifacts/ai/progress.md` (update)
