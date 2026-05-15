@@ -2,19 +2,24 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-15-166
-- title: Document downloads resume runtime enqueue boundary
+- task id: AT-2026-05-15-167
+- title: Add downloads resume runtime enqueue boundary
 - status: committed locally as current HEAD
 
 ## Current In-progress Atomic Task
 
 - task id: none
 - title: none
-- status: no active task; next suggested task is AT-2026-05-15-167
+- status: no active task after AT-167 validation
 
 ## Current Slice
 
 - `docs/modules/downloads/README_IMPL.md`
+- `crates/module-downloads/src/facade/mod.rs`
+- `crates/module-downloads/src/contracts/commands.rs`
+- `crates/module-downloads/src/contracts/dto.rs`
+- `crates/module-downloads/src/contracts/events.rs`
+- `crates/module-downloads/src/contracts/mod.rs`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -23,11 +28,11 @@
 
 ## Validation
 
-- Passed for AT-2026-05-15-166:
-  - README_IMPL runtime-enqueue section was updated.
-  - Readback confirmed the new current-state rows, minimum job-level runtime request, decision mapping, and non-goals.
-  - Scoped `git diff --check` passed with CRLF conversion warnings only.
-  - Scoped diff stat/status confirmed only the AT-166 allowed files are in scope.
+- Passed for AT-2026-05-15-167:
+  - RED focused test failed on the expected `DOWNLOADS_NOT_WIRED` gap.
+  - GREEN focused test passed after the minimal job-level runtime enqueue branch.
+  - Full downloads module test passed with 15 passed, 0 failed after formatting.
+  - README_IMPL was refreshed so current state matches the wired job-level enqueue boundary.
 
 ## Current Git State To Preserve
 
@@ -41,6 +46,5 @@
 
 ## Next Resume Point
 
-1. Start AT-2026-05-15-167 as the Rust RED-test slice for the documented runtime-enqueue boundary.
-2. Keep AT-166 docs-only; Rust implementation starts in the following atomic task.
-3. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.
+1. Choose the next backend slice after job-level resume enqueue before coding further.
+2. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.

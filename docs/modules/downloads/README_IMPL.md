@@ -75,7 +75,7 @@ Implementation truth should move through module facade and ports first. Do not p
 | `resume_download` staging boundary | calls `DownloadStagingObjectStore::ensure_staging_root()` after job and checkpoint exist | module facade test |
 | `resume_download` manifest boundary | calls `DownloadManifestProviderPort::fetch_manifest()` after staging is valid | module facade test |
 | `resume_download` segment decisions | derives `seal_completed`, `resume_partial`, `queue_remaining`, and `reject_mismatch` from manifest/checkpoint facts | module decision tests |
-| `resume_download` runtime enqueue boundary | not wired yet, still returns `DOWNLOADS_NOT_WIRED` after decision derivation | next runtime-enqueue slice |
+| `resume_download` runtime enqueue boundary | enqueues the existing job through job-level `JobRuntime::enqueue()` when resume decisions contain runtime candidates and no mismatch rejection | module facade test |
 | list/get/policy surfaces | not wired yet | future slices |
 
 ---
@@ -102,7 +102,7 @@ Current slice boundary:
 3. Staging boundary is implemented as a minimal port call.
 4. Manifest reconstruction is implemented as a minimal provider port call.
 5. Segment decision derivation is implemented for completed sealing, partial resume, queue remaining, and mismatch rejection.
-6. Runtime enqueue-resume is the next backend boundary and must stay job-level until a downloads-owned scheduler/driver payload is explicitly introduced.
+6. Runtime enqueue-resume is implemented as the first job-level boundary and must stay job-level until a downloads-owned scheduler/driver payload is explicitly introduced.
 7. Concrete segment persistence, scheduler execution, host transport, and frontend projection remain later slices.
 
 Do not skip directly from checkpoint to `JobRuntime::resume`. The module owns business checkpoint and resume reconstruction.
@@ -117,7 +117,7 @@ Do not skip directly from checkpoint to `JobRuntime::resume`. The module owns bu
 | `DownloadCheckpointRepository` | defined in driver module | concrete SQLite shell exists |
 | `DownloadStagingObjectStore` | minimal facade port exists | `()` placeholder keeps composition wiring stable |
 | `DownloadManifestProviderPort` | minimal facade port exists | currently returns a minimal `DownloadManifestPlan` handle |
-| `JobRuntime` | shared kernel-jobs runtime trait exists | current resume does not enqueue yet; first resume enqueue slice should use job-level `EnqueueJobRequest<()>` |
+| `JobRuntime` | shared kernel-jobs runtime trait exists | resume uses job-level `EnqueueJobRequest<()>`; segment details still stay out of `kernel-jobs` |
 
 When adding a port:
 
@@ -219,7 +219,7 @@ Decision mapping:
 | `queue_remaining` | candidate for the downloads-owned scheduler/driver to start from segment offset |
 | `reject_mismatch` | do not enqueue; later slice should project a downloads-domain failure or needs-attention state |
 
-The first code slice after this document should prove only the job-level enqueue boundary:
+The first runtime-enqueue code slice now proves only the job-level enqueue boundary:
 
 1. `resume_download` loads job, checkpoint, staging, and manifest.
 2. It derives segment decisions.

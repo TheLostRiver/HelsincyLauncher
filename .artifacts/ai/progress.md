@@ -4402,6 +4402,40 @@
 - Committed AT-2026-05-15-166 locally with message `docs: define resume runtime enqueue boundary`.
 - Final PWF records avoid embedding a self-referential commit hash because amend changes the commit object id.
 
+### Agent Record: 2026-05-15 23:22:28 +08:00
+- Started AT-2026-05-15-167 after completing AT-166.
+- Scope is backend-only and TDD-first: add a failing module facade test for the documented job-level runtime enqueue boundary before any production Rust edits.
+- Required docs will be read in batches before editing `crates/module-downloads/src/facade/mod.rs`.
+
+### Agent Record: 2026-05-15 23:22:28 +08:00
+- Completed required AT-167 reading pass across root README, CONTRIBUTING, docs index, downloads module docs, downloads implementation guide, download runtime design, crate layout/API drafts, kernel-jobs runtime design, testing strategy, and AI transaction protocol.
+- Confirmed the implementation boundary: `resume_download` may only submit a job-level `EnqueueJobRequest<()>` after downloads-owned resume decisions find enqueue candidates and no mismatch rejection.
+- Confirmed existing code/test helpers support a RED facade test without opening frontend, host transport, SQLite schema, scheduler execution, or kernel-jobs segment payload changes.
+
+### Agent Record: 2026-05-15 23:22:28 +08:00
+- Added RED test `resume_download_enqueues_existing_job_when_decisions_have_runtime_candidates` in `crates/module-downloads/src/facade/mod.rs`.
+- Focused RED command failed as expected: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_download_enqueues_existing_job_when_decisions_have_runtime_candidates`.
+- Failure reason was the expected missing boundary: `resume_download` still returned `DOWNLOADS_NOT_WIRED` instead of runtime `AcceptedJob`.
+
+### Agent Record: 2026-05-15 23:22:28 +08:00
+- Implemented the minimal job-level runtime enqueue branch in `resume_download`.
+- Focused GREEN passed: `resume_download_enqueues_existing_job_when_decisions_have_runtime_candidates` returned ok.
+- Full downloads module tests passed after formatting: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` reported 15 passed, 0 failed.
+- Updated `docs/modules/downloads/README_IMPL.md` so the implementation guide no longer says the runtime enqueue boundary is unwired.
+
+### Agent Record: 2026-05-15 23:22:28 +08:00
+- Scoped `git diff --check` passed for AT-2026-05-15-167 files with CRLF conversion warnings only.
+- Scoped diff stat/status confirmed the slice is limited to `crates/module-downloads/src/facade/mod.rs`, `docs/modules/downloads/README_IMPL.md`, and PWF files.
+- `rg` readback confirmed README_IMPL now records the wired runtime enqueue boundary and facade contains the runtime candidate/no-mismatch enqueue branch.
+
+### Agent Record: 2026-05-15 23:22:28 +08:00
+- `cargo fmt -p launcher-module-downloads` also normalized EOF/newline wrapping in downloads contract files.
+- Because those formatting changes were produced during AT-167 validation and the full module tests passed in that state, the AT-167 allowed set now explicitly includes those module-local formatting-only files.
+
+### Agent Record: 2026-05-15 23:22:28 +08:00
+- Committed AT-2026-05-15-167 locally with message `feat: enqueue resumable downloads`.
+- Final PWF records avoid embedding a self-referential commit hash because amend changes the commit object id.
+
 ### Auto Record: 2026-05-15 23:22:48
 - Tool: apply_patch
 - Phase: Phase 41 - Downloads Resume Runtime Enqueue Boundary Documentation
@@ -4429,6 +4463,93 @@
 ### Auto Record: 2026-05-15 23:26:26
 - Tool: apply_patch
 - Phase: Phase 41 - Downloads Resume Runtime Enqueue Boundary Documentation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-15 23:29:08
+- Tool: apply_patch
+- Phase: Phase 42 - Downloads Resume Runtime Enqueue Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-15 23:31:34
+- Tool: apply_patch
+- Phase: Phase 42 - Downloads Resume Runtime Enqueue Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-15 23:32:12
+- Tool: apply_patch
+- Phase: Phase 42 - Downloads Resume Runtime Enqueue Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-15 23:32:39
+- Tool: apply_patch
+- Phase: Phase 42 - Downloads Resume Runtime Enqueue Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-15 23:32:56
+- Tool: apply_patch
+- Phase: Phase 42 - Downloads Resume Runtime Enqueue Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-15 23:34:45
+- Tool: apply_patch
+- Phase: Phase 42 - Downloads Resume Runtime Enqueue Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-15 23:35:00
+- Tool: apply_patch
+- Phase: Phase 42 - Downloads Resume Runtime Enqueue Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-15 23:35:34
+- Tool: apply_patch
+- Phase: Phase 42 - Downloads Resume Runtime Enqueue Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-15 23:36:05
+- Tool: apply_patch
+- Phase: Phase 42 - Downloads Resume Runtime Enqueue Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-15 23:37:29
+- Tool: apply_patch
+- Phase: Phase 42 - Downloads Resume Runtime Enqueue Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\contracts\commands.rs` (update)
+
+### Auto Record: 2026-05-15 23:43:20
+- Tool: apply_patch
+- Phase: Phase 42 - Downloads Resume Runtime Enqueue Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-15 23:44:53
+- Tool: apply_patch
+- Phase: Phase 42 - Downloads Resume Runtime Enqueue Boundary
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)

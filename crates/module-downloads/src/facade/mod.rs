@@ -375,7 +375,26 @@ impl<
             .staging_store
             .ensure_staging_root(&request.job_id)?;
         let manifest = self.deps.manifest_provider.fetch_manifest(&job.target_id)?;
-        let _resume_decisions = build_resume_segment_decisions(&manifest, &checkpoint.segments)?;
+        let resume_decisions = build_resume_segment_decisions(&manifest, &checkpoint.segments)?;
+        let has_runtime_enqueue_candidate = resume_decisions
+            .iter()
+            .any(DownloadResumeSegmentDecision::is_runtime_enqueue_candidate);
+        let has_reject_mismatch = resume_decisions
+            .iter()
+            .any(|decision| decision.action == DownloadResumeSegmentAction::RejectMismatch);
+
+        if has_runtime_enqueue_candidate && !has_reject_mismatch {
+            // Keep this first resume slice job-level; segment payloads stay in downloads.
+            // 首个恢复切片只做 job-level 入队；segment payload 仍留在 downloads 内部。
+            return self.deps.job_runtime.enqueue(EnqueueJobRequest {
+                job_id: request.job_id,
+                module: "downloads".to_string(),
+                kind: "download".to_string(),
+                priority: job.priority,
+                recoverable: true,
+                extension: None,
+            });
+        }
 
         Err(not_wired("resume_download"))
     }
@@ -519,13 +538,23 @@ mod tests {
     #[derive(Default)]
     struct RecordingCheckpointRepository {
         loaded_job_ids: Mutex<Vec<JobId>>,
+        segments: Vec<DownloadSegmentCheckpointRecord>,
         returns_missing: bool,
     }
 
     impl RecordingCheckpointRepository {
+        fn with_segments(segments: Vec<DownloadSegmentCheckpointRecord>) -> Self {
+            Self {
+                loaded_job_ids: Mutex::new(Vec::new()),
+                segments,
+                returns_missing: false,
+            }
+        }
+
         fn missing() -> Self {
             Self {
                 loaded_job_ids: Mutex::new(Vec::new()),
+                segments: Vec::new(),
                 returns_missing: true,
             }
         }
@@ -551,7 +580,7 @@ mod tests {
 
             Ok(Some(DownloadCheckpointRecord {
                 job_id: job_id.clone(),
-                segments: Vec::new(),
+                segments: self.segments.clone(),
             }))
         }
 
@@ -590,9 +619,17 @@ mod tests {
     #[derive(Default)]
     struct RecordingManifestProvider {
         fetched_target_ids: Mutex<Vec<String>>,
+        segments: Vec<DownloadManifestSegment>,
     }
 
     impl RecordingManifestProvider {
+        fn with_segments(segments: Vec<DownloadManifestSegment>) -> Self {
+            Self {
+                fetched_target_ids: Mutex::new(Vec::new()),
+                segments,
+            }
+        }
+
         fn fetched_target_ids(&self) -> Vec<String> {
             self.fetched_target_ids
                 .lock()
@@ -610,7 +647,7 @@ mod tests {
 
             Ok(DownloadManifestPlan {
                 target_id: target_id.to_string(),
-                segments: Vec::new(),
+                segments: self.segments.clone(),
             })
         }
     }
@@ -898,6 +935,68 @@ mod tests {
         );
         let error = result.expect_err("full resume orchestration should remain out of scope");
         assert_eq!(error.code, "DOWNLOADS_NOT_WIRED");
+    }
+
+    #[test]
+    fn resume_download_enqueues_existing_job_when_decisions_have_runtime_candidates() {
+        let job_id = JobId::generate();
+        let mut job = make_download_job(job_id.clone());
+        job.priority = JobPriority::High;
+        let expected_target_id = job.target_id.clone();
+        let facade = DownloadFacade::new(DownloadModuleDeps {
+            job_repo: RecordingDownloadJobRepository::with_job(job),
+            checkpoint_repo: RecordingCheckpointRepository::with_segments(Vec::new()),
+            manifest_provider: RecordingManifestProvider::with_segments(vec![
+                DownloadManifestSegment {
+                    segment_id: "segment-1".into(),
+                    file_id: "file-1".into(),
+                    offset: 0,
+                    length: 1024,
+                    source_locator: "https://example.invalid/file.bin".into(),
+                    expected_hash: Some("sha256:segment".into()),
+                    write_target: "file.bin.part".into(),
+                },
+            ]),
+            staging_store: RecordingStagingObjectStore::default(),
+            job_runtime: RecordingJobRuntime::default(),
+        });
+
+        let accepted = facade
+            .resume_download(ResumeDownloadRequestDto {
+                job_id: job_id.clone(),
+            })
+            .expect("resume_download should enqueue the existing runtime job");
+
+        assert_eq!(
+            facade.deps().checkpoint_repo.loaded_job_ids(),
+            vec![job_id.clone()]
+        );
+        assert_eq!(
+            facade.deps().staging_store.ensured_job_ids(),
+            vec![job_id.clone()]
+        );
+        assert_eq!(
+            facade.deps().manifest_provider.fetched_target_ids(),
+            vec![expected_target_id]
+        );
+        assert_eq!(accepted.job_id, job_id);
+        assert_eq!(accepted.module, "downloads");
+        assert_eq!(accepted.kind, "download");
+
+        let enqueued_requests = facade.deps().job_runtime.enqueued_requests();
+        assert_eq!(
+            enqueued_requests.len(),
+            1,
+            "resume_download should enqueue one job-level runtime request"
+        );
+
+        let enqueued_request = &enqueued_requests[0];
+        assert_eq!(enqueued_request.job_id, accepted.job_id);
+        assert_eq!(enqueued_request.module, "downloads");
+        assert_eq!(enqueued_request.kind, "download");
+        assert_eq!(enqueued_request.priority, JobPriority::High);
+        assert!(enqueued_request.recoverable);
+        assert_eq!(enqueued_request.extension, None);
     }
 
     #[test]

@@ -20,8 +20,8 @@ pub use commands::{
     StartDownloadRequestDto, UpdateDownloadPolicyRequestDto,
 };
 pub use dto::{
-    DownloadJobExtensionDto, DownloadJobListDto, DownloadJobListItemDto,
-    DownloadJobSnapshotDto, DownloadPolicyDto,
+    DownloadJobExtensionDto, DownloadJobListDto, DownloadJobListItemDto, DownloadJobSnapshotDto,
+    DownloadPolicyDto,
 };
 pub use events::DownloadEventDto;
 pub use queries::{GetDownloadJobQueryDto, GetDownloadPolicyQueryDto, ListDownloadJobsQueryDto};

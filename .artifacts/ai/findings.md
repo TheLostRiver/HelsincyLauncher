@@ -499,3 +499,13 @@
 - `docs/TauriDownloadRuntimeDesign.md` orders resume as: load checkpoint, validate staging, reconstruct manifest, seal completed segments, enqueue remaining segments only, then continue scheduler loop.
 - `docs/modules/downloads/README_ARCH.md`, `README_API.md`, and `README_FLOW.md` keep UI at aggregate projection/intent level; AT-166 must not expose segment decisions or runtime enqueue details through frontend IPC.
 - The smallest safe next document update is to define that `resume_download` should enqueue the existing downloads job id with module `downloads`, kind `download`, original priority, `recoverable = true`, and `extension = None` only after decision derivation finds runtime enqueue candidates and no mismatch rejection.
+
+## Phase 42 Resume Runtime Enqueue Boundary Findings
+
+- AT-2026-05-15-166 documented the job-level runtime enqueue boundary and current HEAD starts AT-167 from that implementation guide.
+- `docs/modules/downloads/README_IMPL.md` requires the first code slice to load job, checkpoint, staging, and manifest, derive segment decisions, enqueue only when at least one runtime candidate exists and no `reject_mismatch` exists, and return the runtime `AcceptedJob`.
+- `docs/TauriDownloadRuntimeDesign.md` keeps checkpoint, segment planning, and resume reconstruction in downloads, while the frontend only consumes aggregate task projections.
+- `docs/TauriKernelJobsRuntimeDesign.md` says `kernel-jobs` must not understand segment plans/checkpoints; AT-167 must use job-level `EnqueueJobRequest<()>` only.
+- `crates/module-downloads/src/facade/mod.rs` already derives segment decisions in `resume_download` but still returns `DOWNLOADS_NOT_WIRED`, making a focused RED test possible.
+- Existing test helpers already record job lookups, checkpoint loads, staging validations, manifest fetches, and runtime enqueue requests, so the narrow test can assert the existing job id, module, kind, persisted priority, recoverable flag, and empty extension.
+- AT-167 implemented the first job-level enqueue boundary and kept mismatch/no-candidate branches on the existing placeholder path, so the next slice needs an explicit design choice before coding deeper scheduler or error projection behavior.
