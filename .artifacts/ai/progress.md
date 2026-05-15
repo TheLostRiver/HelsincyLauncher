@@ -3588,3 +3588,115 @@
 - Phase: Phase 34 - Downloads Module Implementation Documentation
 - Files:
   - `.artifacts/ai/progress.md` (update)
+
+## 2026-05-15 - AT-2026-05-15-160 Start
+
+- Recovered from AT-2026-05-15-159 at commit `c6c6f44`.
+- Read the required docs in small batches before coding:
+  - `README.md`
+  - `CONTRIBUTING.md`
+  - `docs/README.md`
+  - `docs/modules/downloads/README_ARCH.md`
+  - `docs/modules/downloads/README_API.md`
+  - `docs/modules/downloads/README_FLOW.md`
+  - `docs/modules/downloads/README_IMPL.md`
+  - `docs/TauriDownloadRuntimeDesign.md`
+  - `docs/TauriBackendCrateLayoutAndUseCaseStubDesign.md`
+  - `docs/TauriFirstCrateApiDrafts.md`
+  - `docs/TauriKernelJobsRuntimeDesign.md`
+  - `docs/TauriTestingStrategyAndQualityGateDesign.md`
+  - `docs/TauriAIDevelopmentTransactionProtocolDesign.md`
+  - `docs/TauriCodeCommentStandard.md`
+- Selected the next narrow backend-only slice: define the minimal manifest provider boundary after staging validation, and keep full runtime resume enqueue out of scope.
+- Next action: write a RED facade test for `resume_download_reconstructs_manifest_after_staging_is_valid`.
+
+## 2026-05-15 - AT-2026-05-15-160 RED/GREEN
+
+- RED passed as expected: focused test compile failed because `DownloadManifestPlan` and `DownloadManifestProviderPort` did not exist in `crates/module-downloads/src/facade/mod.rs`.
+- GREEN implementation added the minimal manifest plan/port boundary, kept `()` placeholder compatibility, and made `resume_download` fetch the manifest after staging validation.
+- Focused validation passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_download_reconstructs_manifest_after_staging_is_valid` reported 1 passed, 0 failed.
+
+## 2026-05-15 - AT-2026-05-15-160 Validation
+
+- Full module validation passed after the final source adjustment: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` reported 10 passed, 0 failed.
+- Scoped whitespace validation passed for the AT-2026-05-15-160 slice: `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- crates/module-downloads/src/facade/mod.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md`.
+- `cargo fmt --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --package launcher-module-downloads --check` exposed pre-existing package formatting drift outside the current slice; those unrelated files were left untouched.
+- Next coding slice is not started automatically because completed-segment sealing needs an explicit segment/checkpoint data-shape decision before implementation.
+
+### Auto Record: 2026-05-15 20:33:10
+- Tool: apply_patch
+- Phase: Phase 34 - Downloads Module Implementation Documentation
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+
+### Auto Record: 2026-05-15 20:33:20
+- Tool: apply_patch
+- Phase: Phase 35 - Downloads Resume Manifest Boundary
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 20:33:33
+- Tool: apply_patch
+- Phase: Phase 35 - Downloads Resume Manifest Boundary
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 20:33:45
+- Tool: apply_patch
+- Phase: Phase 35 - Downloads Resume Manifest Boundary
+- Files:
+  - `.artifacts/ai/findings.md` (update)
+
+### Auto Record: 2026-05-15 20:33:58
+- Tool: apply_patch
+- Phase: Phase 35 - Downloads Resume Manifest Boundary
+- Files:
+  - `.artifacts/ai/handoff.md` (delete)
+
+### Auto Record: 2026-05-15 20:34:26
+- Tool: apply_patch
+- Phase: Phase 35 - Downloads Resume Manifest Boundary
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-15 20:35:02
+- Tool: apply_patch
+- Phase: Phase 35 - Downloads Resume Manifest Boundary
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-15 20:35:25
+- Tool: apply_patch
+- Phase: Phase 35 - Downloads Resume Manifest Boundary
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 20:37:14
+- Tool: apply_patch
+- Phase: Phase 35 - Downloads Resume Manifest Boundary
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-15 21:00:23
+- Tool: apply_patch
+- Phase: Phase 35 - Downloads Resume Manifest Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+
+### Auto Record: 2026-05-15 21:00:33
+- Tool: apply_patch
+- Phase: Phase 35 - Downloads Resume Manifest Boundary
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-15 21:00:43
+- Tool: apply_patch
+- Phase: Phase 35 - Downloads Resume Manifest Boundary
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-15 21:00:57
+- Tool: apply_patch
+- Phase: Phase 35 - Downloads Resume Manifest Boundary
+- Files:
+  - `.artifacts/ai/handoff.md` (delete)

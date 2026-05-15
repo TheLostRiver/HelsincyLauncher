@@ -92,6 +92,33 @@ impl DownloadStagingObjectStore for () {
     }
 }
 
+/// Minimal manifest handle needed before later runtime resume enqueue.
+/// 后续 runtime 恢复入队前所需的最小 manifest 句柄。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DownloadManifestPlan {
+    /// Provider target identifier used to rebuild the resumable download plan.
+    /// 用于重建可恢复下载计划的 provider 目标标识。
+    pub target_id: String,
+}
+
+/// Port for reloading or reconstructing provider manifest data needed by resume.
+/// 重新加载或重建恢复所需 provider manifest 数据的端口。
+pub trait DownloadManifestProviderPort: Send + Sync {
+    /// Fetches the manifest plan for a module-owned download target.
+    /// 为 downloads 模块拥有的下载目标读取 manifest plan。
+    fn fetch_manifest(&self, target_id: &str) -> AppResult<DownloadManifestPlan>;
+}
+
+impl DownloadManifestProviderPort for () {
+    /// Keeps current composition wiring compatible until a real provider adapter lands.
+    /// 在真实 provider adapter 落地前，保持当前 composition 占位依赖可编译。
+    fn fetch_manifest(&self, target_id: &str) -> AppResult<DownloadManifestPlan> {
+        Ok(DownloadManifestPlan {
+            target_id: target_id.to_string(),
+        })
+    }
+}
+
 /// 组装 downloads facade 所需的依赖束。
 #[derive(Debug, Clone)]
 pub struct DownloadModuleDeps<J, C, M, S, R> {
@@ -199,21 +226,22 @@ impl<J: DownloadJobRepository, C, M, S, R: JobRuntime<Extension = ()>> DownloadF
 impl<
         J: DownloadJobRepository,
         C: DownloadCheckpointRepository,
-        M,
+        M: DownloadManifestProviderPort,
         S: DownloadStagingObjectStore,
         R: JobRuntime<Extension = ()>,
     >
     DownloadFacade<J, C, M, S, R>
 {
-    /// Loads module state, checkpoint, and staging before later resume decisions.
-    /// 先读取模块状态、checkpoint 和 staging，然后才进入后续恢复决策。
+    /// Loads module state, checkpoint, staging, and manifest before later resume decisions.
+    /// 先读取模块状态、checkpoint、staging 和 manifest，然后才进入后续恢复决策。
     ///
     /// Missing module state is a stable downloads-domain failure; full manifest
     /// and runtime resume orchestration stays in a later slice.
-    /// 缺失模块状态是稳定的 downloads 域失败；完整 manifest 与 runtime
-    /// 恢复编排仍留给后续切片。
+    /// Missing module state is a stable downloads-domain failure; runtime resume
+    /// enqueue still stays in a later slice.
+    /// 缺失模块状态是稳定的 downloads 域失败；runtime 恢复入队仍留给后续切片。
     pub fn resume_download(&self, request: ResumeDownloadRequestDto) -> AppResult<AcceptedJob> {
-        let _job = match self.deps.job_repo.get_job(&request.job_id)? {
+        let job = match self.deps.job_repo.get_job(&request.job_id)? {
             Some(job) => job,
             None => return Err(missing_job_record(&request.job_id)),
         };
@@ -224,6 +252,7 @@ impl<
         }
 
         let _staging_root = self.deps.staging_store.ensure_staging_root(&request.job_id)?;
+        let _manifest = self.deps.manifest_provider.fetch_manifest(&job.target_id)?;
 
         Err(not_wired("resume_download"))
     }
@@ -275,7 +304,8 @@ mod tests {
 
     use super::{
         DownloadFacade, DownloadJobRecord, DownloadJobRecordState, DownloadJobRepository,
-        DownloadModuleDeps, DownloadStagingObjectStore, DownloadStagingRoot,
+        DownloadManifestPlan, DownloadManifestProviderPort, DownloadModuleDeps,
+        DownloadStagingObjectStore, DownloadStagingRoot,
     };
     use crate::contracts::{
         CancelDownloadRequestDto, PauseDownloadRequestDto, ResumeDownloadRequestDto,
@@ -427,6 +457,33 @@ mod tests {
 
             Ok(DownloadStagingRoot {
                 job_id: job_id.clone(),
+            })
+        }
+    }
+
+    #[derive(Default)]
+    struct RecordingManifestProvider {
+        fetched_target_ids: Mutex<Vec<String>>,
+    }
+
+    impl RecordingManifestProvider {
+        fn fetched_target_ids(&self) -> Vec<String> {
+            self.fetched_target_ids
+                .lock()
+                .expect("fetched target ids mutex should not be poisoned")
+                .clone()
+        }
+    }
+
+    impl DownloadManifestProviderPort for RecordingManifestProvider {
+        fn fetch_manifest(&self, target_id: &str) -> AppResult<DownloadManifestPlan> {
+            self.fetched_target_ids
+                .lock()
+                .expect("fetched target ids mutex should not be poisoned")
+                .push(target_id.to_string());
+
+            Ok(DownloadManifestPlan {
+                target_id: target_id.to_string(),
             })
         }
     }
@@ -669,6 +726,37 @@ mod tests {
             facade.deps().staging_store.ensured_job_ids(),
             vec![job_id],
             "resume_download must validate staging before later manifest/runtime resume work"
+        );
+        let error = result.expect_err("full resume orchestration should remain out of scope");
+        assert_eq!(error.code, "DOWNLOADS_NOT_WIRED");
+    }
+
+    #[test]
+    fn resume_download_reconstructs_manifest_after_staging_is_valid() {
+        let job_id = JobId::generate();
+        let job = make_download_job(job_id.clone());
+        let expected_target_id = job.target_id.clone();
+        let facade = DownloadFacade::new(DownloadModuleDeps {
+            job_repo: RecordingDownloadJobRepository::with_job(job),
+            checkpoint_repo: RecordingCheckpointRepository::default(),
+            manifest_provider: RecordingManifestProvider::default(),
+            staging_store: RecordingStagingObjectStore::default(),
+            job_runtime: RecordingJobRuntime::default(),
+        });
+
+        let result = facade.resume_download(ResumeDownloadRequestDto {
+            job_id: job_id.clone(),
+        });
+
+        assert_eq!(
+            facade.deps().staging_store.ensured_job_ids(),
+            vec![job_id],
+            "manifest reconstruction should only run after staging validation succeeds"
+        );
+        assert_eq!(
+            facade.deps().manifest_provider.fetched_target_ids(),
+            vec![expected_target_id],
+            "resume_download must reload or reconstruct the manifest plan before runtime enqueue"
         );
         let error = result.expect_err("full resume orchestration should remain out of scope");
         assert_eq!(error.code, "DOWNLOADS_NOT_WIRED");

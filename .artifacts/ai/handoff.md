@@ -2,9 +2,9 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-15-159
-- title: Add downloads module implementation documentation
-- status: committed locally in the current HEAD
+- task id: AT-2026-05-15-160
+- title: Add downloads resume manifest provider boundary
+- status: committed locally in the current HEAD after publication
 
 ## Current In-progress Atomic Task
 
@@ -12,10 +12,7 @@
 
 ## Current Slice
 
-- `docs/modules/downloads/README_IMPL.md`
-- `docs/modules/_template/README_IMPL.md`
-- `docs/ModuleDocumentationStandard.md`
-- `docs/README.md`
+- `crates/module-downloads/src/facade/mod.rs`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -25,14 +22,16 @@
 ## Validation
 
 - Passed:
-  - created downloads README_IMPL and README_IMPL template
-  - updated docs navigation and module documentation standard
-  - scoped `git diff --check` passed for tracked documentation/PWF changes
-  - staged `git diff --cached --check` passed for all current-slice files, including new README_IMPL files
+  - RED compile failure observed for missing `DownloadManifestPlan` / `DownloadManifestProviderPort`
+  - focused `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_download_reconstructs_manifest_after_staging_is_valid`
+  - full `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`
+  - scoped `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- crates/module-downloads/src/facade/mod.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md`
+- Not used as a gate:
+  - package-wide `cargo fmt --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --package launcher-module-downloads --check` because it exposes pre-existing formatting drift in files outside the current slice
 
 ## Current Git State To Preserve
 
-- Unrelated unstaged/unknown work remains present and must not be committed with AT-2026-05-15-159:
+- Unrelated unstaged/unknown work remains present and must not be committed with AT-2026-05-15-160:
   - `Cargo.lock`
   - `MyEpicLauncher.pen`
   - frontend files under `app/` and `components/`
@@ -42,6 +41,6 @@
 
 ## Next Resume Point
 
-1. Return to the next downloads backend implementation slice only after reading the downloads module docs, implementation doc, related design docs, and collaboration docs.
-2. Likely next implementation candidate: manifest reconstruction before runtime enqueue.
+1. Do not continue directly into runtime resume enqueue from AT-2026-05-15-160.
+2. Likely next candidate is completed-segment sealing after manifest reconstruction, but it needs a deliberate segment/checkpoint data-shape decision before coding.
 3. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.

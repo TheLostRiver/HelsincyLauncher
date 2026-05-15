@@ -437,3 +437,12 @@
 - `docs/modules/downloads/README_ARCH.md`, `README_API.md`, and `README_FLOW.md` describe module responsibility, public surface, and flows, but they intentionally do not track Rust facade/port implementation state.
 - Downloads backend implementation currently needs a single module-local implementation guide that points contributors to module docs first, then runtime/use-case/API/testing/collaboration docs before coding.
 - `README_IMPL.md` should not replace design docs or `.artifacts/ai`; it should summarize current landing zones, implemented behavior, next implementation slices, port status, and validation gates for module code work.
+
+## Phase 35 Resume Manifest Boundary Findings
+
+- `docs/modules/downloads/README_IMPL.md` now identifies `DownloadManifestProviderPort` as not yet defined and records manifest reconstruction as the next likely backend resume slice after staging validation.
+- `docs/TauriDownloadRuntimeDesign.md` orders explicit resume as checkpoint load, staging validation, manifest reconstruction, completed-segment sealing, then remaining-segment enqueue; therefore this slice must stop before runtime enqueue.
+- `docs/TauriBackendCrateLayoutAndUseCaseStubDesign.md` sketches resume use-case collaboration as job repo, checkpoint repo, staging store, manifest provider, then runtime, and explicitly says provider/repository/object store should not互调.
+- `docs/TauriFirstCrateApiDrafts.md` names `DownloadManifestProviderPort` as a fixed internal port for `module-downloads`, but the current code still keeps `manifest_provider: M` as an unconstrained placeholder.
+- `docs/TauriTestingStrategyAndQualityGateDesign.md` makes module facade tests the right cheap validation layer for this slice.
+- The smallest document-backed change is to define a minimal manifest plan/port, keep `()` placeholder compatibility for current wiring, and prove `resume_download` calls the provider only after job, checkpoint, and staging are present.

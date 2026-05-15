@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 34 - Downloads Module Implementation Documentation
+Phase 35 - Downloads Resume Manifest Boundary
 
 ## Current Focus
 
@@ -107,6 +107,8 @@ Phase 34 - Downloads Module Implementation Documentation
 - AT-2026-05-15-158 was committed locally as `cd5e848`.
 - AT-2026-05-15-159 is in progress after the user required module implementation docs and pre-code module-document reading rules.
 - AT-2026-05-15-159 completed after adding downloads `README_IMPL.md`, a module implementation template, and README_IMPL discoverability rules.
+- AT-2026-05-15-160 is in progress after reading the downloads implementation guide and selecting the next document-backed resume slice: manifest provider boundary after staging validation.
+- AT-2026-05-15-160 completed after adding the minimal `DownloadManifestProviderPort` and proving `resume_download` reaches manifest reconstruction after staging validation while runtime enqueue remains out of scope.
 
 ## Phases
 
@@ -315,6 +317,12 @@ Phase 34 - Downloads Module Implementation Documentation
 - Atomic tasks: AT-2026-05-15-159
 - **Status:** complete
 
+### Phase 35: Downloads Resume Manifest Boundary
+
+- Outcome: introduce the minimal manifest provider port and prove explicit user `resume_download` reaches manifest reconstruction after job, checkpoint, and staging are present.
+- Atomic tasks: AT-2026-05-15-160
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -470,6 +478,7 @@ Phase 34 - Downloads Module Implementation Documentation
 151. AT-2026-05-15-157 - completed - added stable missing-job error semantics to `resume_download` while keeping staging, manifest, and runtime resume orchestration out of scope.
 152. AT-2026-05-15-158 - completed - added minimal staging validation boundary to `resume_download` while keeping manifest reconstruction and runtime enqueue out of scope.
 153. AT-2026-05-15-159 - completed - added downloads module implementation documentation and README_IMPL discoverability rules.
+154. AT-2026-05-15-160 - completed - added the minimal downloads resume manifest provider boundary after staging validation while keeping runtime enqueue out of scope.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
@@ -488,7 +497,7 @@ Phase 34 - Downloads Module Implementation Documentation
 
 ## Follow-up Queue
 
-1. Continue with the next downloads resume slice only after selecting the next explicit document-backed behavior boundary; likely candidate is manifest reconstruction before runtime enqueue.
+1. Continue with the next downloads resume slice only after selecting the next explicit document-backed behavior boundary; likely candidate is completed-segment sealing, but it needs a deliberate segment/checkpoint data-shape decision before coding.
 2. Leave unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, and `src/` changes untouched unless the user explicitly scopes them into a task.
 
 ## Legacy Note
