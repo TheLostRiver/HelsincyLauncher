@@ -2,20 +2,19 @@
 
 ## Identity
 
-- task id: AT-2026-05-16-176
-- title: Guard runtime enqueue on scheduler failure
+- task id: AT-2026-05-16-177
+- title: Guard all-sealed resume from scheduler
 - status: completed
 
 ## Goal
 
-补上 `DownloadResumeWorkScheduler` 失败路径的最小保护：当 downloads-owned scheduler/driver boundary 返回错误时，`resume_download_outcome()` 必须直接返回该错误，并且不能调用 shared `JobRuntime::enqueue()`。
+补上 all-sealed resume 的 scheduler 边界保护：当 `resume_download_outcome()` 判定所有 segment 已 sealed 并返回 `AlreadyComplete` 时，不能调用 downloads-owned scheduler，也不能调用 shared runtime enqueue。
 
-本轮只覆盖失败保护：
+本轮只覆盖 focused guard：
 
-- add focused RED test first
-- make scheduler failure observable in the existing test fake
-- prove runtime enqueue is skipped when scheduler preparation fails
-- keep concrete fetch/write/verify execution, SQLite schema, frontend, host transport, and `kernel-jobs` payload changes out of scope
+- add focused guard test around all-sealed resume
+- use a failing scheduler fake to prove the scheduler boundary is not touched
+- keep concrete scheduler execution, SQLite schema, frontend, host transport, and `kernel-jobs` payload changes out of scope
 
 ## Scope
 
@@ -25,7 +24,6 @@
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
   - `.artifacts/ai/progress.md`
-  - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
   - concrete scheduler/fetch/write/verify execution
@@ -42,53 +40,46 @@
 3. .artifacts/ai/active-task.md
 4. .artifacts/ai/task-plan.md
 5. .artifacts/ai/progress.md
-6. .artifacts/ai/findings.md
-7. .artifacts/ai/handoff.md
+6. .artifacts/ai/handoff.md
 
 ## 控制性文档
 
-1. README.md
-2. CONTRIBUTING.md
-3. docs/README.md
-4. docs/modules/downloads/README_IMPL.md
-5. docs/TauriDownloadRuntimeDesign.md
-6. docs/TauriKernelJobsRuntimeDesign.md
-7. docs/TauriTestingStrategyAndQualityGateDesign.md
-8. docs/TauriAIDevelopmentTransactionProtocolDesign.md
-9. docs/TauriCodeCommentStandard.md
+1. docs/modules/downloads/README_IMPL.md
+2. docs/TauriDownloadRuntimeDesign.md
+3. docs/TauriKernelJobsRuntimeDesign.md
+4. docs/TauriTestingStrategyAndQualityGateDesign.md
+5. docs/TauriAIDevelopmentTransactionProtocolDesign.md
 
 ## Hypothesis
 
-- falsifiable local hypothesis: the existing scheduler-before-enqueue call order already supports failure propagation, and a focused test can prove no runtime enqueue happens when the scheduler port fails.
+- falsifiable local hypothesis: all-sealed resume already returns `AlreadyComplete` before scheduler/runtime work, and a focused guard can lock that ordering down without production behavior changes.
 
 ## Cheap Check
 
-- add one focused failing test that configures the scheduler fake to fail, then run the focused test and full module suite.
+- add one focused guard test with a failing scheduler fake, then run focused and full downloads module tests.
 
 ## Validation Gate
 
-1. Read required docs before editing Rust.
-2. Add RED test proving scheduler error skips runtime enqueue.
-3. Add the smallest test fake behavior / production adjustment needed.
-4. Update README_IMPL current state.
-5. Run focused test and full `launcher-module-downloads` test.
-6. Run scoped `git diff --check`.
-7. Commit the Rust/docs/PWF slice locally without staging unrelated dirty files.
+1. Read focused implementation docs before editing Rust.
+2. Add focused all-sealed/no-scheduler guard test.
+3. Update README_IMPL current state.
+4. Run focused test and full `launcher-module-downloads` test.
+5. Run scoped `git diff --check`.
+6. Commit the test/docs/PWF slice locally without staging unrelated dirty files.
 
 ## Validation Result
 
 - passed
-- Required README_IMPL scheduler failure behavior, kernel-jobs non-goals, and module facade test strategy were read before Rust edits.
-- RED test `resume_download_skips_runtime_enqueue_when_scheduler_fails` first failed on missing failing scheduler fake behavior.
-- Added the smallest test fake behavior to let `RecordingResumeWorkScheduler` return a configured `AppError`.
-- Focused test passed: `resume_download_skips_runtime_enqueue_when_scheduler_fails` returned 1 passed, 0 failed.
-- Full module test passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` returned 20 passed, 0 failed.
-- Scoped `git diff --check` passed for AT-176 files with CRLF warnings only.
+- README_IMPL call-order lines were read before adding the guard.
+- Added focused guard `resume_download_all_sealed_does_not_touch_scheduler` using a failing scheduler fake to prove the scheduler boundary is not touched.
+- Focused guard passed immediately, confirming existing call order already returned `AlreadyComplete` before scheduler/runtime work.
+- Full module test passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` returned 21 passed, 0 failed.
+- Scoped `git diff --check` passed for AT-177 files with CRLF warnings only.
 - Concrete scheduler execution, SQLite schema, frontend, host transport, and `kernel-jobs` payloads remain unchanged.
 
 ## Notes
 
-- AT-2026-05-16-175 committed scheduler port as `8846a40`.
-- User approved four consecutive tasks without intermediate confirmation; this is task 3/4 in the current batch.
+- AT-2026-05-16-176 committed scheduler failure guard as `edec23d`.
+- User approved four consecutive tasks without intermediate confirmation; this is task 4/4 in the current batch.
 - Direct `origin/main` push remains intentionally skipped without explicit approval.
-- Resume point: start task 4/4 by adding a focused all-sealed/no-scheduler guard.
+- Resume point: the four-task batch is complete; reassess README_IMPL implementation map before choosing another downloads backend slice.

@@ -5111,6 +5111,21 @@
 - Scoped `git diff --check` passed for AT-176 files with CRLF warnings only.
 - Next task 4/4 is determined: add a focused all-sealed/no-scheduler guard.
 
+### Agent Record: 2026-05-16 15:33:14 +08:00
+- Started AT-2026-05-16-177 after committing AT-176 as `edec23d`.
+- Task 4/4 in the current user-approved batch: add a focused all-sealed guard proving `AlreadyComplete` resumes do not touch scheduler/runtime work.
+- `crates/composition-root/src/startup.rs` still has unrelated cargo-fmt-only dirt from earlier; it remains out of scope and will not be staged.
+
+### Agent Record: 2026-05-16 15:34:20 +08:00
+- Re-read README_IMPL call-order lines for AT-177: all-sealed resumes must return `AlreadyComplete` before scheduler/runtime calls.
+- This is a focused guard/coverage slice; no production behavior is expected unless the guard proves the call order wrong.
+
+### Agent Record: 2026-05-16 15:35:18 +08:00
+- Completed AT-2026-05-16-177.
+- Focused all-sealed/no-scheduler guard passed with 1 passed, 0 failed; full `launcher-module-downloads` suite passed with 21 passed, 0 failed.
+- README_IMPL now records that `AlreadyComplete` resumes do not touch scheduler or runtime work.
+- Scoped `git diff --check` passed for AT-177 files with CRLF warnings only.
+
 ### Auto Record: 2026-05-16 14:40:22
 - Tool: apply_patch
 - Phase: Phase 48 - Downloads Resume Work Plan Derivation
@@ -5288,6 +5303,42 @@
 ### Auto Record: 2026-05-16 15:03:36
 - Tool: apply_patch
 - Phase: Phase 51 - Downloads Resume Scheduler Failure Guard
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-16 15:33:53
+- Tool: apply_patch
+- Phase: Phase 52 - Downloads All-Sealed Scheduler Guard
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-16 15:34:07
+- Tool: apply_patch
+- Phase: Phase 52 - Downloads All-Sealed Scheduler Guard
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-16 15:34:25
+- Tool: apply_patch
+- Phase: Phase 52 - Downloads All-Sealed Scheduler Guard
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-16 15:35:03
+- Tool: apply_patch
+- Phase: Phase 52 - Downloads All-Sealed Scheduler Guard
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-16 15:35:42
+- Tool: apply_patch
+- Phase: Phase 52 - Downloads All-Sealed Scheduler Guard
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)

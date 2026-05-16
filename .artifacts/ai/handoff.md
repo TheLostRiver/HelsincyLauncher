@@ -2,9 +2,9 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-16-176
-- title: Guard runtime enqueue on scheduler failure
-- status: completed and ready for the AT-176 local commit
+- task id: AT-2026-05-16-177
+- title: Guard all-sealed resume from scheduler
+- status: completed and ready for the AT-177 local commit
 
 ## Current In-progress Atomic Task
 
@@ -49,6 +49,10 @@
   - Focused scheduler-failure guard passed after fake behavior was added.
   - Full `launcher-module-downloads` suite passed with 20 passed, 0 failed.
   - README_IMPL records scheduler failures returning before runtime enqueue.
+- Passed for AT-2026-05-16-177:
+  - Focused all-sealed/no-scheduler guard passed.
+  - Full `launcher-module-downloads` suite passed with 21 passed, 0 failed.
+  - README_IMPL records that `AlreadyComplete` resumes do not touch scheduler/runtime work.
 
 ## Current Git State To Preserve
 
@@ -62,8 +66,9 @@
 
 ## Next Resume Point
 
-1. Commit AT-2026-05-16-176, then start task 4/4.
-2. Next slice: add a focused all-sealed/no-scheduler guard so already-complete resumes do not touch the scheduler boundary.
-3. Keep concrete execution, persistence, host transport, frontend, and `kernel-jobs` payload changes out of scope.
+1. Commit AT-2026-05-16-177.
+2. The four-task batch requested by the user is complete after AT-177.
+3. Before any further downloads backend coding, reassess README_IMPL and required docs to choose the next slice.
+4. Keep concrete execution, persistence, host transport, frontend, and `kernel-jobs` payload changes out of scope unless explicitly scoped.
 3. Preserve unrelated dirty frontend, sqlite, Cargo.lock, `.codex`, `src/`, and pen files.
 4. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.

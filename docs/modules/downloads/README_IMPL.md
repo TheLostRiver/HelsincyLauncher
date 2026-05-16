@@ -372,13 +372,14 @@ Current Rust slice:
 4. `resume_download_outcome()` builds `DownloadResumeWorkPlan`, schedules it through the downloads-owned port, then enqueues the existing job id through shared runtime.
 5. The focused module test proves scheduler scheduling happens before runtime enqueue.
 6. A focused module guard proves scheduler errors return before shared runtime enqueue.
-7. The composition smoke uses the placeholder scheduler and remains assembly-only.
+7. A focused all-sealed guard proves `AlreadyComplete` resumes do not touch scheduler or runtime work.
+8. The composition smoke uses the placeholder scheduler and remains assembly-only.
 
 Next Rust slice:
 
-1. add a focused all-sealed/no-scheduler guard so already-complete resumes do not touch the scheduler boundary;
-2. keep concrete scheduler execution and persistence unchanged;
-3. avoid host transport, frontend, SQLite schema, and `kernel-jobs` payload changes.
+1. reassess the next downloads backend slice from the implementation map before coding;
+2. keep concrete scheduler execution and persistence unchanged until a dedicated scheduler implementation task exists;
+3. avoid host transport, frontend, SQLite schema, and `kernel-jobs` payload changes unless a later implementation document explicitly scopes them.
 
 ---
 

@@ -1487,6 +1487,73 @@ mod tests {
     }
 
     #[test]
+    fn resume_download_all_sealed_does_not_touch_scheduler() {
+        let job_id = JobId::generate();
+        let events = ResumeRuntimeEvents::default();
+        let facade = DownloadFacade::new(DownloadModuleDeps {
+            job_repo: RecordingDownloadJobRepository::with_job(make_download_job(job_id.clone())),
+            checkpoint_repo: RecordingCheckpointRepository::with_segments(vec![
+                DownloadSegmentCheckpointRecord {
+                    job_id: job_id.clone(),
+                    segment_id: "segment-1".into(),
+                    file_id: "file-1".into(),
+                    offset: 0,
+                    length: 1024,
+                    downloaded_bytes: 1024,
+                    status: DownloadSegmentCheckpointStatus::Completed,
+                    partial_path: Some("file.bin.part".into()),
+                    etag: Some("etag-1".into()),
+                    hash_state_ref: None,
+                },
+            ]),
+            manifest_provider: RecordingManifestProvider::with_segments(vec![
+                DownloadManifestSegment {
+                    segment_id: "segment-1".into(),
+                    file_id: "file-1".into(),
+                    offset: 0,
+                    length: 1024,
+                    source_locator: "https://example.invalid/file.bin".into(),
+                    expected_hash: Some("sha256:segment".into()),
+                    write_target: "file.bin.part".into(),
+                },
+            ]),
+            staging_store: RecordingStagingObjectStore::default(),
+            resume_scheduler: RecordingResumeWorkScheduler::failing_with(
+                events.clone(),
+                AppError::new(
+                    "DL_RESUME_SCHEDULER_SHOULD_NOT_RUN",
+                    "all-sealed resume should not touch scheduler",
+                    false,
+                    AppErrorSeverity::Error,
+                    CorrelationId::generate(),
+                ),
+            ),
+            job_runtime: RecordingJobRuntime::with_events(events.clone()),
+        });
+
+        let outcome = facade
+            .resume_download_outcome(ResumeDownloadRequestDto {
+                job_id: job_id.clone(),
+            })
+            .expect("all-sealed resume should not call the failing scheduler");
+
+        assert_eq!(
+            outcome,
+            DownloadResumeOutcome::AlreadyComplete {
+                job_id,
+                module: "downloads".into(),
+                kind: "download".into(),
+            }
+        );
+        assert!(
+            events.entries().is_empty(),
+            "all-sealed resume must not schedule work or enqueue runtime jobs"
+        );
+        assert_eq!(facade.deps().resume_scheduler.scheduled_plans().len(), 0);
+        assert_eq!(facade.deps().job_runtime.enqueued_requests().len(), 0);
+    }
+
+    #[test]
     fn resume_download_returns_stable_error_when_segment_checkpoint_mismatches_manifest() {
         let job_id = JobId::generate();
         let facade = DownloadFacade::new(DownloadModuleDeps {
