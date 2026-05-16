@@ -2,9 +2,9 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-16-175
-- title: Add downloads resume scheduler port
-- status: completed and ready for the AT-175 local commit
+- task id: AT-2026-05-16-176
+- title: Guard runtime enqueue on scheduler failure
+- status: completed and ready for the AT-176 local commit
 
 ## Current In-progress Atomic Task
 
@@ -14,8 +14,7 @@
 
 - `docs/modules/downloads/README_IMPL.md`
 - `crates/module-downloads/src/facade/mod.rs`
-- `crates/module-downloads/src/lib.rs`
-- `crates/composition-root/src/bootstrap.rs`
+- `crates/module-downloads/src/facade/mod.rs`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -45,6 +44,11 @@
   - Full `launcher-module-downloads` suite passed with 19 passed, 0 failed.
   - Composition `bootstrap_wiring_smoke` passed after placeholder scheduler wiring and stale checkpoint initializer repair.
   - README_IMPL records implemented scheduler port and next scheduler-failure guard slice.
+- Passed for AT-2026-05-16-176:
+  - RED failed on missing failing scheduler fake behavior.
+  - Focused scheduler-failure guard passed after fake behavior was added.
+  - Full `launcher-module-downloads` suite passed with 20 passed, 0 failed.
+  - README_IMPL records scheduler failures returning before runtime enqueue.
 
 ## Current Git State To Preserve
 
@@ -58,7 +62,8 @@
 
 ## Next Resume Point
 
-1. Commit AT-2026-05-16-175, then start task 3/4.
-2. Next slice: add a focused scheduler-failure guard proving scheduler errors skip shared runtime enqueue.
+1. Commit AT-2026-05-16-176, then start task 4/4.
+2. Next slice: add a focused all-sealed/no-scheduler guard so already-complete resumes do not touch the scheduler boundary.
+3. Keep concrete execution, persistence, host transport, frontend, and `kernel-jobs` payload changes out of scope.
 3. Preserve unrelated dirty frontend, sqlite, Cargo.lock, `.codex`, `src/`, and pen files.
 4. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.

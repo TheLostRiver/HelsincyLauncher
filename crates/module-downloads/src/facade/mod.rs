@@ -654,7 +654,9 @@ fn not_wired(operation: &str) -> AppError {
 mod tests {
     use std::sync::{Arc, Mutex};
 
-    use launcher_kernel_foundation::{AppErrorSeverity, AppResult, IsoDateTime, JobId};
+    use launcher_kernel_foundation::{
+        AppError, AppErrorSeverity, AppResult, CorrelationId, IsoDateTime, JobId,
+    };
     use launcher_kernel_jobs::{JobPriority, JobProgress, JobSnapshot, JobState, JobUiState};
 
     use crate::driver::{DownloadCheckpointRecord, DownloadCheckpointRepository};
@@ -894,6 +896,7 @@ mod tests {
     struct RecordingResumeWorkScheduler {
         scheduled_plans: Mutex<Vec<(JobId, DownloadResumeWorkPlan)>>,
         events: ResumeRuntimeEvents,
+        fail_with: Option<AppError>,
     }
 
     impl RecordingResumeWorkScheduler {
@@ -901,6 +904,15 @@ mod tests {
             Self {
                 scheduled_plans: Mutex::new(Vec::new()),
                 events,
+                fail_with: None,
+            }
+        }
+
+        fn failing_with(events: ResumeRuntimeEvents, error: AppError) -> Self {
+            Self {
+                scheduled_plans: Mutex::new(Vec::new()),
+                events,
+                fail_with: Some(error),
             }
         }
 
@@ -923,6 +935,9 @@ mod tests {
                 .lock()
                 .expect("scheduled plans mutex should not be poisoned")
                 .push((job_id.clone(), plan.clone()));
+            if let Some(error) = &self.fail_with {
+                return Err(error.clone());
+            }
             Ok(())
         }
     }
@@ -1365,6 +1380,54 @@ mod tests {
             "segment-remaining"
         );
         assert_eq!(scheduled_plans[0].1.items[1].start_offset, 1024);
+    }
+
+    #[test]
+    fn resume_download_skips_runtime_enqueue_when_scheduler_fails() {
+        let job_id = JobId::generate();
+        let events = ResumeRuntimeEvents::default();
+        let facade = DownloadFacade::new(DownloadModuleDeps {
+            job_repo: RecordingDownloadJobRepository::with_job(make_download_job(job_id.clone())),
+            checkpoint_repo: RecordingCheckpointRepository::with_segments(Vec::new()),
+            manifest_provider: RecordingManifestProvider::with_segments(vec![
+                DownloadManifestSegment {
+                    segment_id: "segment-remaining".into(),
+                    file_id: "file-1".into(),
+                    offset: 0,
+                    length: 1024,
+                    source_locator: "https://example.invalid/file.bin#remaining".into(),
+                    expected_hash: None,
+                    write_target: "file.bin.part".into(),
+                },
+            ]),
+            staging_store: RecordingStagingObjectStore::default(),
+            resume_scheduler: RecordingResumeWorkScheduler::failing_with(
+                events.clone(),
+                AppError::new(
+                    "DL_RESUME_SCHEDULER_UNAVAILABLE",
+                    "resume scheduler unavailable for test",
+                    false,
+                    AppErrorSeverity::Error,
+                    CorrelationId::generate(),
+                ),
+            ),
+            job_runtime: RecordingJobRuntime::with_events(events.clone()),
+        });
+
+        let error = facade
+            .resume_download_outcome(ResumeDownloadRequestDto {
+                job_id: job_id.clone(),
+            })
+            .expect_err("scheduler failure should stop before shared runtime enqueue");
+
+        assert_eq!(error.code, "DL_RESUME_SCHEDULER_UNAVAILABLE");
+        assert_eq!(events.entries(), vec!["schedule_work"]);
+        assert_eq!(facade.deps().resume_scheduler.scheduled_plans().len(), 1);
+        assert_eq!(
+            facade.deps().job_runtime.enqueued_requests().len(),
+            0,
+            "scheduler failure must not enqueue shared runtime work"
+        );
     }
 
     #[test]

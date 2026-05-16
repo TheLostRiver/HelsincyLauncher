@@ -81,7 +81,7 @@ Implementation truth should move through module facade and ports first. Do not p
 | downloads resume host projection | maps `DownloadResumeOutcome` to `DownloadResumeOutcomeDto`; `RuntimeAccepted` wraps accepted-job projection and `AlreadyComplete` uses a non-accepted completed outcome | host mapper tests |
 | resume scheduler/driver payload boundary | documented as downloads-owned work plan derived from `resume_partial` / `queue_remaining`, not a `kernel-jobs` extension or transport payload | README_IMPL |
 | resume work plan derivation | derives module-local `DownloadResumeWorkPlan` / `DownloadResumeWorkItem` values from manifest, checkpoints, and resume decisions | module work-plan test |
-| resume scheduler/driver consumer boundary | `DownloadResumeWorkScheduler` consumes `DownloadResumeWorkPlan` before job-level runtime enqueue; composition currently uses the no-op placeholder | module facade test + composition smoke |
+| resume scheduler/driver consumer boundary | `DownloadResumeWorkScheduler` consumes `DownloadResumeWorkPlan` before job-level runtime enqueue; composition currently uses the no-op placeholder | module facade tests + composition smoke |
 | list/get/policy surfaces | not wired yet | future slices |
 
 ---
@@ -371,11 +371,12 @@ Current Rust slice:
 3. `DownloadModuleDeps` owns the scheduler dependency next to the repositories, manifest provider, staging store, and shared job runtime.
 4. `resume_download_outcome()` builds `DownloadResumeWorkPlan`, schedules it through the downloads-owned port, then enqueues the existing job id through shared runtime.
 5. The focused module test proves scheduler scheduling happens before runtime enqueue.
-6. The composition smoke uses the placeholder scheduler and remains assembly-only.
+6. A focused module guard proves scheduler errors return before shared runtime enqueue.
+7. The composition smoke uses the placeholder scheduler and remains assembly-only.
 
 Next Rust slice:
 
-1. add a focused scheduler-failure guard proving scheduler errors skip runtime enqueue;
+1. add a focused all-sealed/no-scheduler guard so already-complete resumes do not touch the scheduler boundary;
 2. keep concrete scheduler execution and persistence unchanged;
 3. avoid host transport, frontend, SQLite schema, and `kernel-jobs` payload changes.
 

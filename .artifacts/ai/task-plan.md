@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 50 - Downloads Resume Scheduler Port
+Phase 51 - Downloads Resume Scheduler Failure Guard
 
 ## Current Focus
 
@@ -131,6 +131,8 @@ Phase 50 - Downloads Resume Scheduler Port
 - AT-2026-05-16-174 is in progress to document the scheduler/driver boundary before introducing a scheduler port in Rust.
 - AT-2026-05-16-174 completed and committed locally as `6929fa9`, defining the scheduler/driver boundary.
 - AT-2026-05-16-175 is in progress to add the minimal scheduler port and schedule work plans before runtime enqueue.
+- AT-2026-05-16-175 completed and committed locally as `8846a40`, adding the scheduler port and composition placeholder.
+- AT-2026-05-16-176 is in progress to prove scheduler failures skip shared runtime enqueue.
 
 ## Phases
 
@@ -435,6 +437,12 @@ Phase 50 - Downloads Resume Scheduler Port
 - Atomic tasks: AT-2026-05-16-175
 - **Status:** complete
 
+### Phase 51: Downloads Resume Scheduler Failure Guard
+
+- Outcome: prove scheduler boundary failures return before shared runtime enqueue, preserving module-owned work-plan safety.
+- Atomic tasks: AT-2026-05-16-176
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -605,7 +613,8 @@ Phase 50 - Downloads Resume Scheduler Port
 166. AT-2026-05-16-172 - completed - documented the downloads-owned resume scheduler/driver payload boundary before Rust implementation; committed locally.
 167. AT-2026-05-16-173 - completed - added the minimal downloads-owned resume work plan/payload derivation with focused TDD before scheduler execution or persistence work; committed locally as `1a698f9`.
 168. AT-2026-05-16-174 - completed - documented the downloads-owned scheduler/driver boundary before introducing a scheduler port in Rust; committed locally as `6929fa9`.
-169. AT-2026-05-16-175 - completed - added the minimal downloads-owned scheduler port and call order before job-level runtime enqueue; ready for local commit.
+169. AT-2026-05-16-175 - completed - added the minimal downloads-owned scheduler port and call order before job-level runtime enqueue; committed locally as `8846a40`.
+170. AT-2026-05-16-176 - completed - added a focused scheduler-failure guard so scheduler errors skip runtime enqueue; ready for local commit.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
@@ -624,7 +633,7 @@ Phase 50 - Downloads Resume Scheduler Port
 
 ## Follow-up Queue
 
-1. Add a focused scheduler failure guard so scheduler errors skip runtime enqueue.
+1. Add a focused all-sealed/no-scheduler guard so already-complete resumes do not touch the scheduler boundary.
 2. Leave unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, and `src/` changes untouched unless the user explicitly scopes them into a task.
 
 ## Legacy Note

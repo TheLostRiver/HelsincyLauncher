@@ -5092,6 +5092,25 @@
 - Validation passed: focused scheduler-before-enqueue test 1 passed; full `launcher-module-downloads` suite 19 passed; composition `bootstrap_wiring_smoke` integration test 1 passed; scoped `git diff --check` passed with CRLF warnings only.
 - Next task 3/4 is determined: add a focused scheduler-failure guard so scheduler errors return before shared runtime enqueue.
 
+### Agent Record: 2026-05-16 14:59:13 +08:00
+- Started AT-2026-05-16-176 after committing AT-175 as `8846a40`.
+- Task 3/4 in the current user-approved batch: add a focused guard proving scheduler errors skip shared runtime enqueue.
+
+### Agent Record: 2026-05-16 15:00:12 +08:00
+- Re-read README_IMPL scheduler failure behavior, kernel-jobs non-goals, and module facade test strategy before Rust edits.
+- AT-176 remains a focused module facade test/guard; no host transport, frontend, SQLite schema, concrete scheduler execution, or `kernel-jobs` payload changes.
+
+### Agent Record: 2026-05-16 15:02:00 +08:00
+- Added RED test `resume_download_skips_runtime_enqueue_when_scheduler_fails`.
+- RED result: focused cargo test failed because `RecordingResumeWorkScheduler::failing_with` does not exist yet, confirming the failure-path test fake is missing.
+
+### Agent Record: 2026-05-16 15:03:11 +08:00
+- Completed AT-2026-05-16-176.
+- Focused scheduler-failure guard passed with 1 passed, 0 failed; full `launcher-module-downloads` suite passed with 20 passed, 0 failed.
+- README_IMPL now records that scheduler errors return before shared runtime enqueue.
+- Scoped `git diff --check` passed for AT-176 files with CRLF warnings only.
+- Next task 4/4 is determined: add a focused all-sealed/no-scheduler guard.
+
 ### Auto Record: 2026-05-16 14:40:22
 - Tool: apply_patch
 - Phase: Phase 48 - Downloads Resume Work Plan Derivation
@@ -5226,6 +5245,49 @@
 ### Auto Record: 2026-05-16 14:58:04
 - Tool: apply_patch
 - Phase: Phase 50 - Downloads Resume Scheduler Port
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-16 14:59:51
+- Tool: apply_patch
+- Phase: Phase 51 - Downloads Resume Scheduler Failure Guard
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-16 15:00:38
+- Tool: apply_patch
+- Phase: Phase 51 - Downloads Resume Scheduler Failure Guard
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-16 15:01:48
+- Tool: apply_patch
+- Phase: Phase 51 - Downloads Resume Scheduler Failure Guard
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-16 15:02:10
+- Tool: apply_patch
+- Phase: Phase 51 - Downloads Resume Scheduler Failure Guard
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-16 15:02:50
+- Tool: apply_patch
+- Phase: Phase 51 - Downloads Resume Scheduler Failure Guard
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-16 15:03:36
+- Tool: apply_patch
+- Phase: Phase 51 - Downloads Resume Scheduler Failure Guard
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
