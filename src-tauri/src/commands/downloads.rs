@@ -13,8 +13,8 @@ use launcher_module_downloads::contracts::{
 };
 
 use super::{
-    map_accepted_job_result, map_command_result, map_query_result_or_stub, CommandResultDto,
-    DesktopServices, QueryResultDto,
+    map_accepted_job_result, map_command_result, map_download_resume_outcome_result,
+    map_query_result_or_stub, CommandResultDto, DesktopServices, QueryResultDto,
 };
 
 /// 提交后端拥有的下载作业，并投影 accepted-job envelope。
@@ -33,12 +33,12 @@ pub async fn downloads_pause(
     map_command_result(services.downloads.pause_download(request))
 }
 
-/// 请求恢复已暂停的后端下载作业，并投影 accepted-job envelope。
+/// 请求恢复已暂停的后端下载作业，并投影 downloads resume outcome。
 pub async fn downloads_resume(
     services: &DesktopServices,
     request: ResumeDownloadRequestDto,
-) -> CommandResultDto<super::AcceptedJobDto> {
-    map_accepted_job_result(services.downloads.resume_download(request))
+) -> CommandResultDto<super::DownloadResumeOutcomeDto> {
+    map_download_resume_outcome_result(services.downloads.resume_download_outcome(request))
 }
 
 /// 请求取消已有的后端下载作业。
@@ -54,9 +54,11 @@ pub async fn downloads_list_jobs(
     services: &DesktopServices,
     query: ListDownloadJobsQueryDto,
 ) -> QueryResultDto<DownloadJobListDto> {
-    map_query_result_or_stub(services.downloads.list_jobs(query), "DOWNLOADS_NOT_WIRED", || {
-        PageSlice::new(Vec::new(), None)
-    })
+    map_query_result_or_stub(
+        services.downloads.list_jobs(query),
+        "DOWNLOADS_NOT_WIRED",
+        || PageSlice::new(Vec::new(), None),
+    )
 }
 
 /// 读取单个下载作业快照投影，并在当前 host stub 路径上回退为空结果。
@@ -76,13 +78,15 @@ pub async fn downloads_get_policy(
     services: &DesktopServices,
     query: GetDownloadPolicyQueryDto,
 ) -> QueryResultDto<DownloadPolicyDto> {
-    map_query_result_or_stub(services.downloads.get_policy(query), "DOWNLOADS_NOT_WIRED", || {
-        DownloadPolicyDto {
+    map_query_result_or_stub(
+        services.downloads.get_policy(query),
+        "DOWNLOADS_NOT_WIRED",
+        || DownloadPolicyDto {
             concurrency_slots: 3,
             bandwidth_limit_bytes_per_sec: None,
             auto_resume: false,
-        }
-    })
+        },
+    )
 }
 
 /// 更新后端拥有的下载策略。

@@ -533,3 +533,10 @@
 - Current `src-tauri/src/commands/downloads.rs` still maps `services.downloads.resume_download(request)` through `map_accepted_job_result`, so changing the existing public method return type would immediately widen into host transport.
 - A safer first code slice is to add `resume_download_outcome` beside the existing compatibility method, then keep `resume_download -> AppResult<AcceptedJob>` available for current host wiring.
 - The focused module test can use existing in-memory repositories/runtime helpers and assert that an all-sealed manifest/checkpoint pair returns `AlreadyComplete` and leaves runtime enqueue requests empty.
+
+## Phase 46 Resume Outcome Host Projection Findings
+
+- `src-tauri/src/commands/mod.rs` currently has a shared `AcceptedJobDto` and `map_accepted_job_result` for accepted queued work.
+- `src-tauri/src/commands/downloads.rs` still returns `CommandResultDto<AcceptedJobDto>` from `downloads_resume`, which cannot distinguish all-sealed already-complete outcomes from accepted queued work.
+- `docs/TauriIPCAndStateContractsDesign.md` says accepted long-job results mean the backend accepted work for async processing; therefore `AlreadyComplete` must use a separate downloads resume outcome DTO rather than `accepted: true`.
+- The next smallest host slice is a mapper-level TDD change: add `DownloadResumeOutcomeDto`, map `RuntimeAccepted` through existing accepted-job semantics, map `AlreadyComplete` without segment details, and switch only `downloads_resume` to the new mapper.

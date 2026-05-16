@@ -11,6 +11,7 @@
 use launcher_composition_root::DesktopAppServices;
 use launcher_kernel_foundation::{AppError, AppResult, IsoDateTime, JobId};
 use launcher_kernel_jobs::AcceptedJob;
+use launcher_module_downloads::facade::DownloadResumeOutcome;
 
 pub mod downloads;
 pub mod engines;
@@ -126,6 +127,54 @@ impl From<AcceptedJob> for AcceptedJobDto {
     }
 }
 
+/// Resume outcome projection used only by downloads resume transport.
+/// 仅供 downloads resume transport 使用的恢复结果投影。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum DownloadResumeOutcomeDto {
+    /// Resume produced runtime work and was accepted into the shared job queue.
+    /// 恢复产生了 runtime 工作，并已进入 shared job 队列。
+    RuntimeAccepted { job: AcceptedJobDto },
+    /// Resume found the job already complete without queueing runtime work.
+    /// 恢复发现作业已完成，且没有入队 runtime 工作。
+    AlreadyComplete {
+        /// Marker for the already-complete resume outcome.
+        /// 标记恢复结果已经完成。
+        completed: bool,
+
+        /// Downloads job identifier that completed through all-sealed resume.
+        /// 通过 all-sealed 恢复完成的 downloads 作业标识。
+        job_id: JobId,
+
+        /// Module that owns the completed resume outcome.
+        /// 拥有该完成恢复结果的模块。
+        module: String,
+
+        /// Job kind within the owning module.
+        /// 拥有模块内部的作业类型。
+        kind: String,
+    },
+}
+
+impl From<DownloadResumeOutcome> for DownloadResumeOutcomeDto {
+    fn from(outcome: DownloadResumeOutcome) -> Self {
+        match outcome {
+            DownloadResumeOutcome::RuntimeAccepted(job) => {
+                Self::RuntimeAccepted { job: job.into() }
+            }
+            DownloadResumeOutcome::AlreadyComplete {
+                job_id,
+                module,
+                kind,
+            } => Self::AlreadyComplete {
+                completed: true,
+                job_id,
+                module,
+                kind,
+            },
+        }
+    }
+}
+
 /// Shared desktop service aggregation exposed to concrete command handlers.
 /// 暴露给具体 command handler 的共享桌面服务聚合。
 pub type DesktopServices = DesktopAppServices;
@@ -179,5 +228,81 @@ pub fn map_accepted_job_result(result: AppResult<AcceptedJob>) -> CommandResultD
         Err(error) => CommandResultDto::Failure {
             error: error.into(),
         },
+    }
+}
+
+/// Maps a downloads resume outcome without treating already-complete as accepted work.
+/// 映射 downloads 恢复结果，避免把已完成结果当成 accepted work。
+pub fn map_download_resume_outcome_result(
+    result: AppResult<DownloadResumeOutcome>,
+) -> CommandResultDto<DownloadResumeOutcomeDto> {
+    match result {
+        Ok(outcome) => CommandResultDto::Success {
+            data: outcome.into(),
+        },
+        Err(error) => CommandResultDto::Failure {
+            error: error.into(),
+        },
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use launcher_kernel_foundation::{IsoDateTime, JobId};
+    use launcher_kernel_jobs::AcceptedJob;
+    use launcher_module_downloads::facade::DownloadResumeOutcome;
+
+    use super::*;
+
+    #[test]
+    fn maps_download_resume_already_complete_without_accepted_job_marker() {
+        let job_id = JobId::generate();
+
+        let result =
+            map_download_resume_outcome_result(Ok(DownloadResumeOutcome::AlreadyComplete {
+                job_id: job_id.clone(),
+                module: "downloads".into(),
+                kind: "download".into(),
+            }));
+
+        assert_eq!(
+            result,
+            CommandResultDto::Success {
+                data: DownloadResumeOutcomeDto::AlreadyComplete {
+                    completed: true,
+                    job_id,
+                    module: "downloads".into(),
+                    kind: "download".into(),
+                },
+            }
+        );
+    }
+
+    #[test]
+    fn maps_download_resume_runtime_accepted_through_accepted_job_projection() {
+        let job_id = JobId::generate();
+        let accepted = AcceptedJob {
+            job_id: job_id.clone(),
+            module: "downloads".into(),
+            kind: "download".into(),
+            queued_at: IsoDateTime::now(),
+        };
+
+        let result = map_download_resume_outcome_result(Ok(
+            DownloadResumeOutcome::RuntimeAccepted(accepted.clone()),
+        ));
+
+        match result {
+            CommandResultDto::Success {
+                data: DownloadResumeOutcomeDto::RuntimeAccepted { job },
+            } => {
+                assert!(job.accepted);
+                assert_eq!(job.job_id, job_id);
+                assert_eq!(job.module, accepted.module);
+                assert_eq!(job.kind, accepted.kind);
+                assert_eq!(job.queued_at, accepted.queued_at);
+            }
+            other => panic!("runtime-accepted resume should project accepted job, got {other:?}"),
+        }
     }
 }

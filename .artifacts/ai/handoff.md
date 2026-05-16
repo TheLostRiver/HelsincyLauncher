@@ -2,20 +2,21 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-16-170
-- title: Add downloads module-owned resume outcome boundary
+- task id: AT-2026-05-16-171
+- title: Project downloads resume outcome through host transport
 - status: completed and committed locally
 
 ## Current In-progress Atomic Task
 
 - task id: none
 - title: none
-- status: no active task after AT-170 validation
+- status: no active task after AT-171 validation
 
 ## Current Slice
 
 - `docs/modules/downloads/README_IMPL.md`
-- `crates/module-downloads/src/facade/mod.rs`
+- `src-tauri/src/commands/mod.rs`
+- `src-tauri/src/commands/downloads.rs`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -24,11 +25,11 @@
 
 ## Validation
 
-- Passed for AT-2026-05-16-170:
-  - RED focused test failed on missing `resume_download_outcome` / `DownloadResumeOutcome`.
-  - GREEN focused test passed after adding the module-owned outcome boundary.
-  - Full downloads module test passed with 17 passed, 0 failed after formatting.
-  - README_IMPL records the wired module-owned outcome and leaves public transport/DTO adaptation to a later slice.
+- Passed for AT-2026-05-16-171:
+  - RED focused mapper test failed on missing `DownloadResumeOutcomeDto` / mapper.
+  - GREEN focused mapper test passed after adding the downloads resume outcome DTO/mapper.
+  - Host transport smoke passed with 1 passed, 0 failed.
+  - README_IMPL records the host resume outcome projection.
 
 ## Current Git State To Preserve
 
@@ -42,6 +43,6 @@
 
 ## Next Resume Point
 
-1. Choose whether to adapt the public host transport/DTO surface for `AlreadyComplete`, or continue scheduler/driver payload design.
+1. Choose whether to continue downloads scheduler/driver payload design or add concrete adapter coverage for resume outcome branches.
 2. Keep frontend, SQLite schema, scheduler execution, and `kernel-jobs` payload changes out of scope unless a later task explicitly scopes them.
 3. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.

@@ -4734,6 +4734,30 @@
 - Scoped `git diff --check` passed for AT-2026-05-16-170 files with CRLF conversion warnings only.
 - Marked AT-170 complete and ready for local commit as a code/docs/PWF slice.
 
+### Agent Record: 2026-05-16 13:06:47 +08:00
+- Started AT-2026-05-16-171 after user approved implementation.
+- Read PWF recovery files, root README/CONTRIBUTING/docs index, downloads module docs, README_IMPL, IPC/error/testing/collaboration/runtime docs, current `src-tauri` command mapper/downloader handler, transport smoke test, and `DownloadResumeOutcome` facade snippets.
+- Confirmed AT-171 should add a downloads-specific resume outcome DTO/mapper and switch only `downloads_resume` to `resume_download_outcome`; start/Fab/Engines accepted-job paths stay unchanged.
+- Existing unrelated dirty files remain out of scope and must not be staged.
+
+### Agent Record: 2026-05-16 13:08:30 +08:00
+- Added RED mapper tests for `DownloadResumeOutcome::AlreadyComplete` and `RuntimeAccepted`.
+- Focused RED command failed as expected: `cargo test -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml maps_download_resume`.
+- Failure reason was the expected missing transport boundary: no `DownloadResumeOutcomeDto` type and no `map_download_resume_outcome_result` mapper exist yet.
+
+### Agent Record: 2026-05-16 13:10:09 +08:00
+- Implemented `DownloadResumeOutcomeDto` and `map_download_resume_outcome_result` in the host command mapper.
+- Switched only `downloads_resume` to call `services.downloads.resume_download_outcome(request)`.
+- Focused GREEN passed: `cargo test -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml maps_download_resume` reported 2 passed, 0 failed.
+- Updated README_IMPL so current state records the host resume outcome projection.
+
+### Agent Record: 2026-05-16 13:11:33 +08:00
+- Ran `cargo fmt --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml -p my-epic-launcher-desktop` successfully.
+- Focused mapper validation passed again with 2 passed, 0 failed.
+- Host transport smoke passed: `cargo test -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml transport_wiring_smoke` reported 1 passed, 0 failed.
+- Scoped `git diff --check` passed for AT-2026-05-16-171 files with CRLF conversion warnings only.
+- Marked AT-171 complete and ready for local commit as a host transport/docs/PWF slice.
+
 ### Auto Record: 2026-05-16 00:13:23
 - Tool: apply_patch
 - Phase: Phase 44 - Downloads Resume All-Sealed Completion Boundary
@@ -4814,3 +4838,67 @@
   - `.artifacts/ai/task-plan.md` (update)
   - `.artifacts/ai/progress.md` (update)
   - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-16 13:07:39
+- Tool: apply_patch
+- Phase: Phase 46 - Downloads Resume Outcome Host Projection
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-16 13:08:07
+- Tool: apply_patch
+- Phase: Phase 46 - Downloads Resume Outcome Host Projection
+- Files:
+  - `src-tauri/src/commands/mod.rs` (update)
+
+### Auto Record: 2026-05-16 13:08:41
+- Tool: apply_patch
+- Phase: Phase 46 - Downloads Resume Outcome Host Projection
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-16 13:09:27
+- Tool: apply_patch
+- Phase: Phase 46 - Downloads Resume Outcome Host Projection
+- Files:
+  - `src-tauri/src/commands/mod.rs` (update)
+
+### Auto Record: 2026-05-16 13:09:35
+- Tool: apply_patch
+- Phase: Phase 46 - Downloads Resume Outcome Host Projection
+- Files:
+  - `src-tauri/src/commands/mod.rs` (update)
+
+### Auto Record: 2026-05-16 13:09:46
+- Tool: apply_patch
+- Phase: Phase 46 - Downloads Resume Outcome Host Projection
+- Files:
+  - `src-tauri/src/commands/downloads.rs` (update)
+
+### Auto Record: 2026-05-16 13:10:27
+- Tool: apply_patch
+- Phase: Phase 46 - Downloads Resume Outcome Host Projection
+- Files:
+  - `docs/modules/downloads/README_IMPL.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-16 13:12:02
+- Tool: apply_patch
+- Phase: Phase 46 - Downloads Resume Outcome Host Projection
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-16 13:13:50
+- Tool: apply_patch
+- Phase: Phase 46 - Downloads Resume Outcome Host Projection
+- Files:
+  - `src-tauri/src/commands/fab.rs` (update)
+  - `src-tauri/src/commands/jobs.rs` (update)
+  - `src-tauri/tests/transport_wiring_smoke.rs` (update)

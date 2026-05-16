@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 45 - Downloads Module-Owned Resume Outcome Boundary
+Phase 46 - Downloads Resume Outcome Host Projection
 
 ## Current Focus
 
@@ -125,6 +125,7 @@ Phase 45 - Downloads Module-Owned Resume Outcome Boundary
 - AT-2026-05-15-168 completed and committed locally after adding a stable downloads-domain error projection for `resume_download` segment mismatch decisions.
 - AT-2026-05-16-169 completed and committed locally after documenting the all-sealed completion boundary and current `AcceptedJob` contract gap before Rust behavior changes.
 - AT-2026-05-16-170 completed and committed locally after adding the module-owned resume outcome boundary for all-sealed plans while preserving the current host transport `AcceptedJob` entry.
+- AT-2026-05-16-171 completed and committed locally after projecting the module-owned downloads resume outcome through host transport without exposing segment details or changing unrelated accepted-job paths.
 
 ## Phases
 
@@ -399,6 +400,12 @@ Phase 45 - Downloads Module-Owned Resume Outcome Boundary
 - Atomic tasks: AT-2026-05-16-170
 - **Status:** complete
 
+### Phase 46: Downloads Resume Outcome Host Projection
+
+- Outcome: project `DownloadResumeOutcome` through the downloads host transport command so already-complete all-sealed resume is not represented as accepted queued work, without frontend, persistence, scheduler, or kernel-jobs payload changes.
+- Atomic tasks: AT-2026-05-16-171
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -565,6 +572,7 @@ Phase 45 - Downloads Module-Owned Resume Outcome Boundary
 162. AT-2026-05-15-168 - completed - added a TDD-backed downloads facade slice proving `resume_download` returns `DL_RESUME_SEGMENT_MISMATCH` and does not runtime enqueue when segment checkpoint facts conflict with the manifest; committed locally.
 163. AT-2026-05-16-169 - completed - documented the all-sealed completion boundary and current `AcceptedJob` contract gap before changing `resume_download` behavior; committed locally.
 164. AT-2026-05-16-170 - completed - added a module-owned resume outcome for all-sealed plans while preserving current host transport compatibility; committed locally.
+165. AT-2026-05-16-171 - completed - projected the module-owned downloads resume outcome through host transport without exposing segment details; committed locally.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
@@ -583,7 +591,7 @@ Phase 45 - Downloads Module-Owned Resume Outcome Boundary
 
 ## Follow-up Queue
 
-1. Choose whether to adapt the public host transport/DTO surface for already-complete resume outcomes or continue scheduler/driver payload design.
+1. Choose whether to continue downloads scheduler/driver payload design or add concrete adapter coverage for resume outcome branches.
 2. Leave unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, and `src/` changes untouched unless the user explicitly scopes them into a task.
 
 ## Legacy Note
