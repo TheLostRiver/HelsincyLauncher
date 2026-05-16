@@ -2,26 +2,25 @@
 
 ## Identity
 
-- task id: AT-2026-05-16-173
-- title: Add downloads resume work plan derivation
+- task id: AT-2026-05-16-174
+- title: Document downloads resume scheduler boundary
 - status: completed
 
 ## Goal
 
-在 `crates/module-downloads` 内引入最小的 downloads-owned resume work plan/payload 派生：把已经存在的 `resume_partial` / `queue_remaining` 决策转成模块内 scheduler/driver 未来可消费的 work item，同时证明 `seal_completed` 和 `reject_mismatch` 不产生 work item。
+在继续写 scheduler/driver 代码前，先把 `DownloadResumeWorkPlan` 的消费者边界写清楚：谁拥有调度端口、`resume_download_outcome()` 何时生成并交付 work plan、调度失败如何阻止 runtime enqueue，以及哪些内容仍不能进入 `kernel-jobs`、host transport、frontend、SQLite schema 或具体 fetch/write/verify 执行。
 
-本轮只覆盖模块内纯派生和文档/PWF：
+本轮是实现文档切片，属于用户要求的“任务不确定就先规划好实现文档再编码”：
 
-- add focused RED test first
-- add minimal module-local `DownloadResumeWorkPlan` / `DownloadResumeWorkItem` shape
-- derive work items from manifest/checkpoint/decision facts without executing downloads
-- keep scheduler execution, SQLite schema, frontend, host transport, and `kernel-jobs` payload changes out of scope
+- define the module-owned scheduler/driver port boundary
+- define call order relative to work-plan derivation and job-level runtime enqueue
+- define failure behavior before runtime enqueue
+- define the next minimal TDD Rust slice
+- keep Rust production code out of scope for AT-174
 
 ## Scope
 
 - in scope:
-  - `crates/module-downloads/src/facade/mod.rs`
-  - `crates/module-downloads/src/lib.rs`
   - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
@@ -29,6 +28,7 @@
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
+  - Rust production code
   - frontend files
   - host transport IPC shape
   - SQLite schema or concrete segment persistence
@@ -38,14 +38,12 @@
 
 ## Allowed Files
 
-1. crates/module-downloads/src/facade/mod.rs
-2. crates/module-downloads/src/lib.rs
-3. docs/modules/downloads/README_IMPL.md
-4. .artifacts/ai/active-task.md
-5. .artifacts/ai/task-plan.md
-6. .artifacts/ai/progress.md
-7. .artifacts/ai/findings.md
-8. .artifacts/ai/handoff.md
+1. docs/modules/downloads/README_IMPL.md
+2. .artifacts/ai/active-task.md
+3. .artifacts/ai/task-plan.md
+4. .artifacts/ai/progress.md
+5. .artifacts/ai/findings.md
+6. .artifacts/ai/handoff.md
 
 ## 控制性文档
 
@@ -65,35 +63,34 @@
 
 ## Hypothesis
 
-- falsifiable local hypothesis: a pure module-local work-plan derivation can turn `resume_partial` and `queue_remaining` decisions into deterministic work items without changing runtime enqueue, `kernel-jobs`, host transport, frontend, SQLite schema, or concrete scheduler execution.
+- falsifiable local hypothesis: a docs-only implementation guide slice can make the scheduler/driver boundary precise enough that the next Rust task can add a TDD-backed scheduler port and call it before runtime enqueue without touching concrete execution, persistence, host transport, frontend, or `kernel-jobs` payloads.
 
 ## Cheap Check
 
-- write one focused failing Rust unit test for mixed resume decisions, then add the smallest module-local derivation and run the focused test.
+- update README_IMPL, then run scoped `git diff --check` and read back the scheduler/driver boundary wording.
 
 ## Validation Gate
 
-1. Read required root, docs index, downloads module, implementation, download runtime, kernel-jobs runtime, crate layout/API, testing, and collaboration docs before editing Rust.
-2. Add RED test proving `resume_partial` / `queue_remaining` produce work items and `seal_completed` / `reject_mismatch` do not.
+1. Read required root, docs index, downloads module, runtime, kernel-jobs, crate layout/API, testing, and collaboration docs before editing README_IMPL.
+2. Update README_IMPL with the scheduler/driver boundary, call order, failure behavior, out-of-scope list, and next Rust slice.
 3. Record findings and recovery state in `.artifacts/ai`.
-4. Add minimal production derivation and bilingual comments for new declarations.
-5. Run focused cargo tests and scoped `git diff --check`.
-6. Commit the Rust/docs/PWF slice locally without staging unrelated dirty files.
+4. Run scoped `git diff --check` for AT-174 files.
+5. Commit the docs/PWF slice locally without staging unrelated dirty files.
 
 ## Validation Result
 
 - passed
-- Required root, docs index, downloads module, implementation, runtime, kernel-jobs, crate layout/API, testing, AI transaction, and comment-standard snippets were read before Rust edits.
-- RED test `resume_work_plan_derives_only_partial_and_remaining_items` first failed on missing `build_resume_work_plan` / `DownloadResumeWorkMode`.
-- Minimal GREEN implementation added `DownloadResumeWorkPlan`, `DownloadResumeWorkItem`, `DownloadResumeWorkMode`, and `build_resume_work_plan()` with bilingual declaration comments.
-- `crates/module-downloads/src/lib.rs` re-exports the new work-plan function and types through the crate entry.
-- Focused test passed: `resume_work_plan_derives_only_partial_and_remaining_items` returned 1 passed, 0 failed.
-- Full module test passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` returned 18 passed, 0 failed.
-- Scoped `git diff --check` passed for AT-173 files with CRLF warnings only.
-- Runtime enqueue, concrete scheduler execution, SQLite schema, host transport, frontend, and `kernel-jobs` payloads remain unchanged.
+- Required root, docs index, downloads module, runtime, kernel-jobs, crate layout/API, testing, and collaboration docs were read in scoped snippets before editing README_IMPL.
+- README_IMPL now defines the downloads-owned `DownloadResumeWorkScheduler` boundary and its `schedule_resume_work(&self, job_id, plan)` method.
+- README_IMPL defines the facade call order: reject mismatch and all-sealed before scheduling; build/schedule work plan before shared job runtime enqueue.
+- README_IMPL defines failure behavior: scheduler errors return from `resume_download_outcome()` and must skip runtime enqueue.
+- Scoped `git diff --check` passed for AT-174 files with CRLF warnings only.
+- Runtime production code, frontend, host transport, SQLite schema, concrete scheduler execution, and `kernel-jobs` payloads remained unchanged.
 
 ## Notes
 
 - AT-2026-05-16-172 documented the scheduler/driver payload boundary in README_IMPL section 7.6.
+- AT-2026-05-16-173 committed local work-plan derivation as `1a698f9`.
+- User approved four consecutive tasks without intermediate confirmation; proceed directly when the next task is determined.
 - Direct `origin/main` push remains intentionally skipped without explicit approval.
-- Resume point: next slice should define or introduce the downloads-owned scheduler/driver boundary that will consume `DownloadResumeWorkPlan`, before any concrete fetch/write/verify execution or persistence schema work.
+- Resume point: start the next Rust TDD slice by adding `DownloadResumeWorkScheduler`, wiring it into `DownloadModuleDeps`, and proving `resume_download_outcome()` schedules the derived work plan before runtime enqueue.

@@ -5050,3 +5050,70 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Agent Record: 2026-05-16 14:38:43 +08:00
+- Started AT-2026-05-16-174 after the user approved running four consecutive tasks without intermediate confirmation.
+- Current task is docs-first because the exact scheduler/driver consumer boundary for `DownloadResumeWorkPlan` is not yet precise enough for safe Rust coding.
+- AT-173 was committed locally as `1a698f9`; unrelated dirty frontend, sqlite, Cargo.lock, `.codex`, `src/`, and pen files remain out of scope.
+
+### Agent Record: 2026-05-16 14:44:20 +08:00
+- Re-read required root, collaboration, docs-map, downloads module, runtime, crate layout/API, kernel-jobs, testing, and AI transaction snippets for AT-174.
+- Key boundary: the next Rust slice should introduce a downloads-owned scheduler/driver port that consumes `DownloadResumeWorkPlan` before job-level runtime enqueue; concrete fetch/write/verify execution, persistence schema, host transport, frontend, and `kernel-jobs` payloads remain out of scope.
+
+### Agent Record: 2026-05-16 14:45:20 +08:00
+- Completed AT-2026-05-16-174 by updating `docs/modules/downloads/README_IMPL.md` with the `DownloadResumeWorkScheduler` boundary.
+- Readback confirmed the section covers trait name, method shape, placeholder implementation, dependency owner, call order, failure behavior, forbidden surfaces, and next Rust TDD slice.
+- Scoped `git diff --check` passed for AT-174 files with CRLF warnings only.
+
+### Auto Record: 2026-05-16 14:40:22
+- Tool: apply_patch
+- Phase: Phase 48 - Downloads Resume Work Plan Derivation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-16 14:40:45
+- Tool: apply_patch
+- Phase: Phase 49 - Downloads Resume Scheduler Boundary Documentation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-16 14:40:51
+- Tool: apply_patch
+- Phase: Phase 49 - Downloads Resume Scheduler Boundary Documentation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-16 14:41:00
+- Tool: apply_patch
+- Phase: Phase 49 - Downloads Resume Scheduler Boundary Documentation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-16 14:41:15
+- Tool: apply_patch
+- Phase: Phase 49 - Downloads Resume Scheduler Boundary Documentation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-16 14:44:21
+- Tool: apply_patch
+- Phase: Phase 49 - Downloads Resume Scheduler Boundary Documentation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-16 14:44:52
+- Tool: apply_patch
+- Phase: Phase 49 - Downloads Resume Scheduler Boundary Documentation
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-16 14:45:47
+- Tool: apply_patch
+- Phase: Phase 49 - Downloads Resume Scheduler Boundary Documentation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)

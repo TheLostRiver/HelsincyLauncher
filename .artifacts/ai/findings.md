@@ -556,3 +556,10 @@
 - `module-downloads` owns resume reconstruction and checkpoint-aware work planning; `kernel-jobs` owns only generic job lifecycle/snapshot/runtime control and must not receive segment plans.
 - AT-173 should add only a pure module-local derivation in `crates/module-downloads/src/facade/mod.rs`: `resume_partial` / `queue_remaining` become work items, while `seal_completed` / `reject_mismatch` produce no work item.
 - User override for comments: preserve existing English comments and add Chinese comments alongside them; new declarations in this slice should use concise bilingual comments.
+
+## Phase 49 Resume Scheduler Boundary Findings
+
+- Required docs were read in scoped snippets before README_IMPL edits: `README.md`, `CONTRIBUTING.md`, `docs/README.md`, downloads `README_ARCH.md` / `README_API.md` / `README_FLOW.md` / `README_IMPL.md`, `docs/TauriDownloadRuntimeDesign.md`, `docs/TauriBackendCrateLayoutAndUseCaseStubDesign.md`, `docs/TauriFirstCrateApiDrafts.md`, `docs/TauriKernelJobsRuntimeDesign.md`, `docs/TauriTestingStrategyAndQualityGateDesign.md`, and `docs/TauriAIDevelopmentTransactionProtocolDesign.md`.
+- The scheduler/driver consumer is still downloads-owned. It should consume `DownloadResumeWorkPlan` inside `module-downloads`, not through `kernel-jobs`, host IPC, frontend state, or SQLite schema in this slice.
+- Safe call order for the next Rust slice should be: derive decisions -> reject mismatch -> classify all-sealed -> build work plan for runtime candidates -> hand work plan to downloads scheduler/driver port -> enqueue existing job id through shared job runtime.
+- If scheduler/driver port preparation fails, `resume_download_outcome()` should return that downloads-domain error and skip runtime enqueue, preventing a queued job with no module-owned work plan.

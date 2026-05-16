@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 48 - Downloads Resume Work Plan Derivation
+Phase 49 - Downloads Resume Scheduler Boundary Documentation
 
 ## Current Focus
 
@@ -127,7 +127,8 @@ Phase 48 - Downloads Resume Work Plan Derivation
 - AT-2026-05-16-170 completed and committed locally after adding the module-owned resume outcome boundary for all-sealed plans while preserving the current host transport `AcceptedJob` entry.
 - AT-2026-05-16-171 completed and committed locally after projecting the module-owned downloads resume outcome through host transport without exposing segment details or changing unrelated accepted-job paths.
 - AT-2026-05-16-172 completed the downloads-owned scheduler/driver payload boundary documentation before Rust code starts handing `resume_partial` / `queue_remaining` work to a scheduler.
-- Next planned backend slice: add a minimal module-local downloads resume work plan derivation, guided by `docs/modules/downloads/README_IMPL.md` section 7.6, without touching scheduler execution, persistence, host transport, frontend, or `kernel-jobs` payloads.
+- AT-2026-05-16-173 completed and committed locally as `1a698f9`, adding the module-local downloads resume work plan derivation.
+- AT-2026-05-16-174 is in progress to document the scheduler/driver boundary before introducing a scheduler port in Rust.
 
 ## Phases
 
@@ -420,6 +421,12 @@ Phase 48 - Downloads Resume Work Plan Derivation
 - Atomic tasks: AT-2026-05-16-173
 - **Status:** complete
 
+### Phase 49: Downloads Resume Scheduler Boundary Documentation
+
+- Outcome: define the downloads-owned scheduler/driver boundary that consumes `DownloadResumeWorkPlan`, including facade call order and failure behavior before any scheduler port code lands.
+- Atomic tasks: AT-2026-05-16-174
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -587,8 +594,9 @@ Phase 48 - Downloads Resume Work Plan Derivation
 163. AT-2026-05-16-169 - completed - documented the all-sealed completion boundary and current `AcceptedJob` contract gap before changing `resume_download` behavior; committed locally.
 164. AT-2026-05-16-170 - completed - added a module-owned resume outcome for all-sealed plans while preserving current host transport compatibility; committed locally.
 165. AT-2026-05-16-171 - completed - projected the module-owned downloads resume outcome through host transport without exposing segment details; committed locally.
-166. AT-2026-05-16-172 - completed - documented the downloads-owned resume scheduler/driver payload boundary before Rust implementation; ready for local commit.
-167. AT-2026-05-16-173 - completed - added the minimal downloads-owned resume work plan/payload derivation with focused TDD before scheduler execution or persistence work; ready for local commit.
+166. AT-2026-05-16-172 - completed - documented the downloads-owned resume scheduler/driver payload boundary before Rust implementation; committed locally.
+167. AT-2026-05-16-173 - completed - added the minimal downloads-owned resume work plan/payload derivation with focused TDD before scheduler execution or persistence work; committed locally as `1a698f9`.
+168. AT-2026-05-16-174 - completed - documented the downloads-owned scheduler/driver boundary before introducing a scheduler port in Rust; ready for local commit.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
@@ -607,7 +615,7 @@ Phase 48 - Downloads Resume Work Plan Derivation
 
 ## Follow-up Queue
 
-1. Define or introduce the downloads-owned scheduler/driver boundary that will consume `DownloadResumeWorkPlan`, before concrete fetch/write/verify execution, persistence schema, host transport, frontend, or `kernel-jobs` payload work.
+1. Add the minimal Rust scheduler port/call-order slice that consumes `DownloadResumeWorkPlan` before job-level runtime enqueue.
 2. Leave unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, and `src/` changes untouched unless the user explicitly scopes them into a task.
 
 ## Legacy Note

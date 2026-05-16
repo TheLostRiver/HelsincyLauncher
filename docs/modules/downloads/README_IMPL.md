@@ -81,6 +81,7 @@ Implementation truth should move through module facade and ports first. Do not p
 | downloads resume host projection | maps `DownloadResumeOutcome` to `DownloadResumeOutcomeDto`; `RuntimeAccepted` wraps accepted-job projection and `AlreadyComplete` uses a non-accepted completed outcome | host mapper tests |
 | resume scheduler/driver payload boundary | documented as downloads-owned work plan derived from `resume_partial` / `queue_remaining`, not a `kernel-jobs` extension or transport payload | README_IMPL |
 | resume work plan derivation | derives module-local `DownloadResumeWorkPlan` / `DownloadResumeWorkItem` values from manifest, checkpoints, and resume decisions | module work-plan test |
+| resume scheduler/driver consumer boundary | documented as a downloads-owned scheduler port that consumes `DownloadResumeWorkPlan` before job-level runtime enqueue | README_IMPL |
 | list/get/policy surfaces | not wired yet | future slices |
 
 ---
@@ -325,6 +326,51 @@ Current Rust slice:
 6. Runtime enqueue, concrete scheduler execution, persistence, host transport, frontend, and `kernel-jobs` payloads remain unchanged.
 
 Later Rust slices should wire this work plan into a downloads-owned scheduler/driver behind the module boundary before adding concrete persistence or host projections.
+
+### 7.7 Resume Scheduler/Driver Consumer Boundary
+
+The scheduler/driver consumer of `DownloadResumeWorkPlan` is a downloads-owned port, not a shared runtime extension. The first Rust slice should introduce a module-local boundary shaped like:
+
+1. trait name: `DownloadResumeWorkScheduler`;
+2. method: `schedule_resume_work(&self, job_id: &JobId, plan: &DownloadResumeWorkPlan) -> AppResult<()>`;
+3. default placeholder: `impl DownloadResumeWorkScheduler for ()` returning `Ok(())` so current composition wiring can stay minimal until a real scheduler lands;
+4. dependency owner: `DownloadModuleDeps`, alongside repositories, manifest provider, staging store, and shared job runtime;
+5. public export: re-export through `crates/module-downloads/src/lib.rs` with the other facade boundary types.
+
+The resume facade call order should be:
+
+1. load the module job record;
+2. load checkpoint facts;
+3. validate staging root;
+4. fetch or reconstruct manifest;
+5. derive segment decisions;
+6. return `DL_RESUME_SEGMENT_MISMATCH` before any scheduler or runtime call when a decision is `reject_mismatch`;
+7. return `AlreadyComplete` before any scheduler or runtime call when all decisions are `seal_completed`;
+8. build `DownloadResumeWorkPlan` when decisions contain runtime candidates;
+9. call `DownloadResumeWorkScheduler::schedule_resume_work()` with the job id and work plan;
+10. enqueue the existing job id through shared `JobRuntime` using the existing job-level request shape.
+
+Failure behavior:
+
+1. if the scheduler port returns an error, `resume_download_outcome()` must return that error and must not enqueue the shared runtime job;
+2. the first scheduler-port slice should not invent public IPC fields or transport DTOs for scheduler failures;
+3. scheduler preparation failure is a downloads-domain failure, not a `kernel-jobs` lifecycle state by itself.
+
+This boundary still must not:
+
+1. implement fetch/write/verify execution;
+2. add SQLite tables or columns for work items;
+3. expose work items through host transport or frontend IPC;
+4. put segment payloads into `kernel-jobs` `extension`;
+5. add job completion or checkpoint mutation APIs to `kernel-jobs`.
+
+Next Rust slice:
+
+1. add `DownloadResumeWorkScheduler` and a no-op `()` placeholder implementation;
+2. add the scheduler dependency to `DownloadModuleDeps` and update composition/test construction sites;
+3. add a focused RED test proving `resume_download_outcome()` schedules a derived work plan before runtime enqueue;
+4. keep concrete scheduler execution and persistence unchanged;
+5. run `launcher-module-downloads` tests and the narrow composition smoke if composition wiring changes.
 
 ---
 
