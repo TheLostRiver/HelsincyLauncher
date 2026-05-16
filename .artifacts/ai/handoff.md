@@ -2,9 +2,9 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-16-184
-- title: Add DownloadJobDriver local pending-work consumer
-- status: completed and committed locally as `a710cfc`
+- task id: AT-2026-05-16-186
+- title: Wire downloads shared scheduler/source in composition-root
+- status: completed and committed locally
 
 ## Current In-progress Atomic Task
 
@@ -12,6 +12,7 @@
 
 ## Current Slice
 
+- `crates/composition-root/src/bootstrap.rs`
 - `docs/modules/downloads/README_IMPL.md`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
@@ -21,18 +22,21 @@
 
 ## Validation
 
-- Passed for AT-185:
-  - README_IMPL section 7.11 defines the shared scheduler/source composition wiring boundary.
-  - PWF records are aligned to Phase 60.
-  - Readback confirmed the new README_IMPL section and task-plan current phase.
-  - Scoped `git diff --check` passed with CRLF warnings only.
-  - Path-limited `git status --short` showed only AT-185 files.
-- Pending for AT-185:
-  - Local commit of only AT-185 files.
+- Passed for AT-186:
+  - focused RED composition-root test failed for the expected missing wiring seam;
+  - minimal shared scheduler/source wiring implemented in private composition builders;
+  - README_IMPL current Rust slice updated;
+  - focused composition-root test passed;
+  - full composition-root suite passed: 6 unit tests and 7 integration tests, doc tests 0;
+  - `cargo fmt -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed after formatting;
+  - scoped `git diff --check` passed with CRLF warnings only;
+  - path-limited `git status --short` showed only AT-186 files.
+- Pending for AT-186:
+  - none
 
 ## Current Git State To Preserve
 
-- Unrelated unstaged/unknown work remains present and must not be committed with AT-2026-05-16-185:
+- Unrelated unstaged/unknown work remains present and must not be committed with AT-2026-05-16-186:
   - `Cargo.lock`
   - `MyEpicLauncher.pen`
   - frontend files under `app/` and `components/`
@@ -43,6 +47,5 @@
 
 ## Next Resume Point
 
-1. Finish AT-185 docs-only boundary in `docs/modules/downloads/README_IMPL.md`.
-2. Commit only AT-185 files.
-3. If the next Rust slice is clear after AT-185, start AT-186 by rereading the required docs and applying TDD before changing composition-root wiring.
+1. Reassess README_IMPL for the next backend slice before coding.
+2. Do not start fetch/write/verify execution until the checkpoint mutation boundary is explicit.

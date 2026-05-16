@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 60 - Downloads Composition Shared Scheduler Source Wiring Boundary
+Phase 61 - Downloads Composition Shared Scheduler Source Wiring
 
 ## Current Focus
 
@@ -502,6 +502,12 @@ Phase 60 - Downloads Composition Shared Scheduler Source Wiring Boundary
 - Atomic tasks: AT-2026-05-16-185
 - **Status:** complete
 
+### Phase 61: Downloads Composition Shared Scheduler Source Wiring
+
+- Outcome: wire one shared `InMemoryDownloadResumeWorkScheduler` through composition-root as both downloads facade scheduler and driver pending-work source, with focused TDD and no public API/runtime/transport/IO expansion.
+- Atomic tasks: AT-2026-05-16-186
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -683,6 +689,7 @@ Phase 60 - Downloads Composition Shared Scheduler Source Wiring Boundary
 177. AT-2026-05-16-183 - completed - documented the `DownloadJobDriver` local pending-work consumer boundary and defined AT-184 as a TDD-backed local consumer method without changing shared runtime execution semantics.
 178. AT-2026-05-16-184 - completed - added the TDD-backed local `DownloadJobDriver` pending-work consumer and committed locally as `a710cfc`.
 179. AT-2026-05-16-185 - completed - documented the composition shared scheduler/source wiring boundary before touching composition-root Rust code.
+180. AT-2026-05-16-186 - completed - wired the shared downloads resume scheduler/source through composition-root with focused TDD and committed locally.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

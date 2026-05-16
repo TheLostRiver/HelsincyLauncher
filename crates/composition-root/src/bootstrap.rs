@@ -24,7 +24,7 @@ use launcher_kernel_jobs::{
 };
 use launcher_module_downloads::{
     DownloadCheckpointRepository, DownloadFacade, DownloadJobDriver, DownloadModuleDeps,
-    InMemoryDownloadResumeWorkScheduler,
+    DownloadPendingResumeWorkSource, InMemoryDownloadResumeWorkScheduler,
 };
 use launcher_module_engines::{EngineFacade, EngineJobDriver, EngineModuleDeps};
 use launcher_module_fab::{FabFacade, FabModuleDeps, FabPrewarmJobDriver, FabSyncJobDriver};
@@ -177,6 +177,7 @@ pub fn build_desktop_services(config: DesktopBootstrapConfig) -> AppResult<Deskt
     let fab_provider = build_fab_provider_adapter()?;
     let (job_runtime, snapshot_store) = build_job_runtime(&config)?;
     let download_checkpoint_repo = SqliteDownloadCheckpointRepository::new(sqlite_config.clone());
+    let download_resume_scheduler = InMemoryDownloadResumeWorkScheduler::new();
 
     let fab = Arc::new(build_fab_module(
         sqlite_config.clone(),
@@ -187,9 +188,13 @@ pub fn build_desktop_services(config: DesktopBootstrapConfig) -> AppResult<Deskt
         sqlite_config,
         download_checkpoint_repo.clone(),
         job_runtime.clone(),
+        download_resume_scheduler.clone(),
     ));
     let engines = Arc::new(build_engines_module(job_runtime));
-    let registry = build_job_driver_registry(Arc::new(download_checkpoint_repo));
+    let registry = build_job_driver_registry(
+        Arc::new(download_checkpoint_repo),
+        Arc::new(download_resume_scheduler),
+    );
     let snapshot_store_dyn: Arc<dyn JobSnapshotStore<()>> = snapshot_store.clone();
     let startup = Arc::new(build_startup_pipeline(
         &config,
@@ -256,13 +261,14 @@ fn build_downloads_module(
     sqlite_config: SqliteStorageAdapterConfig,
     checkpoint_repo: SqliteDownloadCheckpointRepository,
     job_runtime: SharedJobRuntimeHost,
+    resume_scheduler: InMemoryDownloadResumeWorkScheduler,
 ) -> DesktopDownloadFacade {
     DownloadFacade::new(DownloadModuleDeps {
         job_repo: SqliteDownloadJobRepository::new(sqlite_config.clone()),
         checkpoint_repo,
         manifest_provider: (),
         staging_store: (),
-        resume_scheduler: InMemoryDownloadResumeWorkScheduler::new(),
+        resume_scheduler,
         job_runtime,
     })
 }
@@ -301,13 +307,29 @@ fn build_job_runtime(
 // Restore driver 在这里集中注册，让 startup stage 2 能恢复 queued jobs。
 fn build_job_driver_registry(
     download_checkpoint_repo: Arc<dyn DownloadCheckpointRepository>,
+    download_resume_work_source: Arc<dyn DownloadPendingResumeWorkSource>,
 ) -> Arc<JobDriverRegistry<()>> {
     let mut registry = JobDriverRegistry::new();
     registry.register(Arc::new(FabPrewarmJobDriver));
     registry.register(Arc::new(FabSyncJobDriver));
-    registry.register(Arc::new(DownloadJobDriver::new(download_checkpoint_repo)));
+    registry.register(Arc::new(build_download_job_driver(
+        download_checkpoint_repo,
+        download_resume_work_source,
+    )));
     registry.register(Arc::new(EngineJobDriver));
     Arc::new(registry)
+}
+
+// Downloads driver construction is kept private so public services stay facade-only.
+// Downloads driver 构造保持私有，确保公开服务面仍然只暴露 facade。
+fn build_download_job_driver(
+    download_checkpoint_repo: Arc<dyn DownloadCheckpointRepository>,
+    download_resume_work_source: Arc<dyn DownloadPendingResumeWorkSource>,
+) -> DownloadJobDriver {
+    DownloadJobDriver::with_pending_resume_work_source(
+        download_checkpoint_repo,
+        download_resume_work_source,
+    )
 }
 
 // Startup only depends on assembled facades/runtime surfaces, not concrete repository types.
@@ -336,4 +358,75 @@ fn invalid_builder_input(builder: &str, detail: &str) -> AppError {
         AppErrorSeverity::Warning,
         CorrelationId::generate(),
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use launcher_kernel_foundation::JobId;
+    use launcher_kernel_jobs::RuntimeQueuePolicy;
+    use launcher_module_downloads::{
+        DownloadResumeWorkItem, DownloadResumeWorkMode, DownloadResumeWorkPlan,
+        DownloadResumeWorkScheduler,
+    };
+
+    #[test]
+    fn download_driver_drains_work_scheduled_through_shared_facade_scheduler() {
+        let tmp_path = std::env::temp_dir().join("at186_downloads_shared_scheduler_wiring.sqlite3");
+        let _ = std::fs::remove_file(&tmp_path);
+        let sqlite_config = SqliteStorageAdapterConfig::new(tmp_path.clone());
+        let checkpoint_repo = SqliteDownloadCheckpointRepository::new(sqlite_config.clone());
+        let job_runtime = SharedJobRuntimeHost::new(RuntimeQueuePolicy::new(1));
+        // Use one scheduler handle for both facade preparation and driver source wiring.
+        // 使用同一个 scheduler 句柄同时接入 facade 准备路径与 driver source 接线。
+        let scheduler = InMemoryDownloadResumeWorkScheduler::new();
+        let downloads = build_downloads_module(
+            sqlite_config,
+            checkpoint_repo.clone(),
+            job_runtime,
+            scheduler.clone(),
+        );
+        let driver = build_download_job_driver(Arc::new(checkpoint_repo), Arc::new(scheduler));
+        let job_id = JobId::generate();
+        let plan = make_resume_work_plan("segment-shared");
+
+        downloads
+            .deps()
+            .resume_scheduler
+            .schedule_resume_work(&job_id, &plan)
+            .expect("facade scheduler should register pending resume work");
+
+        // The driver must drain the exact work registered through the facade dependency graph.
+        // driver 必须取走通过 facade 依赖图登记的同一份 pending work。
+        let drained = driver
+            .drain_pending_resume_work(&job_id)
+            .expect("driver should drain pending work from the shared scheduler source");
+
+        assert_eq!(drained.len(), 1);
+        assert_eq!(drained[0].job_id, job_id);
+        assert_eq!(drained[0].plan, plan);
+        assert!(
+            downloads.deps().resume_scheduler.pending_work().is_empty(),
+            "driver drain should consume the work registered through the facade scheduler"
+        );
+
+        let _ = std::fs::remove_file(&tmp_path);
+    }
+
+    fn make_resume_work_plan(segment_id: &str) -> DownloadResumeWorkPlan {
+        DownloadResumeWorkPlan {
+            items: vec![DownloadResumeWorkItem {
+                segment_id: segment_id.into(),
+                file_id: "file-1".into(),
+                source_locator: format!("https://example.invalid/{segment_id}"),
+                write_target: format!("{segment_id}.part"),
+                expected_hash: None,
+                start_offset: 0,
+                length: 1024,
+                resume_mode: DownloadResumeWorkMode::FromStart,
+                checkpoint_ref: None,
+            }],
+        }
+    }
 }

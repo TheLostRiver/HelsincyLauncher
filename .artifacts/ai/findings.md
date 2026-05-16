@@ -626,3 +626,15 @@
 - Current Rust wiring creates the downloads facade scheduler in the facade builder while the driver registry still uses `DownloadJobDriver::new(...)`, so the driver source is currently the no-op `()` implementation rather than the real in-memory scheduler.
 - The next implementation boundary must create one shared `InMemoryDownloadResumeWorkScheduler` in composition assembly and pass it to both the facade dependency graph and `DownloadJobDriver::with_pending_resume_work_source(...)`.
 - The current public composition-root service graph should not grow a driver-registry accessor just for testing; the next Rust slice should prefer a private builder/helper or narrowly scoped composition test surface.
+
+## Phase 61 Downloads Composition Shared Scheduler Source Wiring Findings
+
+- AT-2026-05-16-185 committed locally as `cb991f3`.
+- Push to `origin/main` was attempted after AT-185 and rejected by safety review because direct external default-branch push was not sufficiently authorized; per user rule, continue without a push and do not work around the rejection.
+- Required docs and code surfaces were read before test edits: README, CONTRIBUTING, docs map, downloads ARCH/API/FLOW/README_IMPL 7.11, composition-root wiring design, kernel-jobs runtime design, download runtime design, TDD skill, `crates/composition-root/src/bootstrap.rs`, composition smoke tests, module-downloads facade/driver, and kernel-jobs registry API.
+- `JobDriverRegistry::resolve()` returns `&dyn JobDriver<()>`, so a test that needs `DownloadJobDriver::drain_pending_resume_work()` should use a private composition helper rather than exposing the registry or widening `JobDriver`.
+- The focused RED test should live in `bootstrap.rs` under `#[cfg(test)]`, where it can exercise private builders without changing `launcher-composition-root` public API.
+- The RED test failed on the missing shared scheduler argument and missing private driver builder, proving the test exercised the intended composition seam.
+- The implementation keeps `DesktopAppServices` facade-only and only changes private composition builders.
+- The same scheduler handle is now cloned into the facade deps and injected into `DownloadJobDriver`, so work registered through the facade scheduler can be drained by the driver source.
+- Startup stage-2 restore behavior remains checkpoint-only and does not drain in-memory pending work.

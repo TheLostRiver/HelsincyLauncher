@@ -5838,6 +5838,35 @@
 - Path-limited `git status --short` showed only AT-185 files.
 - Ready to commit AT-185 only.
 
+## 2026-05-16 - AT-185 Commit And Push Attempt
+
+- Committed AT-185 locally as `cb991f3` with message `docs: define downloads shared scheduler wiring`.
+- `git status -sb` shows `main...origin/main [ahead 59]` plus unrelated dirty files that remain out of scope.
+- Attempted `git push origin main` per user rule, but the safety reviewer rejected the direct external default-branch push. No workaround attempted; continuing because the user previously allowed skipping push when push cannot be done.
+
+## 2026-05-16 - AT-186 Start
+
+- Started AT-2026-05-16-186 after AT-185 commit `cb991f3`.
+- Required docs and code surfaces were read in scoped snippets before test edits.
+- TDD rule is active: add focused RED test first, observe expected failure, then implement minimal composition-root shared scheduler/source wiring.
+
+## 2026-05-16 - AT-186 RED/GREEN
+
+- Added focused composition-root test `download_driver_drains_work_scheduled_through_shared_facade_scheduler`.
+- RED failed as expected because `build_downloads_module(...)` still took 3 arguments and `build_download_job_driver(...)` did not exist.
+- Implemented minimal private wiring:
+  - `build_desktop_services()` creates one `InMemoryDownloadResumeWorkScheduler`;
+  - `build_downloads_module(...)` receives that scheduler instead of creating its own;
+  - `build_job_driver_registry(...)` receives the same scheduler as `DownloadPendingResumeWorkSource`;
+  - private `build_download_job_driver(...)` injects the source through `DownloadJobDriver::with_pending_resume_work_source(...)`.
+- Focused test passed after implementation.
+- Full `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed: 6 unit tests and 7 integration tests passed, doc tests 0.
+- Initial fmt check failed on one line wrap; after `cargo fmt`, `cargo fmt -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed.
+- README_IMPL section 7.11 now records the current Rust slice.
+- Scoped `git diff --check` passed with CRLF warnings only.
+- Path-limited `git status --short` showed only AT-186 files; broad status still contains unrelated dirty files including `crates/composition-root/src/startup.rs`, which remains excluded from the commit.
+- AT-186 was committed locally after validation. The exact commit hash should be read from `git log` after the final amend.
+
 ### Auto Record: 2026-05-16 23:38:38
 - Tool: apply_patch
 - Phase: Phase 60 - Downloads Composition Shared Scheduler Source Wiring Boundary
@@ -5852,6 +5881,57 @@
 ### Auto Record: 2026-05-16 23:39:40
 - Tool: apply_patch
 - Phase: Phase 60 - Downloads Composition Shared Scheduler Source Wiring Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-16 23:43:48
+- Tool: apply_patch
+- Phase: Phase 61 - Downloads Composition Shared Scheduler Source Wiring
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (delete)
+  - `crates/composition-root/src/bootstrap.rs` (update)
+
+### Auto Record: 2026-05-16 23:44:21
+- Tool: apply_patch
+- Phase: Phase 61 - Downloads Composition Shared Scheduler Source Wiring
+- Files:
+  - `crates/composition-root/src/bootstrap.rs` (update)
+
+### Auto Record: 2026-05-16 23:44:55
+- Tool: apply_patch
+- Phase: Phase 61 - Downloads Composition Shared Scheduler Source Wiring
+- Files:
+  - `crates/composition-root/src/bootstrap.rs` (update)
+  - `docs/modules/downloads/README_IMPL.md` (update)
+
+### Auto Record: 2026-05-16 23:46:45
+- Tool: apply_patch
+- Phase: Phase 61 - Downloads Composition Shared Scheduler Source Wiring
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-16 23:48:00
+- Tool: apply_patch
+- Phase: Phase 61 - Downloads Composition Shared Scheduler Source Wiring
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-16 23:49:12
+- Tool: apply_patch
+- Phase: Phase 61 - Downloads Composition Shared Scheduler Source Wiring
 - Files:
   - `.artifacts/ai/active-task.md` (update)
   - `.artifacts/ai/task-plan.md` (update)

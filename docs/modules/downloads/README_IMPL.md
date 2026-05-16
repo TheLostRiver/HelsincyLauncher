@@ -596,6 +596,15 @@ Preferred validation for the next Rust slice:
 
 The slice still does not mean downloads can execute segment work. It only ensures that once a documented execution turn exists, the driver can see the pending resume work that the facade prepared before shared runtime enqueue.
 
+Current Rust slice:
+
+1. composition-root creates one `InMemoryDownloadResumeWorkScheduler` during desktop service assembly;
+2. the downloads facade receives a clone of that scheduler as its `DownloadResumeWorkScheduler`;
+3. the downloads job driver registry receives the same shared scheduler as `DownloadPendingResumeWorkSource`;
+4. a private `build_download_job_driver(...)` helper keeps the concrete driver construction testable without exposing driver internals through `DesktopAppServices`;
+5. the focused composition-root test proves work registered through the facade dependency graph can be drained by the driver source;
+6. `kernel-jobs`, host transport, frontend, SQLite schema, checkpoint mutation, snapshot mutation, startup stage-2 restore, and concrete fetch/write/verify execution remain unchanged.
+
 ---
 
 ## 8. Error Semantics
