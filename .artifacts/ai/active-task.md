@@ -2,26 +2,26 @@
 
 ## Identity
 
-- task id: AT-2026-05-16-179
-- title: Add downloads pending resume work scheduler shell
+- task id: AT-2026-05-16-180
+- title: Wire downloads pending resume scheduler in composition root
 - status: completed
 
 ## Goal
 
-实现 downloads 模块本地 pending resume work queue / scheduler shell，让 `DownloadResumeWorkScheduler` 的真实模块内实现可以登记 `DownloadResumeWorkPlan`，并保持登记发生在 shared runtime job-level enqueue 之前。
+把 AT-179 新增的 `InMemoryDownloadResumeWorkScheduler` 接入 composition-root 的 downloads facade 装配，让桌面服务图使用真实 module-local pending work scheduler shell，而不是继续使用 `()` no-op placeholder。
 
-本轮只覆盖 TDD-backed module-local shell：
+本轮只覆盖 composition wiring：
 
-- add focused RED test for pending work registration before runtime enqueue
-- add minimal in-memory/module-local scheduler shell behind `DownloadResumeWorkScheduler`
-- keep `DownloadResumeWorkPlan` transient and module-owned
-- keep actual fetch/write/verify execution, checkpoint mutation, SQLite schema, host transport, frontend, and `kernel-jobs` payload changes out of scope
+- add focused RED smoke proving composition exposes `pending_work()` on the downloads scheduler dependency
+- update `DesktopDownloadFacade` concrete type alias
+- wire `InMemoryDownloadResumeWorkScheduler::new()` in `build_downloads_module`
+- keep driver-side pending-work consumption, fetch/write/verify, checkpoint mutation, SQLite schema, host transport, frontend, and `kernel-jobs` payload changes out of scope
 
 ## Scope
 
 - in scope:
-  - `crates/module-downloads/src/facade/mod.rs`
-  - `crates/module-downloads/src/lib.rs`
+  - `crates/composition-root/src/bootstrap.rs`
+  - `crates/composition-root/tests/bootstrap_wiring_smoke.rs`
   - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
@@ -39,8 +39,8 @@
 
 ## Allowed Files
 
-1. crates/module-downloads/src/facade/mod.rs
-2. crates/module-downloads/src/lib.rs
+1. crates/composition-root/src/bootstrap.rs
+2. crates/composition-root/tests/bootstrap_wiring_smoke.rs
 3. docs/modules/downloads/README_IMPL.md
 4. .artifacts/ai/active-task.md
 5. .artifacts/ai/task-plan.md
@@ -78,42 +78,40 @@ Related architecture/collaboration docs read in scoped snippets:
 
 ## Hypothesis
 
-- falsifiable local hypothesis: a minimal module-local scheduler shell can record pending resume work plans before runtime enqueue without touching fetch/write/verify, checkpoint persistence, host transport, frontend, SQLite schema, or `kernel-jobs`.
+- falsifiable local hypothesis: composition-root can swap downloads `resume_scheduler` from `()` to `InMemoryDownloadResumeWorkScheduler` without changing public service shape or touching driver execution, transport, frontend, SQLite schema, or `kernel-jobs`.
 
 ## Cheap Check
 
-- focused RED/GREEN test: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_download_registers_pending_work_before_runtime_enqueue`
+- focused RED/GREEN test: `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml bootstrap_wiring_smoke`
 
 ## Validation Gate
 
 1. Read required docs in scoped snippets before editing README_IMPL.
-2. Write focused RED test for pending resume work registration before runtime enqueue.
-3. Observe the focused test fail for missing scheduler shell API.
-4. Add the minimal module-local scheduler shell and exports.
+2. Write focused RED composition smoke for scheduler shell wiring.
+3. Observe the focused test fail while composition still uses `()` placeholder.
+4. Wire `InMemoryDownloadResumeWorkScheduler` in composition-root.
 5. Update README_IMPL current state and PWF records.
-6. Run focused test and full `launcher-module-downloads` suite.
+6. Run focused composition smoke and relevant package tests.
 7. Run scoped `git diff --check` and path-limited `git status --short`.
 8. Commit only the AT-179 slice locally.
 
 ## Validation Result
 
 - passed
-- Required README, docs index, CONTRIBUTING, downloads module docs, README_IMPL, download runtime, kernel-jobs runtime, testing strategy, AI transaction protocol, crate API, and composition snippets were read before coding.
-- RED: focused test `resume_download_registers_pending_work_before_runtime_enqueue` failed on missing `DownloadPendingResumeWork` and `InMemoryDownloadResumeWorkScheduler` imports.
-- GREEN: added `DownloadPendingResumeWork` and `InMemoryDownloadResumeWorkScheduler` in `crates/module-downloads/src/facade/mod.rs`.
-- The scheduler shell stores pending work in memory only, implements `DownloadResumeWorkScheduler`, and exposes `pending_work()` / `drain_pending_work()` for later module-owned driver use.
-- Exported the new scheduler shell and pending work type through `crates/module-downloads/src/lib.rs`.
-- Focused test passed: 1 passed, 0 failed.
-- Full `launcher-module-downloads` suite passed: 22 passed, 0 failed.
-- `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed.
-- Scoped `git diff --check` passed for AT-179 files with CRLF warnings only.
-- Path-limited status shows AT-179 files plus the unrelated pre-existing `crates/composition-root/src/startup.rs` formatting side effect.
-- Concrete fetch/write/verify, checkpoint mutation, SQLite schema, host transport, frontend, composition wiring, and `kernel-jobs` payloads remain unchanged.
+- Required README, docs map, CONTRIBUTING, downloads README_IMPL, composition-root wiring design, backend crate layout/API, testing strategy, and AI transaction protocol snippets were read before coding.
+- RED: focused composition smoke failed because current `resume_scheduler` was `()` and had no `pending_work()` method.
+- GREEN: wired `InMemoryDownloadResumeWorkScheduler` into `DesktopDownloadFacade` and `build_downloads_module`.
+- Updated `bootstrap_wiring_smoke` to assert the assembled downloads facade exposes an empty pending-work scheduler.
+- Updated README_IMPL to record that composition now wires the in-memory scheduler shell instead of `()`.
+- Focused `bootstrap_wiring_smoke` passed.
+- Full `launcher-composition-root` suite passed: lib tests 5 passed, integration tests 7 passed, doc tests 0.
+- Initial `cargo fmt -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` failed on smoke-test line wrapping; after `cargo fmt`, the same format check passed.
+- Scoped `git diff --check` passed for AT-180 files with CRLF warnings only.
+- Driver-side pending-work consumption, fetch/write/verify, checkpoint mutation, SQLite schema, host transport, frontend, and `kernel-jobs` payloads remain unchanged.
 
 ## Notes
 
-- AT-2026-05-16-178 committed scheduler execution boundary docs as `41c3be4`.
-- User approved starting AT-179 with "开始实现".
+- AT-2026-05-16-179 committed pending scheduler shell as `4d0c23b`.
+- User approved starting AT-180 with "开始".
 - Direct `origin/main` push remains intentionally skipped without explicit approval.
 - Current unrelated worktree state: preserve `crates/composition-root/src/startup.rs` formatting side effect and other unrelated dirty files.
-- Shell note: an `rg` command with nested double quotes failed PowerShell parsing while checking Mutex style; reran the query with single quotes successfully.

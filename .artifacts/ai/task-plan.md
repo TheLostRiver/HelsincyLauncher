@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 54 - Downloads Pending Resume Work Scheduler Shell
+Phase 55 - Downloads Pending Scheduler Composition Wiring
 
 ## Current Focus
 
@@ -136,7 +136,8 @@ Phase 54 - Downloads Pending Resume Work Scheduler Shell
 - AT-2026-05-16-176 completed and committed locally as `edec23d`, proving scheduler failures skip runtime enqueue.
 - AT-2026-05-16-177 completed and was committed locally as `31942bd`, proving all-sealed resumes do not touch scheduler/runtime work.
 - AT-2026-05-16-178 completed and was committed locally as `41c3be4`, documenting the concrete downloads scheduler execution boundary.
-- AT-2026-05-16-179 completed the TDD-backed module-local pending resume work queue/scheduler shell and is ready for the local commit.
+- AT-2026-05-16-179 completed and was committed locally as `4d0c23b`, adding the TDD-backed module-local pending resume work queue/scheduler shell.
+- AT-2026-05-16-180 completed the composition-root wiring for `InMemoryDownloadResumeWorkScheduler` and is ready for the local commit.
 
 ## Phases
 
@@ -465,6 +466,12 @@ Phase 54 - Downloads Pending Resume Work Scheduler Shell
 - Atomic tasks: AT-2026-05-16-179
 - **Status:** complete
 
+### Phase 55: Downloads Pending Scheduler Composition Wiring
+
+- Outcome: replace the composition-root downloads `resume_scheduler: ()` placeholder with `InMemoryDownloadResumeWorkScheduler`, proving desktop assembly now wires the module-local pending-work scheduler shell without driver execution or transport changes.
+- Atomic tasks: AT-2026-05-16-180
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -639,7 +646,8 @@ Phase 54 - Downloads Pending Resume Work Scheduler Shell
 170. AT-2026-05-16-176 - completed - added a focused scheduler-failure guard so scheduler errors skip runtime enqueue; committed locally as `edec23d`.
 171. AT-2026-05-16-177 - completed - added a focused all-sealed scheduler guard so already-complete resumes do not touch scheduler/runtime work; committed locally as `31942bd`.
 172. AT-2026-05-16-178 - completed - documented the downloads-owned scheduler execution boundary, pending-work queue/scheduler shell as the next Rust slice, and unchanged out-of-scope fetch/write/verify/persistence/transport surfaces; committed locally as `41c3be4`.
-173. AT-2026-05-16-179 - completed - added a TDD-backed module-local pending resume work queue/scheduler shell behind `DownloadResumeWorkScheduler`, with focused and full downloads module tests passing; ready for local commit.
+173. AT-2026-05-16-179 - completed - added a TDD-backed module-local pending resume work queue/scheduler shell behind `DownloadResumeWorkScheduler`, with focused and full downloads module tests passing; committed locally as `4d0c23b`.
+174. AT-2026-05-16-180 - completed - wired `InMemoryDownloadResumeWorkScheduler` into composition-root downloads assembly and proved the smoke path exposes the pending-work scheduler; ready for local commit.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

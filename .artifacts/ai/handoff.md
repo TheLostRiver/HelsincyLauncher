@@ -2,9 +2,9 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-16-179
-- title: Add downloads pending resume work scheduler shell
-- status: completed and ready for the AT-179 local commit
+- task id: AT-2026-05-16-180
+- title: Wire downloads pending resume scheduler in composition root
+- status: completed and ready for the AT-180 local commit
 
 ## Current In-progress Atomic Task
 
@@ -13,8 +13,8 @@
 ## Current Slice
 
 - `docs/modules/downloads/README_IMPL.md`
-- `crates/module-downloads/src/facade/mod.rs`
-- `crates/module-downloads/src/lib.rs`
+- `crates/composition-root/src/bootstrap.rs`
+- `crates/composition-root/tests/bootstrap_wiring_smoke.rs`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -68,6 +68,14 @@
   - `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed.
   - Scoped `git diff --check` passed with CRLF warnings only.
   - README_IMPL records the implemented pending-work shell and deferred execution/persistence/transport surfaces.
+- Passed for AT-2026-05-16-180:
+  - Required docs were read in scoped snippets before coding.
+  - RED failed because composition still used `resume_scheduler: ()`.
+  - Focused composition smoke passed after wiring `InMemoryDownloadResumeWorkScheduler`.
+  - Full `launcher-composition-root` suite passed with 5 lib tests and 7 integration tests.
+  - `cargo fmt -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed after formatting.
+  - Scoped `git diff --check` passed with CRLF warnings only.
+  - README_IMPL records that composition now wires the in-memory scheduler shell.
 
 ## Current Git State To Preserve
 
@@ -81,8 +89,8 @@
 
 ## Next Resume Point
 
-1. Commit AT-2026-05-16-179.
-2. If continuing scheduler work, reassess README_IMPL to choose between composition wiring for `InMemoryDownloadResumeWorkScheduler` and driver-side pending-work consumption.
+1. Commit AT-2026-05-16-180.
+2. If continuing scheduler work, reassess README_IMPL to choose driver-side pending-work consumption or a docs-first boundary for that consumption.
 3. Do not implement HTTP fetch, staging writes, verification, SQLite schema, host transport, frontend IPC, checkpoint mutation, or `kernel-jobs` segment payloads unless explicitly scoped.
 4. Preserve unrelated dirty frontend, sqlite, Cargo.lock, `.codex`, `src/`, pen files, and the existing `crates/composition-root/src/startup.rs` formatting side effect.
 5. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.

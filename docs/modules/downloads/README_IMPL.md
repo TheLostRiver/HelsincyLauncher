@@ -82,7 +82,7 @@ Implementation truth should move through module facade and ports first. Do not p
 | resume scheduler/driver payload boundary | documented as downloads-owned work plan derived from `resume_partial` / `queue_remaining`, not a `kernel-jobs` extension or transport payload | README_IMPL |
 | resume work plan derivation | derives module-local `DownloadResumeWorkPlan` / `DownloadResumeWorkItem` values from manifest, checkpoints, and resume decisions | module work-plan test |
 | resume scheduler/driver consumer boundary | `DownloadResumeWorkScheduler` consumes `DownloadResumeWorkPlan` before job-level runtime enqueue; composition currently uses the no-op placeholder | module facade tests + composition smoke |
-| resume scheduler execution shell | module-local `InMemoryDownloadResumeWorkScheduler` records pending `DownloadResumeWorkPlan` values before runtime enqueue; no fetch/write/verify or persistence behavior is wired yet | module facade test |
+| resume scheduler execution shell | module-local `InMemoryDownloadResumeWorkScheduler` records pending `DownloadResumeWorkPlan` values before runtime enqueue; composition now wires this shell instead of the `()` placeholder; no fetch/write/verify or persistence behavior is wired yet | module facade test + composition smoke |
 | list/get/policy surfaces | not wired yet | future slices |
 
 ---
@@ -412,7 +412,8 @@ Current Rust slice:
 2. `InMemoryDownloadResumeWorkScheduler` implements `DownloadResumeWorkScheduler`.
 3. The shell stores pending work in memory only and exposes `pending_work()` plus `drain_pending_work()` for later module-owned driver use.
 4. The focused module test proves shared runtime enqueue observes pending work already registered for the job id.
-5. Fetcher, writer, verifier, checkpoint mutation, SQLite schema, host transport, frontend IPC, composition wiring, and `kernel-jobs` payloads remain unchanged.
+5. Composition now wires `InMemoryDownloadResumeWorkScheduler` into the desktop downloads facade instead of `()`.
+6. Fetcher, writer, verifier, checkpoint mutation, SQLite schema, host transport, frontend IPC, driver-side consumption, and `kernel-jobs` payloads remain unchanged.
 
 This execution boundary still must not:
 
@@ -433,7 +434,7 @@ Failure behavior remains layered:
 
 Next Rust slice:
 
-1. reassess whether the next smallest scheduler slice is composition wiring for `InMemoryDownloadResumeWorkScheduler` or driver-side pending-work consumption;
+1. reassess whether the next smallest scheduler slice is driver-side pending-work consumption or a documentation boundary for that consumption;
 2. keep concrete fetch/write/verify and checkpoint mutation deferred;
 3. keep host transport, frontend, SQLite schema, and `kernel-jobs` payloads unchanged unless that slice explicitly scopes them.
 

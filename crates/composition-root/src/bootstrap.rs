@@ -24,6 +24,7 @@ use launcher_kernel_jobs::{
 };
 use launcher_module_downloads::{
     DownloadCheckpointRepository, DownloadFacade, DownloadJobDriver, DownloadModuleDeps,
+    InMemoryDownloadResumeWorkScheduler,
 };
 use launcher_module_engines::{EngineFacade, EngineJobDriver, EngineModuleDeps};
 use launcher_module_fab::{FabFacade, FabModuleDeps, FabPrewarmJobDriver, FabSyncJobDriver};
@@ -47,7 +48,7 @@ type DesktopDownloadFacade = DownloadFacade<
     SqliteDownloadCheckpointRepository,
     (),
     (),
-    (),
+    InMemoryDownloadResumeWorkScheduler,
     SharedJobRuntimeHost,
 >;
 
@@ -261,7 +262,7 @@ fn build_downloads_module(
         checkpoint_repo,
         manifest_provider: (),
         staging_store: (),
-        resume_scheduler: (),
+        resume_scheduler: InMemoryDownloadResumeWorkScheduler::new(),
         job_runtime,
     })
 }

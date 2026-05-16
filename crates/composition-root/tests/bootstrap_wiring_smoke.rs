@@ -27,6 +27,16 @@ fn bootstrap_wiring_smoke() {
         services.fab.deps().catalog_provider.config().client_name(),
         "my-epic-launcher-desktop"
     );
+    assert_eq!(
+        services
+            .downloads
+            .deps()
+            .resume_scheduler
+            .pending_work()
+            .len(),
+        0,
+        "downloads composition wiring should expose the module-local pending resume scheduler"
+    );
 
     let accepted_job = services
         .fab

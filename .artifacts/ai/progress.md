@@ -5467,3 +5467,57 @@
   - `.artifacts/ai/findings.md` (update)
   - `.artifacts/ai/progress.md` (update)
   - `.artifacts/ai/handoff.md` (update)
+
+### Session Note: 2026-05-16
+
+- Started AT-2026-05-16-180 after AT-179 commit `4d0c23b`.
+- Re-read required docs in scoped snippets before coding:
+  - root README, docs map, and CONTRIBUTING backend/composition/verification rules
+  - downloads README_IMPL scheduler shell and next-slice boundary
+  - composition-root wiring design and backend crate layout/API docs
+  - testing strategy and AI transaction protocol docs
+- Current implementation target:
+  - first write a RED composition smoke that calls `services.downloads.deps().resume_scheduler.pending_work()`;
+  - then replace the composition `resume_scheduler: ()` placeholder with `InMemoryDownloadResumeWorkScheduler::new()`;
+  - keep driver-side consumption, fetch/write/verify, checkpoint mutation, SQLite schema, host transport, frontend, and `kernel-jobs` payloads out of scope.
+
+### Session Note: 2026-05-16
+
+- Completed AT-2026-05-16-180.
+- TDD evidence:
+  - RED command: `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml bootstrap_wiring_smoke`
+  - RED result: failed because `()` had no `pending_work()` method.
+  - GREEN implementation: imported `InMemoryDownloadResumeWorkScheduler`, updated `DesktopDownloadFacade`, and passed `InMemoryDownloadResumeWorkScheduler::new()` into `DownloadModuleDeps`.
+  - Focused GREEN result: `bootstrap_wiring_smoke` passed.
+  - Full composition result: `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 5 lib tests and 7 integration tests.
+  - Formatting: `cargo fmt -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` initially failed on line wrapping, then passed after `cargo fmt`.
+  - Scoped `git diff --check` passed with CRLF warnings only.
+- README_IMPL now records composition wiring for the in-memory scheduler shell; driver-side consumption, fetch/write/verify, checkpoint mutation, SQLite schema, host transport, frontend, and `kernel-jobs` payloads remain unchanged.
+
+### Auto Record: 2026-05-16 21:14:21
+- Tool: apply_patch
+- Phase: Phase 55 - Downloads Pending Scheduler Composition Wiring
+- Files:
+  - `crates/composition-root/tests/bootstrap_wiring_smoke.rs` (update)
+
+### Auto Record: 2026-05-16 21:14:39
+- Tool: apply_patch
+- Phase: Phase 55 - Downloads Pending Scheduler Composition Wiring
+- Files:
+  - `crates/composition-root/src/bootstrap.rs` (update)
+
+### Auto Record: 2026-05-16 21:15:04
+- Tool: apply_patch
+- Phase: Phase 55 - Downloads Pending Scheduler Composition Wiring
+- Files:
+  - `docs/modules/downloads/README_IMPL.md` (update)
+
+### Auto Record: 2026-05-16 21:16:44
+- Tool: apply_patch
+- Phase: Phase 55 - Downloads Pending Scheduler Composition Wiring
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
