@@ -2,9 +2,9 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-16-174
-- title: Document downloads resume scheduler boundary
-- status: completed and ready for the AT-174 local commit
+- task id: AT-2026-05-16-175
+- title: Add downloads resume scheduler port
+- status: completed and ready for the AT-175 local commit
 
 ## Current In-progress Atomic Task
 
@@ -13,6 +13,9 @@
 ## Current Slice
 
 - `docs/modules/downloads/README_IMPL.md`
+- `crates/module-downloads/src/facade/mod.rs`
+- `crates/module-downloads/src/lib.rs`
+- `crates/composition-root/src/bootstrap.rs`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -36,6 +39,12 @@
   - Required docs were read in scoped snippets before editing README_IMPL.
   - README_IMPL now defines `DownloadResumeWorkScheduler`, call order, failure behavior, and next Rust slice.
   - Scoped `git diff --check` passed for AT-174 files with CRLF warnings only.
+- Passed for AT-2026-05-16-175:
+  - RED failed on missing `DownloadResumeWorkScheduler`.
+  - Focused scheduler-before-enqueue test passed after implementation.
+  - Full `launcher-module-downloads` suite passed with 19 passed, 0 failed.
+  - Composition `bootstrap_wiring_smoke` passed after placeholder scheduler wiring and stale checkpoint initializer repair.
+  - README_IMPL records implemented scheduler port and next scheduler-failure guard slice.
 
 ## Current Git State To Preserve
 
@@ -49,7 +58,7 @@
 
 ## Next Resume Point
 
-1. Commit AT-2026-05-16-174, then immediately start the next Rust TDD slice if the implementation path is clear.
-2. Next Rust slice: add `DownloadResumeWorkScheduler`, wire it into `DownloadModuleDeps`, and prove `resume_download_outcome()` schedules `DownloadResumeWorkPlan` before runtime enqueue.
+1. Commit AT-2026-05-16-175, then start task 3/4.
+2. Next slice: add a focused scheduler-failure guard proving scheduler errors skip shared runtime enqueue.
 3. Preserve unrelated dirty frontend, sqlite, Cargo.lock, `.codex`, `src/`, and pen files.
 4. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.

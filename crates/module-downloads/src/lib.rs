@@ -17,5 +17,5 @@ pub use facade::{
     DownloadJobRecordState, DownloadJobRepository, DownloadManifestPlan,
     DownloadManifestProviderPort, DownloadManifestSegment, DownloadModuleDeps,
     DownloadResumeSegmentAction, DownloadResumeSegmentDecision, DownloadResumeWorkItem,
-    DownloadResumeWorkMode, DownloadResumeWorkPlan,
+    DownloadResumeWorkMode, DownloadResumeWorkPlan, DownloadResumeWorkScheduler,
 };

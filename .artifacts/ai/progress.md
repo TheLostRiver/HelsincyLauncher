@@ -5065,6 +5065,33 @@
 - Readback confirmed the section covers trait name, method shape, placeholder implementation, dependency owner, call order, failure behavior, forbidden surfaces, and next Rust TDD slice.
 - Scoped `git diff --check` passed for AT-174 files with CRLF warnings only.
 
+### Agent Record: 2026-05-16 14:47:09 +08:00
+- Started AT-2026-05-16-175 after committing AT-174 as `6929fa9`.
+- Task 2/4 in the current user-approved batch: add the minimal downloads-owned `DownloadResumeWorkScheduler` port and schedule the derived work plan before shared runtime enqueue.
+- Explicit exclusions remain concrete fetch/write/verify execution, SQLite schema, frontend, host transport, and `kernel-jobs` payload changes.
+
+### Agent Record: 2026-05-16 14:49:05 +08:00
+- Re-read README_IMPL section 7.7, composition-root wiring boundaries, and comment-language rules before Rust edits.
+- The next code path is determined: add the scheduler port in `module-downloads`, add a placeholder scheduler dependency in composition, and prove scheduling happens before shared runtime enqueue.
+
+### Agent Record: 2026-05-16 14:52:00 +08:00
+- Added RED test `resume_download_schedules_work_plan_before_runtime_enqueue`.
+- RED result: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_download_schedules_work_plan_before_runtime_enqueue` failed with unresolved `DownloadResumeWorkScheduler`, which is the expected missing port.
+
+### Agent Record: 2026-05-16 14:56:10 +08:00
+- Focused and full `launcher-module-downloads` tests passed after adding the scheduler port, but composition smoke exposed a stale test initializer in `crates/composition-root/tests/bootstrap_wiring_smoke.rs`.
+- Root cause: `DownloadCheckpointRecord` now includes `segments`, and the correct compatibility constructor is `DownloadCheckpointRecord::empty(job_id)`.
+- Added the composition smoke test file to AT-175 scope because it is the narrow validation target for the composition wiring touched by this task.
+
+### Agent Record: 2026-05-16 14:56:24 +08:00
+- Composition smoke passed after using `DownloadCheckpointRecord::empty(job_id)` in the checkpoint-backed restore seed.
+- Updated `docs/modules/downloads/README_IMPL.md` to record the implemented scheduler port, placeholder composition wiring, and next scheduler-failure guard slice.
+
+### Agent Record: 2026-05-16 14:57:34 +08:00
+- Completed AT-2026-05-16-175.
+- Validation passed: focused scheduler-before-enqueue test 1 passed; full `launcher-module-downloads` suite 19 passed; composition `bootstrap_wiring_smoke` integration test 1 passed; scoped `git diff --check` passed with CRLF warnings only.
+- Next task 3/4 is determined: add a focused scheduler-failure guard so scheduler errors return before shared runtime enqueue.
+
 ### Auto Record: 2026-05-16 14:40:22
 - Tool: apply_patch
 - Phase: Phase 48 - Downloads Resume Work Plan Derivation
@@ -5112,6 +5139,93 @@
 ### Auto Record: 2026-05-16 14:45:47
 - Tool: apply_patch
 - Phase: Phase 49 - Downloads Resume Scheduler Boundary Documentation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-16 14:47:52
+- Tool: apply_patch
+- Phase: Phase 50 - Downloads Resume Scheduler Port
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-16 14:49:00
+- Tool: apply_patch
+- Phase: Phase 50 - Downloads Resume Scheduler Port
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-16 14:50:15
+- Tool: apply_patch
+- Phase: Phase 50 - Downloads Resume Scheduler Port
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-16 14:50:55
+- Tool: apply_patch
+- Phase: Phase 50 - Downloads Resume Scheduler Port
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-16 14:51:12
+- Tool: apply_patch
+- Phase: Phase 50 - Downloads Resume Scheduler Port
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-16 14:52:08
+- Tool: apply_patch
+- Phase: Phase 50 - Downloads Resume Scheduler Port
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-16 14:52:14
+- Tool: apply_patch
+- Phase: Phase 50 - Downloads Resume Scheduler Port
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\lib.rs` (update)
+
+### Auto Record: 2026-05-16 14:52:22
+- Tool: apply_patch
+- Phase: Phase 50 - Downloads Resume Scheduler Port
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\composition-root\src\bootstrap.rs` (update)
+
+### Auto Record: 2026-05-16 14:53:41
+- Tool: apply_patch
+- Phase: Phase 50 - Downloads Resume Scheduler Port
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-16 14:55:41
+- Tool: apply_patch
+- Phase: Phase 50 - Downloads Resume Scheduler Port
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\crates\composition-root\tests\bootstrap_wiring_smoke.rs` (update)
+
+### Auto Record: 2026-05-16 14:56:14
+- Tool: apply_patch
+- Phase: Phase 50 - Downloads Resume Scheduler Port
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-16 14:56:36
+- Tool: apply_patch
+- Phase: Phase 50 - Downloads Resume Scheduler Port
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-16 14:58:04
+- Tool: apply_patch
+- Phase: Phase 50 - Downloads Resume Scheduler Port
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)

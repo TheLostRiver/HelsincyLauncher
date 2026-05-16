@@ -81,7 +81,7 @@ Implementation truth should move through module facade and ports first. Do not p
 | downloads resume host projection | maps `DownloadResumeOutcome` to `DownloadResumeOutcomeDto`; `RuntimeAccepted` wraps accepted-job projection and `AlreadyComplete` uses a non-accepted completed outcome | host mapper tests |
 | resume scheduler/driver payload boundary | documented as downloads-owned work plan derived from `resume_partial` / `queue_remaining`, not a `kernel-jobs` extension or transport payload | README_IMPL |
 | resume work plan derivation | derives module-local `DownloadResumeWorkPlan` / `DownloadResumeWorkItem` values from manifest, checkpoints, and resume decisions | module work-plan test |
-| resume scheduler/driver consumer boundary | documented as a downloads-owned scheduler port that consumes `DownloadResumeWorkPlan` before job-level runtime enqueue | README_IMPL |
+| resume scheduler/driver consumer boundary | `DownloadResumeWorkScheduler` consumes `DownloadResumeWorkPlan` before job-level runtime enqueue; composition currently uses the no-op placeholder | module facade test + composition smoke |
 | list/get/policy surfaces | not wired yet | future slices |
 
 ---
@@ -364,13 +364,20 @@ This boundary still must not:
 4. put segment payloads into `kernel-jobs` `extension`;
 5. add job completion or checkpoint mutation APIs to `kernel-jobs`.
 
+Current Rust slice:
+
+1. `DownloadResumeWorkScheduler` exists as the downloads-owned scheduler/driver port.
+2. `()` implements the port as a no-op placeholder so current composition wiring stays minimal.
+3. `DownloadModuleDeps` owns the scheduler dependency next to the repositories, manifest provider, staging store, and shared job runtime.
+4. `resume_download_outcome()` builds `DownloadResumeWorkPlan`, schedules it through the downloads-owned port, then enqueues the existing job id through shared runtime.
+5. The focused module test proves scheduler scheduling happens before runtime enqueue.
+6. The composition smoke uses the placeholder scheduler and remains assembly-only.
+
 Next Rust slice:
 
-1. add `DownloadResumeWorkScheduler` and a no-op `()` placeholder implementation;
-2. add the scheduler dependency to `DownloadModuleDeps` and update composition/test construction sites;
-3. add a focused RED test proving `resume_download_outcome()` schedules a derived work plan before runtime enqueue;
-4. keep concrete scheduler execution and persistence unchanged;
-5. run `launcher-module-downloads` tests and the narrow composition smoke if composition wiring changes.
+1. add a focused scheduler-failure guard proving scheduler errors skip runtime enqueue;
+2. keep concrete scheduler execution and persistence unchanged;
+3. avoid host transport, frontend, SQLite schema, and `kernel-jobs` payload changes.
 
 ---
 

@@ -12,23 +12,21 @@
 use std::path::PathBuf;
 use std::sync::Arc;
 
-use launcher_adapter_provider_fab::{
-    EpicFabCatalogProviderAdapter, EpicFabCatalogProviderConfig,
-};
+use launcher_adapter_provider_fab::{EpicFabCatalogProviderAdapter, EpicFabCatalogProviderConfig};
 use launcher_adapter_storage_sqlite::{
     SqliteDownloadCheckpointRepository, SqliteDownloadJobRepository,
     SqliteFabInventoryProjectionRepository, SqliteFabMediaMetadataRepository,
     SqliteFabSyncCursorRepository, SqliteJobSnapshotStore, SqliteStorageAdapterConfig,
 };
-use launcher_kernel_foundation::{
-    AppError, AppErrorSeverity, AppResult, CorrelationId,
+use launcher_kernel_foundation::{AppError, AppErrorSeverity, AppResult, CorrelationId};
+use launcher_kernel_jobs::{
+    JobDriverRegistry, JobSnapshotStore, RuntimeQueuePolicy, SharedJobRuntimeHost,
 };
-use launcher_kernel_jobs::{JobDriverRegistry, JobSnapshotStore, RuntimeQueuePolicy, SharedJobRuntimeHost};
 use launcher_module_downloads::{
     DownloadCheckpointRepository, DownloadFacade, DownloadJobDriver, DownloadModuleDeps,
 };
-use launcher_module_fab::{FabFacade, FabModuleDeps, FabPrewarmJobDriver, FabSyncJobDriver};
 use launcher_module_engines::{EngineFacade, EngineJobDriver, EngineModuleDeps};
+use launcher_module_fab::{FabFacade, FabModuleDeps, FabPrewarmJobDriver, FabSyncJobDriver};
 
 use crate::startup::StartupPipelineFacade;
 
@@ -47,6 +45,7 @@ type DesktopFabFacade = FabFacade<
 type DesktopDownloadFacade = DownloadFacade<
     SqliteDownloadJobRepository,
     SqliteDownloadCheckpointRepository,
+    (),
     (),
     (),
     SharedJobRuntimeHost,
@@ -124,7 +123,11 @@ impl Default for DesktopBootstrapConfig {
 /// Facade-only desktop services exposed to the host after composition-root assembly.
 /// composition-root 装配后暴露给宿主的 facade-only 桌面服务集合。
 #[derive(Clone)]
-pub struct DesktopAppServices<F = DesktopFabFacade, D = DesktopDownloadFacade, E = DesktopEngineFacade> {
+pub struct DesktopAppServices<
+    F = DesktopFabFacade,
+    D = DesktopDownloadFacade,
+    E = DesktopEngineFacade,
+> {
     /// Fab module facade wired with the current desktop storage/provider/runtime stack.
     /// 使用当前桌面 storage/provider/runtime 栈接线的 Fab 模块 facade。
     pub fab: Arc<F>,
@@ -187,9 +190,20 @@ pub fn build_desktop_services(config: DesktopBootstrapConfig) -> AppResult<Deskt
     let engines = Arc::new(build_engines_module(job_runtime));
     let registry = build_job_driver_registry(Arc::new(download_checkpoint_repo));
     let snapshot_store_dyn: Arc<dyn JobSnapshotStore<()>> = snapshot_store.clone();
-    let startup = Arc::new(build_startup_pipeline(&config, fab.clone(), snapshot_store, registry));
+    let startup = Arc::new(build_startup_pipeline(
+        &config,
+        fab.clone(),
+        snapshot_store,
+        registry,
+    ));
 
-    Ok(DesktopAppServices::new(fab, downloads, engines, startup, snapshot_store_dyn))
+    Ok(DesktopAppServices::new(
+        fab,
+        downloads,
+        engines,
+        startup,
+        snapshot_store_dyn,
+    ))
 }
 
 // Validate storage inputs before concrete adapters and snapshot stores are created.
@@ -208,10 +222,8 @@ fn build_storage_config(config: &DesktopBootstrapConfig) -> AppResult<SqliteStor
 // Provider wiring stays centralized here so host/transport layers never see adapter details.
 // Provider 接线集中在这里，确保 host/transport 层永远不接触 adapter 细节。
 fn build_fab_provider_adapter() -> AppResult<EpicFabCatalogProviderAdapter> {
-    let provider_config = EpicFabCatalogProviderConfig::new(
-        "https://www.fab.com",
-        "my-epic-launcher-desktop",
-    );
+    let provider_config =
+        EpicFabCatalogProviderConfig::new("https://www.fab.com", "my-epic-launcher-desktop");
 
     if provider_config.base_url().is_empty() || provider_config.client_name().is_empty() {
         return Err(invalid_builder_input(
@@ -249,6 +261,7 @@ fn build_downloads_module(
         checkpoint_repo,
         manifest_provider: (),
         staging_store: (),
+        resume_scheduler: (),
         job_runtime,
     })
 }
@@ -263,7 +276,9 @@ fn build_engines_module(job_runtime: SharedJobRuntimeHost) -> DesktopEngineFacad
 
 // The shared runtime host is assembled once and then fanned out to all queued-job modules.
 // 共享 runtime host 只装配一次，然后分发给所有 queued-job 模块。
-fn build_job_runtime(config: &DesktopBootstrapConfig) -> AppResult<(SharedJobRuntimeHost, Arc<SqliteJobSnapshotStore>)> {
+fn build_job_runtime(
+    config: &DesktopBootstrapConfig,
+) -> AppResult<(SharedJobRuntimeHost, Arc<SqliteJobSnapshotStore>)> {
     if config.default_download_slots == 0 {
         return Err(invalid_builder_input(
             "build_job_runtime",

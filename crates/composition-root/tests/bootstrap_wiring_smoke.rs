@@ -1,12 +1,12 @@
-use std::path::Path;
 use std::future::Future;
+use std::path::Path;
 use std::pin::pin;
 use std::task::{Context, Poll, RawWaker, RawWakerVTable, Waker};
 
 use launcher_composition_root::{build_desktop_services, DesktopBootstrapConfig};
 use launcher_kernel_jobs::{EnqueueJobRequest, JobPriority, JobRuntime, JobState, JobUiState};
-use launcher_module_downloads::DownloadCheckpointRecord;
 use launcher_module_downloads::contracts::StartDownloadRequestDto;
+use launcher_module_downloads::DownloadCheckpointRecord;
 use launcher_module_engines::contracts::RunEngineVerificationRequestDto;
 use launcher_module_fab::contracts::FabInventoryPrewarmRequestDto;
 
@@ -24,12 +24,7 @@ fn bootstrap_wiring_smoke() {
         Path::new("launcher.sqlite3")
     );
     assert_eq!(
-        services
-            .fab
-            .deps()
-            .catalog_provider
-            .config()
-            .client_name(),
+        services.fab.deps().catalog_provider.config().client_name(),
         "my-epic-launcher-desktop"
     );
 
@@ -38,7 +33,9 @@ fn bootstrap_wiring_smoke() {
         .run_startup_prewarm(FabInventoryPrewarmRequestDto {
             reason: "bootstrap-smoke".into(),
         })
-        .expect("bootstrap wiring should expose a Fab prewarm path backed by the shared runtime host");
+        .expect(
+            "bootstrap wiring should expose a Fab prewarm path backed by the shared runtime host",
+        );
 
     let snapshot = services
         .fab
@@ -65,7 +62,9 @@ where
 
     match future.as_mut().poll(&mut context) {
         Poll::Ready(value) => value,
-        Poll::Pending => panic!("composition-root startup future should be ready without a runtime"),
+        Poll::Pending => {
+            panic!("composition-root startup future should be ready without a runtime")
+        }
     }
 }
 
@@ -130,8 +129,8 @@ fn runtime_snapshot_persists_across_rebuilds() {
 
     // Second build: rebuild with the same sqlite path.
     // 第二次构建：使用同一个 sqlite 路径重新装配。
-    let services2 = build_desktop_services(config)
-        .expect("second build_desktop_services should succeed");
+    let services2 =
+        build_desktop_services(config).expect("second build_desktop_services should succeed");
 
     let recovered = services2
         .fab
@@ -245,9 +244,7 @@ fn stage2_restore_keeps_download_job_queued_with_checkpoint() {
         .downloads
         .deps()
         .checkpoint_repo
-        .save_checkpoint(&DownloadCheckpointRecord {
-            job_id: job_id.clone(),
-        })
+        .save_checkpoint(&DownloadCheckpointRecord::empty(job_id.clone()))
         .expect("seeding a synthetic download checkpoint should succeed");
 
     services

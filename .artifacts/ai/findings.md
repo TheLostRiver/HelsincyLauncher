@@ -563,3 +563,9 @@
 - The scheduler/driver consumer is still downloads-owned. It should consume `DownloadResumeWorkPlan` inside `module-downloads`, not through `kernel-jobs`, host IPC, frontend state, or SQLite schema in this slice.
 - Safe call order for the next Rust slice should be: derive decisions -> reject mismatch -> classify all-sealed -> build work plan for runtime candidates -> hand work plan to downloads scheduler/driver port -> enqueue existing job id through shared job runtime.
 - If scheduler/driver port preparation fails, `resume_download_outcome()` should return that downloads-domain error and skip runtime enqueue, preventing a queued job with no module-owned work plan.
+
+## Phase 50 Resume Scheduler Port Findings
+
+- AT-175 code spec comes from README_IMPL section 7.7: add `DownloadResumeWorkScheduler`, method `schedule_resume_work(&self, job_id, plan)`, no-op `()` implementation, `DownloadModuleDeps` ownership, and crate-entry export.
+- Composition root may receive a placeholder scheduler dependency, but it must remain assembly-only; it must not execute download business orchestration.
+- User comment override remains active: preserve existing English comments and add concise Chinese comments alongside new declaration comments.

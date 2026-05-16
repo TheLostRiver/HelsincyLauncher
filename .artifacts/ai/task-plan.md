@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 49 - Downloads Resume Scheduler Boundary Documentation
+Phase 50 - Downloads Resume Scheduler Port
 
 ## Current Focus
 
@@ -129,6 +129,8 @@ Phase 49 - Downloads Resume Scheduler Boundary Documentation
 - AT-2026-05-16-172 completed the downloads-owned scheduler/driver payload boundary documentation before Rust code starts handing `resume_partial` / `queue_remaining` work to a scheduler.
 - AT-2026-05-16-173 completed and committed locally as `1a698f9`, adding the module-local downloads resume work plan derivation.
 - AT-2026-05-16-174 is in progress to document the scheduler/driver boundary before introducing a scheduler port in Rust.
+- AT-2026-05-16-174 completed and committed locally as `6929fa9`, defining the scheduler/driver boundary.
+- AT-2026-05-16-175 is in progress to add the minimal scheduler port and schedule work plans before runtime enqueue.
 
 ## Phases
 
@@ -427,6 +429,12 @@ Phase 49 - Downloads Resume Scheduler Boundary Documentation
 - Atomic tasks: AT-2026-05-16-174
 - **Status:** complete
 
+### Phase 50: Downloads Resume Scheduler Port
+
+- Outcome: add the minimal downloads-owned scheduler port and call it with `DownloadResumeWorkPlan` before job-level runtime enqueue, without concrete execution or persistence changes.
+- Atomic tasks: AT-2026-05-16-175
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -596,7 +604,8 @@ Phase 49 - Downloads Resume Scheduler Boundary Documentation
 165. AT-2026-05-16-171 - completed - projected the module-owned downloads resume outcome through host transport without exposing segment details; committed locally.
 166. AT-2026-05-16-172 - completed - documented the downloads-owned resume scheduler/driver payload boundary before Rust implementation; committed locally.
 167. AT-2026-05-16-173 - completed - added the minimal downloads-owned resume work plan/payload derivation with focused TDD before scheduler execution or persistence work; committed locally as `1a698f9`.
-168. AT-2026-05-16-174 - completed - documented the downloads-owned scheduler/driver boundary before introducing a scheduler port in Rust; ready for local commit.
+168. AT-2026-05-16-174 - completed - documented the downloads-owned scheduler/driver boundary before introducing a scheduler port in Rust; committed locally as `6929fa9`.
+169. AT-2026-05-16-175 - completed - added the minimal downloads-owned scheduler port and call order before job-level runtime enqueue; ready for local commit.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
@@ -615,7 +624,7 @@ Phase 49 - Downloads Resume Scheduler Boundary Documentation
 
 ## Follow-up Queue
 
-1. Add the minimal Rust scheduler port/call-order slice that consumes `DownloadResumeWorkPlan` before job-level runtime enqueue.
+1. Add a focused scheduler failure guard so scheduler errors skip runtime enqueue.
 2. Leave unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, and `src/` changes untouched unless the user explicitly scopes them into a task.
 
 ## Legacy Note

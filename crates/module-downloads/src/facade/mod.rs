@@ -246,6 +246,26 @@ pub struct DownloadResumeWorkPlan {
     pub items: Vec<DownloadResumeWorkItem>,
 }
 
+/// Downloads-owned scheduler boundary that prepares resume work before runtime enqueue.
+/// 在 runtime 入队前准备恢复工作的 downloads 自有 scheduler 边界。
+pub trait DownloadResumeWorkScheduler: Send + Sync {
+    /// Schedules or stages the derived resume work plan for a module-owned job.
+    /// 为模块拥有的任务调度或暂存已派生的恢复工作计划。
+    fn schedule_resume_work(&self, job_id: &JobId, plan: &DownloadResumeWorkPlan) -> AppResult<()>;
+}
+
+impl DownloadResumeWorkScheduler for () {
+    /// Keeps current composition wiring valid until a real scheduler/driver lands.
+    /// 在真实 scheduler/driver 落地前保持当前 composition 接线可用。
+    fn schedule_resume_work(
+        &self,
+        _job_id: &JobId,
+        _plan: &DownloadResumeWorkPlan,
+    ) -> AppResult<()> {
+        Ok(())
+    }
+}
+
 /// Module-owned outcome for resume planning before host transport projection.
 /// host transport 投影前，downloads 模块自有的恢复规划结果。
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -376,7 +396,7 @@ pub fn build_resume_work_plan(
 
 /// 组装 downloads facade 所需的依赖束。
 #[derive(Debug, Clone)]
-pub struct DownloadModuleDeps<J, C, M, S, R> {
+pub struct DownloadModuleDeps<J, C, M, S, W, R> {
     /// 保存 intake 元数据与粗粒度下载状态的模块仓储。
     pub job_repo: J,
     /// 为暂停、恢复和重启场景保留的 checkpoint 能力。
@@ -385,29 +405,31 @@ pub struct DownloadModuleDeps<J, C, M, S, R> {
     pub manifest_provider: M,
     /// 管理本地 staging 产物落盘位置的能力，留给后续切片接线。
     pub staging_store: S,
+    /// 准备 downloads 自有恢复工作计划的 scheduler/driver 边界。
+    pub resume_scheduler: W,
     /// 真正拥有 accepted job 生命周期的共享 job runtime。
     pub job_runtime: R,
 }
 
 /// downloads 模块对外暴露的 use-case facade。
-pub struct DownloadFacade<J, C, M, S, R> {
-    deps: DownloadModuleDeps<J, C, M, S, R>,
+pub struct DownloadFacade<J, C, M, S, W, R> {
+    deps: DownloadModuleDeps<J, C, M, S, W, R>,
 }
 
-impl<J, C, M, S, R> DownloadFacade<J, C, M, S, R> {
+impl<J, C, M, S, W, R> DownloadFacade<J, C, M, S, W, R> {
     /// 用已经装配好的依赖束创建 downloads facade。
-    pub fn new(deps: DownloadModuleDeps<J, C, M, S, R>) -> Self {
+    pub fn new(deps: DownloadModuleDeps<J, C, M, S, W, R>) -> Self {
         Self { deps }
     }
 
     /// 暴露依赖束，主要服务于 composition-root smoke test 与局部诊断。
-    pub fn deps(&self) -> &DownloadModuleDeps<J, C, M, S, R> {
+    pub fn deps(&self) -> &DownloadModuleDeps<J, C, M, S, W, R> {
         &self.deps
     }
 }
 
-impl<J: DownloadJobRepository, C, M, S, R: JobRuntime<Extension = ()>>
-    DownloadFacade<J, C, M, S, R>
+impl<J: DownloadJobRepository, C, M, S, W, R: JobRuntime<Extension = ()>>
+    DownloadFacade<J, C, M, S, W, R>
 {
     /// 记录用户下载意图并向共享 job runtime 提交后端拥有的下载任务。
     pub fn start_download(&self, request: StartDownloadRequestDto) -> AppResult<AcceptedJob> {
@@ -482,8 +504,9 @@ impl<
         C: DownloadCheckpointRepository,
         M: DownloadManifestProviderPort,
         S: DownloadStagingObjectStore,
+        W: DownloadResumeWorkScheduler,
         R: JobRuntime<Extension = ()>,
-    > DownloadFacade<J, C, M, S, R>
+    > DownloadFacade<J, C, M, S, W, R>
 {
     /// Loads module state, checkpoint, staging, and manifest before resume decisions.
     /// 先读取模块状态、checkpoint、staging 和 manifest，然后才进入恢复决策。
@@ -535,6 +558,12 @@ impl<
         }
 
         if has_runtime_enqueue_candidate {
+            let work_plan =
+                build_resume_work_plan(&manifest, &checkpoint.segments, &resume_decisions)?;
+            self.deps
+                .resume_scheduler
+                .schedule_resume_work(&request.job_id, &work_plan)?;
+
             // Keep this first resume slice job-level; segment payloads stay in downloads.
             // 首个恢复切片只做 job-level 入队；segment payload 仍留在 downloads 内部。
             let accepted = self.deps.job_runtime.enqueue(EnqueueJobRequest {
@@ -623,7 +652,7 @@ fn not_wired(operation: &str) -> AppError {
 
 #[cfg(test)]
 mod tests {
-    use std::sync::Mutex;
+    use std::sync::{Arc, Mutex};
 
     use launcher_kernel_foundation::{AppErrorSeverity, AppResult, IsoDateTime, JobId};
     use launcher_kernel_jobs::{JobPriority, JobProgress, JobSnapshot, JobState, JobUiState};
@@ -635,7 +664,8 @@ mod tests {
         DownloadJobRecordState, DownloadJobRepository, DownloadManifestPlan,
         DownloadManifestProviderPort, DownloadManifestSegment, DownloadModuleDeps,
         DownloadResumeOutcome, DownloadResumeSegmentAction, DownloadResumeWorkMode,
-        DownloadStagingObjectStore, DownloadStagingRoot,
+        DownloadResumeWorkPlan, DownloadResumeWorkScheduler, DownloadStagingObjectStore,
+        DownloadStagingRoot,
     };
     use crate::contracts::{
         CancelDownloadRequestDto, PauseDownloadRequestDto, ResumeDownloadRequestDto,
@@ -839,14 +869,82 @@ mod tests {
         }
     }
 
+    #[derive(Clone, Default)]
+    struct ResumeRuntimeEvents {
+        entries: Arc<Mutex<Vec<&'static str>>>,
+    }
+
+    impl ResumeRuntimeEvents {
+        fn record(&self, event: &'static str) {
+            self.entries
+                .lock()
+                .expect("resume runtime events mutex should not be poisoned")
+                .push(event);
+        }
+
+        fn entries(&self) -> Vec<&'static str> {
+            self.entries
+                .lock()
+                .expect("resume runtime events mutex should not be poisoned")
+                .clone()
+        }
+    }
+
+    #[derive(Default)]
+    struct RecordingResumeWorkScheduler {
+        scheduled_plans: Mutex<Vec<(JobId, DownloadResumeWorkPlan)>>,
+        events: ResumeRuntimeEvents,
+    }
+
+    impl RecordingResumeWorkScheduler {
+        fn with_events(events: ResumeRuntimeEvents) -> Self {
+            Self {
+                scheduled_plans: Mutex::new(Vec::new()),
+                events,
+            }
+        }
+
+        fn scheduled_plans(&self) -> Vec<(JobId, DownloadResumeWorkPlan)> {
+            self.scheduled_plans
+                .lock()
+                .expect("scheduled plans mutex should not be poisoned")
+                .clone()
+        }
+    }
+
+    impl DownloadResumeWorkScheduler for RecordingResumeWorkScheduler {
+        fn schedule_resume_work(
+            &self,
+            job_id: &JobId,
+            plan: &DownloadResumeWorkPlan,
+        ) -> AppResult<()> {
+            self.events.record("schedule_work");
+            self.scheduled_plans
+                .lock()
+                .expect("scheduled plans mutex should not be poisoned")
+                .push((job_id.clone(), plan.clone()));
+            Ok(())
+        }
+    }
+
     #[derive(Default)]
     struct RecordingJobRuntime {
         enqueued_requests: Mutex<Vec<launcher_kernel_jobs::EnqueueJobRequest<()>>>,
         paused_job_ids: Mutex<Vec<JobId>>,
         canceled_job_ids: Mutex<Vec<JobId>>,
+        events: ResumeRuntimeEvents,
     }
 
     impl RecordingJobRuntime {
+        fn with_events(events: ResumeRuntimeEvents) -> Self {
+            Self {
+                enqueued_requests: Mutex::new(Vec::new()),
+                paused_job_ids: Mutex::new(Vec::new()),
+                canceled_job_ids: Mutex::new(Vec::new()),
+                events,
+            }
+        }
+
         fn enqueued_requests(&self) -> Vec<launcher_kernel_jobs::EnqueueJobRequest<()>> {
             self.enqueued_requests
                 .lock()
@@ -876,6 +974,7 @@ mod tests {
             &self,
             request: launcher_kernel_jobs::EnqueueJobRequest<Self::Extension>,
         ) -> AppResult<launcher_kernel_jobs::AcceptedJob> {
+            self.events.record("runtime_enqueue");
             self.enqueued_requests
                 .lock()
                 .expect("enqueued requests mutex should not be poisoned")
@@ -933,6 +1032,7 @@ mod tests {
             checkpoint_repo: (),
             manifest_provider: (),
             staging_store: (),
+            resume_scheduler: (),
             job_runtime: runtime,
         });
 
@@ -982,6 +1082,7 @@ mod tests {
             checkpoint_repo: (),
             manifest_provider: (),
             staging_store: (),
+            resume_scheduler: (),
             job_runtime: RecordingJobRuntime::default(),
         });
         let job_id = JobId::generate();
@@ -1003,6 +1104,7 @@ mod tests {
             checkpoint_repo: RecordingCheckpointRepository::default(),
             manifest_provider: (),
             staging_store: (),
+            resume_scheduler: (),
             job_runtime: RecordingJobRuntime::default(),
         });
 
@@ -1027,6 +1129,7 @@ mod tests {
             checkpoint_repo: RecordingCheckpointRepository::missing(),
             manifest_provider: (),
             staging_store: (),
+            resume_scheduler: (),
             job_runtime: RecordingJobRuntime::default(),
         });
 
@@ -1049,6 +1152,7 @@ mod tests {
             checkpoint_repo: RecordingCheckpointRepository::default(),
             manifest_provider: (),
             staging_store: (),
+            resume_scheduler: (),
             job_runtime: RecordingJobRuntime::default(),
         });
         let job_id = JobId::generate();
@@ -1077,6 +1181,7 @@ mod tests {
             checkpoint_repo: RecordingCheckpointRepository::default(),
             manifest_provider: (),
             staging_store: RecordingStagingObjectStore::default(),
+            resume_scheduler: (),
             job_runtime: RecordingJobRuntime::default(),
         });
 
@@ -1103,6 +1208,7 @@ mod tests {
             checkpoint_repo: RecordingCheckpointRepository::default(),
             manifest_provider: RecordingManifestProvider::default(),
             staging_store: RecordingStagingObjectStore::default(),
+            resume_scheduler: (),
             job_runtime: RecordingJobRuntime::default(),
         });
 
@@ -1145,6 +1251,7 @@ mod tests {
                 },
             ]),
             staging_store: RecordingStagingObjectStore::default(),
+            resume_scheduler: (),
             job_runtime: RecordingJobRuntime::default(),
         });
 
@@ -1187,6 +1294,80 @@ mod tests {
     }
 
     #[test]
+    fn resume_download_schedules_work_plan_before_runtime_enqueue() {
+        let job_id = JobId::generate();
+        let events = ResumeRuntimeEvents::default();
+        let facade = DownloadFacade::new(DownloadModuleDeps {
+            job_repo: RecordingDownloadJobRepository::with_job(make_download_job(job_id.clone())),
+            checkpoint_repo: RecordingCheckpointRepository::with_segments(vec![
+                DownloadSegmentCheckpointRecord {
+                    job_id: job_id.clone(),
+                    segment_id: "segment-partial".into(),
+                    file_id: "file-1".into(),
+                    offset: 0,
+                    length: 1024,
+                    downloaded_bytes: 512,
+                    status: DownloadSegmentCheckpointStatus::InProgress,
+                    partial_path: Some("file.bin.part-0".into()),
+                    etag: Some("etag-partial".into()),
+                    hash_state_ref: Some("hash-partial".into()),
+                },
+            ]),
+            manifest_provider: RecordingManifestProvider::with_segments(vec![
+                DownloadManifestSegment {
+                    segment_id: "segment-partial".into(),
+                    file_id: "file-1".into(),
+                    offset: 0,
+                    length: 1024,
+                    source_locator: "https://example.invalid/file.bin#partial".into(),
+                    expected_hash: Some("sha256:partial".into()),
+                    write_target: "file.bin.part-0".into(),
+                },
+                DownloadManifestSegment {
+                    segment_id: "segment-remaining".into(),
+                    file_id: "file-1".into(),
+                    offset: 1024,
+                    length: 2048,
+                    source_locator: "https://example.invalid/file.bin#remaining".into(),
+                    expected_hash: None,
+                    write_target: "file.bin.part-1".into(),
+                },
+            ]),
+            staging_store: RecordingStagingObjectStore::default(),
+            resume_scheduler: RecordingResumeWorkScheduler::with_events(events.clone()),
+            job_runtime: RecordingJobRuntime::with_events(events.clone()),
+        });
+
+        let outcome = facade
+            .resume_download_outcome(ResumeDownloadRequestDto {
+                job_id: job_id.clone(),
+            })
+            .expect("resume_download_outcome should schedule work before runtime enqueue");
+
+        assert!(
+            matches!(outcome, DownloadResumeOutcome::RuntimeAccepted(_)),
+            "runtime candidates should still return accepted runtime work"
+        );
+        assert_eq!(
+            events.entries(),
+            vec!["schedule_work", "runtime_enqueue"],
+            "downloads scheduler work must be prepared before shared runtime enqueue"
+        );
+
+        let scheduled_plans = facade.deps().resume_scheduler.scheduled_plans();
+        assert_eq!(scheduled_plans.len(), 1);
+        assert_eq!(scheduled_plans[0].0, job_id);
+        assert_eq!(scheduled_plans[0].1.items.len(), 2);
+        assert_eq!(scheduled_plans[0].1.items[0].segment_id, "segment-partial");
+        assert_eq!(scheduled_plans[0].1.items[0].start_offset, 512);
+        assert_eq!(
+            scheduled_plans[0].1.items[1].segment_id,
+            "segment-remaining"
+        );
+        assert_eq!(scheduled_plans[0].1.items[1].start_offset, 1024);
+    }
+
+    #[test]
     fn resume_download_outcome_returns_already_complete_when_all_segments_are_sealed() {
         let job_id = JobId::generate();
         let facade = DownloadFacade::new(DownloadModuleDeps {
@@ -1217,6 +1398,7 @@ mod tests {
                 },
             ]),
             staging_store: RecordingStagingObjectStore::default(),
+            resume_scheduler: (),
             job_runtime: RecordingJobRuntime::default(),
         });
 
@@ -1272,6 +1454,7 @@ mod tests {
                 },
             ]),
             staging_store: RecordingStagingObjectStore::default(),
+            resume_scheduler: (),
             job_runtime: RecordingJobRuntime::default(),
         });
 
@@ -1587,6 +1770,7 @@ mod tests {
             checkpoint_repo: (),
             manifest_provider: (),
             staging_store: (),
+            resume_scheduler: (),
             job_runtime: RecordingJobRuntime::default(),
         });
         let job_id = JobId::generate();
