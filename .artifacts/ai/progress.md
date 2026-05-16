@@ -4836,6 +4836,27 @@
   - updated README_IMPL current state.
 - AT-182 kept `DownloadJobDriver`, `kernel-jobs`, composition wiring, host transport, frontend, SQLite schema, fetch/write/verify, and checkpoint mutation unchanged.
 
+### Session Note: 2026-05-16
+
+- Started AT-2026-05-16-183 after AT-182 commit `bb35c6f`.
+- Read README_IMPL 7.9, current `crates/module-downloads/src/driver.rs`, and current `crates/kernel-jobs/src/runtime.rs`.
+- Confirmed:
+  - `DownloadJobDriver` currently has only `checkpoint_repo` and `new(checkpoint_repo)`;
+  - current `JobDriver` trait has `module()`, `kind()`, and `restore()` only;
+  - there is no current runtime `run()` API.
+- Current docs target: define a local `DownloadJobDriver` pending-work consumer boundary that can be coded next without pretending runtime execution has landed.
+
+### Session Note: 2026-05-16
+
+- Completed AT-2026-05-16-183.
+- README_IMPL now contains section `7.10 DownloadJobDriver Local Consumer Boundary`.
+- Validation evidence:
+  - readback confirmed the section preserves `DownloadJobDriver::new(checkpoint_repo)`, adds `with_pending_resume_work_source(...)`, and defines `drain_pending_resume_work(&JobId)`;
+  - readback confirmed `restore()` remains unchanged and must not drain in-memory pending work;
+  - scoped `git diff --check` passed with CRLF warnings only;
+  - path-limited `git status --short` showed only AT-183 docs/PWF files.
+- The next Rust slice is explicit enough to start AT-2026-05-16-184 with TDD.
+
 ### Auto Record: 2026-05-16 00:14:04
 - Tool: apply_patch
 - Phase: Phase 44 - Downloads Resume All-Sealed Completion Boundary
@@ -5653,6 +5674,31 @@
 ### Auto Record: 2026-05-16 21:38:27
 - Tool: apply_patch
 - Phase: Phase 57 - Downloads Pending Resume Work Source Drain
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-16 21:40:48
+- Tool: apply_patch
+- Phase: Phase 58 - DownloadJobDriver Local Pending Work Consumer Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-16 21:41:14
+- Tool: apply_patch
+- Phase: Phase 58 - DownloadJobDriver Local Pending Work Consumer Boundary
+- Files:
+  - `docs/modules/downloads/README_IMPL.md` (update)
+
+### Auto Record: 2026-05-16 21:42:09
+- Tool: apply_patch
+- Phase: Phase 58 - DownloadJobDriver Local Pending Work Consumer Boundary
 - Files:
   - `.artifacts/ai/active-task.md` (update)
   - `.artifacts/ai/task-plan.md` (update)

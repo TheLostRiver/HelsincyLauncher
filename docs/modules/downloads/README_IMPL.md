@@ -496,6 +496,57 @@ Next Rust slice:
 2. do not add fetch/write/verify execution until driver consumption and checkpoint mutation boundaries are separately documented;
 3. keep `kernel-jobs`, host transport, frontend, SQLite schema, and composition wiring unchanged unless the next implementation document explicitly scopes them.
 
+### 7.10 `DownloadJobDriver` Local Consumer Boundary
+
+The next safe driver-facing code slice can add a local consumer method to `DownloadJobDriver` without changing `kernel-jobs::JobDriver`. This keeps current runtime semantics honest: `restore()` remains the only trait callback, while the downloads crate prepares a method that a later documented execution turn can call.
+
+Recommended shape:
+
+```rust
+impl DownloadJobDriver {
+    pub fn with_pending_resume_work_source(
+        checkpoint_repo: Arc<dyn DownloadCheckpointRepository>,
+        pending_work_source: Arc<dyn DownloadPendingResumeWorkSource>,
+    ) -> Self;
+
+    pub fn drain_pending_resume_work(
+        &self,
+        job_id: &JobId,
+    ) -> AppResult<Vec<DownloadPendingResumeWork>>;
+}
+```
+
+Constructor rules:
+
+1. Preserve `DownloadJobDriver::new(checkpoint_repo)` for existing composition and restore tests.
+2. Back `new()` with a module-local no-op pending-work source that returns `Ok(Vec::new())`.
+3. Add `with_pending_resume_work_source(...)` for focused driver tests and later composition wiring.
+4. Do not require composition-root to share the real in-memory scheduler in the first driver-consumer code slice; shared composition wiring should be a later task.
+
+Method rules:
+
+1. `drain_pending_resume_work(&JobId)` delegates to `DownloadPendingResumeWorkSource`.
+2. The method does not call `restore()` and does not read or mutate checkpoint records.
+3. The method does not fetch, write, verify, update snapshots, complete jobs, or publish events.
+4. Empty drain returns an empty vector and is not a completion signal.
+5. Source errors propagate as `AppResult` failures for the future execution turn; they do not change the already-returned resume command result.
+
+`restore()` must remain unchanged:
+
+1. stage-2 restore still reads durable `DownloadCheckpointRepository`;
+2. restore must not drain in-memory pending work because stage-2 may run after process restart;
+3. restore returning `RestoreDisposition::Resumed` only means checkpoint facts are recoverable, not that segment work has executed.
+
+Next Rust slice:
+
+1. add a no-op `DownloadPendingResumeWorkSource` implementation for `()`;
+2. add a pending-work source field to `DownloadJobDriver`;
+3. keep `DownloadJobDriver::new(checkpoint_repo)` compatible by wiring the no-op source;
+4. add `DownloadJobDriver::with_pending_resume_work_source(...)`;
+5. add `DownloadJobDriver::drain_pending_resume_work(&JobId)`;
+6. add focused driver tests proving the injected source drains work and the default constructor returns an empty drain;
+7. keep `kernel-jobs`, composition-root, host transport, frontend, SQLite schema, fetch/write/verify, snapshot mutation, and checkpoint mutation unchanged.
+
 ---
 
 ## 8. Error Semantics

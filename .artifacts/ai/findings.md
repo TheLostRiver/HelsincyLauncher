@@ -598,3 +598,12 @@
 - The job-scoped drain must preserve unrelated job pending work; draining all work would make a future driver execution turn for one job accidentally erase another queued job's work plan.
 - Empty drain is a valid source result for the source boundary but must not be treated as download completion; future driver integration still needs an explicit documented execution behavior.
 - AT-182 intentionally leaves `DownloadJobDriver`, `kernel-jobs`, composition-root, host transport, frontend, SQLite schema, fetch/write/verify, and checkpoint mutation unchanged.
+
+## Phase 58 DownloadJobDriver Local Consumer Boundary Findings
+
+- AT-2026-05-16-182 committed as `bb35c6f` and left `DownloadJobDriver` untouched.
+- Current `DownloadJobDriver` has only a checkpoint repository field and `new(checkpoint_repo)`, and current `kernel-jobs::JobDriver` still exposes only `module()`, `kind()`, and `restore()`.
+- Because there is no runtime `run()` callback yet, the next safe Rust slice should not modify shared runtime execution semantics.
+- README_IMPL now defines a local driver consumer method boundary: keep `restore()` unchanged, add `with_pending_resume_work_source(...)`, and add a local `drain_pending_resume_work(&JobId)` delegating to `DownloadPendingResumeWorkSource`.
+- The default constructor must stay compatible by using a no-op source that returns an empty vector, so current composition and restore tests do not need to wire the real scheduler yet.
+- AT-184 can code this local driver method with focused driver tests while still deferring composition sharing, fetch/write/verify, checkpoint mutation, SQLite schema, host transport, frontend, and `kernel-jobs` API changes.

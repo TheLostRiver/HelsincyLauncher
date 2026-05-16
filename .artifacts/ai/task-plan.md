@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 57 - Downloads Pending Resume Work Source Drain
+Phase 58 - DownloadJobDriver Local Pending Work Consumer Boundary
 
 ## Current Focus
 
@@ -484,6 +484,12 @@ Phase 57 - Downloads Pending Resume Work Source Drain
 - Atomic tasks: AT-2026-05-16-182
 - **Status:** complete
 
+### Phase 58: DownloadJobDriver Local Pending Work Consumer Boundary
+
+- Outcome: define whether and how `DownloadJobDriver` can own a local pending-work consumer method backed by `DownloadPendingResumeWorkSource` before the shared runtime has a documented execution `run()` API.
+- Atomic tasks: AT-2026-05-16-183
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -662,6 +668,7 @@ Phase 57 - Downloads Pending Resume Work Source Drain
 174. AT-2026-05-16-180 - completed - wired `InMemoryDownloadResumeWorkScheduler` into composition-root downloads assembly and proved the smoke path exposes the pending-work scheduler; committed locally as `d3b1b7d`.
 175. AT-2026-05-16-181 - completed - documented the downloads driver pending-work consumption boundary and identified the next code slice as job-id-scoped pending-work source/drain semantics without widening runtime, transport, frontend, persistence, or concrete IO.
 176. AT-2026-05-16-182 - completed - added a TDD-backed pending resume work source/drain boundary for module-local job-scoped consumption without driver/runtime/transport/frontend/persistence changes.
+177. AT-2026-05-16-183 - completed - documented the `DownloadJobDriver` local pending-work consumer boundary and defined AT-184 as a TDD-backed local consumer method without changing shared runtime execution semantics.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

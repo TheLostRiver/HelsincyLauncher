@@ -2,21 +2,24 @@
 
 ## Identity
 
-- task id: AT-2026-05-16-182
-- title: Add downloads pending resume work source drain
+- task id: AT-2026-05-16-183
+- title: Define DownloadJobDriver local pending-work consumer boundary
 - status: completed
 
 ## Goal
 
-按 AT-181 的实现文档，把 `InMemoryDownloadResumeWorkScheduler` 从“只能登记/整体 drain pending work”的壳推进到“可被未来 driver 侧按 job id 消费”的最小代码片：新增 downloads-owned `DownloadPendingResumeWorkSource` 边界，实现 job-id-scoped drain，并用 TDD 证明 draining 一个 job 不会吞掉其他 job 的 pending work，空 job drain 返回空集合。
+在 AT-182 已经提供 `DownloadPendingResumeWorkSource` 之后，继续按文档优先原则明确 `DownloadJobDriver` 的下一步落点：当前 `kernel-jobs::JobDriver` 仍然只有 `restore()`，所以本轮只补充实现文档，定义一个 future-ready 的本地 consumer 方法边界，而不是改 shared runtime、composition wiring 或真实下载执行。
 
-本轮只覆盖 source/drain 语义，不把它接进 `DownloadJobDriver` 或 `kernel-jobs` 执行循环。
+本轮要回答：
+
+- `DownloadJobDriver` 是否可以在没有 `JobDriver::run()` 的情况下先拥有一个本地 pending-work consumer 方法；
+- 该方法怎样依赖 `DownloadPendingResumeWorkSource`，并如何保持 `DownloadJobDriver::new(checkpoint_repo)` 兼容；
+- 空 drain、source failure、stage-2 restore、future execution turn 之间的行为边界；
+- 下一片 Rust slice 是否足够明确。
 
 ## Scope
 
 - in scope:
-  - `crates/module-downloads/src/facade/mod.rs`
-  - `crates/module-downloads/src/lib.rs`
   - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
@@ -24,9 +27,10 @@
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
-  - `DownloadJobDriver` integration
-  - `kernel-jobs::JobDriver` API changes or runtime execution loop
-  - composition-root wiring changes
+  - Rust production code for AT-183
+  - changing `DownloadJobDriver`
+  - changing `kernel-jobs::JobDriver`
+  - composition-root wiring
   - host transport, frontend IPC, UI projection
   - SQLite schema or work-item persistence
   - concrete HTTP fetch, staging writes, verifier/hash execution
@@ -35,75 +39,53 @@
 
 ## Allowed Files
 
-1. crates/module-downloads/src/facade/mod.rs
-2. crates/module-downloads/src/lib.rs
-3. docs/modules/downloads/README_IMPL.md
-4. .artifacts/ai/active-task.md
-5. .artifacts/ai/task-plan.md
-6. .artifacts/ai/progress.md
-7. .artifacts/ai/findings.md
-8. .artifacts/ai/handoff.md
+1. docs/modules/downloads/README_IMPL.md
+2. .artifacts/ai/active-task.md
+3. .artifacts/ai/task-plan.md
+4. .artifacts/ai/progress.md
+5. .artifacts/ai/findings.md
+6. .artifacts/ai/handoff.md
 
 ## 控制性文档
 
-Required context already read in scoped snippets before coding:
+Required context read in scoped snippets before editing:
 
-1. README.md
-2. CONTRIBUTING.md
-3. docs/README.md
-4. docs/modules/downloads/README_ARCH.md
-5. docs/modules/downloads/README_API.md
-6. docs/modules/downloads/README_FLOW.md
-7. docs/modules/downloads/README_IMPL.md
-8. docs/TauriDownloadRuntimeDesign.md
-9. docs/TauriKernelJobsRuntimeDesign.md
-10. docs/TauriCompositionRootWiringDesign.md
-11. docs/TauriFirstCrateApiDrafts.md
-12. docs/TauriTestingStrategyAndQualityGateDesign.md
-13. docs/TauriAIDevelopmentTransactionProtocolDesign.md
-14. superpowers:test-driven-development skill
-
-Additional code context to read before RED:
-
-1. `crates/module-downloads/src/facade/mod.rs` test helper area
-2. `crates/module-downloads/src/lib.rs` export list
+1. docs/modules/downloads/README_IMPL.md
+2. crates/module-downloads/src/driver.rs
+3. crates/kernel-jobs/src/runtime.rs
+4. Prior required docs read for AT-181/AT-182 remain controlling: README, CONTRIBUTING, docs map, downloads ARCH/API/FLOW, download runtime, kernel-jobs runtime, composition-root wiring, first crate API draft, testing strategy, and AI transaction protocol.
 
 ## Hypothesis
 
-- falsifiable local hypothesis: adding a trait-level `drain_pending_resume_work(&JobId)` boundary on the existing in-memory scheduler can prove driver-ready pending-work consumption semantics without touching driver integration, shared runtime, composition wiring, transport, frontend, persistence, or concrete IO.
+- falsifiable local hypothesis: the next safe code slice can add a `DownloadJobDriver` local consumer method backed by `DownloadPendingResumeWorkSource`, while keeping `restore()` unchanged and avoiding any shared runtime execution API change.
 
 ## Cheap Check
 
-- RED/GREEN focused test:
-  - `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml pending_resume_work_source`
-- then full module test:
-  - `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`
+- docs-only validation:
+  - read back the new README_IMPL section;
+  - run scoped `git diff --check`;
+  - run path-limited `git status --short` for AT-183 files.
 
 ## Validation Gate
 
-1. Read existing test helper style in `facade/mod.rs`.
-2. Write focused RED tests for job-scoped pending-work drain semantics.
-3. Observe RED failure caused by missing `DownloadPendingResumeWorkSource` / method.
-4. Implement the minimal trait and in-memory scheduler behavior.
-5. Export the new source trait through `crates/module-downloads/src/lib.rs`.
-6. Update README_IMPL and PWF records.
-7. Run focused test, full module test, format check, scoped diff check, and path-limited status.
-8. Commit only AT-182 files locally.
+1. Confirm AT-182 is committed.
+2. Read README_IMPL 7.9 plus current `DownloadJobDriver` and `JobDriver` trait snippets.
+3. Add README_IMPL section defining the local driver consumer boundary.
+4. Update PWF records.
+5. Run docs-only validation.
+6. Commit only AT-183 files locally.
 
 ## Validation Result
 
 - passed
-- RED focused test failed with unresolved `DownloadPendingResumeWorkSource` and missing `drain_pending_resume_work()`.
-- GREEN implementation added `DownloadPendingResumeWorkSource`, job-id-scoped draining for `InMemoryDownloadResumeWorkScheduler`, and crate-entry export.
-- Focused `pending_resume_work_source` tests passed: 2 passed, 0 failed.
-- Full `launcher-module-downloads` suite passed: 24 unit tests passed, 0 failed; doc tests 0.
-- `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed.
-- Scoped `git diff --check` passed with CRLF warnings only.
-- Path-limited `git status --short` showed only AT-182 files.
+- README_IMPL section `7.10 DownloadJobDriver Local Consumer Boundary` was added and read back.
+- The section preserves `DownloadJobDriver::new(checkpoint_repo)` compatibility, defines `with_pending_resume_work_source(...)`, and defines a local `drain_pending_resume_work(&JobId)` method for a later code slice.
+- The section explicitly keeps `restore()` unchanged and says restore must not drain in-memory pending work.
+- Scoped `git diff --check` passed for AT-183 files with CRLF warnings only.
+- Path-limited `git status --short` showed only AT-183 files.
 
 ## Notes
 
-- AT-2026-05-16-181 committed as `ccb0eac`.
-- Preserve existing English comments and add concise Chinese companion comments for new public declarations.
-- Do not implement actual download execution or claim driver consumption is wired into runtime.
-- Next slice must reassess whether to document or implement a `DownloadJobDriver` local consumer method, because current `kernel-jobs::JobDriver` still has no execution `run()` API.
+- AT-2026-05-16-182 committed as `bb35c6f`.
+- If AT-183 validates a clear Rust slice, AT-184 can code the driver local consumer with TDD.
+- AT-184 is clear enough to start after this commit: add no-op source for `()`, inject pending source into `DownloadJobDriver`, and add focused driver tests.

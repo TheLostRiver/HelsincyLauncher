@@ -4,7 +4,7 @@
 
 - task id: AT-2026-05-16-182
 - title: Add downloads pending resume work source drain
-- status: completed; local commit pending
+- status: completed and committed locally as `bb35c6f`
 
 ## Current In-progress Atomic Task
 
@@ -13,8 +13,6 @@
 ## Current Slice
 
 - `docs/modules/downloads/README_IMPL.md`
-- `crates/module-downloads/src/facade/mod.rs`
-- `crates/module-downloads/src/lib.rs`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -35,6 +33,11 @@
 - `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed.
 - Scoped `git diff --check` passed with CRLF warnings only.
 - Path-limited status showed only AT-182 files.
+- Passed for AT-183:
+  - README_IMPL section 7.10 defines the local `DownloadJobDriver` pending-work consumer method boundary.
+  - The section preserves `restore()` semantics and current `new(checkpoint_repo)` compatibility.
+  - Scoped `git diff --check` passed with CRLF warnings only.
+  - Path-limited status showed only AT-183 docs/PWF files.
 
 ## Current Git State To Preserve
 
@@ -49,9 +52,12 @@
 
 ## Next Resume Point
 
-1. Commit only AT-182 files.
-2. Reassess the next downloads backend slice from README_IMPL section 7.9:
-   - likely docs-first if integrating into `DownloadJobDriver` would require defining a local consumer method or broader `kernel-jobs` execution turn;
-   - do not jump directly to fetch/write/verify.
-3. Keep `kernel-jobs`, composition wiring, host transport, frontend, SQLite schema, fetch/write/verify, and checkpoint mutation unchanged unless the next task explicitly scopes them.
+1. Commit only AT-183 files.
+2. Start AT-2026-05-16-184 with TDD:
+   - add no-op `DownloadPendingResumeWorkSource` implementation for `()`;
+   - add a pending source field to `DownloadJobDriver`;
+   - preserve `DownloadJobDriver::new(checkpoint_repo)` by wiring no-op source;
+   - add `with_pending_resume_work_source(...)`;
+   - add local `drain_pending_resume_work(&JobId)` and focused driver tests.
+3. Keep `kernel-jobs`, composition wiring, host transport, frontend, SQLite schema, fetch/write/verify, snapshot mutation, and checkpoint mutation unchanged.
 4. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.
