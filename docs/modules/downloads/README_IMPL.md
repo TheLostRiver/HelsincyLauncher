@@ -553,6 +553,49 @@ Next Rust slice:
 2. do not start fetch/write/verify execution until the shared scheduler/source wiring and checkpoint mutation boundary are explicit;
 3. keep `kernel-jobs`, host transport, frontend, SQLite schema, snapshot mutation, and checkpoint mutation unchanged unless a later task explicitly scopes them.
 
+### 7.11 Composition Shared Scheduler/Source Wiring Boundary
+
+The next composition-root slice should wire one shared in-memory resume scheduler instance through both sides of the downloads runtime preparation path:
+
+1. as `DownloadResumeWorkScheduler` for `DownloadsFacade::resume_download_outcome()` preparation;
+2. as `DownloadPendingResumeWorkSource` for the `DownloadJobDriver` local consumer method.
+
+This matters because the scheduler shell is currently in-memory. If composition creates two separate `InMemoryDownloadResumeWorkScheduler` values, the facade can successfully register pending work while the driver drains from an empty queue. That would make wiring tests pass superficially while the future execution turn has no prepared work to consume.
+
+Current Rust reality:
+
+1. composition-root already wires `InMemoryDownloadResumeWorkScheduler` into the downloads facade dependency graph;
+2. the job driver registry still constructs downloads drivers through `DownloadJobDriver::new(checkpoint_repo)`;
+3. `DownloadJobDriver::new(...)` deliberately uses the no-op `()` pending-work source for compatibility;
+4. therefore the real scheduler and the driver source are not shared yet.
+
+Required composition shape:
+
+1. create one `InMemoryDownloadResumeWorkScheduler` in the composition assembly path that already owns concrete adapters and module dependencies;
+2. pass a clone of that scheduler to the downloads facade dependencies as `DownloadResumeWorkScheduler`;
+3. pass the same shared scheduler instance to `DownloadJobDriver::with_pending_resume_work_source(...)` as `DownloadPendingResumeWorkSource`;
+4. keep `DesktopAppServices` facade-only; do not expose the driver registry or pending-work source through the public composition API just to make tests easier;
+5. keep startup stage-2 restore unchanged: restore may read durable checkpoints, but it must not drain the in-memory pending-work queue.
+
+Implementation boundaries for the next Rust slice:
+
+1. allowed: composition-root private builder/helper signature changes needed to pass the shared scheduler into both the facade builder and driver registry builder;
+2. allowed: focused composition-root test proving work scheduled through the shared scheduler can be drained by a driver built with the same source;
+3. allowed: existing smoke test adjustments only if construction signatures change;
+4. not allowed: `kernel-jobs::JobDriver` trait changes, runtime `run()` semantics, job completion APIs, snapshot mutation, or host transport changes;
+5. not allowed: concrete HTTP fetch, staging writes, hash/length verification, checkpoint mutation, SQLite work-item persistence, frontend IPC, or UI projection.
+
+Preferred validation for the next Rust slice:
+
+1. first add a focused RED composition-root test around the private/shared wiring helper or equivalent narrow construction seam;
+2. implement the minimal shared scheduler/source wiring;
+3. run the focused composition-root test;
+4. run `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`;
+5. run `cargo fmt -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check`;
+6. run scoped `git diff --check` and path-limited status before committing.
+
+The slice still does not mean downloads can execute segment work. It only ensures that once a documented execution turn exists, the driver can see the pending resume work that the facade prepared before shared runtime enqueue.
+
 ---
 
 ## 8. Error Semantics

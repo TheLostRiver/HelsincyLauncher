@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 59 - DownloadJobDriver Local Pending Work Consumer
+Phase 60 - Downloads Composition Shared Scheduler Source Wiring Boundary
 
 ## Current Focus
 
@@ -496,6 +496,12 @@ Phase 59 - DownloadJobDriver Local Pending Work Consumer
 - Atomic tasks: AT-2026-05-16-184
 - **Status:** complete
 
+### Phase 60: Downloads Composition Shared Scheduler Source Wiring Boundary
+
+- Outcome: define the composition-root assembly boundary that shares one `InMemoryDownloadResumeWorkScheduler` as both the downloads facade scheduler and the driver pending-work source, without changing runtime execution, transport, frontend, SQLite, checkpoint mutation, or concrete IO.
+- Atomic tasks: AT-2026-05-16-185
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -675,7 +681,8 @@ Phase 59 - DownloadJobDriver Local Pending Work Consumer
 175. AT-2026-05-16-181 - completed - documented the downloads driver pending-work consumption boundary and identified the next code slice as job-id-scoped pending-work source/drain semantics without widening runtime, transport, frontend, persistence, or concrete IO.
 176. AT-2026-05-16-182 - completed - added a TDD-backed pending resume work source/drain boundary for module-local job-scoped consumption without driver/runtime/transport/frontend/persistence changes.
 177. AT-2026-05-16-183 - completed - documented the `DownloadJobDriver` local pending-work consumer boundary and defined AT-184 as a TDD-backed local consumer method without changing shared runtime execution semantics.
-178. AT-2026-05-16-184 - completed - implementation and validation passed; ready for local commit after approval recovered.
+178. AT-2026-05-16-184 - completed - added the TDD-backed local `DownloadJobDriver` pending-work consumer and committed locally as `a710cfc`.
+179. AT-2026-05-16-185 - completed - documented the composition shared scheduler/source wiring boundary before touching composition-root Rust code.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

@@ -5820,3 +5820,40 @@
   - `.artifacts/ai/task-plan.md` (update)
   - `.artifacts/ai/progress.md` (update)
   - `.artifacts/ai/handoff.md` (update)
+
+## 2026-05-16 - AT-185 Start
+
+- Confirmed recent git history: AT-184 is committed as `a710cfc` (`feat: add downloads driver pending work consumer`).
+- `git status --short` still shows unrelated dirty files that must be preserved and excluded from this slice: `Cargo.lock`, `MyEpicLauncher.pen`, frontend files, sqlite files, `.codex`, `src/`, and `crates/composition-root/src/startup.rs`.
+- Initial PWF catchup attempt against `C:\Users\Helsincy\.codex\skills\planning-with-files\scripts\session-catchup.py` failed because that global script path does not exist in this workspace. Retried with `.codex\skills\planning-with-files\scripts\session-catchup.py`, which exited successfully with no report output.
+- Required docs were read in scoped snippets: `README.md`, `CONTRIBUTING.md`, `docs/README.md`, downloads ARCH/API/FLOW/README_IMPL, composition-root wiring design, kernel-jobs runtime design, and download runtime design.
+- Started AT-2026-05-16-185 as a docs-only boundary slice for composition shared scheduler/source wiring before any Rust code changes.
+
+## 2026-05-16 - AT-185 Validation
+
+- Added README_IMPL section 7.11, defining that composition-root must share one `InMemoryDownloadResumeWorkScheduler` as both facade `DownloadResumeWorkScheduler` and driver `DownloadPendingResumeWorkSource`.
+- The section keeps composition-root assembly-only and leaves runtime execution, host transport, frontend, SQLite work-item persistence, fetch/write/verify, checkpoint mutation, snapshot mutation, and startup stage-2 restore unchanged.
+- Readback confirmed the new section and task-plan Phase 60.
+- Scoped `git diff --check` passed with CRLF warnings only.
+- Path-limited `git status --short` showed only AT-185 files.
+- Ready to commit AT-185 only.
+
+### Auto Record: 2026-05-16 23:38:38
+- Tool: apply_patch
+- Phase: Phase 60 - Downloads Composition Shared Scheduler Source Wiring Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (delete)
+  - `docs/modules/downloads/README_IMPL.md` (update)
+
+### Auto Record: 2026-05-16 23:39:40
+- Tool: apply_patch
+- Phase: Phase 60 - Downloads Composition Shared Scheduler Source Wiring Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)

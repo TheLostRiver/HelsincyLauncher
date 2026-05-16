@@ -2,27 +2,24 @@
 
 ## Identity
 
-- task id: AT-2026-05-16-184
-- title: Add DownloadJobDriver local pending-work consumer
+- task id: AT-2026-05-16-185
+- title: Define downloads composition shared scheduler/source wiring boundary
 - status: completed
 
 ## Goal
 
-按 AT-183 的实现文档，在 `DownloadJobDriver` 上增加一个本地 pending resume work consumer 方法，为后续 runtime execution turn 预留明确入口；保持 `restore()` 语义、`kernel-jobs::JobDriver` trait、composition-root wiring、真实下载 IO 和 checkpoint mutation 全部不变。
+在开始 composition-root Rust wiring 前，先把 downloads resume pending-work scheduler/source 的装配边界写清楚：同一个 `InMemoryDownloadResumeWorkScheduler` 必须同时作为 facade 的 `DownloadResumeWorkScheduler` 和 driver 的 `DownloadPendingResumeWorkSource`，避免 facade 注册的 pending work 与 driver drain 看到两套不同内存队列。
 
 本轮只覆盖：
 
-- no-op `DownloadPendingResumeWorkSource` for `()`;
-- `DownloadJobDriver` 持有 pending-work source；
-- 保持 `DownloadJobDriver::new(checkpoint_repo)` 兼容；
-- 新增 `with_pending_resume_work_source(...)` 和 `drain_pending_resume_work(&JobId)`;
-- focused driver tests。
+- README_IMPL 中的 composition shared scheduler/source wiring 规则；
+- 明确 composition-root 只负责 assembly，不执行业务 resume/fetch/write/verify；
+- 明确下一 Rust 切片的最小可验证范围；
+- 更新 `.artifacts/ai` 任务记录。
 
 ## Scope
 
 - in scope:
-  - `crates/module-downloads/src/facade/mod.rs`
-  - `crates/module-downloads/src/driver.rs`
   - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
@@ -30,73 +27,67 @@
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
+  - Rust production code changes
+  - composition-root wiring implementation
   - `kernel-jobs::JobDriver` API changes or runtime execution loop
-  - composition-root wiring changes
   - host transport, frontend IPC, UI projection
-  - SQLite schema or work-item persistence
+  - SQLite schema or durable work-item persistence
   - concrete HTTP fetch, staging writes, verifier/hash execution
-  - checkpoint mutation or new checkpoint repository methods
-  - snapshot mutation, completion APIs, or event publication
+  - checkpoint mutation, snapshot mutation, completion APIs, or event publication
   - unrelated dirty worktree files
 
 ## Allowed Files
 
-1. crates/module-downloads/src/facade/mod.rs
-2. crates/module-downloads/src/driver.rs
-3. docs/modules/downloads/README_IMPL.md
-4. .artifacts/ai/active-task.md
-5. .artifacts/ai/task-plan.md
-6. .artifacts/ai/progress.md
-7. .artifacts/ai/findings.md
-8. .artifacts/ai/handoff.md
+1. docs/modules/downloads/README_IMPL.md
+2. .artifacts/ai/active-task.md
+3. .artifacts/ai/task-plan.md
+4. .artifacts/ai/progress.md
+5. .artifacts/ai/findings.md
+6. .artifacts/ai/handoff.md
 
 ## 控制性文档
 
-Required context read in scoped snippets before coding:
+Required context read in scoped snippets before editing:
 
-1. docs/modules/downloads/README_IMPL.md section 7.10
-2. crates/module-downloads/src/driver.rs
-3. crates/module-downloads/src/facade/mod.rs
-4. crates/kernel-jobs/src/runtime.rs
-5. superpowers:test-driven-development skill
-
-Prior required architecture/collaboration docs from AT-181/AT-183 remain controlling.
+1. README.md
+2. CONTRIBUTING.md
+3. docs/README.md
+4. docs/modules/downloads/README_ARCH.md
+5. docs/modules/downloads/README_API.md
+6. docs/modules/downloads/README_FLOW.md
+7. docs/modules/downloads/README_IMPL.md sections 7.9-7.10
+8. docs/TauriCompositionRootWiringDesign.md
+9. docs/TauriKernelJobsRuntimeDesign.md
+10. docs/TauriDownloadRuntimeDesign.md
 
 ## Hypothesis
 
-- falsifiable local hypothesis: `DownloadJobDriver` can expose a local pending-work consumer method by delegating to `DownloadPendingResumeWorkSource`, while existing restore tests and module tests remain green and no shared runtime/composition/IO/persistence behavior changes.
+- falsifiable local hypothesis: a docs-only boundary can define the next composition-root wiring slice clearly enough that the later Rust task can share one scheduler/source instance without widening into runtime execution, host transport, frontend, SQLite persistence, fetch/write/verify, checkpoint mutation, or snapshot completion.
 
 ## Cheap Check
 
-- RED/GREEN focused test:
-  - `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml download_job_driver_pending_resume_work`
-- then full module test:
-  - `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`
+- Read back the new README_IMPL section and PWF current phase.
+- `git diff --check -- docs/modules/downloads/README_IMPL.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md`
+- `git status --short -- docs/modules/downloads/README_IMPL.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md`
 
 ## Validation Gate
 
-1. Write focused RED driver tests before production code.
-2. Observe RED failure caused by missing local driver consumer API.
-3. Implement no-op source for `()`, driver source field, compatibility constructor, injected constructor, and local drain method.
-4. Update README_IMPL and PWF records.
-5. Run focused test, full module test, format check, scoped diff check, and path-limited status.
-6. Commit only AT-184 files locally.
+1. Document shared scheduler/source ownership and assembly-only rules.
+2. Document the minimum next Rust wiring slice and verification path.
+3. Update PWF records.
+4. Run readback, scoped diff check, and path-limited status.
+5. Commit only AT-185 files locally.
 
 ## Validation Result
 
 - passed
-- RED focused driver test failed because `DownloadJobDriver` had no `with_pending_resume_work_source(...)` and no `drain_pending_resume_work(...)`.
-- GREEN implementation added no-op `DownloadPendingResumeWorkSource` for `()`, a pending source field on `DownloadJobDriver`, a compatibility-preserving `new(checkpoint_repo)`, an injected constructor, and a local drain method.
-- Focused `download_job_driver_pending_resume_work` tests passed: 2 passed, 0 failed.
-- Full `launcher-module-downloads` suite passed: 26 unit tests passed, 0 failed; doc tests 0.
-- Initial `cargo fmt --check` failed on driver test formatting; after `cargo fmt`, `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed.
+- README_IMPL section 7.11 now defines the composition shared scheduler/source wiring boundary.
+- Readback confirmed the section states one `InMemoryDownloadResumeWorkScheduler` must feed both facade preparation and driver drain.
+- Task-plan readback confirmed Phase 60 is the current phase.
 - Scoped `git diff --check` passed with CRLF warnings only.
-- Path-limited `git status --short` was rerun after approval recovered and showed only AT-184 files.
-- Local commit is ready.
+- Path-limited `git status --short` showed only AT-185 files.
 
 ## Notes
 
-- AT-2026-05-16-183 committed as `17402bc`.
-- New public declaration comments must preserve English and add Chinese companion comments.
-- Next slice should reassess composition wiring that shares the same `InMemoryDownloadResumeWorkScheduler` between facade and driver, or document that wiring first.
-- Previous commit blocker cleared after approval recovered; AT-184 is ready to commit.
+- AT-2026-05-16-184 is committed as `a710cfc`.
+- The next Rust slice should not begin fetch/write/verify execution; it should only wire the same scheduler/source instance through composition-root and prove the driver can drain work prepared through the facade path.

@@ -617,3 +617,12 @@
 - The local driver drain method delegates to the source only; it does not fetch, write, verify, read or mutate checkpoints, mutate snapshots, complete jobs, publish events, or alter `restore()`.
 - Full downloads module tests passed with 26 unit tests after formatting, so existing restore/facade behavior stayed intact.
 - The next likely slice is composition-level shared scheduler/source wiring, but it should be reassessed from README_IMPL before coding.
+
+## Phase 60 Downloads Composition Shared Scheduler Source Wiring Findings
+
+- AT-2026-05-16-184 is already committed as `a710cfc`; the lingering "ready for local commit" wording in older PWF files is stale recovery text.
+- Required docs were read in scoped snippets before this docs-first slice: `README.md`, `CONTRIBUTING.md`, `docs/README.md`, downloads ARCH/API/FLOW/README_IMPL, `docs/TauriCompositionRootWiringDesign.md`, `docs/TauriKernelJobsRuntimeDesign.md`, and `docs/TauriDownloadRuntimeDesign.md`.
+- Composition-root is the only concrete assembly owner, but it must not execute download resume business logic, fetch, write, verify, mutate checkpoints, or expose driver internals through its public API.
+- Current Rust wiring creates the downloads facade scheduler in the facade builder while the driver registry still uses `DownloadJobDriver::new(...)`, so the driver source is currently the no-op `()` implementation rather than the real in-memory scheduler.
+- The next implementation boundary must create one shared `InMemoryDownloadResumeWorkScheduler` in composition assembly and pass it to both the facade dependency graph and `DownloadJobDriver::with_pending_resume_work_source(...)`.
+- The current public composition-root service graph should not grow a driver-registry accessor just for testing; the next Rust slice should prefer a private builder/helper or narrowly scoped composition test surface.
