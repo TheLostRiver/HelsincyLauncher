@@ -2,8 +2,8 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-16-186
-- title: Wire downloads shared scheduler/source in composition-root
+- task id: AT-2026-05-16-187
+- title: Define downloads checkpoint mutation boundary
 - status: completed and committed locally
 
 ## Current In-progress Atomic Task
@@ -12,7 +12,6 @@
 
 ## Current Slice
 
-- `crates/composition-root/src/bootstrap.rs`
 - `docs/modules/downloads/README_IMPL.md`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
@@ -22,21 +21,17 @@
 
 ## Validation
 
-- Passed for AT-186:
-  - focused RED composition-root test failed for the expected missing wiring seam;
-  - minimal shared scheduler/source wiring implemented in private composition builders;
-  - README_IMPL current Rust slice updated;
-  - focused composition-root test passed;
-  - full composition-root suite passed: 6 unit tests and 7 integration tests, doc tests 0;
-  - `cargo fmt -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed after formatting;
-  - scoped `git diff --check` passed with CRLF warnings only;
-  - path-limited `git status --short` showed only AT-186 files.
-- Pending for AT-186:
+- Passed for AT-187:
+  - README_IMPL readback
+  - PWF current phase readback
+  - scoped `git diff --check`
+  - path-limited `git status --short`
+- Pending for AT-187:
   - none
 
 ## Current Git State To Preserve
 
-- Unrelated unstaged/unknown work remains present and must not be committed with AT-2026-05-16-186:
+- Unrelated unstaged/unknown work remains present and must not be committed with AT-2026-05-16-187:
   - `Cargo.lock`
   - `MyEpicLauncher.pen`
   - frontend files under `app/` and `components/`
@@ -47,5 +42,5 @@
 
 ## Next Resume Point
 
-1. Reassess README_IMPL for the next backend slice before coding.
-2. Do not start fetch/write/verify execution until the checkpoint mutation boundary is explicit.
+1. Next Rust slice should target segment checkpoint persistence through `DownloadCheckpointRepository` / `SqliteDownloadCheckpointRepository`, not fetch/write/verify execution.
+2. Before coding, reread README/CONTRIBUTING/docs map, downloads module docs, README_IMPL 7.12, storage/repository design, adapter-storage-sqlite checkpoint code, and TDD skill.

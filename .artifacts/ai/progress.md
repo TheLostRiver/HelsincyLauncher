@@ -5867,6 +5867,17 @@
 - Path-limited `git status --short` showed only AT-186 files; broad status still contains unrelated dirty files including `crates/composition-root/src/startup.rs`, which remains excluded from the commit.
 - AT-186 was committed locally after validation. The exact commit hash should be read from `git log` after the final amend.
 
+## 2026-05-16 - AT-187 Checkpoint Boundary Docs
+
+- Confirmed AT-186 final commit is `6a721af`.
+- Read README_IMPL 7.11, download runtime checkpoint/resume sections, storage placement sections, repository/checkpoint transaction sections, and current handoff before editing.
+- Added AT-187 as a docs-only boundary task for downloads checkpoint mutation.
+- Key conclusion: next Rust work should first make segment checkpoint facts durable through the repository/adapter boundary; concrete fetch/write/verify and runtime completion remain deferred.
+- Readback confirmed README_IMPL section 7.12 and task-plan Phase 62.
+- Scoped `git diff --check` passed with CRLF warnings only.
+- Path-limited `git status --short` showed only AT-187 files.
+- AT-187 was committed locally after validation. The exact commit hash should be read from `git log` after the final amend.
+
 ### Auto Record: 2026-05-16 23:38:38
 - Tool: apply_patch
 - Phase: Phase 60 - Downloads Composition Shared Scheduler Source Wiring Boundary
@@ -5932,6 +5943,34 @@
 ### Auto Record: 2026-05-16 23:49:12
 - Tool: apply_patch
 - Phase: Phase 61 - Downloads Composition Shared Scheduler Source Wiring
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-16 23:51:58
+- Tool: apply_patch
+- Phase: Phase 62 - Downloads Checkpoint Mutation Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (delete)
+  - `docs/modules/downloads/README_IMPL.md` (update)
+
+### Auto Record: 2026-05-16 23:52:31
+- Tool: apply_patch
+- Phase: Phase 62 - Downloads Checkpoint Mutation Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-16 23:53:19
+- Tool: apply_patch
+- Phase: Phase 62 - Downloads Checkpoint Mutation Boundary
 - Files:
   - `.artifacts/ai/active-task.md` (update)
   - `.artifacts/ai/task-plan.md` (update)

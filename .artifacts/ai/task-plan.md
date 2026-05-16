@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 61 - Downloads Composition Shared Scheduler Source Wiring
+Phase 62 - Downloads Checkpoint Mutation Boundary
 
 ## Current Focus
 
@@ -508,6 +508,12 @@ Phase 61 - Downloads Composition Shared Scheduler Source Wiring
 - Atomic tasks: AT-2026-05-16-186
 - **Status:** complete
 
+### Phase 62: Downloads Checkpoint Mutation Boundary
+
+- Outcome: define downloads-owned checkpoint mutation timing, repository/SQLite responsibility, failure layering, and the next persistence slice before concrete fetch/write/verify execution begins.
+- Atomic tasks: AT-2026-05-16-187
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -690,6 +696,7 @@ Phase 61 - Downloads Composition Shared Scheduler Source Wiring
 178. AT-2026-05-16-184 - completed - added the TDD-backed local `DownloadJobDriver` pending-work consumer and committed locally as `a710cfc`.
 179. AT-2026-05-16-185 - completed - documented the composition shared scheduler/source wiring boundary before touching composition-root Rust code.
 180. AT-2026-05-16-186 - completed - wired the shared downloads resume scheduler/source through composition-root with focused TDD and committed locally.
+181. AT-2026-05-16-187 - completed - documented the downloads checkpoint mutation boundary and next segment-checkpoint persistence slice, then committed locally.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

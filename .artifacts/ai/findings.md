@@ -638,3 +638,13 @@
 - The implementation keeps `DesktopAppServices` facade-only and only changes private composition builders.
 - The same scheduler handle is now cloned into the facade deps and injected into `DownloadJobDriver`, so work registered through the facade scheduler can be drained by the driver source.
 - Startup stage-2 restore behavior remains checkpoint-only and does not drain in-memory pending work.
+
+## Phase 62 Downloads Checkpoint Mutation Boundary Findings
+
+- AT-2026-05-16-186 committed locally as `6a721af`.
+- README_IMPL 7.11 now closes the shared scheduler/source wiring prerequisite.
+- `docs/TauriDownloadRuntimeDesign.md` requires checkpoint persistence after job creation, manifest/segment plan confirmation, segment completion, pause completion, time-window flush, and terminal failed/canceled/completed transitions.
+- `docs/TauriStorageAndDatabaseDesign.md` classifies `download_job_checkpoint` and `download_segment_checkpoint` as SQLite facts, while staging files and large manifests stay in the filesystem with references.
+- `docs/TauriRepositoryPortsAndAdapterDesign.md` says modules access SQLite only through repository ports, SQLite adapters own SQL/transactions/mapping, and cross-medium consistency relies on state machine + checkpoint + retry/compensation rather than distributed transactions.
+- Current Rust still has a richer `DownloadCheckpointRecord` / `DownloadSegmentCheckpointRecord` shape than the SQLite adapter persists; the adapter currently only stores enough job-level checkpoint presence for restore.
+- The next Rust slice should therefore be segment-checkpoint persistence in the repository/adapter boundary, not driver fetch/write/verify execution.

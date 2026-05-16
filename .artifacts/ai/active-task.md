@@ -2,25 +2,24 @@
 
 ## Identity
 
-- task id: AT-2026-05-16-186
-- title: Wire downloads shared scheduler/source in composition-root
+- task id: AT-2026-05-16-187
+- title: Define downloads checkpoint mutation boundary
 - status: completed
 
 ## Goal
 
-按 README_IMPL 7.11，把 composition-root downloads wiring 改成同一个 `InMemoryDownloadResumeWorkScheduler` 同时供 facade `DownloadResumeWorkScheduler` 和 `DownloadJobDriver` 的 `DownloadPendingResumeWorkSource` 使用。先用 RED composition-root 单测证明当前 driver 会从空/no-op source drain，不会看到 facade scheduler 登记的 pending work，再做最小实现。
+在继续任何 fetch/write/verify 或 driver execution 代码前，先把 downloads checkpoint mutation 的 owner、写入时机、repository/SQLite 边界、错误分层和下一 Rust 切片写清楚。
 
 本轮只覆盖：
 
-- composition-root 私有 builder/helper 层的共享 scheduler/source wiring；
-- focused composition-root 单测；
-- 必要 README_IMPL/PWF 记录更新；
-- 不扩大 composition-root public API。
+- README_IMPL checkpoint mutation boundary；
+- 明确 command path、scheduler pending queue、driver execution turn 与 checkpoint repository 的职责；
+- 明确下一 Rust 切片应优先补 segment checkpoint persistence，而不是直接进入 HTTP/文件写入/校验；
+- 更新 `.artifacts/ai` 任务记录。
 
 ## Scope
 
 - in scope:
-  - `crates/composition-root/src/bootstrap.rs`
   - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
@@ -28,27 +27,26 @@
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
-  - `kernel-jobs::JobDriver` trait changes or runtime `run()` semantics
-  - host transport, frontend IPC, UI projection
-  - SQLite work-item persistence or schema changes
+  - Rust production code changes
+  - SQLite schema or adapter implementation changes
   - concrete HTTP fetch, staging writes, verifier/hash execution
-  - checkpoint mutation, snapshot mutation, completion APIs, or event publication
-  - startup stage-2 restore behavior changes
-  - unrelated dirty worktree files, including existing `crates/composition-root/src/startup.rs`
+  - `kernel-jobs` runtime execution loop or job completion APIs
+  - host transport, frontend IPC, UI projection
+  - checkpoint mutation implementation
+  - unrelated dirty worktree files
 
 ## Allowed Files
 
-1. crates/composition-root/src/bootstrap.rs
-2. docs/modules/downloads/README_IMPL.md
-3. .artifacts/ai/active-task.md
-4. .artifacts/ai/task-plan.md
-5. .artifacts/ai/progress.md
-6. .artifacts/ai/findings.md
-7. .artifacts/ai/handoff.md
+1. docs/modules/downloads/README_IMPL.md
+2. .artifacts/ai/active-task.md
+3. .artifacts/ai/task-plan.md
+4. .artifacts/ai/progress.md
+5. .artifacts/ai/findings.md
+6. .artifacts/ai/handoff.md
 
 ## 控制性文档
 
-Required context read in scoped snippets before coding:
+Required context read in scoped snippets before editing:
 
 1. README.md
 2. CONTRIBUTING.md
@@ -57,45 +55,40 @@ Required context read in scoped snippets before coding:
 5. docs/modules/downloads/README_API.md
 6. docs/modules/downloads/README_FLOW.md
 7. docs/modules/downloads/README_IMPL.md section 7.11
-8. docs/TauriCompositionRootWiringDesign.md
-9. docs/TauriKernelJobsRuntimeDesign.md
-10. docs/TauriDownloadRuntimeDesign.md
-11. superpowers:test-driven-development skill
+8. docs/TauriDownloadRuntimeDesign.md checkpoint/resume sections
+9. docs/TauriStorageAndDatabaseDesign.md storage placement sections
+10. docs/TauriRepositoryPortsAndAdapterDesign.md repository/checkpoint transaction sections
 
 ## Hypothesis
 
-- falsifiable local hypothesis: composition-root can create one in-memory downloads resume scheduler and pass shared clones to both facade deps and `DownloadJobDriver::with_pending_resume_work_source(...)`, while preserving facade-only public services, startup restore semantics, current smoke behavior, and all out-of-scope runtime/transport/IO/persistence boundaries.
+- falsifiable local hypothesis: a docs-only boundary can make the checkpoint mutation owner and next persistence slice explicit enough to continue backend work without prematurely implementing fetch/write/verify, runtime completion, host transport, frontend projection, or broad SQLite abstractions.
 
 ## Cheap Check
 
-- RED/GREEN focused test:
-  - `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml download_driver_drains_work_scheduled_through_shared_facade_scheduler`
-- then full composition-root tests:
-  - `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`
+- Read back the new README_IMPL section and PWF current phase.
+- `git diff --check -- docs/modules/downloads/README_IMPL.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md`
+- `git status --short -- docs/modules/downloads/README_IMPL.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md`
 
 ## Validation Gate
 
-1. Add the focused RED test first.
-2. Observe expected RED failure caused by missing shared scheduler/source wiring.
-3. Implement minimal private builder/helper wiring.
-4. Update README_IMPL current Rust slice and PWF records.
-5. Run focused test, full composition-root test, format check, scoped diff check, and path-limited status.
-6. Commit only AT-186 files locally.
+1. Document command/driver/checkpoint repository ownership.
+2. Document durable checkpoint mutation timing and failure behavior.
+3. Identify the next Rust slice without opening concrete download execution.
+4. Update PWF records.
+5. Run readback, scoped diff check, and path-limited status.
+6. Commit only AT-187 files locally.
 
 ## Validation Result
 
 - passed
-- RED focused test failed for the expected reasons: `build_downloads_module(...)` did not accept a shared scheduler argument and `build_download_job_driver(...)` did not exist.
-- GREEN implementation creates one composition-root owned `InMemoryDownloadResumeWorkScheduler`, passes it to the downloads facade deps, and injects it into `DownloadJobDriver::with_pending_resume_work_source(...)`.
-- Focused composition-root test passed: `download_driver_drains_work_scheduled_through_shared_facade_scheduler`.
-- Full `launcher-composition-root` suite passed: 6 unit tests and 7 integration tests passed; doc tests 0.
-- Initial `cargo fmt --check` failed on one test line wrap; after `cargo fmt`, `cargo fmt -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed.
-- README_IMPL section 7.11 now records the current Rust slice.
+- README_IMPL section 7.12 now defines the checkpoint mutation boundary.
+- Readback confirmed ownership rules, command path rules, driver/execution-turn rules, persistence rules, and next Rust slice.
+- Task-plan readback confirmed Phase 62 is the current phase.
 - Scoped `git diff --check` passed with CRLF warnings only.
-- Path-limited `git status --short` showed only AT-186 files.
+- Path-limited `git status --short` showed only AT-187 files.
 - Local commit completed after validation.
 
 ## Notes
 
-- AT-2026-05-16-185 committed as `cb991f3`.
-- Push to `origin/main` was rejected by safety review; do not work around it.
+- AT-2026-05-16-186 committed as `6a721af`.
+- Push to `origin/main` was rejected earlier by safety review; do not work around it.

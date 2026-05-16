@@ -605,6 +605,51 @@ Current Rust slice:
 5. the focused composition-root test proves work registered through the facade dependency graph can be drained by the driver source;
 6. `kernel-jobs`, host transport, frontend, SQLite schema, checkpoint mutation, snapshot mutation, startup stage-2 restore, and concrete fetch/write/verify execution remain unchanged.
 
+### 7.12 Checkpoint Mutation Boundary
+
+Checkpoint mutation is the last boundary that must be explicit before the downloads driver can start real segment execution. The prepared in-memory work queue is useful for a same-process execution turn, but it is not the durable source of truth. Durable resume facts remain downloads-owned checkpoint records written through `DownloadCheckpointRepository`.
+
+Ownership rules:
+
+1. `module-downloads` owns `DownloadCheckpointRecord` and `DownloadSegmentCheckpointRecord` semantics.
+2. `adapter-storage-sqlite` owns SQL tables, transactions, and row mapping for persisted checkpoint facts.
+3. `kernel-jobs` owns generic job snapshots only; it must not store segment checkpoint details in `extension`.
+4. composition-root only wires the repository and scheduler/source dependencies; it must not inspect or mutate checkpoint contents.
+5. host transport and frontend only see stable command results and job/read-model projections, never segment checkpoint internals.
+
+Command path rules:
+
+1. `resume_download_outcome()` may load checkpoint facts to validate resume safety.
+2. It may derive segment decisions and schedule pending work before job-level runtime enqueue.
+3. It must not treat the in-memory pending queue as persistence.
+4. It must not rewrite segment checkpoint facts while merely accepting a resume command.
+5. Scheduler preparation failure still returns synchronously and skips runtime enqueue.
+
+Driver/execution-turn rules:
+
+1. A future driver execution turn may drain pending work for the accepted job id.
+2. Before mutating durable facts, it should reload or otherwise validate the current checkpoint record so stale in-memory work cannot overwrite newer persisted state.
+3. Segment checkpoint writes happen after a concrete boundary has produced a durable fact, such as manifest/segment plan confirmation, partial byte progress eligible for flush, verified segment completion, pause completion, or terminal failure/cancel/completion.
+4. Checkpoint save failure belongs to the driver/execution failure surface; it must not change the already-returned resume command result.
+5. Runtime snapshot completion must not be reported before the corresponding downloads checkpoint transition has been persisted or deliberately classified as unrecoverable.
+
+Persistence rules:
+
+1. `download_job_checkpoint` and `download_segment_checkpoint` belong in SQLite as structured, recoverable facts.
+2. Staging files, partial fragments, raw manifests, and large provider payloads stay in the filesystem/object-store layer, with references stored in checkpoint records when needed.
+3. Cross-medium consistency uses a state machine plus checkpoint/retry/compensation, not a fake distributed transaction between SQLite, filesystem, and provider IO.
+4. If multiple checkpoint rows for one job need atomic mutation, the adapter may introduce a downloads-local transaction boundary such as `DownloadCheckpointWriteTx`; it must not become a global unit of work.
+5. The first persistence implementation may stay job-scoped and segment-scoped, but it must round-trip the current `DownloadSegmentCheckpointRecord` facts instead of only preserving checkpoint presence.
+
+Next Rust slice:
+
+1. add focused tests proving `SqliteDownloadCheckpointRepository::save(...)` and `load(...)` round-trip segment checkpoint facts in `DownloadCheckpointRecord`;
+2. extend only the repository/adapter persistence boundary required for those tests;
+3. avoid changing driver execution, runtime `JobDriver`, host transport, frontend, composition public API, concrete fetch/write/verify, snapshot completion, or public error DTOs;
+4. run adapter/module-level tests plus scoped diff checks before committing.
+
+Only after segment checkpoint facts are durable should a later slice start consuming pending work to perform concrete fetch/write/verify behavior.
+
 ---
 
 ## 8. Error Semantics
