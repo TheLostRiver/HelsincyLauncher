@@ -4800,6 +4800,42 @@
 - AT-181 did not touch Rust code, SQLite schema, host transport, frontend IPC, fetch/write/verify, checkpoint mutation, or `kernel-jobs` payloads.
 - The next slice is clear enough to start AT-2026-05-16-182 after committing AT-181.
 
+### Session Note: 2026-05-16
+
+- Started AT-2026-05-16-182 after AT-181 commit `ccb0eac`.
+- Read the TDD skill before coding; AT-182 must write RED tests before production code.
+- Current implementation target:
+  - add focused tests under `pending_resume_work_source`;
+  - introduce `DownloadPendingResumeWorkSource`;
+  - implement job-id-scoped draining for `InMemoryDownloadResumeWorkScheduler`;
+  - export the trait from `crates/module-downloads/src/lib.rs`;
+  - keep driver integration, runtime API changes, composition wiring, host transport, frontend, SQLite schema, fetch/write/verify, and checkpoint mutation out of scope.
+
+### Session Note: 2026-05-16
+
+- AT-182 RED/GREEN progress:
+  - RED test command: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml pending_resume_work_source`
+  - RED result: failed with unresolved `DownloadPendingResumeWorkSource` and missing `drain_pending_resume_work()`.
+  - GREEN implementation: added `DownloadPendingResumeWorkSource`, implemented job-id-scoped draining for `InMemoryDownloadResumeWorkScheduler`, and exported the trait from `crates/module-downloads/src/lib.rs`.
+  - Focused GREEN result: 2 passed, 0 failed.
+- README_IMPL now records the implemented source/drain boundary while keeping driver integration and execution IO out of scope.
+
+### Session Note: 2026-05-16
+
+- Completed AT-2026-05-16-182.
+- Validation evidence:
+  - Focused `pending_resume_work_source` tests passed: 2 passed, 0 failed.
+  - Full `launcher-module-downloads` tests passed: 24 unit tests passed, 0 failed; doc tests 0.
+  - `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed.
+  - Scoped `git diff --check` passed with CRLF warnings only.
+  - Path-limited `git status --short` showed only AT-182 files.
+- Implementation summary:
+  - added `DownloadPendingResumeWorkSource`;
+  - implemented job-id-scoped pending-work draining on `InMemoryDownloadResumeWorkScheduler`;
+  - exported the source trait from `crates/module-downloads/src/lib.rs`;
+  - updated README_IMPL current state.
+- AT-182 kept `DownloadJobDriver`, `kernel-jobs`, composition wiring, host transport, frontend, SQLite schema, fetch/write/verify, and checkpoint mutation unchanged.
+
 ### Auto Record: 2026-05-16 00:14:04
 - Tool: apply_patch
 - Phase: Phase 44 - Downloads Resume All-Sealed Completion Boundary
@@ -5581,5 +5617,45 @@
 - Files:
   - `.artifacts/ai/active-task.md` (update)
   - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-16 21:35:00
+- Tool: apply_patch
+- Phase: Phase 57 - Downloads Pending Resume Work Source Drain
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-16 21:35:51
+- Tool: apply_patch
+- Phase: Phase 57 - Downloads Pending Resume Work Source Drain
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-16 21:36:26
+- Tool: apply_patch
+- Phase: Phase 57 - Downloads Pending Resume Work Source Drain
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+  - `crates/module-downloads/src/lib.rs` (update)
+
+### Auto Record: 2026-05-16 21:37:11
+- Tool: apply_patch
+- Phase: Phase 57 - Downloads Pending Resume Work Source Drain
+- Files:
+  - `docs/modules/downloads/README_IMPL.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-16 21:38:27
+- Tool: apply_patch
+- Phase: Phase 57 - Downloads Pending Resume Work Source Drain
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
   - `.artifacts/ai/progress.md` (update)
   - `.artifacts/ai/handoff.md` (update)

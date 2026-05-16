@@ -2,8 +2,8 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-16-181
-- title: Define downloads driver pending-work consumption boundary
+- task id: AT-2026-05-16-182
+- title: Add downloads pending resume work source drain
 - status: completed; local commit pending
 
 ## Current In-progress Atomic Task
@@ -13,6 +13,8 @@
 ## Current Slice
 
 - `docs/modules/downloads/README_IMPL.md`
+- `crates/module-downloads/src/facade/mod.rs`
+- `crates/module-downloads/src/lib.rs`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -27,6 +29,12 @@
 - README_IMPL section 7.9 now defines `DownloadPendingResumeWorkSource`, job-id-scoped draining, empty queue behavior, failure layering, and the next code slice.
 - Scoped `git diff --check` passed with CRLF warnings only.
 - Path-limited status showed only AT-181 docs/PWF files.
+- AT-182 RED failed on missing `DownloadPendingResumeWorkSource` and missing `drain_pending_resume_work()`.
+- AT-182 focused GREEN passed: 2 pending-work source tests passed.
+- Full `launcher-module-downloads` tests passed: 24 unit tests passed, 0 failed; doc tests 0.
+- `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed.
+- Scoped `git diff --check` passed with CRLF warnings only.
+- Path-limited status showed only AT-182 files.
 
 ## Current Git State To Preserve
 
@@ -41,7 +49,9 @@
 
 ## Next Resume Point
 
-1. Commit only AT-181 files.
-2. Start AT-2026-05-16-182 with TDD: add `DownloadPendingResumeWorkSource`, implement job-id-scoped draining on `InMemoryDownloadResumeWorkScheduler`, and test that unrelated pending work is preserved plus empty drains return an empty vector.
-3. Keep `DownloadJobDriver`, `kernel-jobs`, composition wiring, host transport, frontend, SQLite schema, fetch/write/verify, and checkpoint mutation unchanged in AT-182 unless a later task explicitly scopes driver integration.
+1. Commit only AT-182 files.
+2. Reassess the next downloads backend slice from README_IMPL section 7.9:
+   - likely docs-first if integrating into `DownloadJobDriver` would require defining a local consumer method or broader `kernel-jobs` execution turn;
+   - do not jump directly to fetch/write/verify.
+3. Keep `kernel-jobs`, composition wiring, host transport, frontend, SQLite schema, fetch/write/verify, and checkpoint mutation unchanged unless the next task explicitly scopes them.
 4. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.

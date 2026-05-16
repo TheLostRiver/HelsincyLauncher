@@ -589,3 +589,12 @@
 - Current Rust reality differs from future design sketches: `crates/kernel-jobs/src/runtime.rs` defines `JobDriver` with `module()`, `kind()`, and `restore()` only; there is no `run()` method or execution context yet.
 - `crates/module-downloads/src/facade/mod.rs` already has `InMemoryDownloadResumeWorkScheduler::pending_work()` and `drain_pending_work()`, but directly coupling `DownloadJobDriver` to that concrete type would make tests pass while hardening an internal implementation detail.
 - The next implementation document should prefer a narrow module-local pending-work source/drain boundary that the driver can consume when a documented execution turn exists, while keeping fetch/write/verify, checkpoint mutation, SQLite schema, host transport, frontend, and `kernel-jobs` payloads out of scope.
+
+## Phase 57 Pending Resume Work Source Drain Findings
+
+- AT-2026-05-16-181 committed as `ccb0eac` and defined the AT-182 code slice as source/drain semantics only.
+- The RED test failed for the intended reason: `DownloadPendingResumeWorkSource` and `drain_pending_resume_work()` did not exist.
+- `InMemoryDownloadResumeWorkScheduler` already stores `DownloadPendingResumeWork` in a shared `Arc<Mutex<Vec<_>>>`, so the minimal source implementation can filter the in-memory vector by `JobId` without introducing persistence or driver execution.
+- The job-scoped drain must preserve unrelated job pending work; draining all work would make a future driver execution turn for one job accidentally erase another queued job's work plan.
+- Empty drain is a valid source result for the source boundary but must not be treated as download completion; future driver integration still needs an explicit documented execution behavior.
+- AT-182 intentionally leaves `DownloadJobDriver`, `kernel-jobs`, composition-root, host transport, frontend, SQLite schema, fetch/write/verify, and checkpoint mutation unchanged.

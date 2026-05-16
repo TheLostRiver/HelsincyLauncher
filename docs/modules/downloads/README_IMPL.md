@@ -83,7 +83,7 @@ Implementation truth should move through module facade and ports first. Do not p
 | resume work plan derivation | derives module-local `DownloadResumeWorkPlan` / `DownloadResumeWorkItem` values from manifest, checkpoints, and resume decisions | module work-plan test |
 | resume scheduler/driver consumer boundary | `DownloadResumeWorkScheduler` consumes `DownloadResumeWorkPlan` before job-level runtime enqueue; composition currently uses the no-op placeholder | module facade tests + composition smoke |
 | resume scheduler execution shell | module-local `InMemoryDownloadResumeWorkScheduler` records pending `DownloadResumeWorkPlan` values before runtime enqueue; composition now wires this shell instead of the `()` placeholder; no fetch/write/verify or persistence behavior is wired yet | module facade test + composition smoke |
-| driver pending-work consumption boundary | documented as a job-scoped pending-work drain/source boundary; current Rust has no `JobDriver::run()` yet, so implementation must start with source/drain semantics rather than fake execution | README_IMPL |
+| driver pending-work consumption boundary | `DownloadPendingResumeWorkSource` and job-id-scoped draining on `InMemoryDownloadResumeWorkScheduler` prove future driver consumption can drain one job without discarding unrelated pending work; current Rust still has no `JobDriver::run()` | module source/drain tests |
 | list/get/policy surfaces | not wired yet | future slices |
 
 ---
@@ -483,12 +483,18 @@ Failure behavior:
 2. Source/drain failures during a future execution turn belong to the driver/scheduler loop and should be reported through the documented runtime/driver failure surface, not by changing the already-returned resume command result.
 3. No new public `DL_*` execution code should be added until the concrete fetch/write/verify slice defines the failing boundary.
 
+Current Rust slice:
+
+1. `DownloadPendingResumeWorkSource` defines the future driver-facing pending-work source boundary.
+2. `InMemoryDownloadResumeWorkScheduler` implements a job-id-scoped `drain_pending_resume_work(&JobId)` source method.
+3. Focused module tests prove that draining one job preserves unrelated pending work and that draining an empty job returns an empty vector.
+4. keep `DownloadJobDriver`, `kernel-jobs`, composition wiring, host transport, frontend, SQLite schema, fetch/write/verify, and checkpoint mutation unchanged unless a later task explicitly scopes driver integration.
+
 Next Rust slice:
 
-1. add `DownloadPendingResumeWorkSource`;
-2. implement a job-id-scoped drain on `InMemoryDownloadResumeWorkScheduler`;
-3. add focused module tests proving that draining one job preserves unrelated pending work and that draining an empty job returns an empty vector;
-4. keep `DownloadJobDriver`, `kernel-jobs`, composition wiring, host transport, frontend, SQLite schema, fetch/write/verify, and checkpoint mutation unchanged unless a later task explicitly scopes driver integration.
+1. reassess whether to integrate the source into `DownloadJobDriver` through an explicit local consumer method, or first document the shared runtime execution turn that would call such a consumer;
+2. do not add fetch/write/verify execution until driver consumption and checkpoint mutation boundaries are separately documented;
+3. keep `kernel-jobs`, host transport, frontend, SQLite schema, and composition wiring unchanged unless the next implementation document explicitly scopes them.
 
 ---
 

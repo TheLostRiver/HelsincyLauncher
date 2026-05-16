@@ -294,6 +294,44 @@ impl InMemoryDownloadResumeWorkScheduler {
     }
 }
 
+/// Downloads-owned source boundary for future driver-side pending resume work consumption.
+/// 后续 driver 侧消费 pending resume work 的 downloads 自有 source 边界。
+pub trait DownloadPendingResumeWorkSource: Send + Sync {
+    /// Drains pending resume work for one job while preserving unrelated jobs.
+    /// 取走单个 job 的 pending resume work，同时保留其他 job 的待处理工作。
+    fn drain_pending_resume_work(
+        &self,
+        job_id: &JobId,
+    ) -> AppResult<Vec<DownloadPendingResumeWork>>;
+}
+
+impl DownloadPendingResumeWorkSource for InMemoryDownloadResumeWorkScheduler {
+    /// Drains only the requested job's pending work without running download IO.
+    /// 只取走指定 job 的 pending work，不执行下载 IO。
+    fn drain_pending_resume_work(
+        &self,
+        job_id: &JobId,
+    ) -> AppResult<Vec<DownloadPendingResumeWork>> {
+        let mut pending_work = self
+            .pending_work
+            .lock()
+            .expect("pending resume work mutex should not be poisoned");
+        let mut drained = Vec::new();
+        let mut remaining = Vec::with_capacity(pending_work.len());
+
+        for work in pending_work.drain(..) {
+            if &work.job_id == job_id {
+                drained.push(work);
+            } else {
+                remaining.push(work);
+            }
+        }
+
+        *pending_work = remaining;
+        Ok(drained)
+    }
+}
+
 /// Downloads-owned scheduler boundary that prepares resume work before runtime enqueue.
 /// 在 runtime 入队前准备恢复工作的 downloads 自有 scheduler 边界。
 pub trait DownloadResumeWorkScheduler: Send + Sync {
@@ -728,9 +766,10 @@ mod tests {
         build_resume_segment_decisions, build_resume_work_plan, DownloadFacade, DownloadJobRecord,
         DownloadJobRecordState, DownloadJobRepository, DownloadManifestPlan,
         DownloadManifestProviderPort, DownloadManifestSegment, DownloadModuleDeps,
-        DownloadPendingResumeWork, DownloadResumeOutcome, DownloadResumeSegmentAction,
-        DownloadResumeWorkMode, DownloadResumeWorkPlan, DownloadResumeWorkScheduler,
-        DownloadStagingObjectStore, DownloadStagingRoot, InMemoryDownloadResumeWorkScheduler,
+        DownloadPendingResumeWork, DownloadPendingResumeWorkSource, DownloadResumeOutcome,
+        DownloadResumeSegmentAction, DownloadResumeWorkItem, DownloadResumeWorkMode,
+        DownloadResumeWorkPlan, DownloadResumeWorkScheduler, DownloadStagingObjectStore,
+        DownloadStagingRoot, InMemoryDownloadResumeWorkScheduler,
     };
     use crate::contracts::{
         CancelDownloadRequestDto, PauseDownloadRequestDto, ResumeDownloadRequestDto,
@@ -1188,6 +1227,22 @@ mod tests {
         }
     }
 
+    fn make_resume_work_plan(segment_id: &str) -> DownloadResumeWorkPlan {
+        DownloadResumeWorkPlan {
+            items: vec![DownloadResumeWorkItem {
+                segment_id: segment_id.into(),
+                file_id: "file-1".into(),
+                source_locator: format!("https://example.invalid/{segment_id}"),
+                write_target: format!("{segment_id}.part"),
+                expected_hash: None,
+                start_offset: 0,
+                length: 1024,
+                resume_mode: DownloadResumeWorkMode::FromStart,
+                checkpoint_ref: None,
+            }],
+        }
+    }
+
     #[test]
     fn start_download_persists_request_metadata_and_enqueue_priority() {
         let job_repo = RecordingDownloadJobRepository::default();
@@ -1607,6 +1662,71 @@ mod tests {
         );
         assert_eq!(pending_work[0].plan.items[1].start_offset, 1024);
         assert_eq!(runtime.enqueued_requests().len(), 1);
+    }
+
+    #[test]
+    fn pending_resume_work_source_drains_matching_job_and_preserves_unrelated_work() {
+        let scheduler = InMemoryDownloadResumeWorkScheduler::new();
+        let job_id = JobId::generate();
+        let unrelated_job_id = JobId::generate();
+        let job_plan = make_resume_work_plan("segment-match");
+        let unrelated_plan = make_resume_work_plan("segment-unrelated");
+
+        scheduler
+            .schedule_resume_work(&job_id, &job_plan)
+            .expect("scheduling matching pending work should succeed");
+        scheduler
+            .schedule_resume_work(&unrelated_job_id, &unrelated_plan)
+            .expect("scheduling unrelated pending work should succeed");
+
+        let drained = scheduler
+            .drain_pending_resume_work(&job_id)
+            .expect("draining pending work for one job should succeed");
+
+        assert_eq!(
+            drained,
+            vec![DownloadPendingResumeWork {
+                job_id: job_id.clone(),
+                plan: job_plan,
+            }]
+        );
+        assert_eq!(
+            scheduler.pending_work(),
+            vec![DownloadPendingResumeWork {
+                job_id: unrelated_job_id,
+                plan: unrelated_plan,
+            }],
+            "draining one job must preserve pending work for other jobs"
+        );
+    }
+
+    #[test]
+    fn pending_resume_work_source_returns_empty_for_job_without_pending_work() {
+        let scheduler = InMemoryDownloadResumeWorkScheduler::new();
+        let existing_job_id = JobId::generate();
+        let missing_job_id = JobId::generate();
+        let existing_plan = make_resume_work_plan("segment-existing");
+
+        scheduler
+            .schedule_resume_work(&existing_job_id, &existing_plan)
+            .expect("scheduling existing pending work should succeed");
+
+        let drained = scheduler
+            .drain_pending_resume_work(&missing_job_id)
+            .expect("draining a job with no pending work should succeed");
+
+        assert!(
+            drained.is_empty(),
+            "missing job drain should return an empty work list"
+        );
+        assert_eq!(
+            scheduler.pending_work(),
+            vec![DownloadPendingResumeWork {
+                job_id: existing_job_id,
+                plan: existing_plan,
+            }],
+            "empty drain must not discard unrelated pending work"
+        );
     }
 
     #[test]
