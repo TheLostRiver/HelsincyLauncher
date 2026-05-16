@@ -4768,6 +4768,38 @@
   - `.artifacts/ai/progress.md` (update)
   - `.artifacts/ai/handoff.md` (update)
 
+### Session Note: 2026-05-16
+
+- Started AT-2026-05-16-181 after confirming AT-180 commit `d3b1b7d` is present.
+- Re-read required docs in scoped snippets before editing:
+  - root README, CONTRIBUTING, and docs map entry rules
+  - downloads README_ARCH/API/FLOW/README_IMPL scheduler and resume boundaries
+  - TauriDownloadRuntimeDesign scheduler/fetcher/writer/verifier/checkpoint ownership
+  - TauriKernelJobsRuntimeDesign module-owned checkpoint and driver registry boundaries
+  - TauriCompositionRootWiringDesign assembly-only composition rules
+  - TauriFirstCrateApiDrafts downloads/composition dependency rules
+  - TauriTestingStrategyAndQualityGateDesign docs-only validation rules
+  - TauriAIDevelopmentTransactionProtocolDesign atomic task/progress/commit rules
+- Read current Rust surfaces:
+  - `crates/module-downloads/src/driver.rs`
+  - `crates/module-downloads/src/facade/mod.rs`
+  - `crates/kernel-jobs/src/runtime.rs`
+  - `crates/composition-root/src/bootstrap.rs`
+- Key finding: current `JobDriver` exposes `restore()` only; README_IMPL must not imply a current `run()` API exists before kernel-jobs defines one.
+- AT-181 is docs-only and will define the driver pending-work consumption boundary before any code slice.
+
+### Session Note: 2026-05-16
+
+- Completed AT-2026-05-16-181.
+- README_IMPL now has section `7.9 Driver Pending-Work Consumption Boundary`.
+- Validation evidence:
+  - readback confirmed 7.9 documents current `JobDriver` as restore-only and keeps `run()` as future design;
+  - readback confirmed the next Rust slice is `DownloadPendingResumeWorkSource` plus job-id-scoped draining on `InMemoryDownloadResumeWorkScheduler`;
+  - scoped `git diff --check` passed with CRLF warnings only;
+  - path-limited `git status --short` showed only AT-181 docs/PWF files.
+- AT-181 did not touch Rust code, SQLite schema, host transport, frontend IPC, fetch/write/verify, checkpoint mutation, or `kernel-jobs` payloads.
+- The next slice is clear enough to start AT-2026-05-16-182 after committing AT-181.
+
 ### Auto Record: 2026-05-16 00:14:04
 - Tool: apply_patch
 - Phase: Phase 44 - Downloads Resume All-Sealed Completion Boundary
@@ -5519,5 +5551,35 @@
   - `.artifacts/ai/active-task.md` (update)
   - `.artifacts/ai/task-plan.md` (update)
   - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-16 21:30:11
+- Tool: apply_patch
+- Phase: Phase 56 - Downloads Driver Pending Work Consumption Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+  - `.artifacts/ai/task-plan.md` (update)
+
+### Auto Record: 2026-05-16 21:30:43
+- Tool: apply_patch
+- Phase: Phase 56 - Downloads Driver Pending Work Consumption Boundary
+- Files:
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (delete)
+
+### Auto Record: 2026-05-16 21:32:02
+- Tool: apply_patch
+- Phase: Phase 56 - Downloads Driver Pending Work Consumption Boundary
+- Files:
+  - `docs/modules/downloads/README_IMPL.md` (update)
+
+### Auto Record: 2026-05-16 21:33:13
+- Tool: apply_patch
+- Phase: Phase 56 - Downloads Driver Pending Work Consumption Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
   - `.artifacts/ai/progress.md` (update)
   - `.artifacts/ai/handoff.md` (update)

@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 55 - Downloads Pending Scheduler Composition Wiring
+Phase 56 - Downloads Driver Pending Work Consumption Boundary
 
 ## Current Focus
 
@@ -472,6 +472,12 @@ Phase 55 - Downloads Pending Scheduler Composition Wiring
 - Atomic tasks: AT-2026-05-16-180
 - **Status:** complete
 
+### Phase 56: Downloads Driver Pending Work Consumption Boundary
+
+- Outcome: define how downloads driver-side execution should consume module-local pending resume work without pretending the current `kernel-jobs` runtime already has a full `run()` execution loop, and identify the next smallest Rust slice if one is safe.
+- Atomic tasks: AT-2026-05-16-181
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -647,7 +653,8 @@ Phase 55 - Downloads Pending Scheduler Composition Wiring
 171. AT-2026-05-16-177 - completed - added a focused all-sealed scheduler guard so already-complete resumes do not touch scheduler/runtime work; committed locally as `31942bd`.
 172. AT-2026-05-16-178 - completed - documented the downloads-owned scheduler execution boundary, pending-work queue/scheduler shell as the next Rust slice, and unchanged out-of-scope fetch/write/verify/persistence/transport surfaces; committed locally as `41c3be4`.
 173. AT-2026-05-16-179 - completed - added a TDD-backed module-local pending resume work queue/scheduler shell behind `DownloadResumeWorkScheduler`, with focused and full downloads module tests passing; committed locally as `4d0c23b`.
-174. AT-2026-05-16-180 - completed - wired `InMemoryDownloadResumeWorkScheduler` into composition-root downloads assembly and proved the smoke path exposes the pending-work scheduler; ready for local commit.
+174. AT-2026-05-16-180 - completed - wired `InMemoryDownloadResumeWorkScheduler` into composition-root downloads assembly and proved the smoke path exposes the pending-work scheduler; committed locally as `d3b1b7d`.
+175. AT-2026-05-16-181 - completed - documented the downloads driver pending-work consumption boundary and identified the next code slice as job-id-scoped pending-work source/drain semantics without widening runtime, transport, frontend, persistence, or concrete IO.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

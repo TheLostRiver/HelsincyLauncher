@@ -579,3 +579,13 @@
 - AT-175 code spec comes from README_IMPL section 7.7: add `DownloadResumeWorkScheduler`, method `schedule_resume_work(&self, job_id, plan)`, no-op `()` implementation, `DownloadModuleDeps` ownership, and crate-entry export.
 - Composition root may receive a placeholder scheduler dependency, but it must remain assembly-only; it must not execute download business orchestration.
 - User comment override remains active: preserve existing English comments and add concise Chinese comments alongside new declaration comments.
+
+## Phase 56 Driver Pending Work Consumption Boundary Findings
+
+- AT-2026-05-16-180 is already committed as `d3b1b7d`; the lingering "ready for local commit" wording in handoff/task-plan was stale recovery text.
+- Required docs were read in scoped snippets before editing: root README, CONTRIBUTING, docs map, downloads ARCH/API/FLOW/README_IMPL, download runtime, kernel-jobs runtime, composition-root wiring, first crate API draft, testing strategy, and AI transaction protocol.
+- `docs/TauriDownloadRuntimeDesign.md` says resume continues by loading checkpoints, validating staging, reconstructing manifest, sealing completed segments, enqueueing remaining segments, then continuing the scheduler loop; frontend must not own segment/checkpoint state.
+- `docs/TauriKernelJobsRuntimeDesign.md` says `kernel-jobs` owns generic lifecycle/snapshot/routing, while downloads owns segment checkpoints, resume reconstruction, planner/scheduler/writer/verifier internals, and business checkpoint writes.
+- Current Rust reality differs from future design sketches: `crates/kernel-jobs/src/runtime.rs` defines `JobDriver` with `module()`, `kind()`, and `restore()` only; there is no `run()` method or execution context yet.
+- `crates/module-downloads/src/facade/mod.rs` already has `InMemoryDownloadResumeWorkScheduler::pending_work()` and `drain_pending_work()`, but directly coupling `DownloadJobDriver` to that concrete type would make tests pass while hardening an internal implementation detail.
+- The next implementation document should prefer a narrow module-local pending-work source/drain boundary that the driver can consume when a documented execution turn exists, while keeping fetch/write/verify, checkpoint mutation, SQLite schema, host transport, frontend, and `kernel-jobs` payloads out of scope.

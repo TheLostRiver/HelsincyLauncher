@@ -2,9 +2,9 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-16-180
-- title: Wire downloads pending resume scheduler in composition root
-- status: completed and ready for the AT-180 local commit
+- task id: AT-2026-05-16-181
+- title: Define downloads driver pending-work consumption boundary
+- status: completed; local commit pending
 
 ## Current In-progress Atomic Task
 
@@ -13,8 +13,6 @@
 ## Current Slice
 
 - `docs/modules/downloads/README_IMPL.md`
-- `crates/composition-root/src/bootstrap.rs`
-- `crates/composition-root/tests/bootstrap_wiring_smoke.rs`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -23,74 +21,27 @@
 
 ## Validation
 
-- Passed for AT-2026-05-16-172:
-  - Required root, docs index, downloads module, runtime, kernel-jobs, crate layout/API, testing, and collaboration docs were read in scoped snippets.
-  - README_IMPL section 7.6 now documents that shared `JobRuntime` receives only job-level enqueue, while resume segment work plans remain downloads-owned.
-  - `resume_partial` and `queue_remaining` are future scheduler work candidates; `seal_completed` and `reject_mismatch` produce no work item.
-  - Scoped `git diff --check` passed for AT-172 files with CRLF warnings only.
-- Passed for AT-2026-05-16-173:
-  - RED test failed on missing work-plan API before production code was added.
-  - Focused work-plan test passed after adding the minimal module-local derivation.
-  - Full `launcher-module-downloads` test suite passed with 18 passed, 0 failed.
-  - README_IMPL records the implemented work-plan derivation and unchanged out-of-scope surfaces.
-  - Scoped `git diff --check` passed for AT-173 files with CRLF warnings only.
-- Passed for AT-2026-05-16-174:
-  - Required docs were read in scoped snippets before editing README_IMPL.
-  - README_IMPL now defines `DownloadResumeWorkScheduler`, call order, failure behavior, and next Rust slice.
-  - Scoped `git diff --check` passed for AT-174 files with CRLF warnings only.
-- Passed for AT-2026-05-16-175:
-  - RED failed on missing `DownloadResumeWorkScheduler`.
-  - Focused scheduler-before-enqueue test passed after implementation.
-  - Full `launcher-module-downloads` suite passed with 19 passed, 0 failed.
-  - Composition `bootstrap_wiring_smoke` passed after placeholder scheduler wiring and stale checkpoint initializer repair.
-  - README_IMPL records implemented scheduler port and next scheduler-failure guard slice.
-- Passed for AT-2026-05-16-176:
-  - RED failed on missing failing scheduler fake behavior.
-  - Focused scheduler-failure guard passed after fake behavior was added.
-  - Full `launcher-module-downloads` suite passed with 20 passed, 0 failed.
-  - README_IMPL records scheduler failures returning before runtime enqueue.
-- Passed for AT-2026-05-16-177:
-  - Focused all-sealed/no-scheduler guard passed.
-  - Full `launcher-module-downloads` suite passed with 21 passed, 0 failed.
-  - README_IMPL records that `AlreadyComplete` resumes do not touch scheduler/runtime work.
-- Passed for AT-2026-05-16-178:
-  - Required README, collaboration, docs index, downloads module docs, implementation guide, download runtime, kernel-jobs runtime, testing strategy, AI transaction protocol, crate API draft, architecture, and composition snippets were read before editing.
-  - README_IMPL now contains section `7.8 Concrete Scheduler Execution Boundary`.
-  - The documented next Rust slice is a module-local pending resume work queue/scheduler shell, not concrete fetch/write/verify execution.
-  - The document keeps SQLite schema, host transport, frontend IPC, and `kernel-jobs` segment payloads out of scope.
-  - Scoped `git diff --check` passed with CRLF warnings only.
-  - Path-limited status confirmed AT-178 files plus the unrelated pre-existing `crates/composition-root/src/startup.rs` formatting side effect.
-- Passed for AT-2026-05-16-179:
-  - Required docs were re-read in scoped snippets before coding.
-  - RED failed on missing `DownloadPendingResumeWork` and `InMemoryDownloadResumeWorkScheduler`.
-  - Focused GREEN passed after adding the in-memory pending-work scheduler shell.
-  - Full `launcher-module-downloads` suite passed with 22 passed, 0 failed.
-  - `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed.
-  - Scoped `git diff --check` passed with CRLF warnings only.
-  - README_IMPL records the implemented pending-work shell and deferred execution/persistence/transport surfaces.
-- Passed for AT-2026-05-16-180:
-  - Required docs were read in scoped snippets before coding.
-  - RED failed because composition still used `resume_scheduler: ()`.
-  - Focused composition smoke passed after wiring `InMemoryDownloadResumeWorkScheduler`.
-  - Full `launcher-composition-root` suite passed with 5 lib tests and 7 integration tests.
-  - `cargo fmt -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed after formatting.
-  - Scoped `git diff --check` passed with CRLF warnings only.
-  - README_IMPL records that composition now wires the in-memory scheduler shell.
+- Required docs and related Rust surfaces have been read in scoped snippets.
+- Confirmed AT-180 commit `d3b1b7d` exists.
+- Confirmed current `kernel-jobs::JobDriver` has no `run()` method yet, so README_IMPL must distinguish future scheduler loop design from current Rust API.
+- README_IMPL section 7.9 now defines `DownloadPendingResumeWorkSource`, job-id-scoped draining, empty queue behavior, failure layering, and the next code slice.
+- Scoped `git diff --check` passed with CRLF warnings only.
+- Path-limited status showed only AT-181 docs/PWF files.
 
 ## Current Git State To Preserve
 
-- Unrelated unstaged/unknown work remains present and must not be committed with AT-2026-05-16-173:
+- Unrelated unstaged/unknown work remains present and must not be committed with AT-2026-05-16-181:
   - `Cargo.lock`
   - `MyEpicLauncher.pen`
   - frontend files under `app/` and `components/`
   - sqlite files under `crates/composition-root/` and `src-tauri/`
   - `.codex` files
   - `src/`
+  - `crates/composition-root/src/startup.rs`
 
 ## Next Resume Point
 
-1. Commit AT-2026-05-16-180.
-2. If continuing scheduler work, reassess README_IMPL to choose driver-side pending-work consumption or a docs-first boundary for that consumption.
-3. Do not implement HTTP fetch, staging writes, verification, SQLite schema, host transport, frontend IPC, checkpoint mutation, or `kernel-jobs` segment payloads unless explicitly scoped.
-4. Preserve unrelated dirty frontend, sqlite, Cargo.lock, `.codex`, `src/`, pen files, and the existing `crates/composition-root/src/startup.rs` formatting side effect.
-5. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.
+1. Commit only AT-181 files.
+2. Start AT-2026-05-16-182 with TDD: add `DownloadPendingResumeWorkSource`, implement job-id-scoped draining on `InMemoryDownloadResumeWorkScheduler`, and test that unrelated pending work is preserved plus empty drains return an empty vector.
+3. Keep `DownloadJobDriver`, `kernel-jobs`, composition wiring, host transport, frontend, SQLite schema, fetch/write/verify, and checkpoint mutation unchanged in AT-182 unless a later task explicitly scopes driver integration.
+4. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.
