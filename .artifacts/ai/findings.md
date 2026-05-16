@@ -549,3 +549,10 @@
 - `kernel-jobs` extension data is only for snapshot summaries, not complete business checkpoint or segment payloads.
 - Downloads integration says the concrete download driver should call planner/scheduler/writer/verifier in `run()`, with business checkpoint writes going back through `DownloadCheckpointRepository`.
 - The next safe implementation slice is module-local: define a downloads-owned resume work plan/payload derived from segment decisions, without touching shared runtime payload, host transport, frontend, SQLite schema, or concrete execution.
+
+## Phase 48 Resume Work Plan Derivation Findings
+
+- Required docs were read in scoped snippets before Rust edits: `README.md`, `CONTRIBUTING.md`, `docs/README.md`, downloads `README_ARCH.md` / `README_API.md` / `README_FLOW.md` / `README_IMPL.md`, `docs/TauriDownloadRuntimeDesign.md`, `docs/TauriBackendCrateLayoutAndUseCaseStubDesign.md`, `docs/TauriFirstCrateApiDrafts.md`, `docs/TauriKernelJobsRuntimeDesign.md`, `docs/TauriTestingStrategyAndQualityGateDesign.md`, `docs/TauriAIDevelopmentTransactionProtocolDesign.md`, and `docs/TauriCodeCommentStandard.md`.
+- `module-downloads` owns resume reconstruction and checkpoint-aware work planning; `kernel-jobs` owns only generic job lifecycle/snapshot/runtime control and must not receive segment plans.
+- AT-173 should add only a pure module-local derivation in `crates/module-downloads/src/facade/mod.rs`: `resume_partial` / `queue_remaining` become work items, while `seal_completed` / `reject_mismatch` produce no work item.
+- User override for comments: preserve existing English comments and add Chinese comments alongside them; new declarations in this slice should use concise bilingual comments.

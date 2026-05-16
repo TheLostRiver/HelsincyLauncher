@@ -2,25 +2,26 @@
 
 ## Identity
 
-- task id: AT-2026-05-16-172
-- title: Document downloads resume scheduler driver payload boundary
+- task id: AT-2026-05-16-173
+- title: Add downloads resume work plan derivation
 - status: completed
 
 ## Goal
 
-在 `docs/modules/downloads/README_IMPL.md` 中把 `resume_partial` / `queue_remaining` 后续如何进入 downloads-owned scheduler/driver 写清楚：shared `JobRuntime` 仍只做 job-level enqueue，segment plan/checkpoint 仍留在 `module-downloads` 内部，下一步 Rust 代码只能先引入模块内的 resume work payload/plan 边界，不能把 segment payload 塞进 `kernel-jobs`、host transport、frontend 或 SQLite schema。
+在 `crates/module-downloads` 内引入最小的 downloads-owned resume work plan/payload 派生：把已经存在的 `resume_partial` / `queue_remaining` 决策转成模块内 scheduler/driver 未来可消费的 work item，同时证明 `seal_completed` 和 `reject_mismatch` 不产生 work item。
 
-本轮只覆盖文档和 PWF：
+本轮只覆盖模块内纯派生和文档/PWF：
 
-- define downloads-owned resume work payload boundary
-- define what runtime enqueue can and cannot carry
-- define how `resume_partial` and `queue_remaining` should be translated for the later scheduler/driver
-- define the next minimal TDD Rust slice
-- keep Rust code, frontend, host transport, SQLite schema, scheduler execution, and `kernel-jobs` payload changes out of scope
+- add focused RED test first
+- add minimal module-local `DownloadResumeWorkPlan` / `DownloadResumeWorkItem` shape
+- derive work items from manifest/checkpoint/decision facts without executing downloads
+- keep scheduler execution, SQLite schema, frontend, host transport, and `kernel-jobs` payload changes out of scope
 
 ## Scope
 
 - in scope:
+  - `crates/module-downloads/src/facade/mod.rs`
+  - `crates/module-downloads/src/lib.rs`
   - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
@@ -28,7 +29,6 @@
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
-  - Rust production code
   - frontend files
   - host transport IPC shape
   - SQLite schema or concrete segment persistence
@@ -38,12 +38,14 @@
 
 ## Allowed Files
 
-1. docs/modules/downloads/README_IMPL.md
-2. .artifacts/ai/active-task.md
-3. .artifacts/ai/task-plan.md
-4. .artifacts/ai/progress.md
-5. .artifacts/ai/findings.md
-6. .artifacts/ai/handoff.md
+1. crates/module-downloads/src/facade/mod.rs
+2. crates/module-downloads/src/lib.rs
+3. docs/modules/downloads/README_IMPL.md
+4. .artifacts/ai/active-task.md
+5. .artifacts/ai/task-plan.md
+6. .artifacts/ai/progress.md
+7. .artifacts/ai/findings.md
+8. .artifacts/ai/handoff.md
 
 ## 控制性文档
 
@@ -63,31 +65,35 @@
 
 ## Hypothesis
 
-- falsifiable local hypothesis: a docs-only implementation guide slice can define the downloads-owned resume work payload boundary precisely enough that the next Rust task can add focused module tests without touching `kernel-jobs`, host transport, frontend, SQLite schema, or concrete scheduler execution.
+- falsifiable local hypothesis: a pure module-local work-plan derivation can turn `resume_partial` and `queue_remaining` decisions into deterministic work items without changing runtime enqueue, `kernel-jobs`, host transport, frontend, SQLite schema, or concrete scheduler execution.
 
 ## Cheap Check
 
-- update README_IMPL, then run scoped doc/Git validation and read back the scheduler/driver payload boundary wording.
+- write one focused failing Rust unit test for mixed resume decisions, then add the smallest module-local derivation and run the focused test.
 
 ## Validation Gate
 
-1. Read required root, docs index, downloads module, download runtime, kernel-jobs runtime, crate layout/API, testing, and collaboration docs before editing README_IMPL.
-2. Update README_IMPL with the scheduler/driver payload boundary and next Rust slice.
+1. Read required root, docs index, downloads module, implementation, download runtime, kernel-jobs runtime, crate layout/API, testing, and collaboration docs before editing Rust.
+2. Add RED test proving `resume_partial` / `queue_remaining` produce work items and `seal_completed` / `reject_mismatch` do not.
 3. Record findings and recovery state in `.artifacts/ai`.
-4. Run scoped `git diff --check` for AT-172 files.
-5. Commit the docs/PWF slice locally without staging unrelated dirty files.
+4. Add minimal production derivation and bilingual comments for new declarations.
+5. Run focused cargo tests and scoped `git diff --check`.
+6. Commit the Rust/docs/PWF slice locally without staging unrelated dirty files.
 
 ## Validation Result
 
 - passed
-- Required root, docs index, downloads module, runtime, kernel-jobs, crate layout/API, testing, and collaboration documents were read in scoped snippets before editing.
-- `docs/modules/downloads/README_IMPL.md` now defines the scheduler/driver payload boundary: shared `JobRuntime` receives only job-level enqueue, while segment work items remain downloads-owned.
-- `resume_partial` and `queue_remaining` map to future downloads-owned work items; `seal_completed` and `reject_mismatch` do not create scheduler work.
-- Scoped `git diff --check` passed for AT-172 files with CRLF warnings only.
-- AT-172 is ready to be included in the local docs/PWF commit.
-- Resume point: start the minimal Rust slice for module-local `DownloadResumeWorkPlan` / `DownloadResumeWorkItem` derivation before any scheduler execution, transport, frontend, SQLite schema, or `kernel-jobs` payload changes.
+- Required root, docs index, downloads module, implementation, runtime, kernel-jobs, crate layout/API, testing, AI transaction, and comment-standard snippets were read before Rust edits.
+- RED test `resume_work_plan_derives_only_partial_and_remaining_items` first failed on missing `build_resume_work_plan` / `DownloadResumeWorkMode`.
+- Minimal GREEN implementation added `DownloadResumeWorkPlan`, `DownloadResumeWorkItem`, `DownloadResumeWorkMode`, and `build_resume_work_plan()` with bilingual declaration comments.
+- `crates/module-downloads/src/lib.rs` re-exports the new work-plan function and types through the crate entry.
+- Focused test passed: `resume_work_plan_derives_only_partial_and_remaining_items` returned 1 passed, 0 failed.
+- Full module test passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` returned 18 passed, 0 failed.
+- Scoped `git diff --check` passed for AT-173 files with CRLF warnings only.
+- Runtime enqueue, concrete scheduler execution, SQLite schema, host transport, frontend, and `kernel-jobs` payloads remain unchanged.
 
 ## Notes
 
-- AT-2026-05-16-171 projected `DownloadResumeOutcome` through host transport.
+- AT-2026-05-16-172 documented the scheduler/driver payload boundary in README_IMPL section 7.6.
 - Direct `origin/main` push remains intentionally skipped without explicit approval.
+- Resume point: next slice should define or introduce the downloads-owned scheduler/driver boundary that will consume `DownloadResumeWorkPlan`, before any concrete fetch/write/verify execution or persistence schema work.

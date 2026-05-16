@@ -192,6 +192,60 @@ impl DownloadResumeSegmentDecision {
     }
 }
 
+/// Module-local resume work mode for the future downloads scheduler/driver.
+/// 面向后续 downloads scheduler/driver 的模块本地恢复工作模式。
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DownloadResumeWorkMode {
+    /// Continue a segment from a validated partial checkpoint.
+    /// 从已校验的部分 checkpoint 继续下载 segment。
+    Partial,
+    /// Start or restart the segment from its manifest offset.
+    /// 从 manifest offset 开始或重新开始下载 segment。
+    FromStart,
+}
+
+/// Module-owned resume work item derived after manifest/checkpoint decisions.
+/// 根据 manifest/checkpoint 决策推导出的 downloads 模块自有恢复工作项。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DownloadResumeWorkItem {
+    /// Stable segment identifier used by the future scheduler route.
+    /// 后续 scheduler 路由使用的稳定 segment 标识。
+    pub segment_id: String,
+    /// Stable logical file identifier guarding against stale checkpoints.
+    /// 用于防止误用陈旧 checkpoint 的稳定逻辑文件标识。
+    pub file_id: String,
+    /// Provider fetch reference kept behind the downloads boundary.
+    /// 保留在 downloads 边界内的 provider 拉取引用。
+    pub source_locator: String,
+    /// Staging-relative output target for the future writer.
+    /// 后续 writer 使用的 staging 相对输出目标。
+    pub write_target: String,
+    /// Optional verifier expectation copied from the manifest segment.
+    /// 从 manifest segment 复制的可选校验期望。
+    pub expected_hash: Option<String>,
+    /// Segment-relative resume offset or manifest start offset, depending on mode.
+    /// 根据模式保存 segment 相对续传偏移或 manifest 起始偏移。
+    pub start_offset: u64,
+    /// Total segment length expected by scheduler and verifier.
+    /// scheduler 与 verifier 期望的 segment 总长度。
+    pub length: u64,
+    /// Whether the future driver should resume partially or start from scratch.
+    /// 后续 driver 应部分续传还是从头开始。
+    pub resume_mode: DownloadResumeWorkMode,
+    /// Module-local checkpoint reference when this item came from a checkpoint.
+    /// 当工作项来自 checkpoint 时保存模块本地 checkpoint 引用。
+    pub checkpoint_ref: Option<String>,
+}
+
+/// Module-local resume work plan that must not be stored in `kernel-jobs`.
+/// 不能存入 `kernel-jobs` 的 downloads 模块本地恢复工作计划。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DownloadResumeWorkPlan {
+    /// Work items that the future downloads scheduler/driver may consume.
+    /// 后续 downloads scheduler/driver 可消费的工作项。
+    pub items: Vec<DownloadResumeWorkItem>,
+}
+
 /// Module-owned outcome for resume planning before host transport projection.
 /// host transport 投影前，downloads 模块自有的恢复规划结果。
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -260,6 +314,64 @@ pub fn build_resume_segment_decisions(
             }
         })
         .collect())
+}
+
+/// Builds the downloads-owned scheduler work plan from resume decisions.
+/// 从恢复决策构建 downloads 自有的 scheduler 工作计划。
+pub fn build_resume_work_plan(
+    manifest: &DownloadManifestPlan,
+    checkpoints: &[DownloadSegmentCheckpointRecord],
+    decisions: &[DownloadResumeSegmentDecision],
+) -> AppResult<DownloadResumeWorkPlan> {
+    let mut items = Vec::new();
+
+    for decision in decisions {
+        let segment = manifest
+            .segments
+            .iter()
+            .find(|segment| segment.segment_id == decision.segment_id)
+            .ok_or_else(|| resume_work_plan_inconsistent(&decision.segment_id, "manifest"))?;
+
+        match decision.action {
+            DownloadResumeSegmentAction::ResumePartial => {
+                let checkpoint = checkpoints
+                    .iter()
+                    .find(|checkpoint| checkpoint.segment_id == decision.segment_id)
+                    .ok_or_else(|| {
+                        resume_work_plan_inconsistent(&decision.segment_id, "checkpoint")
+                    })?;
+
+                items.push(DownloadResumeWorkItem {
+                    segment_id: segment.segment_id.clone(),
+                    file_id: segment.file_id.clone(),
+                    source_locator: segment.source_locator.clone(),
+                    write_target: segment.write_target.clone(),
+                    expected_hash: segment.expected_hash.clone(),
+                    start_offset: checkpoint.downloaded_bytes,
+                    length: segment.length,
+                    resume_mode: DownloadResumeWorkMode::Partial,
+                    checkpoint_ref: Some(checkpoint.segment_id.clone()),
+                });
+            }
+            DownloadResumeSegmentAction::QueueRemaining => {
+                items.push(DownloadResumeWorkItem {
+                    segment_id: segment.segment_id.clone(),
+                    file_id: segment.file_id.clone(),
+                    source_locator: segment.source_locator.clone(),
+                    write_target: segment.write_target.clone(),
+                    expected_hash: segment.expected_hash.clone(),
+                    start_offset: segment.offset,
+                    length: segment.length,
+                    resume_mode: DownloadResumeWorkMode::FromStart,
+                    checkpoint_ref: None,
+                });
+            }
+            DownloadResumeSegmentAction::SealCompleted
+            | DownloadResumeSegmentAction::RejectMismatch => {}
+        }
+    }
+
+    Ok(DownloadResumeWorkPlan { items })
 }
 
 /// 组装 downloads facade 所需的依赖束。
@@ -474,6 +586,18 @@ fn resume_segment_mismatch(job_id: &JobId) -> AppError {
     )
 }
 
+// Reports an impossible resume work-plan input mismatch inside the downloads module.
+// 上报 downloads 模块内部恢复工作计划输入不一致的异常状态。
+fn resume_work_plan_inconsistent(segment_id: &str, missing_source: &str) -> AppError {
+    AppError::new(
+        "DL_RESUME_WORK_PLAN_INCONSISTENT",
+        format!("resume work plan cannot find {missing_source} facts for segment {segment_id}"),
+        false,
+        AppErrorSeverity::Error,
+        CorrelationId::generate(),
+    )
+}
+
 // Keeps the missing-checkpoint branch owned by downloads instead of leaking into runtime.
 // 将缺失 checkpoint 的分支保留在 downloads 域内，避免泄露到 runtime 里猜测。
 fn missing_checkpoint(job_id: &JobId) -> AppError {
@@ -507,10 +631,11 @@ mod tests {
     use crate::driver::{DownloadCheckpointRecord, DownloadCheckpointRepository};
 
     use super::{
-        build_resume_segment_decisions, DownloadFacade, DownloadJobRecord, DownloadJobRecordState,
-        DownloadJobRepository, DownloadManifestPlan, DownloadManifestProviderPort,
-        DownloadManifestSegment, DownloadModuleDeps, DownloadResumeOutcome,
-        DownloadResumeSegmentAction, DownloadStagingObjectStore, DownloadStagingRoot,
+        build_resume_segment_decisions, build_resume_work_plan, DownloadFacade, DownloadJobRecord,
+        DownloadJobRecordState, DownloadJobRepository, DownloadManifestPlan,
+        DownloadManifestProviderPort, DownloadManifestSegment, DownloadModuleDeps,
+        DownloadResumeOutcome, DownloadResumeSegmentAction, DownloadResumeWorkMode,
+        DownloadStagingObjectStore, DownloadStagingRoot,
     };
     use crate::contracts::{
         CancelDownloadRequestDto, PauseDownloadRequestDto, ResumeDownloadRequestDto,
@@ -1324,6 +1449,135 @@ mod tests {
             decisions[0].is_runtime_enqueue_candidate(),
             "remaining segments should be runtime enqueue candidates"
         );
+    }
+
+    #[test]
+    fn resume_work_plan_derives_only_partial_and_remaining_items() {
+        let job_id = JobId::generate();
+        let manifest = DownloadManifestPlan {
+            target_id: "asset-123".into(),
+            segments: vec![
+                DownloadManifestSegment {
+                    segment_id: "segment-sealed".into(),
+                    file_id: "file-1".into(),
+                    offset: 0,
+                    length: 256,
+                    source_locator: "https://example.invalid/file.bin#sealed".into(),
+                    expected_hash: Some("sha256:sealed".into()),
+                    write_target: "file.bin.part-0".into(),
+                },
+                DownloadManifestSegment {
+                    segment_id: "segment-partial".into(),
+                    file_id: "file-1".into(),
+                    offset: 256,
+                    length: 512,
+                    source_locator: "https://example.invalid/file.bin#partial".into(),
+                    expected_hash: Some("sha256:partial".into()),
+                    write_target: "file.bin.part-1".into(),
+                },
+                DownloadManifestSegment {
+                    segment_id: "segment-remaining".into(),
+                    file_id: "file-1".into(),
+                    offset: 768,
+                    length: 1024,
+                    source_locator: "https://example.invalid/file.bin#remaining".into(),
+                    expected_hash: None,
+                    write_target: "file.bin.part-2".into(),
+                },
+                DownloadManifestSegment {
+                    segment_id: "segment-mismatch".into(),
+                    file_id: "file-1".into(),
+                    offset: 1792,
+                    length: 128,
+                    source_locator: "https://example.invalid/file.bin#mismatch".into(),
+                    expected_hash: Some("sha256:mismatch".into()),
+                    write_target: "file.bin.part-3".into(),
+                },
+            ],
+        };
+        let checkpoints = vec![
+            DownloadSegmentCheckpointRecord {
+                job_id: job_id.clone(),
+                segment_id: "segment-sealed".into(),
+                file_id: "file-1".into(),
+                offset: 0,
+                length: 256,
+                downloaded_bytes: 256,
+                status: DownloadSegmentCheckpointStatus::Completed,
+                partial_path: Some("file.bin.part-0".into()),
+                etag: Some("etag-sealed".into()),
+                hash_state_ref: None,
+            },
+            DownloadSegmentCheckpointRecord {
+                job_id: job_id.clone(),
+                segment_id: "segment-partial".into(),
+                file_id: "file-1".into(),
+                offset: 256,
+                length: 512,
+                downloaded_bytes: 128,
+                status: DownloadSegmentCheckpointStatus::InProgress,
+                partial_path: Some("file.bin.part-1".into()),
+                etag: Some("etag-partial".into()),
+                hash_state_ref: Some("hash-partial".into()),
+            },
+            DownloadSegmentCheckpointRecord {
+                job_id,
+                segment_id: "segment-mismatch".into(),
+                file_id: "stale-file".into(),
+                offset: 1792,
+                length: 128,
+                downloaded_bytes: 128,
+                status: DownloadSegmentCheckpointStatus::Completed,
+                partial_path: Some("file.bin.part-3".into()),
+                etag: Some("etag-mismatch".into()),
+                hash_state_ref: None,
+            },
+        ];
+        let decisions = build_resume_segment_decisions(&manifest, &checkpoints)
+            .expect("mixed checkpoint facts should still produce decisions");
+
+        let work_plan = build_resume_work_plan(&manifest, &checkpoints, &decisions)
+            .expect("mixed resume decisions should produce a work plan");
+
+        assert_eq!(
+            work_plan.items.len(),
+            2,
+            "only partial and remaining segments should produce work items"
+        );
+
+        let partial = work_plan
+            .items
+            .iter()
+            .find(|item| item.segment_id == "segment-partial")
+            .expect("partial segment should become a work item");
+        assert_eq!(partial.file_id, "file-1");
+        assert_eq!(
+            partial.source_locator,
+            "https://example.invalid/file.bin#partial"
+        );
+        assert_eq!(partial.write_target, "file.bin.part-1");
+        assert_eq!(partial.expected_hash.as_deref(), Some("sha256:partial"));
+        assert_eq!(partial.start_offset, 128);
+        assert_eq!(partial.length, 512);
+        assert_eq!(partial.resume_mode, DownloadResumeWorkMode::Partial);
+        assert_eq!(partial.checkpoint_ref.as_deref(), Some("segment-partial"));
+
+        let remaining = work_plan
+            .items
+            .iter()
+            .find(|item| item.segment_id == "segment-remaining")
+            .expect("remaining segment should become a work item");
+        assert_eq!(remaining.file_id, "file-1");
+        assert_eq!(
+            remaining.source_locator,
+            "https://example.invalid/file.bin#remaining"
+        );
+        assert_eq!(remaining.write_target, "file.bin.part-2");
+        assert_eq!(remaining.expected_hash, None);
+        assert_eq!(remaining.start_offset, 768);
+        assert_eq!(remaining.length, 1024);
+        assert_eq!(remaining.resume_mode, DownloadResumeWorkMode::FromStart);
+        assert_eq!(remaining.checkpoint_ref, None);
     }
 
     #[test]

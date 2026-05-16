@@ -2,9 +2,9 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-16-172
-- title: Document downloads resume scheduler driver payload boundary
-- status: completed and included in the AT-172 local commit
+- task id: AT-2026-05-16-173
+- title: Add downloads resume work plan derivation
+- status: completed and ready for the AT-173 local commit
 
 ## Current In-progress Atomic Task
 
@@ -13,6 +13,8 @@
 ## Current Slice
 
 - `docs/modules/downloads/README_IMPL.md`
+- `crates/module-downloads/src/facade/mod.rs`
+- `crates/module-downloads/src/lib.rs`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -26,6 +28,12 @@
   - README_IMPL section 7.6 now documents that shared `JobRuntime` receives only job-level enqueue, while resume segment work plans remain downloads-owned.
   - `resume_partial` and `queue_remaining` are future scheduler work candidates; `seal_completed` and `reject_mismatch` produce no work item.
   - Scoped `git diff --check` passed for AT-172 files with CRLF warnings only.
+- Passed for AT-2026-05-16-173:
+  - RED test failed on missing work-plan API before production code was added.
+  - Focused work-plan test passed after adding the minimal module-local derivation.
+  - Full `launcher-module-downloads` test suite passed with 18 passed, 0 failed.
+  - README_IMPL records the implemented work-plan derivation and unchanged out-of-scope surfaces.
+  - Scoped `git diff --check` passed for AT-173 files with CRLF warnings only.
 
 ## Current Git State To Preserve
 
@@ -39,7 +47,7 @@
 
 ## Next Resume Point
 
-1. Start AT-2026-05-16-173 only after reading the required root, architecture, collaboration, downloads module, and README_IMPL documents again.
-2. Implement the minimal module-local `DownloadResumeWorkPlan` / `DownloadResumeWorkItem` derivation under TDD.
-3. Keep frontend, host transport, SQLite schema, scheduler execution, and `kernel-jobs` payload changes out of scope for AT-173.
+1. Start the next slice by reading the required docs again and deciding the downloads-owned scheduler/driver boundary that consumes `DownloadResumeWorkPlan`.
+2. Keep concrete fetch/write/verify execution, persistence schema, host transport, frontend, and `kernel-jobs` payload changes out of scope until that boundary is explicit.
+3. Preserve unrelated dirty frontend, sqlite, Cargo.lock, `.codex`, `src/`, and pen files.
 4. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.

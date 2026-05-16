@@ -13,8 +13,9 @@ pub use driver::{
     DownloadSegmentCheckpointRecord, DownloadSegmentCheckpointStatus,
 };
 pub use facade::{
-    build_resume_segment_decisions, DownloadFacade, DownloadJobRecord, DownloadJobRecordState,
-    DownloadJobRepository, DownloadManifestPlan, DownloadManifestProviderPort,
-    DownloadManifestSegment, DownloadModuleDeps, DownloadResumeSegmentAction,
-    DownloadResumeSegmentDecision,
+    build_resume_segment_decisions, build_resume_work_plan, DownloadFacade, DownloadJobRecord,
+    DownloadJobRecordState, DownloadJobRepository, DownloadManifestPlan,
+    DownloadManifestProviderPort, DownloadManifestSegment, DownloadModuleDeps,
+    DownloadResumeSegmentAction, DownloadResumeSegmentDecision, DownloadResumeWorkItem,
+    DownloadResumeWorkMode, DownloadResumeWorkPlan,
 };

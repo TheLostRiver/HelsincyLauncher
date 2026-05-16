@@ -80,6 +80,7 @@ Implementation truth should move through module facade and ports first. Do not p
 | `resume_download` all-sealed completion boundary | returns module-owned `DownloadResumeOutcome::AlreadyComplete` from `resume_download_outcome` without runtime enqueue | module facade test |
 | downloads resume host projection | maps `DownloadResumeOutcome` to `DownloadResumeOutcomeDto`; `RuntimeAccepted` wraps accepted-job projection and `AlreadyComplete` uses a non-accepted completed outcome | host mapper tests |
 | resume scheduler/driver payload boundary | documented as downloads-owned work plan derived from `resume_partial` / `queue_remaining`, not a `kernel-jobs` extension or transport payload | README_IMPL |
+| resume work plan derivation | derives module-local `DownloadResumeWorkPlan` / `DownloadResumeWorkItem` values from manifest, checkpoints, and resume decisions | module work-plan test |
 | list/get/policy surfaces | not wired yet | future slices |
 
 ---
@@ -314,12 +315,16 @@ This boundary must not:
 4. add SQLite tables or columns;
 5. implement fetch/write/verify scheduler execution.
 
-Next Rust slice:
+Current Rust slice:
 
-1. introduce a module-local `DownloadResumeWorkPlan` / `DownloadResumeWorkItem` shape;
-2. add a pure module test that derives work items from a manifest plus completed/partial/missing checkpoints;
-3. prove `resume_partial` and `queue_remaining` become work items while `seal_completed` and `reject_mismatch` do not;
-4. leave runtime enqueue, concrete scheduler execution, and persistence unchanged in that slice.
+1. `crates/module-downloads/src/facade/mod.rs` defines module-local `DownloadResumeWorkPlan`, `DownloadResumeWorkItem`, and `DownloadResumeWorkMode`.
+2. `build_resume_work_plan()` derives work items from manifest, checkpoint, and decision facts after decision derivation has classified each segment.
+3. `resume_partial` creates a `partial` work item with `start_offset = downloaded_bytes` and a module-local checkpoint reference.
+4. `queue_remaining` creates a `from_start` work item with `start_offset = manifest.offset` and no checkpoint reference.
+5. `seal_completed` and `reject_mismatch` create no work item; mismatch projection still happens before enqueue in `resume_download_outcome()`.
+6. Runtime enqueue, concrete scheduler execution, persistence, host transport, frontend, and `kernel-jobs` payloads remain unchanged.
+
+Later Rust slices should wire this work plan into a downloads-owned scheduler/driver behind the module boundary before adding concrete persistence or host projections.
 
 ---
 

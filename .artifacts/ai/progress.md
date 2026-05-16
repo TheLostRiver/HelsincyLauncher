@@ -4941,7 +4941,108 @@
 - Validation: scoped `git diff --check` passed for AT-172 files with CRLF warnings only; no Rust, frontend, host transport, SQLite schema, scheduler execution, or `kernel-jobs` payload changes were made.
 - Next backend task is AT-2026-05-16-173: read the required docs again, then add a minimal module-local `DownloadResumeWorkPlan` / `DownloadResumeWorkItem` derivation under TDD.
 
+### Agent Record: 2026-05-16 13:40:21 +08:00
+- Started AT-2026-05-16-173 after committing AT-172 as `938179a`.
+- Planned backend-only TDD scope: add a pure downloads-owned resume work plan derivation in `crates/module-downloads/src/facade/mod.rs`, with bilingual comments on new declarations.
+- Explicit exclusions remain scheduler execution, SQLite schema, frontend, host transport, and `kernel-jobs` payload changes.
+
+### Agent Record: 2026-05-16 13:44:30 +08:00
+- Re-read the required root, docs-map, collaboration, downloads module, runtime, crate layout/API, kernel-jobs, testing, AI transaction, and comment-standard snippets before Rust edits.
+- Implementation boundary is now fixed: only derive module-local resume work items in `crates/module-downloads/src/facade/mod.rs`; no scheduler execution, persistence schema, host transport, frontend, or `kernel-jobs` payload change.
+- Next action follows TDD: add the focused RED test first, observe the expected failure, then add minimal production code.
+
+### Agent Record: 2026-05-16 13:49:10 +08:00
+- Added RED test `resume_work_plan_derives_only_partial_and_remaining_items` in `crates/module-downloads/src/facade/mod.rs`.
+- RED result: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_work_plan_derives_only_partial_and_remaining_items` failed with unresolved `build_resume_work_plan` and `DownloadResumeWorkMode`, which is the expected missing feature.
+
+### Agent Record: 2026-05-16 13:53:35 +08:00
+- Added minimal `DownloadResumeWorkPlan`, `DownloadResumeWorkItem`, `DownloadResumeWorkMode`, and `build_resume_work_plan()` implementation in `crates/module-downloads/src/facade/mod.rs`.
+- Synchronized `crates/module-downloads/src/lib.rs` so the crate entry re-exports the new work-plan function and types.
+- Focused GREEN passed: `resume_work_plan_derives_only_partial_and_remaining_items` returned 1 passed, 0 failed.
+- Full module GREEN passed after the crate-entry export update: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` returned 18 passed, 0 failed.
+- Updated `docs/modules/downloads/README_IMPL.md` to record the implemented work-plan derivation and keep scheduler execution, persistence, host transport, frontend, and `kernel-jobs` payload changes out of scope.
+
+### Agent Record: 2026-05-16 13:53:35 +08:00
+- Completed AT-2026-05-16-173 after focused and full module tests passed.
+- Scoped `git diff --check` passed for `crates/module-downloads/src/facade/mod.rs`, `crates/module-downloads/src/lib.rs`, README_IMPL, and PWF files with CRLF warnings only.
+- Next candidate slice: define or introduce the downloads-owned scheduler/driver boundary that consumes `DownloadResumeWorkPlan`, still before concrete fetch/write/verify execution, persistence schema, host transport, frontend, or `kernel-jobs` payload changes.
+
 ### Auto Record: 2026-05-16 13:38:56
+- Tool: apply_patch
+- Phase: Phase 48 - Downloads Resume Work Plan Derivation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-16 13:41:06
+- Tool: apply_patch
+- Phase: Phase 48 - Downloads Resume Work Plan Derivation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-16 13:46:40
+- Tool: apply_patch
+- Phase: Phase 48 - Downloads Resume Work Plan Derivation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-16 13:48:17
+- Tool: apply_patch
+- Phase: Phase 48 - Downloads Resume Work Plan Derivation
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-16 13:48:39
+- Tool: apply_patch
+- Phase: Phase 48 - Downloads Resume Work Plan Derivation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-16 13:49:14
+- Tool: apply_patch
+- Phase: Phase 48 - Downloads Resume Work Plan Derivation
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-16 13:49:55
+- Tool: apply_patch
+- Phase: Phase 48 - Downloads Resume Work Plan Derivation
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-16 13:51:01
+- Tool: apply_patch
+- Phase: Phase 48 - Downloads Resume Work Plan Derivation
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-16 13:51:16
+- Tool: apply_patch
+- Phase: Phase 48 - Downloads Resume Work Plan Derivation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-16 13:52:40
+- Tool: apply_patch
+- Phase: Phase 48 - Downloads Resume Work Plan Derivation
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\lib.rs` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-16 13:53:13
+- Tool: apply_patch
+- Phase: Phase 48 - Downloads Resume Work Plan Derivation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-16 13:54:09
 - Tool: apply_patch
 - Phase: Phase 48 - Downloads Resume Work Plan Derivation
 - Files:
