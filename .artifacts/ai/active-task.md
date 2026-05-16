@@ -2,24 +2,26 @@
 
 ## Identity
 
-- task id: AT-2026-05-16-178
-- title: Document downloads scheduler execution boundary
+- task id: AT-2026-05-16-179
+- title: Add downloads pending resume work scheduler shell
 - status: completed
 
 ## Goal
 
-补上 downloads resume scheduler execution 的实现边界文档：在写任何真实 fetch/write/verify/scheduler execution 代码前，先把 module-owned scheduler 如何消费 `DownloadResumeWorkPlan`、如何继续保持 `kernel-jobs` job-level 边界、以及下一步最小 Rust slice 写清楚。
+实现 downloads 模块本地 pending resume work queue / scheduler shell，让 `DownloadResumeWorkScheduler` 的真实模块内实现可以登记 `DownloadResumeWorkPlan`，并保持登记发生在 shared runtime job-level enqueue 之前。
 
-本轮只覆盖 docs-first boundary：
+本轮只覆盖 TDD-backed module-local shell：
 
-- add a dedicated README_IMPL section for concrete scheduler execution boundaries
-- define ownership split between module facade, downloads scheduler/driver, shared `JobRuntime`, repositories, and future adapters
-- define the next minimal Rust slice after documentation
-- keep actual fetch/write/verify execution, SQLite schema, host transport, frontend, and `kernel-jobs` payload changes out of scope
+- add focused RED test for pending work registration before runtime enqueue
+- add minimal in-memory/module-local scheduler shell behind `DownloadResumeWorkScheduler`
+- keep `DownloadResumeWorkPlan` transient and module-owned
+- keep actual fetch/write/verify execution, checkpoint mutation, SQLite schema, host transport, frontend, and `kernel-jobs` payload changes out of scope
 
 ## Scope
 
 - in scope:
+  - `crates/module-downloads/src/facade/mod.rs`
+  - `crates/module-downloads/src/lib.rs`
   - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
@@ -27,8 +29,8 @@
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
-  - Rust production behavior changes
   - concrete scheduler/fetch/write/verify execution
+  - checkpoint mutation or new checkpoint repository methods
   - frontend files
   - host transport IPC shape
   - SQLite schema or concrete segment persistence
@@ -37,12 +39,14 @@
 
 ## Allowed Files
 
-1. docs/modules/downloads/README_IMPL.md
-2. .artifacts/ai/active-task.md
-3. .artifacts/ai/task-plan.md
-4. .artifacts/ai/progress.md
-5. .artifacts/ai/findings.md
-6. .artifacts/ai/handoff.md
+1. crates/module-downloads/src/facade/mod.rs
+2. crates/module-downloads/src/lib.rs
+3. docs/modules/downloads/README_IMPL.md
+4. .artifacts/ai/active-task.md
+5. .artifacts/ai/task-plan.md
+6. .artifacts/ai/progress.md
+7. .artifacts/ai/findings.md
+8. .artifacts/ai/handoff.md
 
 ## 控制性文档
 
@@ -74,35 +78,42 @@ Related architecture/collaboration docs read in scoped snippets:
 
 ## Hypothesis
 
-- falsifiable local hypothesis: the next safe backend slice is documentation-only because the current README_IMPL explicitly keeps concrete scheduler execution and persistence unchanged until a dedicated scheduler implementation task exists.
+- falsifiable local hypothesis: a minimal module-local scheduler shell can record pending resume work plans before runtime enqueue without touching fetch/write/verify, checkpoint persistence, host transport, frontend, SQLite schema, or `kernel-jobs`.
 
 ## Cheap Check
 
-- docs-only validation: path/reference readback, scoped `git diff --check`, and path-limited `git status --short`.
+- focused RED/GREEN test: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_download_registers_pending_work_before_runtime_enqueue`
 
 ## Validation Gate
 
 1. Read required docs in scoped snippets before editing README_IMPL.
-2. Update README_IMPL with the dedicated scheduler execution implementation boundary.
-3. Update PWF records for AT-178.
-4. Run scoped `git diff --check` over touched files.
-5. Run path-limited `git status --short`.
-6. Commit the docs/PWF slice locally without staging unrelated dirty files.
+2. Write focused RED test for pending resume work registration before runtime enqueue.
+3. Observe the focused test fail for missing scheduler shell API.
+4. Add the minimal module-local scheduler shell and exports.
+5. Update README_IMPL current state and PWF records.
+6. Run focused test and full `launcher-module-downloads` suite.
+7. Run scoped `git diff --check` and path-limited `git status --short`.
+8. Commit only the AT-179 slice locally.
 
 ## Validation Result
 
 - passed
-- Required README, collaboration, docs index, downloads module docs, implementation guide, download runtime, kernel-jobs runtime, testing strategy, AI transaction protocol, crate API draft, architecture, and composition snippets were read before editing README_IMPL.
-- Added README_IMPL section `7.8 Concrete Scheduler Execution Boundary`.
-- The new boundary keeps command-path scheduler preparation separate from future downloads driver/scheduler execution.
-- The documented next Rust slice is a module-local pending resume work queue/scheduler shell, not real fetch/write/verify behavior.
-- Readback found the new implementation-state row, section heading, pending-work boundary, failure layering, and next Rust slice anchors.
-- Scoped `git diff --check` passed for AT-178 files with CRLF warnings only.
-- Path-limited `git status --short` shows only AT-178 files plus the pre-existing unrelated `crates/composition-root/src/startup.rs` formatting side effect.
+- Required README, docs index, CONTRIBUTING, downloads module docs, README_IMPL, download runtime, kernel-jobs runtime, testing strategy, AI transaction protocol, crate API, and composition snippets were read before coding.
+- RED: focused test `resume_download_registers_pending_work_before_runtime_enqueue` failed on missing `DownloadPendingResumeWork` and `InMemoryDownloadResumeWorkScheduler` imports.
+- GREEN: added `DownloadPendingResumeWork` and `InMemoryDownloadResumeWorkScheduler` in `crates/module-downloads/src/facade/mod.rs`.
+- The scheduler shell stores pending work in memory only, implements `DownloadResumeWorkScheduler`, and exposes `pending_work()` / `drain_pending_work()` for later module-owned driver use.
+- Exported the new scheduler shell and pending work type through `crates/module-downloads/src/lib.rs`.
+- Focused test passed: 1 passed, 0 failed.
+- Full `launcher-module-downloads` suite passed: 22 passed, 0 failed.
+- `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed.
+- Scoped `git diff --check` passed for AT-179 files with CRLF warnings only.
+- Path-limited status shows AT-179 files plus the unrelated pre-existing `crates/composition-root/src/startup.rs` formatting side effect.
+- Concrete fetch/write/verify, checkpoint mutation, SQLite schema, host transport, frontend, composition wiring, and `kernel-jobs` payloads remain unchanged.
 
 ## Notes
 
-- AT-2026-05-16-177 committed all-sealed scheduler guard as `31942bd`.
-- User approved starting AT-178 after selecting this docs-first next step.
+- AT-2026-05-16-178 committed scheduler execution boundary docs as `41c3be4`.
+- User approved starting AT-179 with "开始实现".
 - Direct `origin/main` push remains intentionally skipped without explicit approval.
-- Shell note: PowerShell `Select-Object -Index (a..b),(c..d)` failed because the comma expression did not bind as the required `Int32[]`; use `-Skip/-First` or an explicit array next time.
+- Current unrelated worktree state: preserve `crates/composition-root/src/startup.rs` formatting side effect and other unrelated dirty files.
+- Shell note: an `rg` command with nested double quotes failed PowerShell parsing while checking Mutex style; reran the query with single quotes successfully.

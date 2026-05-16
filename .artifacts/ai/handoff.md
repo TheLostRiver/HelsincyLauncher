@@ -2,9 +2,9 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-16-178
-- title: Document downloads scheduler execution boundary
-- status: completed and ready for the AT-178 local commit
+- task id: AT-2026-05-16-179
+- title: Add downloads pending resume work scheduler shell
+- status: completed and ready for the AT-179 local commit
 
 ## Current In-progress Atomic Task
 
@@ -13,6 +13,8 @@
 ## Current Slice
 
 - `docs/modules/downloads/README_IMPL.md`
+- `crates/module-downloads/src/facade/mod.rs`
+- `crates/module-downloads/src/lib.rs`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -58,6 +60,14 @@
   - The document keeps SQLite schema, host transport, frontend IPC, and `kernel-jobs` segment payloads out of scope.
   - Scoped `git diff --check` passed with CRLF warnings only.
   - Path-limited status confirmed AT-178 files plus the unrelated pre-existing `crates/composition-root/src/startup.rs` formatting side effect.
+- Passed for AT-2026-05-16-179:
+  - Required docs were re-read in scoped snippets before coding.
+  - RED failed on missing `DownloadPendingResumeWork` and `InMemoryDownloadResumeWorkScheduler`.
+  - Focused GREEN passed after adding the in-memory pending-work scheduler shell.
+  - Full `launcher-module-downloads` suite passed with 22 passed, 0 failed.
+  - `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed.
+  - Scoped `git diff --check` passed with CRLF warnings only.
+  - README_IMPL records the implemented pending-work shell and deferred execution/persistence/transport surfaces.
 
 ## Current Git State To Preserve
 
@@ -71,8 +81,8 @@
 
 ## Next Resume Point
 
-1. Commit AT-2026-05-16-178.
-2. If continuing backend work, the next documented Rust slice is a module-local pending resume work queue/scheduler shell behind `DownloadResumeWorkScheduler`.
-3. That next Rust slice should prove only pending-work registration before runtime enqueue; it must not implement HTTP fetch, staging writes, verification, SQLite schema, host transport, frontend IPC, or `kernel-jobs` segment payloads.
+1. Commit AT-2026-05-16-179.
+2. If continuing scheduler work, reassess README_IMPL to choose between composition wiring for `InMemoryDownloadResumeWorkScheduler` and driver-side pending-work consumption.
+3. Do not implement HTTP fetch, staging writes, verification, SQLite schema, host transport, frontend IPC, checkpoint mutation, or `kernel-jobs` segment payloads unless explicitly scoped.
 4. Preserve unrelated dirty frontend, sqlite, Cargo.lock, `.codex`, `src/`, pen files, and the existing `crates/composition-root/src/startup.rs` formatting side effect.
 5. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.

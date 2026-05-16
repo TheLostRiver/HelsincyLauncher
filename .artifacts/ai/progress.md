@@ -5408,3 +5408,62 @@
   - `.artifacts/ai/task-plan.md` (update)
   - `.artifacts/ai/progress.md` (update)
   - `.artifacts/ai/handoff.md` (update)
+
+### Session Note: 2026-05-16
+
+- Started AT-2026-05-16-179 after AT-178 commit `41c3be4`.
+- Re-read required docs in scoped snippets before coding:
+  - root README and docs map backend/module guidance
+  - CONTRIBUTING module and verification rules
+  - downloads README_ARCH/API/FLOW/README_IMPL scheduler and resume boundaries
+  - TauriDownloadRuntimeDesign scheduler/fetcher/writer/verifier/checkpoint boundaries
+  - TauriKernelJobsRuntimeDesign module-owned checkpoint and job-level runtime boundaries
+  - TauriTestingStrategyAndQualityGateDesign and TauriAIDevelopmentTransactionProtocolDesign validation/atomic task rules
+  - TauriFirstCrateApiDrafts and TauriCompositionRootWiringDesign module/composition boundaries
+- Current implementation target:
+  - first write a RED test named `resume_download_registers_pending_work_before_runtime_enqueue`;
+  - then add only a minimal module-local pending resume work queue/scheduler shell;
+  - preserve unrelated `crates/composition-root/src/startup.rs` formatting side effect.
+
+### Session Note: 2026-05-16
+
+- Completed AT-2026-05-16-179.
+- TDD evidence:
+  - RED command: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml resume_download_registers_pending_work_before_runtime_enqueue`
+  - RED result: failed with unresolved imports for `DownloadPendingResumeWork` and `InMemoryDownloadResumeWorkScheduler`.
+  - GREEN implementation: added `DownloadPendingResumeWork` and `InMemoryDownloadResumeWorkScheduler`, implemented `DownloadResumeWorkScheduler`, and exported both through the crate entry.
+  - Focused GREEN result: 1 passed, 0 failed.
+  - Full module result: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 22 passed, 0 failed.
+  - Format result: `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed.
+  - Scoped `git diff --check` passed with CRLF warnings only.
+- README_IMPL now records the pending-work shell as implemented while keeping concrete fetch/write/verify, checkpoint mutation, SQLite schema, host transport, frontend, composition wiring, and `kernel-jobs` payloads unchanged.
+- Error encountered and recovered: an `rg` command with nested double quotes failed PowerShell parsing while checking Mutex style; reran with a single-quoted pattern successfully.
+
+### Auto Record: 2026-05-16 20:42:11
+- Tool: apply_patch
+- Phase: Phase 54 - Downloads Pending Resume Work Scheduler Shell
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-16 20:42:49
+- Tool: apply_patch
+- Phase: Phase 54 - Downloads Pending Resume Work Scheduler Shell
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+  - `crates/module-downloads/src/lib.rs` (update)
+
+### Auto Record: 2026-05-16 20:43:32
+- Tool: apply_patch
+- Phase: Phase 54 - Downloads Pending Resume Work Scheduler Shell
+- Files:
+  - `docs/modules/downloads/README_IMPL.md` (update)
+
+### Auto Record: 2026-05-16 20:45:18
+- Tool: apply_patch
+- Phase: Phase 54 - Downloads Pending Resume Work Scheduler Shell
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)

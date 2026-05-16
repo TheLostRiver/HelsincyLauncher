@@ -5,6 +5,8 @@
 //! accepted job，`pause_download` / `cancel_download` 已转接 shared job runtime；
 //! 恢复、查询和策略入口仍保留 `DOWNLOADS_NOT_WIRED` stub 语义。
 
+use std::sync::{Arc, Mutex};
+
 use launcher_kernel_foundation::{AppError, AppErrorSeverity, AppResult, CorrelationId, JobId};
 use launcher_kernel_jobs::{AcceptedJob, EnqueueJobRequest, JobPriority, JobRuntime};
 
@@ -246,6 +248,52 @@ pub struct DownloadResumeWorkPlan {
     pub items: Vec<DownloadResumeWorkItem>,
 }
 
+/// Transient pending resume work registered for a downloads job.
+/// 为 downloads job 登记的瞬时 pending resume work。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DownloadPendingResumeWork {
+    /// Existing downloads job id that owns the pending work.
+    /// 拥有这批 pending work 的既有 downloads job id。
+    pub job_id: JobId,
+    /// Derived resume plan kept inside the downloads module boundary.
+    /// 保留在 downloads 模块边界内的派生恢复计划。
+    pub plan: DownloadResumeWorkPlan,
+}
+
+/// In-memory scheduler shell that registers pending resume work for later driver use.
+/// 为后续 driver 消费登记 pending resume work 的内存态 scheduler 壳。
+#[derive(Debug, Clone, Default)]
+pub struct InMemoryDownloadResumeWorkScheduler {
+    pending_work: Arc<Mutex<Vec<DownloadPendingResumeWork>>>,
+}
+
+impl InMemoryDownloadResumeWorkScheduler {
+    /// Creates an empty pending-work scheduler shell.
+    /// 创建一个空的 pending-work scheduler 壳。
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Returns a snapshot of currently registered pending resume work.
+    /// 返回当前已登记 pending resume work 的快照。
+    pub fn pending_work(&self) -> Vec<DownloadPendingResumeWork> {
+        self.pending_work
+            .lock()
+            .expect("pending resume work mutex should not be poisoned")
+            .clone()
+    }
+
+    /// Drains registered pending resume work for a future module-owned driver loop.
+    /// 为后续模块自有 driver loop 取走已登记的 pending resume work。
+    pub fn drain_pending_work(&self) -> Vec<DownloadPendingResumeWork> {
+        self.pending_work
+            .lock()
+            .expect("pending resume work mutex should not be poisoned")
+            .drain(..)
+            .collect()
+    }
+}
+
 /// Downloads-owned scheduler boundary that prepares resume work before runtime enqueue.
 /// 在 runtime 入队前准备恢复工作的 downloads 自有 scheduler 边界。
 pub trait DownloadResumeWorkScheduler: Send + Sync {
@@ -262,6 +310,21 @@ impl DownloadResumeWorkScheduler for () {
         _job_id: &JobId,
         _plan: &DownloadResumeWorkPlan,
     ) -> AppResult<()> {
+        Ok(())
+    }
+}
+
+impl DownloadResumeWorkScheduler for InMemoryDownloadResumeWorkScheduler {
+    /// Registers the derived work plan without running fetch/write/verify work.
+    /// 只登记派生工作计划，不执行 fetch/write/verify 工作。
+    fn schedule_resume_work(&self, job_id: &JobId, plan: &DownloadResumeWorkPlan) -> AppResult<()> {
+        self.pending_work
+            .lock()
+            .expect("pending resume work mutex should not be poisoned")
+            .push(DownloadPendingResumeWork {
+                job_id: job_id.clone(),
+                plan: plan.clone(),
+            });
         Ok(())
     }
 }
@@ -665,9 +728,9 @@ mod tests {
         build_resume_segment_decisions, build_resume_work_plan, DownloadFacade, DownloadJobRecord,
         DownloadJobRecordState, DownloadJobRepository, DownloadManifestPlan,
         DownloadManifestProviderPort, DownloadManifestSegment, DownloadModuleDeps,
-        DownloadResumeOutcome, DownloadResumeSegmentAction, DownloadResumeWorkMode,
-        DownloadResumeWorkPlan, DownloadResumeWorkScheduler, DownloadStagingObjectStore,
-        DownloadStagingRoot,
+        DownloadPendingResumeWork, DownloadResumeOutcome, DownloadResumeSegmentAction,
+        DownloadResumeWorkMode, DownloadResumeWorkPlan, DownloadResumeWorkScheduler,
+        DownloadStagingObjectStore, DownloadStagingRoot, InMemoryDownloadResumeWorkScheduler,
     };
     use crate::contracts::{
         CancelDownloadRequestDto, PauseDownloadRequestDto, ResumeDownloadRequestDto,
@@ -1038,6 +1101,93 @@ mod tests {
         }
     }
 
+    #[derive(Clone)]
+    struct PendingAwareJobRuntime {
+        resume_scheduler: InMemoryDownloadResumeWorkScheduler,
+        enqueued_requests: Arc<Mutex<Vec<launcher_kernel_jobs::EnqueueJobRequest<()>>>>,
+        pending_seen_at_enqueue: Arc<Mutex<Vec<bool>>>,
+    }
+
+    impl PendingAwareJobRuntime {
+        fn new(resume_scheduler: InMemoryDownloadResumeWorkScheduler) -> Self {
+            Self {
+                resume_scheduler,
+                enqueued_requests: Arc::new(Mutex::new(Vec::new())),
+                pending_seen_at_enqueue: Arc::new(Mutex::new(Vec::new())),
+            }
+        }
+
+        fn enqueued_requests(&self) -> Vec<launcher_kernel_jobs::EnqueueJobRequest<()>> {
+            self.enqueued_requests
+                .lock()
+                .expect("pending-aware enqueued requests mutex should not be poisoned")
+                .clone()
+        }
+
+        fn pending_seen_at_enqueue(&self) -> Vec<bool> {
+            self.pending_seen_at_enqueue
+                .lock()
+                .expect("pending seen at enqueue mutex should not be poisoned")
+                .clone()
+        }
+    }
+
+    impl launcher_kernel_jobs::JobRuntime for PendingAwareJobRuntime {
+        type Extension = ();
+
+        fn enqueue(
+            &self,
+            request: launcher_kernel_jobs::EnqueueJobRequest<Self::Extension>,
+        ) -> AppResult<launcher_kernel_jobs::AcceptedJob> {
+            let pending_work = self.resume_scheduler.pending_work();
+            let pending_seen = pending_work
+                .iter()
+                .any(|work| work.job_id == request.job_id);
+
+            self.pending_seen_at_enqueue
+                .lock()
+                .expect("pending seen at enqueue mutex should not be poisoned")
+                .push(pending_seen);
+            self.enqueued_requests
+                .lock()
+                .expect("pending-aware enqueued requests mutex should not be poisoned")
+                .push(request.clone());
+
+            Ok(launcher_kernel_jobs::AcceptedJob {
+                job_id: request.job_id,
+                module: request.module,
+                kind: request.kind,
+                queued_at: IsoDateTime::now(),
+            })
+        }
+
+        fn snapshot(&self, job_id: &JobId) -> AppResult<Option<JobSnapshot<Self::Extension>>> {
+            Ok(Some(JobSnapshot {
+                job_id: job_id.clone(),
+                module: "downloads".into(),
+                kind: "download".into(),
+                state: JobState::Queued,
+                ui_state: JobUiState::Queued,
+                progress: JobProgress::pending(),
+                recoverable: true,
+                updated_at: IsoDateTime::now(),
+                extension: None,
+            }))
+        }
+
+        fn pause(&self, _job_id: &JobId) -> AppResult<()> {
+            Ok(())
+        }
+
+        fn resume(&self, _job_id: &JobId) -> AppResult<()> {
+            Ok(())
+        }
+
+        fn cancel(&self, _job_id: &JobId) -> AppResult<()> {
+            Ok(())
+        }
+    }
+
     #[test]
     fn start_download_persists_request_metadata_and_enqueue_priority() {
         let job_repo = RecordingDownloadJobRepository::default();
@@ -1380,6 +1530,83 @@ mod tests {
             "segment-remaining"
         );
         assert_eq!(scheduled_plans[0].1.items[1].start_offset, 1024);
+    }
+
+    #[test]
+    fn resume_download_registers_pending_work_before_runtime_enqueue() {
+        let job_id = JobId::generate();
+        let resume_scheduler = InMemoryDownloadResumeWorkScheduler::default();
+        let runtime = PendingAwareJobRuntime::new(resume_scheduler.clone());
+        let facade = DownloadFacade::new(DownloadModuleDeps {
+            job_repo: RecordingDownloadJobRepository::with_job(make_download_job(job_id.clone())),
+            checkpoint_repo: RecordingCheckpointRepository::with_segments(vec![
+                DownloadSegmentCheckpointRecord {
+                    job_id: job_id.clone(),
+                    segment_id: "segment-partial".into(),
+                    file_id: "file-1".into(),
+                    offset: 0,
+                    length: 1024,
+                    downloaded_bytes: 512,
+                    status: DownloadSegmentCheckpointStatus::InProgress,
+                    partial_path: Some("file.bin.part-0".into()),
+                    etag: Some("etag-partial".into()),
+                    hash_state_ref: Some("hash-partial".into()),
+                },
+            ]),
+            manifest_provider: RecordingManifestProvider::with_segments(vec![
+                DownloadManifestSegment {
+                    segment_id: "segment-partial".into(),
+                    file_id: "file-1".into(),
+                    offset: 0,
+                    length: 1024,
+                    source_locator: "https://example.invalid/file.bin#partial".into(),
+                    expected_hash: Some("sha256:partial".into()),
+                    write_target: "file.bin.part-0".into(),
+                },
+                DownloadManifestSegment {
+                    segment_id: "segment-remaining".into(),
+                    file_id: "file-1".into(),
+                    offset: 1024,
+                    length: 2048,
+                    source_locator: "https://example.invalid/file.bin#remaining".into(),
+                    expected_hash: None,
+                    write_target: "file.bin.part-1".into(),
+                },
+            ]),
+            staging_store: RecordingStagingObjectStore::default(),
+            resume_scheduler,
+            job_runtime: runtime.clone(),
+        });
+
+        let outcome = facade
+            .resume_download_outcome(ResumeDownloadRequestDto {
+                job_id: job_id.clone(),
+            })
+            .expect("resume_download_outcome should register pending work before enqueue");
+
+        assert!(
+            matches!(outcome, DownloadResumeOutcome::RuntimeAccepted(_)),
+            "runtime candidates should still enqueue the existing job"
+        );
+        assert_eq!(
+            runtime.pending_seen_at_enqueue(),
+            vec![true],
+            "runtime enqueue should only run after pending resume work is registered"
+        );
+
+        let pending_work: Vec<DownloadPendingResumeWork> =
+            facade.deps().resume_scheduler.pending_work();
+        assert_eq!(pending_work.len(), 1);
+        assert_eq!(pending_work[0].job_id, job_id);
+        assert_eq!(pending_work[0].plan.items.len(), 2);
+        assert_eq!(pending_work[0].plan.items[0].segment_id, "segment-partial");
+        assert_eq!(pending_work[0].plan.items[0].start_offset, 512);
+        assert_eq!(
+            pending_work[0].plan.items[1].segment_id,
+            "segment-remaining"
+        );
+        assert_eq!(pending_work[0].plan.items[1].start_offset, 1024);
+        assert_eq!(runtime.enqueued_requests().len(), 1);
     }
 
     #[test]

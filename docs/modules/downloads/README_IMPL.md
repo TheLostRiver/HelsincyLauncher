@@ -82,7 +82,7 @@ Implementation truth should move through module facade and ports first. Do not p
 | resume scheduler/driver payload boundary | documented as downloads-owned work plan derived from `resume_partial` / `queue_remaining`, not a `kernel-jobs` extension or transport payload | README_IMPL |
 | resume work plan derivation | derives module-local `DownloadResumeWorkPlan` / `DownloadResumeWorkItem` values from manifest, checkpoints, and resume decisions | module work-plan test |
 | resume scheduler/driver consumer boundary | `DownloadResumeWorkScheduler` consumes `DownloadResumeWorkPlan` before job-level runtime enqueue; composition currently uses the no-op placeholder | module facade tests + composition smoke |
-| resume scheduler execution boundary | documented as a downloads-owned pending-work/driver execution split; no fetch/write/verify or persistence behavior is wired yet | README_IMPL |
+| resume scheduler execution shell | module-local `InMemoryDownloadResumeWorkScheduler` records pending `DownloadResumeWorkPlan` values before runtime enqueue; no fetch/write/verify or persistence behavior is wired yet | module facade test |
 | list/get/policy surfaces | not wired yet | future slices |
 
 ---
@@ -384,7 +384,7 @@ Next Rust slice:
 
 ### 7.8 Concrete Scheduler Execution Boundary
 
-`DownloadResumeWorkScheduler` is currently a preparation boundary. It consumes a module-owned `DownloadResumeWorkPlan` before job-level runtime enqueue, but it must not turn the command path into the place where segment fetch, file write, or verification work runs.
+`DownloadResumeWorkScheduler` is a preparation boundary. It consumes a module-owned `DownloadResumeWorkPlan` before job-level runtime enqueue, but it must not turn the command path into the place where segment fetch, file write, or verification work runs.
 
 The implementation split should be:
 
@@ -396,22 +396,23 @@ The implementation split should be:
 | shared `JobRuntime` | job id, queue/lease/snapshot lifecycle, pause/cancel control, driver routing by module/kind | segment plan, checkpoint bytes, provider source locator, work item persistence |
 | checkpoint repository | persisted business checkpoint facts that allow resume reconstruction | transient scheduler queue state as source-of-truth |
 
-The next concrete scheduler implementation should therefore start with a module-local pending-work boundary, not with real HTTP or disk IO.
+The first concrete scheduler shell therefore starts with a module-local pending-work boundary, not with real HTTP or disk IO.
 
 Minimum future Rust shape:
 
-1. add a downloads-owned pending resume work queue/store boundary behind `DownloadResumeWorkScheduler`;
-2. keep `DownloadResumeWorkPlan` as transient derived work, not authoritative persistence;
-3. make the scheduler implementation register the plan for the existing job id and return before shared runtime enqueue proceeds;
-4. make the future downloads driver/scheduler loop consume the registered plan during `run()` or an equivalent module-owned execution turn;
-5. keep `()` as the composition placeholder until a separate wiring task explicitly swaps in the real scheduler implementation.
+1. a downloads-owned pending resume work queue/store boundary exists behind `DownloadResumeWorkScheduler`;
+2. `DownloadResumeWorkPlan` remains transient derived work, not authoritative persistence;
+3. the scheduler implementation registers the plan for the existing job id and returns before shared runtime enqueue proceeds;
+4. the future downloads driver/scheduler loop can consume the registered plan during `run()` or an equivalent module-owned execution turn;
+5. `()` remains the composition placeholder until a separate wiring task explicitly swaps in the real scheduler implementation.
 
-The first Rust slice after this document should prove only pending-work registration:
+Current Rust slice:
 
-1. RED: a focused module test shows a concrete scheduler shell records the job id and derived work plan before runtime enqueue;
-2. GREEN: add the minimal module-local queue/scheduler shell without fetcher, writer, verifier, SQLite schema, host transport, or frontend changes;
-3. guard: queue/scheduler registration failure returns before runtime enqueue, preserving the current scheduler-failure rule;
-4. validation: focused module test, full `launcher-module-downloads` test, scoped `git diff --check`.
+1. `DownloadPendingResumeWork` records an existing `JobId` plus its derived `DownloadResumeWorkPlan`.
+2. `InMemoryDownloadResumeWorkScheduler` implements `DownloadResumeWorkScheduler`.
+3. The shell stores pending work in memory only and exposes `pending_work()` plus `drain_pending_work()` for later module-owned driver use.
+4. The focused module test proves shared runtime enqueue observes pending work already registered for the job id.
+5. Fetcher, writer, verifier, checkpoint mutation, SQLite schema, host transport, frontend IPC, composition wiring, and `kernel-jobs` payloads remain unchanged.
 
 This execution boundary still must not:
 
@@ -432,9 +433,9 @@ Failure behavior remains layered:
 
 Next Rust slice:
 
-1. implement the module-local pending resume work queue/scheduler shell described above;
+1. reassess whether the next smallest scheduler slice is composition wiring for `InMemoryDownloadResumeWorkScheduler` or driver-side pending-work consumption;
 2. keep concrete fetch/write/verify and checkpoint mutation deferred;
-3. keep composition-root, host transport, frontend, SQLite schema, and `kernel-jobs` payloads unchanged unless that slice explicitly scopes them.
+3. keep host transport, frontend, SQLite schema, and `kernel-jobs` payloads unchanged unless that slice explicitly scopes them.
 
 ---
 
