@@ -3,6 +3,8 @@ use std::sync::Arc;
 use launcher_kernel_foundation::{AppResult, JobId};
 use launcher_kernel_jobs::{JobDriver, JobSnapshot, RestoreDisposition};
 
+use crate::facade::{DownloadPendingResumeWork, DownloadPendingResumeWorkSource};
+
 /// 持久化下载 checkpoint 的最小记录。
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DownloadCheckpointRecord {
@@ -93,12 +95,35 @@ pub trait DownloadCheckpointRepository: Send + Sync {
 #[derive(Clone)]
 pub struct DownloadJobDriver {
     checkpoint_repo: Arc<dyn DownloadCheckpointRepository>,
+    pending_resume_work_source: Arc<dyn DownloadPendingResumeWorkSource>,
 }
 
 impl DownloadJobDriver {
     /// 用共享的 checkpoint 仓储能力创建下载恢复驱动。
     pub fn new(checkpoint_repo: Arc<dyn DownloadCheckpointRepository>) -> Self {
-        Self { checkpoint_repo }
+        Self::with_pending_resume_work_source(checkpoint_repo, Arc::new(()))
+    }
+
+    /// Creates a download driver with an injected pending-work source for future execution turns.
+    /// 使用注入的 pending-work source 创建下载 driver，供后续执行 turn 消费。
+    pub fn with_pending_resume_work_source(
+        checkpoint_repo: Arc<dyn DownloadCheckpointRepository>,
+        pending_resume_work_source: Arc<dyn DownloadPendingResumeWorkSource>,
+    ) -> Self {
+        Self {
+            checkpoint_repo,
+            pending_resume_work_source,
+        }
+    }
+
+    /// Drains pending resume work for a job without running fetch/write/verify logic.
+    /// 只取走指定 job 的 pending resume work，不执行 fetch/write/verify 逻辑。
+    pub fn drain_pending_resume_work(
+        &self,
+        job_id: &JobId,
+    ) -> AppResult<Vec<DownloadPendingResumeWork>> {
+        self.pending_resume_work_source
+            .drain_pending_resume_work(job_id)
     }
 }
 
@@ -132,6 +157,11 @@ mod tests {
 
     use launcher_kernel_foundation::{IsoDateTime, JobId};
     use launcher_kernel_jobs::{JobDriver, JobProgress, JobState, JobUiState};
+
+    use crate::facade::{
+        DownloadPendingResumeWork, DownloadResumeWorkItem, DownloadResumeWorkMode,
+        DownloadResumeWorkPlan, DownloadResumeWorkScheduler, InMemoryDownloadResumeWorkScheduler,
+    };
 
     use super::{DownloadCheckpointRecord, DownloadCheckpointRepository, DownloadJobDriver};
 
@@ -180,6 +210,22 @@ mod tests {
         }
     }
 
+    fn make_resume_work_plan(segment_id: &str) -> DownloadResumeWorkPlan {
+        DownloadResumeWorkPlan {
+            items: vec![DownloadResumeWorkItem {
+                segment_id: segment_id.into(),
+                file_id: "file-1".into(),
+                source_locator: format!("https://example.invalid/{segment_id}"),
+                write_target: format!("{segment_id}.part"),
+                expected_hash: None,
+                start_offset: 0,
+                length: 1024,
+                resume_mode: DownloadResumeWorkMode::FromStart,
+                checkpoint_ref: None,
+            }],
+        }
+    }
+
     #[test]
     fn restore_returns_failed_when_checkpoint_is_missing() {
         let repo = Arc::new(InMemoryCheckpointRepository::default());
@@ -216,6 +262,46 @@ mod tests {
             disposition,
             launcher_kernel_jobs::RestoreDisposition::Resumed,
             "persisted checkpoint should keep the queued download resumable"
+        );
+    }
+
+    #[test]
+    fn download_job_driver_pending_resume_work_drains_from_injected_source() {
+        let repo = Arc::new(InMemoryCheckpointRepository::default());
+        let scheduler = InMemoryDownloadResumeWorkScheduler::new();
+        let job_id = JobId::generate();
+        let plan = make_resume_work_plan("segment-driver");
+        let driver =
+            DownloadJobDriver::with_pending_resume_work_source(repo, Arc::new(scheduler.clone()));
+
+        scheduler
+            .schedule_resume_work(&job_id, &plan)
+            .expect("scheduling pending work for the driver should succeed");
+
+        let drained = driver
+            .drain_pending_resume_work(&job_id)
+            .expect("driver local pending-work consumer should delegate to the source");
+
+        assert_eq!(drained, vec![DownloadPendingResumeWork { job_id, plan }]);
+        assert!(
+            scheduler.pending_work().is_empty(),
+            "driver drain should consume the source work for the job"
+        );
+    }
+
+    #[test]
+    fn download_job_driver_pending_resume_work_default_source_returns_empty() {
+        let repo = Arc::new(InMemoryCheckpointRepository::default());
+        let driver = DownloadJobDriver::new(repo);
+        let job_id = JobId::generate();
+
+        let drained = driver
+            .drain_pending_resume_work(&job_id)
+            .expect("default pending-work source should not fail");
+
+        assert!(
+            drained.is_empty(),
+            "default driver constructor should expose an empty pending-work source"
         );
     }
 }

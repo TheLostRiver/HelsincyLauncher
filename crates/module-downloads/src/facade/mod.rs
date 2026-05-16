@@ -305,6 +305,17 @@ pub trait DownloadPendingResumeWorkSource: Send + Sync {
     ) -> AppResult<Vec<DownloadPendingResumeWork>>;
 }
 
+impl DownloadPendingResumeWorkSource for () {
+    /// Keeps driver construction compatible until a real pending-work source is wired.
+    /// 在真实 pending-work source 接入前保持 driver 构造兼容。
+    fn drain_pending_resume_work(
+        &self,
+        _job_id: &JobId,
+    ) -> AppResult<Vec<DownloadPendingResumeWork>> {
+        Ok(Vec::new())
+    }
+}
+
 impl DownloadPendingResumeWorkSource for InMemoryDownloadResumeWorkScheduler {
     /// Drains only the requested job's pending work without running download IO.
     /// 只取走指定 job 的 pending work，不执行下载 IO。

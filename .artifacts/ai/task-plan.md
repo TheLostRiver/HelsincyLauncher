@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 58 - DownloadJobDriver Local Pending Work Consumer Boundary
+Phase 59 - DownloadJobDriver Local Pending Work Consumer
 
 ## Current Focus
 
@@ -490,6 +490,12 @@ Phase 58 - DownloadJobDriver Local Pending Work Consumer Boundary
 - Atomic tasks: AT-2026-05-16-183
 - **Status:** complete
 
+### Phase 59: DownloadJobDriver Local Pending Work Consumer
+
+- Outcome: add the TDD-backed local `DownloadJobDriver` pending-work consumer method and injected source constructor while preserving restore/runtime/composition/IO behavior.
+- Atomic tasks: AT-2026-05-16-184
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -669,6 +675,7 @@ Phase 58 - DownloadJobDriver Local Pending Work Consumer Boundary
 175. AT-2026-05-16-181 - completed - documented the downloads driver pending-work consumption boundary and identified the next code slice as job-id-scoped pending-work source/drain semantics without widening runtime, transport, frontend, persistence, or concrete IO.
 176. AT-2026-05-16-182 - completed - added a TDD-backed pending resume work source/drain boundary for module-local job-scoped consumption without driver/runtime/transport/frontend/persistence changes.
 177. AT-2026-05-16-183 - completed - documented the `DownloadJobDriver` local pending-work consumer boundary and defined AT-184 as a TDD-backed local consumer method without changing shared runtime execution semantics.
+178. AT-2026-05-16-184 - completed - implementation and validation passed; ready for local commit after approval recovered.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

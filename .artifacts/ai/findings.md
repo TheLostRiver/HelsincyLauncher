@@ -607,3 +607,13 @@
 - README_IMPL now defines a local driver consumer method boundary: keep `restore()` unchanged, add `with_pending_resume_work_source(...)`, and add a local `drain_pending_resume_work(&JobId)` delegating to `DownloadPendingResumeWorkSource`.
 - The default constructor must stay compatible by using a no-op source that returns an empty vector, so current composition and restore tests do not need to wire the real scheduler yet.
 - AT-184 can code this local driver method with focused driver tests while still deferring composition sharing, fetch/write/verify, checkpoint mutation, SQLite schema, host transport, frontend, and `kernel-jobs` API changes.
+
+## Phase 59 DownloadJobDriver Local Consumer Findings
+
+- AT-2026-05-16-183 committed as `17402bc` and documented the local driver consumer boundary.
+- The RED driver test failed on missing `with_pending_resume_work_source(...)` and `drain_pending_resume_work(...)`, proving the test exercised new API surface.
+- A no-op `DownloadPendingResumeWorkSource` implementation for `()` lets `DownloadJobDriver::new(checkpoint_repo)` remain compatible with existing composition and restore tests.
+- The injected constructor lets tests and later composition pass the real in-memory scheduler source without changing shared runtime execution semantics in this slice.
+- The local driver drain method delegates to the source only; it does not fetch, write, verify, read or mutate checkpoints, mutate snapshots, complete jobs, publish events, or alter `restore()`.
+- Full downloads module tests passed with 26 unit tests after formatting, so existing restore/facade behavior stayed intact.
+- The next likely slice is composition-level shared scheduler/source wiring, but it should be reassessed from README_IMPL before coding.

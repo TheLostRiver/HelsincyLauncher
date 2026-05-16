@@ -13,6 +13,8 @@
 ## Current Slice
 
 - `docs/modules/downloads/README_IMPL.md`
+- `crates/module-downloads/src/facade/mod.rs`
+- `crates/module-downloads/src/driver.rs`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -38,6 +40,14 @@
   - The section preserves `restore()` semantics and current `new(checkpoint_repo)` compatibility.
   - Scoped `git diff --check` passed with CRLF warnings only.
   - Path-limited status showed only AT-183 docs/PWF files.
+- Pending for AT-184: RED driver test, implementation, focused/full module tests, format check, scoped diff check, and commit.
+- AT-184 RED failed on missing driver local consumer API.
+- AT-184 focused GREEN passed: 2 driver pending-work consumer tests passed.
+- Full `launcher-module-downloads` suite passed: 26 unit tests passed, 0 failed; doc tests 0.
+- `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed after applying `cargo fmt`.
+- Scoped `git diff --check` passed with CRLF warnings only.
+- Previous status/commit blocker cleared after approval recovered.
+- Path-limited status showed only AT-184 files and scoped `git diff --check` passed with CRLF warnings only.
 
 ## Current Git State To Preserve
 
@@ -52,12 +62,9 @@
 
 ## Next Resume Point
 
-1. Commit only AT-183 files.
-2. Start AT-2026-05-16-184 with TDD:
-   - add no-op `DownloadPendingResumeWorkSource` implementation for `()`;
-   - add a pending source field to `DownloadJobDriver`;
-   - preserve `DownloadJobDriver::new(checkpoint_repo)` by wiring no-op source;
-   - add `with_pending_resume_work_source(...)`;
-   - add local `drain_pending_resume_work(&JobId)` and focused driver tests.
-3. Keep `kernel-jobs`, composition wiring, host transport, frontend, SQLite schema, fetch/write/verify, snapshot mutation, and checkpoint mutation unchanged.
+1. Commit only AT-184 files.
+2. Reassess README_IMPL 7.10 for the next slice:
+   - likely composition-level wiring to share one `InMemoryDownloadResumeWorkScheduler` between the facade scheduler path and the driver source path;
+   - if the wiring scope is unclear, document it first before coding.
+3. Keep `kernel-jobs`, host transport, frontend, SQLite schema, fetch/write/verify, snapshot mutation, and checkpoint mutation unchanged unless the next task explicitly scopes them.
 4. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.

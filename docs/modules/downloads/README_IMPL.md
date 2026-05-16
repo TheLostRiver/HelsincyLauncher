@@ -537,15 +537,21 @@ Method rules:
 2. restore must not drain in-memory pending work because stage-2 may run after process restart;
 3. restore returning `RestoreDisposition::Resumed` only means checkpoint facts are recoverable, not that segment work has executed.
 
+Current Rust slice:
+
+1. `()` implements `DownloadPendingResumeWorkSource` as an empty no-op source.
+2. `DownloadJobDriver` owns a pending-work source field.
+3. `DownloadJobDriver::new(checkpoint_repo)` stays compatible by wiring the no-op source.
+4. `DownloadJobDriver::with_pending_resume_work_source(...)` allows focused tests and future composition wiring to inject a real source.
+5. `DownloadJobDriver::drain_pending_resume_work(&JobId)` delegates to the source and does not execute download IO.
+6. Focused driver tests prove the injected source drains work and the default constructor returns an empty drain.
+7. keep `kernel-jobs`, composition-root, host transport, frontend, SQLite schema, fetch/write/verify, snapshot mutation, and checkpoint mutation unchanged.
+
 Next Rust slice:
 
-1. add a no-op `DownloadPendingResumeWorkSource` implementation for `()`;
-2. add a pending-work source field to `DownloadJobDriver`;
-3. keep `DownloadJobDriver::new(checkpoint_repo)` compatible by wiring the no-op source;
-4. add `DownloadJobDriver::with_pending_resume_work_source(...)`;
-5. add `DownloadJobDriver::drain_pending_resume_work(&JobId)`;
-6. add focused driver tests proving the injected source drains work and the default constructor returns an empty drain;
-7. keep `kernel-jobs`, composition-root, host transport, frontend, SQLite schema, fetch/write/verify, snapshot mutation, and checkpoint mutation unchanged.
+1. reassess whether the next step is composition wiring that shares the same `InMemoryDownloadResumeWorkScheduler` between facade and driver, or a docs-first boundary for that wiring;
+2. do not start fetch/write/verify execution until the shared scheduler/source wiring and checkpoint mutation boundary are explicit;
+3. keep `kernel-jobs`, host transport, frontend, SQLite schema, snapshot mutation, and checkpoint mutation unchanged unless a later task explicitly scopes them.
 
 ---
 
