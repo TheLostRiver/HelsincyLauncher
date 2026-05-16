@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 62 - Downloads Checkpoint Mutation Boundary
+Phase 63 - Downloads SQLite Segment Checkpoint Persistence
 
 ## Current Focus
 
@@ -514,6 +514,12 @@ Phase 62 - Downloads Checkpoint Mutation Boundary
 - Atomic tasks: AT-2026-05-16-187
 - **Status:** complete
 
+### Phase 63: Downloads SQLite Segment Checkpoint Persistence
+
+- Outcome: persist and load `DownloadSegmentCheckpointRecord` facts through `SqliteDownloadCheckpointRepository` with focused TDD, without opening driver execution, concrete IO, runtime completion, host transport, or frontend projection.
+- Atomic tasks: AT-2026-05-16-188
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -697,6 +703,7 @@ Phase 62 - Downloads Checkpoint Mutation Boundary
 179. AT-2026-05-16-185 - completed - documented the composition shared scheduler/source wiring boundary before touching composition-root Rust code.
 180. AT-2026-05-16-186 - completed - wired the shared downloads resume scheduler/source through composition-root with focused TDD and committed locally.
 181. AT-2026-05-16-187 - completed - documented the downloads checkpoint mutation boundary and next segment-checkpoint persistence slice, then committed locally.
+182. AT-2026-05-16-188 - completed - persisted downloads segment checkpoint facts through `SqliteDownloadCheckpointRepository` with focused TDD, then committed locally.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

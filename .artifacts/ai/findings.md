@@ -648,3 +648,15 @@
 - `docs/TauriRepositoryPortsAndAdapterDesign.md` says modules access SQLite only through repository ports, SQLite adapters own SQL/transactions/mapping, and cross-medium consistency relies on state machine + checkpoint + retry/compensation rather than distributed transactions.
 - Current Rust still has a richer `DownloadCheckpointRecord` / `DownloadSegmentCheckpointRecord` shape than the SQLite adapter persists; the adapter currently only stores enough job-level checkpoint presence for restore.
 - The next Rust slice should therefore be segment-checkpoint persistence in the repository/adapter boundary, not driver fetch/write/verify execution.
+
+## Phase 63 Downloads SQLite Segment Checkpoint Persistence Findings
+
+- AT-2026-05-16-187 committed locally as `95cf6fa`.
+- README_IMPL 7.12 defines the next Rust slice as focused tests proving `SqliteDownloadCheckpointRepository::save(...)` and `load(...)` round-trip segment checkpoint facts.
+- Current `SqliteDownloadCheckpointRepository::ensure_table()` creates only `download_job_checkpoints(job_id)`.
+- Current `save_checkpoint()` inserts only job id; current `load_checkpoint()` returns `DownloadCheckpointRecord::empty(job_id)`, discarding segment facts.
+- The first RED test should assert full round-trip of `DownloadSegmentCheckpointRecord`, including status and nullable `partial_path`, `etag`, and `hash_state_ref`.
+- RED failed exactly on segment loss: load returned the saved job id with an empty segment list.
+- The implementation stores segment records in a job-scoped `download_segment_checkpoints` table and replaces one job's segment rows in the same transaction as the job checkpoint upsert.
+- Offset, length, and downloaded byte counts are stored as text for now to preserve the Rust `u64` contract without forcing signed SQLite narrowing.
+- This slice remains persistence-only; no driver execution, runtime completion, transport, frontend, composition public API, fetch/write/verify, or DTO shape changed.

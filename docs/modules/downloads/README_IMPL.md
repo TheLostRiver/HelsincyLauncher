@@ -648,6 +648,15 @@ Next Rust slice:
 3. avoid changing driver execution, runtime `JobDriver`, host transport, frontend, composition public API, concrete fetch/write/verify, snapshot completion, or public error DTOs;
 4. run adapter/module-level tests plus scoped diff checks before committing.
 
+Current Rust slice:
+
+1. `SqliteDownloadCheckpointRepository` now creates `download_segment_checkpoints` alongside the job-level checkpoint table.
+2. `save_checkpoint(...)` replaces one job's segment facts in a transaction after upserting the job checkpoint row.
+3. `load_checkpoint(...)` returns the persisted `DownloadSegmentCheckpointRecord` list in saved order instead of always returning an empty checkpoint.
+4. Segment status and nullable `partial_path` / `etag` / `hash_state_ref` round-trip through adapter-local row mapping.
+5. `u64` offset/length/downloaded byte facts are stored as text in this first slice so SQLite's signed integer limit does not narrow the Rust contract.
+6. Focused adapter coverage proves segment facts round-trip; driver execution, runtime completion, host transport, frontend, composition public API, fetch/write/verify, and public DTOs remain unchanged.
+
 Only after segment checkpoint facts are durable should a later slice start consuming pending work to perform concrete fetch/write/verify behavior.
 
 ---

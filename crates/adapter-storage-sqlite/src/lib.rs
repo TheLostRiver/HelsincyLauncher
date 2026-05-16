@@ -8,10 +8,13 @@ use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
 use launcher_kernel_foundation::{AppResult, AssetId, IsoDateTime, JobId, PageSlice};
-use launcher_kernel_jobs::{JobPriority, JobProgress, JobSnapshot, JobSnapshotStore, JobState, JobUiState};
+use launcher_kernel_jobs::{
+    JobPriority, JobProgress, JobSnapshot, JobSnapshotStore, JobState, JobUiState,
+};
 use launcher_module_downloads::{
     DownloadCheckpointRecord, DownloadCheckpointRepository, DownloadJobRecord,
-    DownloadJobRecordState, DownloadJobRepository,
+    DownloadJobRecordState, DownloadJobRepository, DownloadSegmentCheckpointRecord,
+    DownloadSegmentCheckpointStatus,
 };
 use launcher_module_fab::{
     contracts::{FabAssetDetailDto, FabInventoryListQueryDto},
@@ -61,7 +64,10 @@ impl FabInventoryProjectionRepository for SqliteFabInventoryProjectionRepository
         Ok(PageSlice::new(Vec::new(), None))
     }
 
-    fn get_asset_detail_snapshot(&self, _asset_id: &AssetId) -> AppResult<Option<FabAssetDetailDto>> {
+    fn get_asset_detail_snapshot(
+        &self,
+        _asset_id: &AssetId,
+    ) -> AppResult<Option<FabAssetDetailDto>> {
         Ok(None)
     }
 }
@@ -134,13 +140,15 @@ impl SqliteDownloadJobRepository {
                 state TEXT NOT NULL
             );",
         )
-        .map_err(|e| launcher_kernel_foundation::AppError::new(
-            "SQLITE_WRITE_ERROR",
-            format!("download_jobs table init failed: {e}"),
-            false,
-            launcher_kernel_foundation::AppErrorSeverity::Warning,
-            launcher_kernel_foundation::CorrelationId::generate(),
-        ))?;
+        .map_err(|e| {
+            launcher_kernel_foundation::AppError::new(
+                "SQLITE_WRITE_ERROR",
+                format!("download_jobs table init failed: {e}"),
+                false,
+                launcher_kernel_foundation::AppErrorSeverity::Warning,
+                launcher_kernel_foundation::CorrelationId::generate(),
+            )
+        })?;
         Ok(())
     }
 
@@ -165,71 +173,87 @@ impl SqliteDownloadJobRepository {
                  FROM download_jobs
                  WHERE job_id = ?1",
             )
-            .map_err(|e| launcher_kernel_foundation::AppError::new(
-                "SQLITE_READ_ERROR",
-                format!("failed to prepare download job select: {e}"),
-                false,
-                launcher_kernel_foundation::AppErrorSeverity::Warning,
-                launcher_kernel_foundation::CorrelationId::generate(),
-            ))?;
+            .map_err(|e| {
+                launcher_kernel_foundation::AppError::new(
+                    "SQLITE_READ_ERROR",
+                    format!("failed to prepare download job select: {e}"),
+                    false,
+                    launcher_kernel_foundation::AppErrorSeverity::Warning,
+                    launcher_kernel_foundation::CorrelationId::generate(),
+                )
+            })?;
 
         let mut rows = stmt
             .query(rusqlite::params![job_id.to_string()])
-            .map_err(|e| launcher_kernel_foundation::AppError::new(
+            .map_err(|e| {
+                launcher_kernel_foundation::AppError::new(
+                    "SQLITE_READ_ERROR",
+                    format!("download job query failed: {e}"),
+                    false,
+                    launcher_kernel_foundation::AppErrorSeverity::Warning,
+                    launcher_kernel_foundation::CorrelationId::generate(),
+                )
+            })?;
+
+        let maybe_row = rows.next().map_err(|e| {
+            launcher_kernel_foundation::AppError::new(
                 "SQLITE_READ_ERROR",
-                format!("download job query failed: {e}"),
+                format!("download job row read failed: {e}"),
                 false,
                 launcher_kernel_foundation::AppErrorSeverity::Warning,
                 launcher_kernel_foundation::CorrelationId::generate(),
-            ))?;
-
-        let maybe_row = rows.next().map_err(|e| launcher_kernel_foundation::AppError::new(
-            "SQLITE_READ_ERROR",
-            format!("download job row read failed: {e}"),
-            false,
-            launcher_kernel_foundation::AppErrorSeverity::Warning,
-            launcher_kernel_foundation::CorrelationId::generate(),
-        ))?;
+            )
+        })?;
 
         let Some(row) = maybe_row else {
             return Ok(None);
         };
 
-        let target_id: String = row.get(0).map_err(|e| launcher_kernel_foundation::AppError::new(
-            "SQLITE_READ_ERROR",
-            format!("download job target_id decode failed: {e}"),
-            false,
-            launcher_kernel_foundation::AppErrorSeverity::Warning,
-            launcher_kernel_foundation::CorrelationId::generate(),
-        ))?;
-        let kind: String = row.get(1).map_err(|e| launcher_kernel_foundation::AppError::new(
-            "SQLITE_READ_ERROR",
-            format!("download job kind decode failed: {e}"),
-            false,
-            launcher_kernel_foundation::AppErrorSeverity::Warning,
-            launcher_kernel_foundation::CorrelationId::generate(),
-        ))?;
-        let install_intent: Option<String> = row.get(2).map_err(|e| launcher_kernel_foundation::AppError::new(
-            "SQLITE_READ_ERROR",
-            format!("download job install_intent decode failed: {e}"),
-            false,
-            launcher_kernel_foundation::AppErrorSeverity::Warning,
-            launcher_kernel_foundation::CorrelationId::generate(),
-        ))?;
-        let priority_raw: String = row.get(3).map_err(|e| launcher_kernel_foundation::AppError::new(
-            "SQLITE_READ_ERROR",
-            format!("download job priority decode failed: {e}"),
-            false,
-            launcher_kernel_foundation::AppErrorSeverity::Warning,
-            launcher_kernel_foundation::CorrelationId::generate(),
-        ))?;
-        let state_raw: String = row.get(4).map_err(|e| launcher_kernel_foundation::AppError::new(
-            "SQLITE_READ_ERROR",
-            format!("download job state decode failed: {e}"),
-            false,
-            launcher_kernel_foundation::AppErrorSeverity::Warning,
-            launcher_kernel_foundation::CorrelationId::generate(),
-        ))?;
+        let target_id: String = row.get(0).map_err(|e| {
+            launcher_kernel_foundation::AppError::new(
+                "SQLITE_READ_ERROR",
+                format!("download job target_id decode failed: {e}"),
+                false,
+                launcher_kernel_foundation::AppErrorSeverity::Warning,
+                launcher_kernel_foundation::CorrelationId::generate(),
+            )
+        })?;
+        let kind: String = row.get(1).map_err(|e| {
+            launcher_kernel_foundation::AppError::new(
+                "SQLITE_READ_ERROR",
+                format!("download job kind decode failed: {e}"),
+                false,
+                launcher_kernel_foundation::AppErrorSeverity::Warning,
+                launcher_kernel_foundation::CorrelationId::generate(),
+            )
+        })?;
+        let install_intent: Option<String> = row.get(2).map_err(|e| {
+            launcher_kernel_foundation::AppError::new(
+                "SQLITE_READ_ERROR",
+                format!("download job install_intent decode failed: {e}"),
+                false,
+                launcher_kernel_foundation::AppErrorSeverity::Warning,
+                launcher_kernel_foundation::CorrelationId::generate(),
+            )
+        })?;
+        let priority_raw: String = row.get(3).map_err(|e| {
+            launcher_kernel_foundation::AppError::new(
+                "SQLITE_READ_ERROR",
+                format!("download job priority decode failed: {e}"),
+                false,
+                launcher_kernel_foundation::AppErrorSeverity::Warning,
+                launcher_kernel_foundation::CorrelationId::generate(),
+            )
+        })?;
+        let state_raw: String = row.get(4).map_err(|e| {
+            launcher_kernel_foundation::AppError::new(
+                "SQLITE_READ_ERROR",
+                format!("download job state decode failed: {e}"),
+                false,
+                launcher_kernel_foundation::AppErrorSeverity::Warning,
+                launcher_kernel_foundation::CorrelationId::generate(),
+            )
+        })?;
 
         Ok(Some(DownloadJobRecord {
             job_id: job_id.clone(),
@@ -258,13 +282,15 @@ impl DownloadJobRepository for SqliteDownloadJobRepository {
                 encode_download_job_state(job.state),
             ],
         )
-        .map_err(|e| launcher_kernel_foundation::AppError::new(
-            "SQLITE_WRITE_ERROR",
-            format!("download job insert failed: {e}"),
-            false,
-            launcher_kernel_foundation::AppErrorSeverity::Warning,
-            launcher_kernel_foundation::CorrelationId::generate(),
-        ))?;
+        .map_err(|e| {
+            launcher_kernel_foundation::AppError::new(
+                "SQLITE_WRITE_ERROR",
+                format!("download job insert failed: {e}"),
+                false,
+                launcher_kernel_foundation::AppErrorSeverity::Warning,
+                launcher_kernel_foundation::CorrelationId::generate(),
+            )
+        })?;
         Ok(())
     }
 
@@ -278,13 +304,15 @@ impl DownloadJobRepository for SqliteDownloadJobRepository {
             "UPDATE download_jobs SET state = ?2 WHERE job_id = ?1",
             rusqlite::params![job_id.to_string(), encode_download_job_state(state)],
         )
-        .map_err(|e| launcher_kernel_foundation::AppError::new(
-            "SQLITE_WRITE_ERROR",
-            format!("download job state update failed: {e}"),
-            false,
-            launcher_kernel_foundation::AppErrorSeverity::Warning,
-            launcher_kernel_foundation::CorrelationId::generate(),
-        ))?;
+        .map_err(|e| {
+            launcher_kernel_foundation::AppError::new(
+                "SQLITE_WRITE_ERROR",
+                format!("download job state update failed: {e}"),
+                false,
+                launcher_kernel_foundation::AppErrorSeverity::Warning,
+                launcher_kernel_foundation::CorrelationId::generate(),
+            )
+        })?;
         Ok(())
     }
 }
@@ -366,15 +394,32 @@ impl SqliteDownloadCheckpointRepository {
         conn.execute_batch(
             "CREATE TABLE IF NOT EXISTS download_job_checkpoints (
                 job_id TEXT PRIMARY KEY NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS download_segment_checkpoints (
+                job_id TEXT NOT NULL,
+                segment_index INTEGER NOT NULL,
+                segment_id TEXT NOT NULL,
+                file_id TEXT NOT NULL,
+                segment_offset TEXT NOT NULL,
+                segment_length TEXT NOT NULL,
+                downloaded_bytes TEXT NOT NULL,
+                status TEXT NOT NULL,
+                partial_path TEXT NULL,
+                etag TEXT NULL,
+                hash_state_ref TEXT NULL,
+                PRIMARY KEY (job_id, segment_id),
+                FOREIGN KEY (job_id) REFERENCES download_job_checkpoints(job_id) ON DELETE CASCADE
             );",
         )
-        .map_err(|e| launcher_kernel_foundation::AppError::new(
-            "SQLITE_WRITE_ERROR",
-            format!("download_job_checkpoints table init failed: {e}"),
-            false,
-            launcher_kernel_foundation::AppErrorSeverity::Warning,
-            launcher_kernel_foundation::CorrelationId::generate(),
-        ))?;
+        .map_err(|e| {
+            launcher_kernel_foundation::AppError::new(
+                "SQLITE_WRITE_ERROR",
+                format!("download checkpoint tables init failed: {e}"),
+                false,
+                launcher_kernel_foundation::AppErrorSeverity::Warning,
+                launcher_kernel_foundation::CorrelationId::generate(),
+            )
+        })?;
         Ok(())
     }
 
@@ -395,51 +440,230 @@ impl SqliteDownloadCheckpointRepository {
         let conn = self.open_connection()?;
         let mut stmt = conn
             .prepare("SELECT job_id FROM download_job_checkpoints WHERE job_id = ?1")
-            .map_err(|e| launcher_kernel_foundation::AppError::new(
-                "SQLITE_READ_ERROR",
-                format!("failed to prepare checkpoint select: {e}"),
-                false,
-                launcher_kernel_foundation::AppErrorSeverity::Warning,
-                launcher_kernel_foundation::CorrelationId::generate(),
-            ))?;
+            .map_err(|e| {
+                launcher_kernel_foundation::AppError::new(
+                    "SQLITE_READ_ERROR",
+                    format!("failed to prepare checkpoint select: {e}"),
+                    false,
+                    launcher_kernel_foundation::AppErrorSeverity::Warning,
+                    launcher_kernel_foundation::CorrelationId::generate(),
+                )
+            })?;
 
         let mut rows = stmt
             .query(rusqlite::params![job_id.to_string()])
-            .map_err(|e| launcher_kernel_foundation::AppError::new(
+            .map_err(|e| {
+                launcher_kernel_foundation::AppError::new(
+                    "SQLITE_READ_ERROR",
+                    format!("checkpoint query failed: {e}"),
+                    false,
+                    launcher_kernel_foundation::AppErrorSeverity::Warning,
+                    launcher_kernel_foundation::CorrelationId::generate(),
+                )
+            })?;
+
+        let maybe_row = rows.next().map_err(|e| {
+            launcher_kernel_foundation::AppError::new(
                 "SQLITE_READ_ERROR",
-                format!("checkpoint query failed: {e}"),
+                format!("checkpoint row read failed: {e}"),
                 false,
                 launcher_kernel_foundation::AppErrorSeverity::Warning,
                 launcher_kernel_foundation::CorrelationId::generate(),
-            ))?;
+            )
+        })?;
 
-        let maybe_row = rows.next().map_err(|e| launcher_kernel_foundation::AppError::new(
-            "SQLITE_READ_ERROR",
-            format!("checkpoint row read failed: {e}"),
-            false,
-            launcher_kernel_foundation::AppErrorSeverity::Warning,
-            launcher_kernel_foundation::CorrelationId::generate(),
-        ))?;
+        if maybe_row.is_none() {
+            return Ok(None);
+        }
 
-        Ok(maybe_row.map(|_| DownloadCheckpointRecord::empty(job_id.clone())))
+        drop(rows);
+        drop(stmt);
+
+        let mut segment_stmt = conn
+            .prepare(
+                "SELECT job_id, segment_id, file_id, segment_offset, segment_length,
+                        downloaded_bytes, status, partial_path, etag, hash_state_ref
+                 FROM download_segment_checkpoints
+                 WHERE job_id = ?1
+                 ORDER BY segment_index ASC",
+            )
+            .map_err(|e| {
+                sqlite_read_error(format!("failed to prepare segment checkpoint select: {e}"))
+            })?;
+
+        let mut segment_rows = segment_stmt
+            .query(rusqlite::params![job_id.to_string()])
+            .map_err(|e| sqlite_read_error(format!("segment checkpoint query failed: {e}")))?;
+
+        let mut segments = Vec::new();
+        while let Some(row) = segment_rows
+            .next()
+            .map_err(|e| sqlite_read_error(format!("segment checkpoint row read failed: {e}")))?
+        {
+            let segment_job_id: String = row
+                .get(0)
+                .map_err(|e| sqlite_read_error(format!("segment job_id decode failed: {e}")))?;
+            let segment_id: String = row
+                .get(1)
+                .map_err(|e| sqlite_read_error(format!("segment_id decode failed: {e}")))?;
+            let file_id: String = row
+                .get(2)
+                .map_err(|e| sqlite_read_error(format!("segment file_id decode failed: {e}")))?;
+            let offset_raw: String = row
+                .get(3)
+                .map_err(|e| sqlite_read_error(format!("segment offset decode failed: {e}")))?;
+            let length_raw: String = row
+                .get(4)
+                .map_err(|e| sqlite_read_error(format!("segment length decode failed: {e}")))?;
+            let downloaded_bytes_raw: String = row.get(5).map_err(|e| {
+                sqlite_read_error(format!("segment downloaded_bytes decode failed: {e}"))
+            })?;
+            let status_raw: String = row
+                .get(6)
+                .map_err(|e| sqlite_read_error(format!("segment status decode failed: {e}")))?;
+            let partial_path: Option<String> = row.get(7).map_err(|e| {
+                sqlite_read_error(format!("segment partial_path decode failed: {e}"))
+            })?;
+            let etag: Option<String> = row
+                .get(8)
+                .map_err(|e| sqlite_read_error(format!("segment etag decode failed: {e}")))?;
+            let hash_state_ref: Option<String> = row.get(9).map_err(|e| {
+                sqlite_read_error(format!("segment hash_state_ref decode failed: {e}"))
+            })?;
+
+            segments.push(DownloadSegmentCheckpointRecord {
+                job_id: JobId::new(segment_job_id),
+                segment_id,
+                file_id,
+                offset: decode_u64_text("segment offset", &offset_raw)?,
+                length: decode_u64_text("segment length", &length_raw)?,
+                downloaded_bytes: decode_u64_text(
+                    "segment downloaded_bytes",
+                    &downloaded_bytes_raw,
+                )?,
+                status: decode_segment_checkpoint_status(&status_raw)?,
+                partial_path,
+                etag,
+                hash_state_ref,
+            });
+        }
+
+        Ok(Some(DownloadCheckpointRecord {
+            job_id: job_id.clone(),
+            segments,
+        }))
     }
 
     /// 持久化最新的下载断点记录，供暂停和恢复链路复用。
     pub fn save_checkpoint(&self, checkpoint: &DownloadCheckpointRecord) -> AppResult<()> {
-        let conn = self.open_connection()?;
-        conn.execute(
+        let mut conn = self.open_connection()?;
+        let tx = conn.transaction().map_err(|e| {
+            launcher_kernel_foundation::AppError::new(
+                "SQLITE_WRITE_ERROR",
+                format!("checkpoint transaction start failed: {e}"),
+                false,
+                launcher_kernel_foundation::AppErrorSeverity::Warning,
+                launcher_kernel_foundation::CorrelationId::generate(),
+            )
+        })?;
+
+        tx.execute(
             "INSERT OR REPLACE INTO download_job_checkpoints (job_id) VALUES (?1)",
             rusqlite::params![checkpoint.job_id.to_string()],
         )
-        .map_err(|e| launcher_kernel_foundation::AppError::new(
-            "SQLITE_WRITE_ERROR",
-            format!("checkpoint upsert failed: {e}"),
-            false,
-            launcher_kernel_foundation::AppErrorSeverity::Warning,
-            launcher_kernel_foundation::CorrelationId::generate(),
-        ))?;
+        .map_err(|e| {
+            launcher_kernel_foundation::AppError::new(
+                "SQLITE_WRITE_ERROR",
+                format!("checkpoint upsert failed: {e}"),
+                false,
+                launcher_kernel_foundation::AppErrorSeverity::Warning,
+                launcher_kernel_foundation::CorrelationId::generate(),
+            )
+        })?;
+        // Replace the segment facts as one job-scoped checkpoint snapshot.
+        // 将 segment facts 作为同一个 job-scoped checkpoint 快照整体替换。
+        tx.execute(
+            "DELETE FROM download_segment_checkpoints WHERE job_id = ?1",
+            rusqlite::params![checkpoint.job_id.to_string()],
+        )
+        .map_err(|e| sqlite_write_error(format!("segment checkpoint delete failed: {e}")))?;
+
+        for (segment_index, segment) in checkpoint.segments.iter().enumerate() {
+            tx.execute(
+                "INSERT INTO download_segment_checkpoints
+                 (job_id, segment_index, segment_id, file_id, segment_offset, segment_length,
+                  downloaded_bytes, status, partial_path, etag, hash_state_ref)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
+                rusqlite::params![
+                    segment.job_id.to_string(),
+                    i64::try_from(segment_index).map_err(|e| {
+                        sqlite_write_error(format!("segment index conversion failed: {e}"))
+                    })?,
+                    segment.segment_id,
+                    segment.file_id,
+                    segment.offset.to_string(),
+                    segment.length.to_string(),
+                    segment.downloaded_bytes.to_string(),
+                    encode_segment_checkpoint_status(segment.status),
+                    segment.partial_path,
+                    segment.etag,
+                    segment.hash_state_ref,
+                ],
+            )
+            .map_err(|e| sqlite_write_error(format!("segment checkpoint insert failed: {e}")))?;
+        }
+
+        tx.commit().map_err(|e| {
+            sqlite_write_error(format!("checkpoint transaction commit failed: {e}"))
+        })?;
         Ok(())
     }
+}
+
+fn encode_segment_checkpoint_status(status: DownloadSegmentCheckpointStatus) -> &'static str {
+    match status {
+        DownloadSegmentCheckpointStatus::Pending => "pending",
+        DownloadSegmentCheckpointStatus::InProgress => "in_progress",
+        DownloadSegmentCheckpointStatus::Completed => "completed",
+        DownloadSegmentCheckpointStatus::Failed => "failed",
+    }
+}
+
+fn decode_segment_checkpoint_status(raw: &str) -> AppResult<DownloadSegmentCheckpointStatus> {
+    match raw {
+        "pending" => Ok(DownloadSegmentCheckpointStatus::Pending),
+        "in_progress" => Ok(DownloadSegmentCheckpointStatus::InProgress),
+        "completed" => Ok(DownloadSegmentCheckpointStatus::Completed),
+        "failed" => Ok(DownloadSegmentCheckpointStatus::Failed),
+        _ => Err(sqlite_read_error(format!(
+            "unsupported segment checkpoint status `{raw}`"
+        ))),
+    }
+}
+
+fn decode_u64_text(field: &str, raw: &str) -> AppResult<u64> {
+    raw.parse::<u64>()
+        .map_err(|e| sqlite_read_error(format!("{field} parse failed: {e}")))
+}
+
+fn sqlite_read_error(message: String) -> launcher_kernel_foundation::AppError {
+    launcher_kernel_foundation::AppError::new(
+        "SQLITE_READ_ERROR",
+        message,
+        false,
+        launcher_kernel_foundation::AppErrorSeverity::Warning,
+        launcher_kernel_foundation::CorrelationId::generate(),
+    )
+}
+
+fn sqlite_write_error(message: String) -> launcher_kernel_foundation::AppError {
+    launcher_kernel_foundation::AppError::new(
+        "SQLITE_WRITE_ERROR",
+        message,
+        false,
+        launcher_kernel_foundation::AppErrorSeverity::Warning,
+        launcher_kernel_foundation::CorrelationId::generate(),
+    )
 }
 
 impl DownloadCheckpointRepository for SqliteDownloadCheckpointRepository {
@@ -482,34 +706,39 @@ impl SqliteJobSnapshotStore {
             "ALTER TABLE job_snapshots ADD COLUMN recoverable INTEGER NOT NULL DEFAULT 1",
             [],
         );
-        Self { conn: Mutex::new(conn) }
+        Self {
+            conn: Mutex::new(conn),
+        }
     }
 
     fn upsert(&self, snapshot: &JobSnapshot<()>) -> AppResult<()> {
-        let progress_json = serde_json::to_string(&snapshot.progress)
-            .map_err(|e| launcher_kernel_foundation::AppError::new(
+        let progress_json = serde_json::to_string(&snapshot.progress).map_err(|e| {
+            launcher_kernel_foundation::AppError::new(
                 "SQLITE_SERIALIZE_ERROR",
                 format!("failed to serialize JobProgress: {e}"),
                 false,
                 launcher_kernel_foundation::AppErrorSeverity::Warning,
                 launcher_kernel_foundation::CorrelationId::generate(),
-            ))?;
-        let state_str = serde_json::to_string(&snapshot.state)
-            .map_err(|e| launcher_kernel_foundation::AppError::new(
+            )
+        })?;
+        let state_str = serde_json::to_string(&snapshot.state).map_err(|e| {
+            launcher_kernel_foundation::AppError::new(
                 "SQLITE_SERIALIZE_ERROR",
                 format!("failed to serialize JobState: {e}"),
                 false,
                 launcher_kernel_foundation::AppErrorSeverity::Warning,
                 launcher_kernel_foundation::CorrelationId::generate(),
-            ))?;
-        let ui_state_str = serde_json::to_string(&snapshot.ui_state)
-            .map_err(|e| launcher_kernel_foundation::AppError::new(
+            )
+        })?;
+        let ui_state_str = serde_json::to_string(&snapshot.ui_state).map_err(|e| {
+            launcher_kernel_foundation::AppError::new(
                 "SQLITE_SERIALIZE_ERROR",
                 format!("failed to serialize JobUiState: {e}"),
                 false,
                 launcher_kernel_foundation::AppErrorSeverity::Warning,
                 launcher_kernel_foundation::CorrelationId::generate(),
-            ))?;
+            )
+        })?;
         let conn = self.conn.lock().unwrap_or_else(|p| p.into_inner());
         conn.execute(
             "INSERT OR REPLACE INTO job_snapshots
@@ -548,34 +777,42 @@ impl JobSnapshotStore<()> for SqliteJobSnapshotStore {
 
     fn get(&self, job_id: &JobId) -> AppResult<Option<JobSnapshot<()>>> {
         let conn = self.conn.lock().unwrap_or_else(|p| p.into_inner());
-        let mut stmt = conn.prepare(
-            "SELECT job_id, module, kind, state, ui_state, progress, recoverable, updated_at
+        let mut stmt = conn
+            .prepare(
+                "SELECT job_id, module, kind, state, ui_state, progress, recoverable, updated_at
              FROM job_snapshots WHERE job_id = ?1",
-        )
-        .map_err(|e| launcher_kernel_foundation::AppError::new(
-            "SQLITE_READ_ERROR",
-            format!("failed to prepare job_snapshots select: {e}"),
-            false,
-            launcher_kernel_foundation::AppErrorSeverity::Warning,
-            launcher_kernel_foundation::CorrelationId::generate(),
-        ))?;
+            )
+            .map_err(|e| {
+                launcher_kernel_foundation::AppError::new(
+                    "SQLITE_READ_ERROR",
+                    format!("failed to prepare job_snapshots select: {e}"),
+                    false,
+                    launcher_kernel_foundation::AppErrorSeverity::Warning,
+                    launcher_kernel_foundation::CorrelationId::generate(),
+                )
+            })?;
 
-        let mut rows = stmt.query(rusqlite::params![job_id.to_string()])
-            .map_err(|e| launcher_kernel_foundation::AppError::new(
+        let mut rows = stmt
+            .query(rusqlite::params![job_id.to_string()])
+            .map_err(|e| {
+                launcher_kernel_foundation::AppError::new(
+                    "SQLITE_READ_ERROR",
+                    format!("job_snapshots query failed: {e}"),
+                    false,
+                    launcher_kernel_foundation::AppErrorSeverity::Warning,
+                    launcher_kernel_foundation::CorrelationId::generate(),
+                )
+            })?;
+
+        if let Some(row) = rows.next().map_err(|e| {
+            launcher_kernel_foundation::AppError::new(
                 "SQLITE_READ_ERROR",
-                format!("job_snapshots query failed: {e}"),
+                format!("job_snapshots row read failed: {e}"),
                 false,
                 launcher_kernel_foundation::AppErrorSeverity::Warning,
                 launcher_kernel_foundation::CorrelationId::generate(),
-            ))?;
-
-        if let Some(row) = rows.next().map_err(|e| launcher_kernel_foundation::AppError::new(
-            "SQLITE_READ_ERROR",
-            format!("job_snapshots row read failed: {e}"),
-            false,
-            launcher_kernel_foundation::AppErrorSeverity::Warning,
-            launcher_kernel_foundation::CorrelationId::generate(),
-        ))? {
+            )
+        })? {
             let job_id_str: String = row.get(0).unwrap();
             let module: String = row.get(1).unwrap();
             let kind: String = row.get(2).unwrap();
@@ -585,38 +822,43 @@ impl JobSnapshotStore<()> for SqliteJobSnapshotStore {
             let recoverable_int: i64 = row.get(6).unwrap_or(1);
             let updated_at_str: String = row.get(7).unwrap();
 
-            let state: JobState = serde_json::from_str(&state_str)
-                .map_err(|e| launcher_kernel_foundation::AppError::new(
+            let state: JobState = serde_json::from_str(&state_str).map_err(|e| {
+                launcher_kernel_foundation::AppError::new(
                     "SQLITE_DESERIALIZE_ERROR",
                     format!("failed to deserialize JobState: {e}"),
                     false,
                     launcher_kernel_foundation::AppErrorSeverity::Warning,
                     launcher_kernel_foundation::CorrelationId::generate(),
-                ))?;
-            let ui_state: JobUiState = serde_json::from_str(&ui_state_str)
-                .map_err(|e| launcher_kernel_foundation::AppError::new(
+                )
+            })?;
+            let ui_state: JobUiState = serde_json::from_str(&ui_state_str).map_err(|e| {
+                launcher_kernel_foundation::AppError::new(
                     "SQLITE_DESERIALIZE_ERROR",
                     format!("failed to deserialize JobUiState: {e}"),
                     false,
                     launcher_kernel_foundation::AppErrorSeverity::Warning,
                     launcher_kernel_foundation::CorrelationId::generate(),
-                ))?;
-            let progress: JobProgress = serde_json::from_str(&progress_str)
-                .map_err(|e| launcher_kernel_foundation::AppError::new(
+                )
+            })?;
+            let progress: JobProgress = serde_json::from_str(&progress_str).map_err(|e| {
+                launcher_kernel_foundation::AppError::new(
                     "SQLITE_DESERIALIZE_ERROR",
                     format!("failed to deserialize JobProgress: {e}"),
                     false,
                     launcher_kernel_foundation::AppErrorSeverity::Warning,
                     launcher_kernel_foundation::CorrelationId::generate(),
-                ))?;
+                )
+            })?;
             let updated_at: IsoDateTime = serde_json::from_str(&format!(r#""{updated_at_str}""#))
-                .map_err(|e| launcher_kernel_foundation::AppError::new(
+                .map_err(|e| {
+                launcher_kernel_foundation::AppError::new(
                     "SQLITE_DESERIALIZE_ERROR",
                     format!("failed to parse updated_at: {e}"),
                     false,
                     launcher_kernel_foundation::AppErrorSeverity::Warning,
                     launcher_kernel_foundation::CorrelationId::generate(),
-                ))?;
+                )
+            })?;
             let parsed_job_id = JobId::new(job_id_str);
 
             Ok(Some(JobSnapshot {
@@ -642,7 +884,9 @@ impl JobSnapshotStore<()> for SqliteJobSnapshotStore {
             r#""restoring""#,
             r#""running""#,
         ];
-        let placeholders = resumable_state_jsons.iter().enumerate()
+        let placeholders = resumable_state_jsons
+            .iter()
+            .enumerate()
             .map(|(i, _)| format!("?{}", i + 1))
             .collect::<Vec<_>>()
             .join(", ");
@@ -651,31 +895,38 @@ impl JobSnapshotStore<()> for SqliteJobSnapshotStore {
              FROM job_snapshots WHERE state IN ({placeholders})"
         );
         let conn = self.conn.lock().unwrap_or_else(|p| p.into_inner());
-        let mut stmt = conn.prepare(&sql).map_err(|e| launcher_kernel_foundation::AppError::new(
-            "SQLITE_READ_ERROR",
-            format!("list_resumable prepare failed: {e}"),
-            false,
-            launcher_kernel_foundation::AppErrorSeverity::Warning,
-            launcher_kernel_foundation::CorrelationId::generate(),
-        ))?;
-
-        let mut results = Vec::new();
-        let mut rows = stmt.query(rusqlite::params_from_iter(resumable_state_jsons.iter()))
-            .map_err(|e| launcher_kernel_foundation::AppError::new(
+        let mut stmt = conn.prepare(&sql).map_err(|e| {
+            launcher_kernel_foundation::AppError::new(
                 "SQLITE_READ_ERROR",
-                format!("list_resumable query failed: {e}"),
+                format!("list_resumable prepare failed: {e}"),
                 false,
                 launcher_kernel_foundation::AppErrorSeverity::Warning,
                 launcher_kernel_foundation::CorrelationId::generate(),
-            ))?;
+            )
+        })?;
 
-        while let Some(row) = rows.next().map_err(|e| launcher_kernel_foundation::AppError::new(
-            "SQLITE_READ_ERROR",
-            format!("list_resumable row read failed: {e}"),
-            false,
-            launcher_kernel_foundation::AppErrorSeverity::Warning,
-            launcher_kernel_foundation::CorrelationId::generate(),
-        ))? {
+        let mut results = Vec::new();
+        let mut rows = stmt
+            .query(rusqlite::params_from_iter(resumable_state_jsons.iter()))
+            .map_err(|e| {
+                launcher_kernel_foundation::AppError::new(
+                    "SQLITE_READ_ERROR",
+                    format!("list_resumable query failed: {e}"),
+                    false,
+                    launcher_kernel_foundation::AppErrorSeverity::Warning,
+                    launcher_kernel_foundation::CorrelationId::generate(),
+                )
+            })?;
+
+        while let Some(row) = rows.next().map_err(|e| {
+            launcher_kernel_foundation::AppError::new(
+                "SQLITE_READ_ERROR",
+                format!("list_resumable row read failed: {e}"),
+                false,
+                launcher_kernel_foundation::AppErrorSeverity::Warning,
+                launcher_kernel_foundation::CorrelationId::generate(),
+            )
+        })? {
             let job_id_str: String = row.get(0).unwrap();
             let module: String = row.get(1).unwrap();
             let kind: String = row.get(2).unwrap();
@@ -685,10 +936,43 @@ impl JobSnapshotStore<()> for SqliteJobSnapshotStore {
             let recoverable_int: i64 = row.get(6).unwrap_or(1);
             let updated_at_str: String = row.get(7).unwrap();
 
-            let state: JobState = serde_json::from_str(&state_str).map_err(|e| launcher_kernel_foundation::AppError::new("SQLITE_DESERIALIZE_ERROR", format!("state: {e}"), false, launcher_kernel_foundation::AppErrorSeverity::Warning, launcher_kernel_foundation::CorrelationId::generate()))?;
-            let ui_state: JobUiState = serde_json::from_str(&ui_state_str).map_err(|e| launcher_kernel_foundation::AppError::new("SQLITE_DESERIALIZE_ERROR", format!("ui_state: {e}"), false, launcher_kernel_foundation::AppErrorSeverity::Warning, launcher_kernel_foundation::CorrelationId::generate()))?;
-            let progress: JobProgress = serde_json::from_str(&progress_str).map_err(|e| launcher_kernel_foundation::AppError::new("SQLITE_DESERIALIZE_ERROR", format!("progress: {e}"), false, launcher_kernel_foundation::AppErrorSeverity::Warning, launcher_kernel_foundation::CorrelationId::generate()))?;
-            let updated_at: IsoDateTime = serde_json::from_str(&format!(r#""{updated_at_str}""#)).map_err(|e| launcher_kernel_foundation::AppError::new("SQLITE_DESERIALIZE_ERROR", format!("updated_at: {e}"), false, launcher_kernel_foundation::AppErrorSeverity::Warning, launcher_kernel_foundation::CorrelationId::generate()))?;
+            let state: JobState = serde_json::from_str(&state_str).map_err(|e| {
+                launcher_kernel_foundation::AppError::new(
+                    "SQLITE_DESERIALIZE_ERROR",
+                    format!("state: {e}"),
+                    false,
+                    launcher_kernel_foundation::AppErrorSeverity::Warning,
+                    launcher_kernel_foundation::CorrelationId::generate(),
+                )
+            })?;
+            let ui_state: JobUiState = serde_json::from_str(&ui_state_str).map_err(|e| {
+                launcher_kernel_foundation::AppError::new(
+                    "SQLITE_DESERIALIZE_ERROR",
+                    format!("ui_state: {e}"),
+                    false,
+                    launcher_kernel_foundation::AppErrorSeverity::Warning,
+                    launcher_kernel_foundation::CorrelationId::generate(),
+                )
+            })?;
+            let progress: JobProgress = serde_json::from_str(&progress_str).map_err(|e| {
+                launcher_kernel_foundation::AppError::new(
+                    "SQLITE_DESERIALIZE_ERROR",
+                    format!("progress: {e}"),
+                    false,
+                    launcher_kernel_foundation::AppErrorSeverity::Warning,
+                    launcher_kernel_foundation::CorrelationId::generate(),
+                )
+            })?;
+            let updated_at: IsoDateTime = serde_json::from_str(&format!(r#""{updated_at_str}""#))
+                .map_err(|e| {
+                launcher_kernel_foundation::AppError::new(
+                    "SQLITE_DESERIALIZE_ERROR",
+                    format!("updated_at: {e}"),
+                    false,
+                    launcher_kernel_foundation::AppErrorSeverity::Warning,
+                    launcher_kernel_foundation::CorrelationId::generate(),
+                )
+            })?;
 
             results.push(JobSnapshot {
                 job_id: JobId::new(job_id_str),
@@ -703,5 +987,66 @@ impl JobSnapshotStore<()> for SqliteJobSnapshotStore {
             });
         }
         Ok(results)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use launcher_module_downloads::{
+        DownloadSegmentCheckpointRecord, DownloadSegmentCheckpointStatus,
+    };
+
+    #[test]
+    fn sqlite_download_checkpoint_round_trips_segment_facts() {
+        let tmp_path =
+            std::env::temp_dir().join("at188_download_segment_checkpoint_round_trip.sqlite3");
+        let _ = std::fs::remove_file(&tmp_path);
+        let repo = SqliteDownloadCheckpointRepository::new(SqliteStorageAdapterConfig::new(
+            tmp_path.clone(),
+        ));
+        let job_id = JobId::generate();
+        let checkpoint = DownloadCheckpointRecord {
+            job_id: job_id.clone(),
+            segments: vec![
+                DownloadSegmentCheckpointRecord {
+                    job_id: job_id.clone(),
+                    segment_id: "segment-partial".into(),
+                    file_id: "file-a".into(),
+                    offset: 128,
+                    length: 1024,
+                    downloaded_bytes: 512,
+                    status: DownloadSegmentCheckpointStatus::InProgress,
+                    partial_path: Some("staging/file-a.part".into()),
+                    etag: Some("etag-a".into()),
+                    hash_state_ref: Some("hash-a".into()),
+                },
+                DownloadSegmentCheckpointRecord {
+                    job_id: job_id.clone(),
+                    segment_id: "segment-complete".into(),
+                    file_id: "file-b".into(),
+                    offset: 2048,
+                    length: 4096,
+                    downloaded_bytes: 4096,
+                    status: DownloadSegmentCheckpointStatus::Completed,
+                    partial_path: None,
+                    etag: None,
+                    hash_state_ref: None,
+                },
+            ],
+        };
+
+        repo.save(&checkpoint)
+            .expect("saving a segment checkpoint record should succeed");
+
+        let loaded = repo
+            .load(&job_id)
+            .expect("loading a segment checkpoint record should not error")
+            .expect("saved checkpoint should be present");
+
+        assert_eq!(loaded, checkpoint);
+
+        let _ = std::fs::remove_file(&tmp_path);
     }
 }

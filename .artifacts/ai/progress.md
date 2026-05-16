@@ -5878,6 +5878,29 @@
 - Path-limited `git status --short` showed only AT-187 files.
 - AT-187 was committed locally after validation. The exact commit hash should be read from `git log` after the final amend.
 
+## 2026-05-16 - AT-188 Start
+
+- Confirmed AT-187 final commit is `95cf6fa`.
+- Read adapter-storage-sqlite checkpoint implementation and tests surface before editing.
+- Started AT-188 as a TDD-backed repository/adapter persistence slice.
+- Added focused RED test target: `sqlite_download_checkpoint_round_trips_segment_facts`.
+
+## 2026-05-16 - AT-188 RED/GREEN
+
+- RED focused test failed as expected because the loaded checkpoint preserved the job id but returned `segments: []`.
+- Implemented minimal SQLite segment checkpoint persistence:
+  - `download_segment_checkpoints` table with job id, saved order, segment identity, file id, numeric facts, status, and nullable references;
+  - transactional job checkpoint upsert plus segment-row replacement for the saved job;
+  - load path that returns persisted segment records in saved order;
+  - status mapping and text-backed `u64` numeric decoding.
+- Focused adapter test passed.
+- Full `cargo test -p launcher-adapter-storage-sqlite --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed: 1 unit test passed, doc tests 0.
+- Initial fmt check failed; after `cargo fmt`, `cargo fmt -p launcher-adapter-storage-sqlite --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed.
+- README_IMPL section 7.12 now records the current Rust slice.
+- Scoped `git diff --check` passed with CRLF warnings only.
+- Path-limited `git status --short` showed only AT-188 files; broad status still contains unrelated dirty files, which remain excluded from the commit.
+- AT-188 was committed locally after validation. The exact commit hash should be read from `git log` after the final amend.
+
 ### Auto Record: 2026-05-16 23:38:38
 - Tool: apply_patch
 - Phase: Phase 60 - Downloads Composition Shared Scheduler Source Wiring Boundary
@@ -5971,6 +5994,51 @@
 ### Auto Record: 2026-05-16 23:53:19
 - Tool: apply_patch
 - Phase: Phase 62 - Downloads Checkpoint Mutation Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-16 23:55:19
+- Tool: apply_patch
+- Phase: Phase 63 - Downloads SQLite Segment Checkpoint Persistence
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (delete)
+  - `crates/adapter-storage-sqlite/src/lib.rs` (update)
+
+### Auto Record: 2026-05-16 23:56:44
+- Tool: apply_patch
+- Phase: Phase 63 - Downloads SQLite Segment Checkpoint Persistence
+- Files:
+  - `crates/adapter-storage-sqlite/src/lib.rs` (update)
+
+### Auto Record: 2026-05-16 23:58:24
+- Tool: apply_patch
+- Phase: Phase 63 - Downloads SQLite Segment Checkpoint Persistence
+- Files:
+  - `docs/modules/downloads/README_IMPL.md` (update)
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-16 23:59:00
+- Tool: apply_patch
+- Phase: Phase 63 - Downloads SQLite Segment Checkpoint Persistence
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-16 23:59:44
+- Tool: apply_patch
+- Phase: Phase 63 - Downloads SQLite Segment Checkpoint Persistence
 - Files:
   - `.artifacts/ai/active-task.md` (update)
   - `.artifacts/ai/task-plan.md` (update)

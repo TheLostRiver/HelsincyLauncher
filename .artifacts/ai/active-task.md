@@ -2,24 +2,25 @@
 
 ## Identity
 
-- task id: AT-2026-05-16-187
-- title: Define downloads checkpoint mutation boundary
+- task id: AT-2026-05-16-188
+- title: Persist downloads segment checkpoint facts in SQLite
 - status: completed
 
 ## Goal
 
-在继续任何 fetch/write/verify 或 driver execution 代码前，先把 downloads checkpoint mutation 的 owner、写入时机、repository/SQLite 边界、错误分层和下一 Rust 切片写清楚。
+按 README_IMPL 7.12，为 `SqliteDownloadCheckpointRepository` 增加 segment checkpoint facts 的最小持久化 round-trip，先 RED 测试，再实现，只覆盖 repository/adapter persistence boundary。
 
 本轮只覆盖：
 
-- README_IMPL checkpoint mutation boundary；
-- 明确 command path、scheduler pending queue、driver execution turn 与 checkpoint repository 的职责；
-- 明确下一 Rust 切片应优先补 segment checkpoint persistence，而不是直接进入 HTTP/文件写入/校验；
-- 更新 `.artifacts/ai` 任务记录。
+- `DownloadCheckpointRecord.segments` 在 SQLite adapter 的 save/load round-trip；
+- focused adapter test；
+- README_IMPL/PWF 当前 Rust slice 更新；
+- 不进入 driver execution、fetch/write/verify 或 runtime completion。
 
 ## Scope
 
 - in scope:
+  - `crates/adapter-storage-sqlite/src/lib.rs`
   - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
@@ -27,26 +28,27 @@
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
-  - Rust production code changes
-  - SQLite schema or adapter implementation changes
+  - driver execution and pending-work consumption changes
   - concrete HTTP fetch, staging writes, verifier/hash execution
   - `kernel-jobs` runtime execution loop or job completion APIs
   - host transport, frontend IPC, UI projection
-  - checkpoint mutation implementation
+  - composition-root public API changes
+  - broad storage abstractions or global unit-of-work
   - unrelated dirty worktree files
 
 ## Allowed Files
 
-1. docs/modules/downloads/README_IMPL.md
-2. .artifacts/ai/active-task.md
-3. .artifacts/ai/task-plan.md
-4. .artifacts/ai/progress.md
-5. .artifacts/ai/findings.md
-6. .artifacts/ai/handoff.md
+1. crates/adapter-storage-sqlite/src/lib.rs
+2. docs/modules/downloads/README_IMPL.md
+3. .artifacts/ai/active-task.md
+4. .artifacts/ai/task-plan.md
+5. .artifacts/ai/progress.md
+6. .artifacts/ai/findings.md
+7. .artifacts/ai/handoff.md
 
 ## 控制性文档
 
-Required context read in scoped snippets before editing:
+Required context read in scoped snippets before coding:
 
 1. README.md
 2. CONTRIBUTING.md
@@ -54,41 +56,47 @@ Required context read in scoped snippets before editing:
 4. docs/modules/downloads/README_ARCH.md
 5. docs/modules/downloads/README_API.md
 6. docs/modules/downloads/README_FLOW.md
-7. docs/modules/downloads/README_IMPL.md section 7.11
+7. docs/modules/downloads/README_IMPL.md section 7.12
 8. docs/TauriDownloadRuntimeDesign.md checkpoint/resume sections
 9. docs/TauriStorageAndDatabaseDesign.md storage placement sections
 10. docs/TauriRepositoryPortsAndAdapterDesign.md repository/checkpoint transaction sections
+11. crates/adapter-storage-sqlite/src/lib.rs checkpoint implementation
+12. superpowers:test-driven-development skill
 
 ## Hypothesis
 
-- falsifiable local hypothesis: a docs-only boundary can make the checkpoint mutation owner and next persistence slice explicit enough to continue backend work without prematurely implementing fetch/write/verify, runtime completion, host transport, frontend projection, or broad SQLite abstractions.
+- falsifiable local hypothesis: `SqliteDownloadCheckpointRepository` can persist and load current `DownloadSegmentCheckpointRecord` facts for one job using adapter-local SQL/schema changes while preserving existing job-level restore behavior and without changing driver execution, runtime, transport, frontend, or concrete IO.
 
 ## Cheap Check
 
-- Read back the new README_IMPL section and PWF current phase.
-- `git diff --check -- docs/modules/downloads/README_IMPL.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md`
-- `git status --short -- docs/modules/downloads/README_IMPL.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md`
+- RED/GREEN focused test:
+  - `cargo test -p launcher-adapter-storage-sqlite --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml sqlite_download_checkpoint_round_trips_segment_facts`
+- then full adapter test:
+  - `cargo test -p launcher-adapter-storage-sqlite --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`
 
 ## Validation Gate
 
-1. Document command/driver/checkpoint repository ownership.
-2. Document durable checkpoint mutation timing and failure behavior.
-3. Identify the next Rust slice without opening concrete download execution.
-4. Update PWF records.
-5. Run readback, scoped diff check, and path-limited status.
-6. Commit only AT-187 files locally.
+1. Add focused RED adapter test before production code.
+2. Observe expected RED failure caused by segment facts not round-tripping.
+3. Implement minimal job/segment checkpoint table persistence.
+4. Update README_IMPL and PWF records.
+5. Run focused test, full adapter tests, format check, scoped diff check, and path-limited status.
+6. Commit only AT-188 files locally.
 
 ## Validation Result
 
 - passed
-- README_IMPL section 7.12 now defines the checkpoint mutation boundary.
-- Readback confirmed ownership rules, command path rules, driver/execution-turn rules, persistence rules, and next Rust slice.
-- Task-plan readback confirmed Phase 62 is the current phase.
+- RED focused adapter test failed as expected: saved checkpoint loaded back with `segments: []`.
+- GREEN implementation added `download_segment_checkpoints`, transactional job-scoped segment replacement, segment row mapping, status encoding/decoding, and u64 text encoding.
+- Focused test passed: `sqlite_download_checkpoint_round_trips_segment_facts`.
+- Full `launcher-adapter-storage-sqlite` test suite passed: 1 unit test passed; doc tests 0.
+- Initial `cargo fmt --check` failed on crate formatting; after `cargo fmt`, `cargo fmt -p launcher-adapter-storage-sqlite --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed.
+- README_IMPL section 7.12 now records the current Rust slice.
 - Scoped `git diff --check` passed with CRLF warnings only.
-- Path-limited `git status --short` showed only AT-187 files.
+- Path-limited `git status --short` showed only AT-188 files.
 - Local commit completed after validation.
 
 ## Notes
 
-- AT-2026-05-16-186 committed as `6a721af`.
+- AT-2026-05-16-187 committed as `95cf6fa`.
 - Push to `origin/main` was rejected earlier by safety review; do not work around it.
