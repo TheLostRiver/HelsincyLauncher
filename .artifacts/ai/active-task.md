@@ -2,28 +2,25 @@
 
 ## Identity
 
-- task id: AT-2026-05-16-171
-- title: Project downloads resume outcome through host transport
+- task id: AT-2026-05-16-172
+- title: Document downloads resume scheduler driver payload boundary
 - status: completed
 
 ## Goal
 
-把 AT-170 新增的 `DownloadResumeOutcome` 安全投影到 `src-tauri` host transport：`RuntimeAccepted` 继续返回 accepted-job 语义，`AlreadyComplete` 返回稳定的已完成 resume outcome，不再伪装成 `accepted: true`，也不再让 all-sealed resume 卡在 `DOWNLOADS_NOT_WIRED`。
+在 `docs/modules/downloads/README_IMPL.md` 中把 `resume_partial` / `queue_remaining` 后续如何进入 downloads-owned scheduler/driver 写清楚：shared `JobRuntime` 仍只做 job-level enqueue，segment plan/checkpoint 仍留在 `module-downloads` 内部，下一步 Rust 代码只能先引入模块内的 resume work payload/plan 边界，不能把 segment payload 塞进 `kernel-jobs`、host transport、frontend 或 SQLite schema。
 
-本轮只覆盖后端 transport/outcome 边界：
+本轮只覆盖文档和 PWF：
 
-- add a RED mapper/transport test first
-- introduce a host-side resume outcome DTO
-- switch `downloads_resume` to `resume_download_outcome`
-- keep start/Fab/Engines accepted-job mappers unchanged
-- keep segment details out of transport
-- update README_IMPL implementation state
+- define downloads-owned resume work payload boundary
+- define what runtime enqueue can and cannot carry
+- define how `resume_partial` and `queue_remaining` should be translated for the later scheduler/driver
+- define the next minimal TDD Rust slice
+- keep Rust code, frontend, host transport, SQLite schema, scheduler execution, and `kernel-jobs` payload changes out of scope
 
 ## Scope
 
 - in scope:
-  - `src-tauri/src/commands/mod.rs`
-  - `src-tauri/src/commands/downloads.rs`
   - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
@@ -31,24 +28,22 @@
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
+  - Rust production code
   - frontend files
+  - host transport IPC shape
   - SQLite schema or concrete segment persistence
   - concrete scheduler/fetch/write/verify execution
   - `kernel-jobs` segment payload or completion API changes
-  - changing start/Fab/Engines accepted-job transport shape
-  - exposing segment-level completion details
   - unrelated dirty worktree files
 
 ## Allowed Files
 
-1. src-tauri/src/commands/mod.rs
-2. src-tauri/src/commands/downloads.rs
-3. docs/modules/downloads/README_IMPL.md
-4. .artifacts/ai/active-task.md
-5. .artifacts/ai/task-plan.md
-6. .artifacts/ai/progress.md
-7. .artifacts/ai/findings.md
-8. .artifacts/ai/handoff.md
+1. docs/modules/downloads/README_IMPL.md
+2. .artifacts/ai/active-task.md
+3. .artifacts/ai/task-plan.md
+4. .artifacts/ai/progress.md
+5. .artifacts/ai/findings.md
+6. .artifacts/ai/handoff.md
 
 ## 控制性文档
 
@@ -62,43 +57,37 @@
 8. docs/TauriDownloadRuntimeDesign.md
 9. docs/TauriBackendCrateLayoutAndUseCaseStubDesign.md
 10. docs/TauriFirstCrateApiDrafts.md
-11. docs/TauriIPCAndStateContractsDesign.md
-12. docs/TauriErrorHandlingAndProjectionDesign.md
-13. docs/TauriTestingStrategyAndQualityGateDesign.md
-14. docs/TauriAIDevelopmentTransactionProtocolDesign.md
-15. current `src-tauri/src/commands/mod.rs` and `downloads.rs` snippets
-16. current `crates/module-downloads/src/facade/mod.rs` outcome snippets
+11. docs/TauriKernelJobsRuntimeDesign.md
+12. docs/TauriTestingStrategyAndQualityGateDesign.md
+13. docs/TauriAIDevelopmentTransactionProtocolDesign.md
 
 ## Hypothesis
 
-- falsifiable local hypothesis: a focused host command mapper test can force `DownloadResumeOutcome::AlreadyComplete` to map into a non-accepted host DTO while `RuntimeAccepted` still maps through accepted-job semantics, without changing frontend, persistence, scheduler, or kernel-jobs contracts.
+- falsifiable local hypothesis: a docs-only implementation guide slice can define the downloads-owned resume work payload boundary precisely enough that the next Rust task can add focused module tests without touching `kernel-jobs`, host transport, frontend, SQLite schema, or concrete scheduler execution.
 
 ## Cheap Check
 
-- add a RED test for the host mapper and confirm it fails because no `DownloadResumeOutcomeDto` / mapper exists yet.
+- update README_IMPL, then run scoped doc/Git validation and read back the scheduler/driver payload boundary wording.
 
 ## Validation Gate
 
-1. Read required root, docs index, module, runtime, IPC, error, testing, collaboration, README_IMPL, and current transport/facade snippets before editing Rust code.
-2. Add RED mapper/transport test before production code.
-3. Confirm RED fails for the expected missing transport outcome mapper.
-4. Add only the minimal DTO/mapper and downloads handler change needed to pass.
-5. Update README_IMPL current-state wording.
-6. Run focused host test, downloads module test if touched, transport smoke, formatter/checks, and scoped `git diff --check`.
+1. Read required root, docs index, downloads module, download runtime, kernel-jobs runtime, crate layout/API, testing, and collaboration docs before editing README_IMPL.
+2. Update README_IMPL with the scheduler/driver payload boundary and next Rust slice.
+3. Record findings and recovery state in `.artifacts/ai`.
+4. Run scoped `git diff --check` for AT-172 files.
+5. Commit the docs/PWF slice locally without staging unrelated dirty files.
 
 ## Validation Result
 
 - passed
-- RED confirmed with focused compile failure: `maps_download_resume` failed because `DownloadResumeOutcomeDto` and `map_download_resume_outcome_result` did not exist.
-- GREEN confirmed with focused mapper tests pass after adding the downloads resume outcome DTO/mapper and switching `downloads_resume` to `resume_download_outcome`.
-- Focused host mapper validation passed: `cargo test -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml maps_download_resume` reported 2 passed, 0 failed.
-- Host transport smoke passed: `cargo test -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml transport_wiring_smoke` reported 1 passed, 0 failed.
-- `cargo fmt --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml -p my-epic-launcher-desktop` completed successfully.
-- Scoped `git diff --check` passed for host commands, README_IMPL, and PWF files with CRLF conversion warnings only.
-- AT-171 is committed locally as a host transport/docs/PWF slice.
+- Required root, docs index, downloads module, runtime, kernel-jobs, crate layout/API, testing, and collaboration documents were read in scoped snippets before editing.
+- `docs/modules/downloads/README_IMPL.md` now defines the scheduler/driver payload boundary: shared `JobRuntime` receives only job-level enqueue, while segment work items remain downloads-owned.
+- `resume_partial` and `queue_remaining` map to future downloads-owned work items; `seal_completed` and `reject_mismatch` do not create scheduler work.
+- Scoped `git diff --check` passed for AT-172 files with CRLF warnings only.
+- AT-172 is ready to be included in the local docs/PWF commit.
+- Resume point: start the minimal Rust slice for module-local `DownloadResumeWorkPlan` / `DownloadResumeWorkItem` derivation before any scheduler execution, transport, frontend, SQLite schema, or `kernel-jobs` payload changes.
 
 ## Notes
 
-- AT-2026-05-16-170 added module-owned `DownloadResumeOutcome`.
-- Resume point: choose whether to continue downloads scheduler/driver payload design or add concrete adapter coverage for resume outcome branches.
+- AT-2026-05-16-171 projected `DownloadResumeOutcome` through host transport.
 - Direct `origin/main` push remains intentionally skipped without explicit approval.

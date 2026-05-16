@@ -79,6 +79,7 @@ Implementation truth should move through module facade and ports first. Do not p
 | `resume_download` mismatch error projection | returns `DL_RESUME_SEGMENT_MISMATCH` and skips runtime enqueue when derived decisions contain `reject_mismatch` | module facade test |
 | `resume_download` all-sealed completion boundary | returns module-owned `DownloadResumeOutcome::AlreadyComplete` from `resume_download_outcome` without runtime enqueue | module facade test |
 | downloads resume host projection | maps `DownloadResumeOutcome` to `DownloadResumeOutcomeDto`; `RuntimeAccepted` wraps accepted-job projection and `AlreadyComplete` uses a non-accepted completed outcome | host mapper tests |
+| resume scheduler/driver payload boundary | documented as downloads-owned work plan derived from `resume_partial` / `queue_remaining`, not a `kernel-jobs` extension or transport payload | README_IMPL |
 | list/get/policy surfaces | not wired yet | future slices |
 
 ---
@@ -107,7 +108,8 @@ Current slice boundary:
 5. Segment decision derivation is implemented for completed sealing, partial resume, queue remaining, and mismatch rejection.
 6. Runtime enqueue-resume is implemented as the first job-level boundary and must stay job-level until a downloads-owned scheduler/driver payload is explicitly introduced.
 7. The all-sealed no-enqueue outcome is represented inside `module-downloads` by `DownloadResumeOutcome::AlreadyComplete` and projected by host transport as `DownloadResumeOutcomeDto::AlreadyComplete`.
-8. Concrete segment persistence, scheduler execution, host transport, and frontend projection remain later slices.
+8. The scheduler/driver payload boundary is documented below; the next Rust slice should stay module-local.
+9. Concrete segment persistence, scheduler execution, host transport, and frontend projection remain later slices.
 
 Do not skip directly from checkpoint to `JobRuntime::resume`. The module owns business checkpoint and resume reconstruction.
 
@@ -267,6 +269,57 @@ Next public boundary:
 
 1. decide how frontend-side callers should consume `DownloadResumeOutcomeDto`;
 2. keep segment-level completion details inside downloads unless a separate projection design says they are safe to surface.
+
+### 7.6 Resume Scheduler/Driver Payload Boundary
+
+`resume_partial` and `queue_remaining` are runtime-work candidates, but the candidate detail is downloads business data. The shared `JobRuntime` still receives only a job-level enqueue request:
+
+1. existing job id;
+2. module `downloads`;
+3. kind `download`;
+4. persisted job priority;
+5. `recoverable = true`;
+6. `extension = None` while the shared runtime host uses `JobRuntime<Extension = ()>`.
+
+The segment work plan must stay inside `module-downloads`. The first module-owned work payload should be derived from the manifest, checkpoint, staging root, and resume decisions after safe mismatch/all-sealed handling.
+
+Minimum module-owned resume work item:
+
+| Field | Source | Purpose |
+|-------|--------|---------|
+| `segment_id` | manifest segment | stable segment identity for scheduler routing |
+| `file_id` | manifest segment | guard against cross-file stale checkpoint use |
+| `source_locator` | manifest segment | provider fetch reference kept behind downloads boundary |
+| `write_target` | manifest segment | staging-relative output target |
+| `expected_hash` | manifest segment | optional verifier input |
+| `start_offset` | decision + checkpoint | `downloaded_bytes` for `resume_partial`, manifest `offset` for `queue_remaining` |
+| `length` | manifest segment | total segment length for scheduler and verifier |
+| `resume_mode` | decision action | `partial` or `from_start` |
+| `checkpoint_ref` | checkpoint segment when present | module-local reference for later checkpoint update |
+
+Decision mapping:
+
+| Decision action | Work-plan behavior |
+|-----------------|--------------------|
+| `seal_completed` | no work item; the segment is already complete |
+| `resume_partial` | create work item with `resume_mode = partial` and `start_offset = downloaded_bytes` |
+| `queue_remaining` | create work item with `resume_mode = from_start` and `start_offset = manifest.offset` |
+| `reject_mismatch` | no work item; return `DL_RESUME_SEGMENT_MISMATCH` before enqueue |
+
+This boundary must not:
+
+1. put segment plans into `kernel-jobs` `extension`;
+2. store resume work items as source-of-truth persistence;
+3. expose segment work items through host transport or frontend IPC;
+4. add SQLite tables or columns;
+5. implement fetch/write/verify scheduler execution.
+
+Next Rust slice:
+
+1. introduce a module-local `DownloadResumeWorkPlan` / `DownloadResumeWorkItem` shape;
+2. add a pure module test that derives work items from a manifest plus completed/partial/missing checkpoints;
+3. prove `resume_partial` and `queue_remaining` become work items while `seal_completed` and `reject_mismatch` do not;
+4. leave runtime enqueue, concrete scheduler execution, and persistence unchanged in that slice.
 
 ---
 

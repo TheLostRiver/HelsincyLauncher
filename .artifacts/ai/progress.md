@@ -4902,3 +4902,50 @@
   - `src-tauri/src/commands/fab.rs` (update)
   - `src-tauri/src/commands/jobs.rs` (update)
   - `src-tauri/tests/transport_wiring_smoke.rs` (update)
+
+### Agent Record: 2026-05-16 13:33:46 +08:00
+- Started AT-2026-05-16-172 after user approved writing the scheduler/driver payload boundary before code.
+- Confirmed current working tree only has unrelated dirty frontend, sqlite, Cargo.lock, `.codex`, and `src/` changes.
+- Read AT-171 active-task recovery state and the relevant downloads runtime, kernel-jobs runtime, crate layout/API, README_IMPL, testing, and collaboration documentation snippets.
+- Key finding: runtime enqueue remains job-level, while `resume_partial` and `queue_remaining` must be translated into a downloads-owned scheduler/driver work plan, not into `kernel-jobs` extension, host transport, frontend, or SQLite schema in this slice.
+
+### Agent Record: 2026-05-16 13:35:18 +08:00
+- Updated `docs/modules/downloads/README_IMPL.md` with the resume scheduler/driver payload boundary.
+- Defined the module-owned resume work item fields, decision-to-work-plan mapping, explicit forbidden surfaces, and the next minimal Rust slice.
+- Kept AT-172 docs-only; no Rust, frontend, transport, SQLite schema, scheduler execution, or `kernel-jobs` payload changes were made.
+
+### Auto Record: 2026-05-16 13:34:42
+- Tool: apply_patch
+- Phase: Phase 47 - Downloads Resume Scheduler Driver Payload Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-16 13:35:05
+- Tool: apply_patch
+- Phase: Phase 47 - Downloads Resume Scheduler Driver Payload Boundary
+- Files:
+  - `docs/modules/downloads/README_IMPL.md` (update)
+
+### Auto Record: 2026-05-16 13:35:27
+- Tool: apply_patch
+- Phase: Phase 47 - Downloads Resume Scheduler Driver Payload Boundary
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Agent Record: 2026-05-16 13:37:40 +08:00
+- Completed AT-2026-05-16-172 after readback confirmed README_IMPL section 7.6 defines the downloads-owned scheduler/driver payload boundary.
+- Validation: scoped `git diff --check` passed for AT-172 files with CRLF warnings only; no Rust, frontend, host transport, SQLite schema, scheduler execution, or `kernel-jobs` payload changes were made.
+- Next backend task is AT-2026-05-16-173: read the required docs again, then add a minimal module-local `DownloadResumeWorkPlan` / `DownloadResumeWorkItem` derivation under TDD.
+
+### Auto Record: 2026-05-16 13:38:56
+- Tool: apply_patch
+- Phase: Phase 48 - Downloads Resume Work Plan Derivation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)

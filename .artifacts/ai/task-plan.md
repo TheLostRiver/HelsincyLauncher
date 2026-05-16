@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 46 - Downloads Resume Outcome Host Projection
+Phase 48 - Downloads Resume Work Plan Derivation
 
 ## Current Focus
 
@@ -126,6 +126,8 @@ Phase 46 - Downloads Resume Outcome Host Projection
 - AT-2026-05-16-169 completed and committed locally after documenting the all-sealed completion boundary and current `AcceptedJob` contract gap before Rust behavior changes.
 - AT-2026-05-16-170 completed and committed locally after adding the module-owned resume outcome boundary for all-sealed plans while preserving the current host transport `AcceptedJob` entry.
 - AT-2026-05-16-171 completed and committed locally after projecting the module-owned downloads resume outcome through host transport without exposing segment details or changing unrelated accepted-job paths.
+- AT-2026-05-16-172 completed the downloads-owned scheduler/driver payload boundary documentation before Rust code starts handing `resume_partial` / `queue_remaining` work to a scheduler.
+- Next planned backend slice: add a minimal module-local downloads resume work plan derivation, guided by `docs/modules/downloads/README_IMPL.md` section 7.6, without touching scheduler execution, persistence, host transport, frontend, or `kernel-jobs` payloads.
 
 ## Phases
 
@@ -406,6 +408,18 @@ Phase 46 - Downloads Resume Outcome Host Projection
 - Atomic tasks: AT-2026-05-16-171
 - **Status:** complete
 
+### Phase 47: Downloads Resume Scheduler Driver Payload Boundary
+
+- Outcome: document the downloads-owned resume work payload boundary so `resume_partial` and `queue_remaining` can later feed a module scheduler/driver without moving segment plans into `kernel-jobs`, host transport, frontend, or SQLite schema.
+- Atomic tasks: AT-2026-05-16-172
+- **Status:** complete
+
+### Phase 48: Downloads Resume Work Plan Derivation
+
+- Outcome: introduce the smallest downloads-owned resume work plan/payload derivation so `resume_partial` and `queue_remaining` can be represented as module-local scheduler inputs while `seal_completed` and `reject_mismatch` produce no work item.
+- Atomic tasks: AT-2026-05-16-173
+- **Status:** planned
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -573,6 +587,8 @@ Phase 46 - Downloads Resume Outcome Host Projection
 163. AT-2026-05-16-169 - completed - documented the all-sealed completion boundary and current `AcceptedJob` contract gap before changing `resume_download` behavior; committed locally.
 164. AT-2026-05-16-170 - completed - added a module-owned resume outcome for all-sealed plans while preserving current host transport compatibility; committed locally.
 165. AT-2026-05-16-171 - completed - projected the module-owned downloads resume outcome through host transport without exposing segment details; committed locally.
+166. AT-2026-05-16-172 - completed - documented the downloads-owned resume scheduler/driver payload boundary before Rust implementation; ready for local commit.
+167. AT-2026-05-16-173 - planned - add the minimal downloads-owned resume work plan/payload derivation with focused TDD before scheduler execution or persistence work.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
@@ -591,7 +607,7 @@ Phase 46 - Downloads Resume Outcome Host Projection
 
 ## Follow-up Queue
 
-1. Choose whether to continue downloads scheduler/driver payload design or add concrete adapter coverage for resume outcome branches.
+1. Start AT-173: add the minimal Rust slice for a downloads-owned resume work plan/payload boundary.
 2. Leave unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, and `src/` changes untouched unless the user explicitly scopes them into a task.
 
 ## Legacy Note

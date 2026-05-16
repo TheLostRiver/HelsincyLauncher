@@ -540,3 +540,12 @@
 - `src-tauri/src/commands/downloads.rs` still returns `CommandResultDto<AcceptedJobDto>` from `downloads_resume`, which cannot distinguish all-sealed already-complete outcomes from accepted queued work.
 - `docs/TauriIPCAndStateContractsDesign.md` says accepted long-job results mean the backend accepted work for async processing; therefore `AlreadyComplete` must use a separate downloads resume outcome DTO rather than `accepted: true`.
 - The next smallest host slice is a mapper-level TDD change: add `DownloadResumeOutcomeDto`, map `RuntimeAccepted` through existing accepted-job semantics, map `AlreadyComplete` without segment details, and switch only `downloads_resume` to the new mapper.
+
+## Phase 47 Resume Scheduler Driver Payload Boundary Findings
+
+- `docs/TauriDownloadRuntimeDesign.md` defines resume as loading checkpoint, validating staging, reconstructing manifest, sealing completed segments, enqueueing remaining segments only, then continuing the scheduler loop.
+- The same runtime design says `resume_partial` should continue from checkpoint bytes when validators allow it, while `queue_remaining` should start the affected segment from its manifest offset.
+- `docs/TauriKernelJobsRuntimeDesign.md` says `kernel-jobs` owns shared job state and queueing, but not module business checkpoints or download segment plans.
+- `kernel-jobs` extension data is only for snapshot summaries, not complete business checkpoint or segment payloads.
+- Downloads integration says the concrete download driver should call planner/scheduler/writer/verifier in `run()`, with business checkpoint writes going back through `DownloadCheckpointRepository`.
+- The next safe implementation slice is module-local: define a downloads-owned resume work plan/payload derived from segment decisions, without touching shared runtime payload, host transport, frontend, SQLite schema, or concrete execution.
