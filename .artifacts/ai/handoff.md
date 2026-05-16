@@ -2,9 +2,9 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-16-177
-- title: Guard all-sealed resume from scheduler
-- status: completed and ready for the AT-177 local commit
+- task id: AT-2026-05-16-178
+- title: Document downloads scheduler execution boundary
+- status: completed and ready for the AT-178 local commit
 
 ## Current In-progress Atomic Task
 
@@ -13,8 +13,6 @@
 ## Current Slice
 
 - `docs/modules/downloads/README_IMPL.md`
-- `crates/module-downloads/src/facade/mod.rs`
-- `crates/module-downloads/src/facade/mod.rs`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -53,6 +51,13 @@
   - Focused all-sealed/no-scheduler guard passed.
   - Full `launcher-module-downloads` suite passed with 21 passed, 0 failed.
   - README_IMPL records that `AlreadyComplete` resumes do not touch scheduler/runtime work.
+- Passed for AT-2026-05-16-178:
+  - Required README, collaboration, docs index, downloads module docs, implementation guide, download runtime, kernel-jobs runtime, testing strategy, AI transaction protocol, crate API draft, architecture, and composition snippets were read before editing.
+  - README_IMPL now contains section `7.8 Concrete Scheduler Execution Boundary`.
+  - The documented next Rust slice is a module-local pending resume work queue/scheduler shell, not concrete fetch/write/verify execution.
+  - The document keeps SQLite schema, host transport, frontend IPC, and `kernel-jobs` segment payloads out of scope.
+  - Scoped `git diff --check` passed with CRLF warnings only.
+  - Path-limited status confirmed AT-178 files plus the unrelated pre-existing `crates/composition-root/src/startup.rs` formatting side effect.
 
 ## Current Git State To Preserve
 
@@ -66,9 +71,8 @@
 
 ## Next Resume Point
 
-1. Commit AT-2026-05-16-177.
-2. The four-task batch requested by the user is complete after AT-177.
-3. Before any further downloads backend coding, reassess README_IMPL and required docs to choose the next slice.
-4. Keep concrete execution, persistence, host transport, frontend, and `kernel-jobs` payload changes out of scope unless explicitly scoped.
-3. Preserve unrelated dirty frontend, sqlite, Cargo.lock, `.codex`, `src/`, and pen files.
-4. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.
+1. Commit AT-2026-05-16-178.
+2. If continuing backend work, the next documented Rust slice is a module-local pending resume work queue/scheduler shell behind `DownloadResumeWorkScheduler`.
+3. That next Rust slice should prove only pending-work registration before runtime enqueue; it must not implement HTTP fetch, staging writes, verification, SQLite schema, host transport, frontend IPC, or `kernel-jobs` segment payloads.
+4. Preserve unrelated dirty frontend, sqlite, Cargo.lock, `.codex`, `src/`, pen files, and the existing `crates/composition-root/src/startup.rs` formatting side effect.
+5. Do not retry direct `origin/main` push without explicit approval; previous direct push attempts were blocked by safety review.

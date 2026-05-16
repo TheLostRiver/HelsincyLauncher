@@ -2,30 +2,32 @@
 
 ## Identity
 
-- task id: AT-2026-05-16-177
-- title: Guard all-sealed resume from scheduler
+- task id: AT-2026-05-16-178
+- title: Document downloads scheduler execution boundary
 - status: completed
 
 ## Goal
 
-补上 all-sealed resume 的 scheduler 边界保护：当 `resume_download_outcome()` 判定所有 segment 已 sealed 并返回 `AlreadyComplete` 时，不能调用 downloads-owned scheduler，也不能调用 shared runtime enqueue。
+补上 downloads resume scheduler execution 的实现边界文档：在写任何真实 fetch/write/verify/scheduler execution 代码前，先把 module-owned scheduler 如何消费 `DownloadResumeWorkPlan`、如何继续保持 `kernel-jobs` job-level 边界、以及下一步最小 Rust slice 写清楚。
 
-本轮只覆盖 focused guard：
+本轮只覆盖 docs-first boundary：
 
-- add focused guard test around all-sealed resume
-- use a failing scheduler fake to prove the scheduler boundary is not touched
-- keep concrete scheduler execution, SQLite schema, frontend, host transport, and `kernel-jobs` payload changes out of scope
+- add a dedicated README_IMPL section for concrete scheduler execution boundaries
+- define ownership split between module facade, downloads scheduler/driver, shared `JobRuntime`, repositories, and future adapters
+- define the next minimal Rust slice after documentation
+- keep actual fetch/write/verify execution, SQLite schema, host transport, frontend, and `kernel-jobs` payload changes out of scope
 
 ## Scope
 
 - in scope:
-  - `crates/module-downloads/src/facade/mod.rs`
   - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
   - `.artifacts/ai/progress.md`
+  - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
+  - Rust production behavior changes
   - concrete scheduler/fetch/write/verify execution
   - frontend files
   - host transport IPC shape
@@ -35,51 +37,72 @@
 
 ## Allowed Files
 
-1. crates/module-downloads/src/facade/mod.rs
-2. docs/modules/downloads/README_IMPL.md
-3. .artifacts/ai/active-task.md
-4. .artifacts/ai/task-plan.md
-5. .artifacts/ai/progress.md
+1. docs/modules/downloads/README_IMPL.md
+2. .artifacts/ai/active-task.md
+3. .artifacts/ai/task-plan.md
+4. .artifacts/ai/progress.md
+5. .artifacts/ai/findings.md
 6. .artifacts/ai/handoff.md
 
 ## 控制性文档
+
+1. README.md
+2. CONTRIBUTING.md
+3. docs/README.md
+4. docs/modules/downloads/README_ARCH.md
+5. docs/modules/downloads/README_API.md
+6. docs/modules/downloads/README_FLOW.md
+7. docs/modules/downloads/README_IMPL.md
+8. docs/TauriDownloadRuntimeDesign.md
+9. docs/TauriBackendCrateLayoutAndUseCaseStubDesign.md
+10. docs/TauriFirstCrateApiDrafts.md
+11. docs/TauriKernelJobsRuntimeDesign.md
+12. docs/TauriTestingStrategyAndQualityGateDesign.md
+13. docs/TauriAIDevelopmentTransactionProtocolDesign.md
+
+Related architecture/collaboration docs read in scoped snippets:
 
 1. docs/modules/downloads/README_IMPL.md
 2. docs/TauriDownloadRuntimeDesign.md
 3. docs/TauriKernelJobsRuntimeDesign.md
 4. docs/TauriTestingStrategyAndQualityGateDesign.md
 5. docs/TauriAIDevelopmentTransactionProtocolDesign.md
+6. docs/TauriRewriteArchitectureBlueprint.md
+7. docs/TauriArchitecturePrinciplesDesign.md
+8. docs/TauriCurrentRepoArchitectureOverview.md
+9. docs/TauriCompositionRootWiringDesign.md
 
 ## Hypothesis
 
-- falsifiable local hypothesis: all-sealed resume already returns `AlreadyComplete` before scheduler/runtime work, and a focused guard can lock that ordering down without production behavior changes.
+- falsifiable local hypothesis: the next safe backend slice is documentation-only because the current README_IMPL explicitly keeps concrete scheduler execution and persistence unchanged until a dedicated scheduler implementation task exists.
 
 ## Cheap Check
 
-- add one focused guard test with a failing scheduler fake, then run focused and full downloads module tests.
+- docs-only validation: path/reference readback, scoped `git diff --check`, and path-limited `git status --short`.
 
 ## Validation Gate
 
-1. Read focused implementation docs before editing Rust.
-2. Add focused all-sealed/no-scheduler guard test.
-3. Update README_IMPL current state.
-4. Run focused test and full `launcher-module-downloads` test.
-5. Run scoped `git diff --check`.
-6. Commit the test/docs/PWF slice locally without staging unrelated dirty files.
+1. Read required docs in scoped snippets before editing README_IMPL.
+2. Update README_IMPL with the dedicated scheduler execution implementation boundary.
+3. Update PWF records for AT-178.
+4. Run scoped `git diff --check` over touched files.
+5. Run path-limited `git status --short`.
+6. Commit the docs/PWF slice locally without staging unrelated dirty files.
 
 ## Validation Result
 
 - passed
-- README_IMPL call-order lines were read before adding the guard.
-- Added focused guard `resume_download_all_sealed_does_not_touch_scheduler` using a failing scheduler fake to prove the scheduler boundary is not touched.
-- Focused guard passed immediately, confirming existing call order already returned `AlreadyComplete` before scheduler/runtime work.
-- Full module test passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` returned 21 passed, 0 failed.
-- Scoped `git diff --check` passed for AT-177 files with CRLF warnings only.
-- Concrete scheduler execution, SQLite schema, frontend, host transport, and `kernel-jobs` payloads remain unchanged.
+- Required README, collaboration, docs index, downloads module docs, implementation guide, download runtime, kernel-jobs runtime, testing strategy, AI transaction protocol, crate API draft, architecture, and composition snippets were read before editing README_IMPL.
+- Added README_IMPL section `7.8 Concrete Scheduler Execution Boundary`.
+- The new boundary keeps command-path scheduler preparation separate from future downloads driver/scheduler execution.
+- The documented next Rust slice is a module-local pending resume work queue/scheduler shell, not real fetch/write/verify behavior.
+- Readback found the new implementation-state row, section heading, pending-work boundary, failure layering, and next Rust slice anchors.
+- Scoped `git diff --check` passed for AT-178 files with CRLF warnings only.
+- Path-limited `git status --short` shows only AT-178 files plus the pre-existing unrelated `crates/composition-root/src/startup.rs` formatting side effect.
 
 ## Notes
 
-- AT-2026-05-16-176 committed scheduler failure guard as `edec23d`.
-- User approved four consecutive tasks without intermediate confirmation; this is task 4/4 in the current batch.
+- AT-2026-05-16-177 committed all-sealed scheduler guard as `31942bd`.
+- User approved starting AT-178 after selecting this docs-first next step.
 - Direct `origin/main` push remains intentionally skipped without explicit approval.
-- Resume point: the four-task batch is complete; reassess README_IMPL implementation map before choosing another downloads backend slice.
+- Shell note: PowerShell `Select-Object -Index (a..b),(c..d)` failed because the comma expression did not bind as the required `Int32[]`; use `-Skip/-First` or an explicit array next time.

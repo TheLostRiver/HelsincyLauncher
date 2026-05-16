@@ -5344,3 +5344,67 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Session Note: 2026-05-16
+
+- Started AT-2026-05-16-178 after confirming AT-177 is committed locally as `31942bd`.
+- Read required context in scoped batches before editing implementation docs:
+  - `README.md`
+  - `CONTRIBUTING.md`
+  - `docs/README.md`
+  - `docs/modules/downloads/README_ARCH.md`
+  - `docs/modules/downloads/README_API.md`
+  - `docs/modules/downloads/README_FLOW.md`
+  - `docs/modules/downloads/README_IMPL.md`
+  - `docs/TauriDownloadRuntimeDesign.md`
+  - `docs/TauriKernelJobsRuntimeDesign.md`
+  - `docs/TauriTestingStrategyAndQualityGateDesign.md`
+  - `docs/TauriAIDevelopmentTransactionProtocolDesign.md`
+  - `docs/TauriFirstCrateApiDrafts.md`
+  - architecture overview/principles/blueprint snippets
+  - composition/backend crate layout snippets
+- Findings for AT-178:
+  - scheduler port and work-plan derivation are already implemented;
+  - concrete scheduler execution and persistence remain explicitly out of scope until a dedicated implementation task defines the boundary;
+  - segment work items must remain downloads-owned and must not move into `kernel-jobs`, host transport, frontend IPC, or SQLite source-of-truth tables in this docs slice.
+- Error encountered: `Select-Object -Index (19..31),(69..85)` failed because PowerShell did not bind the comma expression as the required `Int32[]`; switched to `-Skip/-First` continuous snippets.
+
+### Session Note: 2026-05-16
+
+- Completed AT-2026-05-16-178.
+- Updated `docs/modules/downloads/README_IMPL.md` with section `7.8 Concrete Scheduler Execution Boundary`.
+- The document now defines:
+  - command-path scheduler preparation must not run fetch/write/verify work;
+  - pending resume work should stay module-local and transient;
+  - shared `JobRuntime` remains job-level and does not receive segment payloads;
+  - checkpoint repositories remain business fact source-of-truth, not scheduler work-item storage;
+  - the next Rust slice should implement only a module-local pending resume work queue/scheduler shell.
+- Validation passed:
+  - README_IMPL anchor readback found the new implementation-state row, section heading, pending-work boundary, failure layering, and next Rust slice.
+  - Scoped `git diff --check` passed with CRLF warnings only.
+  - Path-limited status showed AT-178 files plus the unrelated pre-existing `crates/composition-root/src/startup.rs` formatting side effect.
+
+### Auto Record: 2026-05-16 19:36:15
+- Tool: apply_patch
+- Phase: Phase 53 - Downloads Scheduler Execution Boundary Documentation
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-16 19:37:22
+- Tool: apply_patch
+- Phase: Phase 53 - Downloads Scheduler Execution Boundary Documentation
+- Files:
+  - `docs/modules/downloads/README_IMPL.md` (update)
+
+### Auto Record: 2026-05-16 19:38:33
+- Tool: apply_patch
+- Phase: Phase 53 - Downloads Scheduler Execution Boundary Documentation
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)

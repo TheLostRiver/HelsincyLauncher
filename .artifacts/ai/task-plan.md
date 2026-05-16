@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 52 - Downloads All-Sealed Scheduler Guard
+Phase 53 - Downloads Scheduler Execution Boundary Documentation
 
 ## Current Focus
 
@@ -134,7 +134,8 @@ Phase 52 - Downloads All-Sealed Scheduler Guard
 - AT-2026-05-16-175 completed and committed locally as `8846a40`, adding the scheduler port and composition placeholder.
 - AT-2026-05-16-176 is in progress to prove scheduler failures skip shared runtime enqueue.
 - AT-2026-05-16-176 completed and committed locally as `edec23d`, proving scheduler failures skip runtime enqueue.
-- AT-2026-05-16-177 is in progress to guard all-sealed resumes from scheduler/runtime work.
+- AT-2026-05-16-177 completed and was committed locally as `31942bd`, proving all-sealed resumes do not touch scheduler/runtime work.
+- AT-2026-05-16-178 completed the concrete downloads scheduler execution boundary documentation and is ready for the local commit.
 
 ## Phases
 
@@ -451,6 +452,12 @@ Phase 52 - Downloads All-Sealed Scheduler Guard
 - Atomic tasks: AT-2026-05-16-177
 - **Status:** complete
 
+### Phase 53: Downloads Scheduler Execution Boundary Documentation
+
+- Outcome: define the downloads-owned scheduler execution boundary, ownership split, forbidden surfaces, and the next minimal Rust slice before implementing concrete fetch/write/verify behavior.
+- Atomic tasks: AT-2026-05-16-178
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -623,7 +630,8 @@ Phase 52 - Downloads All-Sealed Scheduler Guard
 168. AT-2026-05-16-174 - completed - documented the downloads-owned scheduler/driver boundary before introducing a scheduler port in Rust; committed locally as `6929fa9`.
 169. AT-2026-05-16-175 - completed - added the minimal downloads-owned scheduler port and call order before job-level runtime enqueue; committed locally as `8846a40`.
 170. AT-2026-05-16-176 - completed - added a focused scheduler-failure guard so scheduler errors skip runtime enqueue; committed locally as `edec23d`.
-171. AT-2026-05-16-177 - completed - added a focused all-sealed scheduler guard so already-complete resumes do not touch scheduler/runtime work; ready for local commit.
+171. AT-2026-05-16-177 - completed - added a focused all-sealed scheduler guard so already-complete resumes do not touch scheduler/runtime work; committed locally as `31942bd`.
+172. AT-2026-05-16-178 - completed - documented the downloads-owned scheduler execution boundary, pending-work queue/scheduler shell as the next Rust slice, and unchanged out-of-scope fetch/write/verify/persistence/transport surfaces; ready for local commit.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

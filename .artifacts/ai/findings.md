@@ -11,6 +11,12 @@
 
 ## Research Findings
 
+- AT-2026-05-16-178 pre-edit read confirmed `docs/modules/downloads/README_IMPL.md` currently says scheduler port and work-plan derivation exist, but concrete scheduler execution, persistence, host transport, frontend projection, and `kernel-jobs` payload changes remain later slices until a dedicated implementation task scopes them.
+- Downloads module ARCH/API/FLOW documents keep frontend and host-facing surfaces on aggregate projections/control intents; segment, checkpoint, scheduler, fetcher, writer, and verifier details stay backend-owned and must not leak into UI state.
+- `docs/TauriDownloadRuntimeDesign.md` separates `DownloadScheduler`, `SegmentFetcherPool`, `SegmentWriter`, and `SegmentVerifier`, and the resume flow requires sealed completed segments, partial range resume where safe, and queueing only remaining segments.
+- `docs/TauriKernelJobsRuntimeDesign.md` keeps module business checkpoints and segment plans out of `kernel-jobs`; the shared runtime owns job-level lifecycle/snapshot/lease semantics while `module-downloads` owns resume reconstruction and concrete download driver behavior.
+- Docs-only validation for AT-178 should use path/reference readback, scoped `git diff --check`, and path-limited `git status --short`; no Rust tests are required unless the task adds behavior or mandatory test gates.
+
 - The user explicitly prefers the Windsurf rule surface under `.windsurf/rules` rather than a repo-root `.windsurfrules` file.
 - Because `.github/skills/strict-doc-driven-development/SKILL.md` carries Copilot-specific frontmatter such as `name`, `user-invocable`, and `allowed-tools`, the portable move remains to restate its operational rules in plain text instead of trying to reuse that file verbatim in Windsurf.
 - Once a folder-based Windsurf rule surface is requested, keeping both `.windsurfrules` and `.windsurf/rules/*` would create avoidable drift, so the safer move is a one-file relocation with root file deletion.
