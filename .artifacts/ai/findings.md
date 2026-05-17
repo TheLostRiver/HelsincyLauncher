@@ -856,3 +856,12 @@
 - RED/GREEN confirmed `SqliteDownloadPolicyStore` can load a normalized default policy when no row exists, upsert a normalized policy snapshot, and round-trip bandwidth-limit plus auto-resume facts without applying them to runtime behavior.
 - Composition-root now uses the SQLite policy store for the desktop downloads facade while leaving `RuntimeQueuePolicy` and shared job runtime construction unchanged.
 - Verification passed for focused adapter policy tests, affected composition check, existing downloads module policy tests, rustfmt check, and scoped `git diff --check` with CRLF warnings only.
+
+## Phase 86 Downloads Runtime Policy Application Boundary Findings
+
+- AT-2026-05-17-210 final commit is `2f9e828` and was pushed to `origin/main`.
+- `TauriDownloadRuntimeDesign.md` maps the user-facing `downloadConcurrencySlots: 1..128` to a backend `global_slots = clamp(user_setting, 1, 128)` budget, but also says real scheduling remains constrained by per-job, per-host, and writer-backpressure caps.
+- `TauriKernelJobsRuntimeDesign.md` treats queue policy as shared runtime input, while current Rust only has `RuntimeQueuePolicy { max_concurrent_jobs }` and a read-only `SharedJobRuntimeHost::policy()` snapshot.
+- Current `JobRuntime` exposes no policy mutation API, so applying persisted downloads policy live would require a separate kernel-jobs boundary.
+- The first safe integration slice should be startup seeding: composition-root can load the persisted downloads policy before constructing the shared runtime and pass the loaded `concurrency_slots` to `RuntimeQueuePolicy::new(...)`.
+- README_IMPL 7.26 now pins the first Rust slice to focused composition-root coverage for persisted-policy startup seeding and empty-store fallback, with live `update_policy(...)` runtime mutation explicitly deferred.

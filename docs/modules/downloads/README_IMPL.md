@@ -1250,6 +1250,44 @@ Later slices:
 
 ---
 
+### 7.26 Downloads Runtime Policy Application Boundary
+
+Persisting downloads policy does not by itself mean every policy update can immediately reshape the shared job runtime. The current Rust runtime has an immutable `RuntimeQueuePolicy` snapshot on `SharedJobRuntimeHost`, while `DownloadsFacade::update_policy(...)` only writes the downloads-owned `DownloadPolicyStore`. The next safe runtime integration is therefore startup seeding, not live mutation of active runtime scheduling.
+
+Current Rust reality:
+
+1. `SqliteDownloadPolicyStore` can persist and load `DownloadPolicyDto`.
+2. `DesktopBootstrapConfig.default_download_slots` still seeds both the default persisted downloads policy and the initial `RuntimeQueuePolicy`.
+3. `SharedJobRuntimeHost` exposes `policy()` as a read-only snapshot and has no runtime policy update method.
+4. `JobRuntime` exposes enqueue/snapshot/pause/resume/cancel only; it has no queue-policy mutation contract.
+5. The current runtime does not execute a real scheduler loop, leases, per-module caps, per-host caps, writer backpressure, or live segment scheduling.
+
+Boundary rules:
+
+1. The next Rust slice may use the persisted downloads policy to seed the initial `RuntimeQueuePolicy` during composition-root startup.
+2. Startup seeding should read `DownloadPolicyStore::load_policy(...)`, clamp through the existing policy-store semantics, and pass `concurrency_slots` into `RuntimeQueuePolicy::new(...)`.
+3. If the policy row is absent, startup should continue to use the normalized default derived from `DesktopBootstrapConfig.default_download_slots`.
+4. `DownloadsFacade::update_policy(...)` must remain a persistence operation only in this slice; it must not mutate an already-running `SharedJobRuntimeHost`.
+5. This slice must not add a runtime policy update API, scheduler loop, lease mutation, snapshot migration, active-job rescheduling, pending resume work mutation, host transport command, frontend settings UI, concrete IO, retry/backoff, or terminal completion behavior.
+6. Composition-root remains the only owner that can connect the concrete SQLite policy store to the concrete shared runtime construction.
+
+First Rust slice:
+
+1. add focused composition-root RED coverage proving a preexisting persisted downloads policy seeds `SharedJobRuntimeHost::policy().max_concurrent_jobs`;
+2. add focused coverage proving an empty policy store falls back to `DesktopBootstrapConfig.default_download_slots`;
+3. refactor composition-root startup order only as much as needed to construct/load one `SqliteDownloadPolicyStore` before `build_job_runtime(...)`;
+4. pass the same SQLite policy store into `DownloadFacade` so `get_policy(...)` and runtime startup budget read the same persisted snapshot;
+5. keep `update_policy(...)` live runtime behavior unchanged and document that runtime hot-apply remains a later boundary;
+6. run focused composition-root tests, affected adapter/module policy tests if touched, rustfmt check, scoped `git diff --check`, and path-limited status before commit.
+
+Later slices:
+
+1. Live runtime policy updates need an explicit kernel-jobs mutation contract before `DownloadsFacade::update_policy(...)` can affect active scheduling.
+2. Per-module caps, fairness weights, per-host caps, and writer backpressure must remain separate scheduler-design slices.
+3. Host transport and frontend settings surfaces should wait until startup seeding and live-update semantics are independently stable.
+
+---
+
 ## 8. Error Semantics
 
 Downloads-domain errors use `DL_*` codes when they become stable public classifications.

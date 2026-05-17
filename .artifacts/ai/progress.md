@@ -8245,6 +8245,14 @@
   - `cargo fmt -p launcher-adapter-storage-sqlite -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check`: passed.
   - scoped `git diff --check`: passed with CRLF normalization warnings only.
 
+## Agent Note: 2026-05-17 17:55
+
+- AT-2026-05-17-210 was committed and pushed as `2f9e828 feat: persist downloads policy in sqlite`.
+- Started AT-2026-05-17-211 as a docs-only boundary task before applying persisted downloads policy to runtime construction.
+- Read README_IMPL policy sections, download runtime concurrency/policy sections, kernel-jobs queue policy sections, current `RuntimeQueuePolicy` / `SharedJobRuntimeHost` code, and composition-root bootstrap wiring.
+- Added README_IMPL section 7.26 selecting startup seeding from persisted downloads policy as the first safe runtime integration slice.
+- Scoped `git diff --check` passed with CRLF normalization warnings only; path-limited status shows only AT-211 files.
+
 ### Auto Record: 2026-05-17 15:38:00
 - Tool: apply_patch
 - Phase: Phase 83 - Downloads Policy Store Implementation
@@ -8368,6 +8376,27 @@
   - `.artifacts/ai/progress.md` (update)
 
 ### Auto Record: 2026-05-17 15:57:49
+- Tool: apply_patch
+- Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-17 16:00:48
+- Tool: apply_patch
+- Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
+- Files:
+  - `docs/modules/downloads/README_IMPL.md` (update)
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-17 16:01:25
 - Tool: apply_patch
 - Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
 - Files:
