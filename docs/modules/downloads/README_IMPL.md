@@ -1443,6 +1443,12 @@ Validation should remain in `launcher-kernel-jobs` first:
 2. unknown job ids and missing drivers produce explicit deferred dispositions;
 3. existing enqueue/snapshot/policy tests keep passing.
 
+Current Rust state:
+
+1. `SharedJobRuntimeHost::run_one_execution_turn(...)` loads a stored snapshot by `JobId`, resolves the driver through `JobDriverRegistry<()>`, and calls one `driver.run(...)` turn through `JobExecutionContext`.
+2. Missing snapshots and missing drivers return explicit `JobRunDisposition::Deferred` results instead of silently succeeding.
+3. The method does not mutate lifecycle state, start a scheduler loop, acquire durable leases, create cancellation/snapshot-writer context, or call downloads concrete execution.
+
 ---
 
 ## 8. Error Semantics

@@ -966,3 +966,13 @@
 - The first dispatch boundary should be one-shot and explicit: missing snapshot or missing driver should return `JobRunDisposition::Deferred`, not silently succeed.
 - Scheduler loops, durable leases, snapshot writer/cancellation context, terminal state mutation, downloads driver overrides, concrete IO, retry/backoff, host transport, frontend, and SQLite schema remain later boundaries.
 - Scoped docs-only validation passed with `git diff --check` for README_IMPL and PWF files; warnings were CRLF normalization only.
+
+## Phase 98 Kernel Jobs One-shot Execution Dispatch Findings
+
+- AT-2026-05-17-222 final commit is `feddcfc` and was pushed to `origin/main`.
+- Required context was read in focused chunks: README/docs routing, downloads module ARCH/API/FLOW/README_IMPL 7.29-7.30, kernel-jobs runtime design driver/runtime-host/runtime-context sections, download runtime scheduler/budget notes, testing strategy job-runtime guidance, current `kernel-jobs` runtime/lib/model code, and composition-root driver-registry wiring.
+- README_IMPL 7.30 pins the next code slice to `SharedJobRuntimeHost`: load one snapshot, resolve one driver, and call one `driver.run(...)` through a read-only context.
+- The dispatch method should not mutate state yet. Missing snapshots or drivers should be explicit deferred dispositions so callers can observe that execution was not started.
+- RED/GREEN confirmed the one-shot dispatch boundary: the initial focused tests failed on missing `run_one_execution_turn(...)`; after implementation, focused dispatch tests passed.
+- Full `launcher-kernel-jobs` lib tests passed with 7 tests, and `cargo check -p launcher-composition-root` passed, confirming existing module drivers still compile through the default deferred run path.
+- `run_one_execution_turn(...)` leaves the queued snapshot lifecycle state unchanged, keeping scheduler loops, leases, terminal state mutation, and downloads concrete execution out of scope.

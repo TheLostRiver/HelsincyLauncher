@@ -237,6 +237,31 @@ impl SharedJobRuntimeHost {
             .lock()
             .unwrap_or_else(|poisoned| poisoned.into_inner()) = policy;
     }
+
+    /// Dispatches exactly one execution turn for a stored snapshot through the matching driver.
+    /// 通过匹配的 driver 为已存储快照调度一次执行回合。
+    pub fn run_one_execution_turn(
+        &self,
+        job_id: &JobId,
+        registry: &JobDriverRegistry<()>,
+    ) -> AppResult<JobRunDisposition> {
+        let Some(snapshot) = self.snapshot_store.get(job_id)? else {
+            return Ok(JobRunDisposition::Deferred {
+                reason: format!("snapshot missing for job {job_id}"),
+            });
+        };
+
+        let Some(driver) = registry.resolve(&snapshot.module, &snapshot.kind) else {
+            return Ok(JobRunDisposition::Deferred {
+                reason: format!(
+                    "driver not registered for {}/{}",
+                    snapshot.module, snapshot.kind
+                ),
+            });
+        };
+
+        driver.run(JobExecutionContext::new(&snapshot))
+    }
 }
 
 impl Debug for SharedJobRuntimeHost {
@@ -475,6 +500,95 @@ mod tests {
                 .as_slice(),
             &[expected_job_id]
         );
+    }
+
+    #[test]
+    fn execution_dispatch_calls_registered_driver_once_for_enqueued_snapshot() {
+        let runtime = SharedJobRuntimeHost::new(RuntimeQueuePolicy::new(1));
+        let job_id = JobId::generate();
+        runtime
+            .enqueue(EnqueueJobRequest {
+                job_id: job_id.clone(),
+                module: "test".into(),
+                kind: "run".into(),
+                priority: JobPriority::Normal,
+                recoverable: true,
+                extension: None,
+            })
+            .expect("dispatch fixture should enqueue a queued snapshot");
+
+        let driver = Arc::new(RecordingRunDriver::default());
+        let seen_job_ids = driver.seen_job_ids();
+        let mut registry = super::JobDriverRegistry::new();
+        registry.register(driver);
+
+        let disposition = runtime
+            .run_one_execution_turn(&job_id, &registry)
+            .expect("one-shot dispatch should call the registered driver");
+
+        assert_eq!(disposition, JobRunDisposition::Accepted);
+        assert_eq!(
+            seen_job_ids
+                .lock()
+                .expect("recording driver mutex should not be poisoned")
+                .as_slice(),
+            &[job_id.clone()]
+        );
+        assert_eq!(
+            runtime
+                .snapshot(&job_id)
+                .expect("snapshot query should succeed")
+                .expect("queued snapshot should still exist")
+                .state,
+            JobState::Queued,
+            "one-shot dispatch must not mutate lifecycle state yet"
+        );
+    }
+
+    #[test]
+    fn execution_dispatch_defers_when_snapshot_is_missing() {
+        let runtime = SharedJobRuntimeHost::new(RuntimeQueuePolicy::new(1));
+        let registry = super::JobDriverRegistry::new();
+        let missing_job_id = JobId::generate();
+
+        let disposition = runtime
+            .run_one_execution_turn(&missing_job_id, &registry)
+            .expect("missing snapshot should be a non-terminal dispatch result");
+
+        match disposition {
+            JobRunDisposition::Deferred { reason } => {
+                assert!(reason.contains("snapshot missing"));
+            }
+            other => panic!("missing snapshot should defer dispatch, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn execution_dispatch_defers_when_driver_is_missing() {
+        let runtime = SharedJobRuntimeHost::new(RuntimeQueuePolicy::new(1));
+        let job_id = JobId::generate();
+        runtime
+            .enqueue(EnqueueJobRequest {
+                job_id: job_id.clone(),
+                module: "missing".into(),
+                kind: "driver".into(),
+                priority: JobPriority::Normal,
+                recoverable: true,
+                extension: None,
+            })
+            .expect("dispatch fixture should enqueue a queued snapshot");
+        let registry = super::JobDriverRegistry::new();
+
+        let disposition = runtime
+            .run_one_execution_turn(&job_id, &registry)
+            .expect("missing driver should be a non-terminal dispatch result");
+
+        match disposition {
+            JobRunDisposition::Deferred { reason } => {
+                assert!(reason.contains("driver not registered"));
+            }
+            other => panic!("missing driver should defer dispatch, got {other:?}"),
+        }
     }
 
     fn test_snapshot(module: &str, kind: &str) -> JobSnapshot<()> {

@@ -8968,6 +8968,29 @@
 - Scoped `git diff --check` passed for README_IMPL and PWF files with CRLF normalization warnings only.
 - Marked AT-2026-05-17-222 complete locally; remaining publication step is selective stage, commit, and push.
 
+## 2026-05-17 - AT-2026-05-17-223 started
+
+- Published AT-2026-05-17-222 as commit `feddcfc` and pushed it to `origin/main`.
+- Started AT-2026-05-17-223 from README_IMPL 7.30.
+- Required context read in focused chunks: README.md, CONTRIBUTING.md, docs/README.md, downloads module ARCH/API/FLOW/README_IMPL 7.29-7.30, kernel-jobs runtime design driver/runtime-host/runtime-context sections, download runtime scheduler/budget notes, testing strategy job-runtime guidance, current `kernel-jobs` runtime/lib/model code, and composition-root driver-registry wiring.
+- Planned RED test: enqueue a queued snapshot, register a fake driver, and prove `SharedJobRuntimeHost` has no one-shot dispatch method yet; missing snapshot and missing driver branches should later return explicit deferred dispositions.
+
+## 2026-05-17 - AT-2026-05-17-223 RED/GREEN
+
+- RED validation failed as expected: `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib execution_dispatch` reported missing `SharedJobRuntimeHost::run_one_execution_turn(...)`.
+- Implemented `SharedJobRuntimeHost::run_one_execution_turn(...)` as a one-shot snapshot lookup, driver resolution, and `driver.run(JobExecutionContext::new(&snapshot))` dispatch.
+- GREEN focused validation passed: `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib execution_dispatch` ran 3 tests, all passed.
+
+## 2026-05-17 - AT-2026-05-17-223 completed
+
+- Updated README_IMPL 7.30 current Rust state after adding `SharedJobRuntimeHost::run_one_execution_turn(...)`.
+- Full validation passed:
+  - `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` ran 7 tests, all passed.
+  - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
+  - `rustfmt --edition 2021 --check crates\kernel-jobs\src\runtime.rs` passed.
+  - scoped `git diff --check` passed with CRLF normalization warnings only.
+- Marked AT-2026-05-17-223 complete locally; remaining publication step is selective stage, commit, and push.
+
 ### Auto Record: 2026-05-17 20:44:38
 - Tool: apply_patch
 - Phase: Phase 97 - Shared Runtime Execution Dispatch Boundary
@@ -8982,6 +9005,45 @@
 ### Auto Record: 2026-05-17 20:45:19
 - Tool: apply_patch
 - Phase: Phase 97 - Shared Runtime Execution Dispatch Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 20:47:36
+- Tool: apply_patch
+- Phase: Phase 98 - Kernel Jobs One-shot Execution Dispatch
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 20:48:02
+- Tool: apply_patch
+- Phase: Phase 98 - Kernel Jobs One-shot Execution Dispatch
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\kernel-jobs\src\runtime.rs` (update)
+
+### Auto Record: 2026-05-17 20:48:54
+- Tool: apply_patch
+- Phase: Phase 98 - Kernel Jobs One-shot Execution Dispatch
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\kernel-jobs\src\runtime.rs` (update)
+
+### Auto Record: 2026-05-17 20:49:18
+- Tool: apply_patch
+- Phase: Phase 98 - Kernel Jobs One-shot Execution Dispatch
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 20:50:11
+- Tool: apply_patch
+- Phase: Phase 98 - Kernel Jobs One-shot Execution Dispatch
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
