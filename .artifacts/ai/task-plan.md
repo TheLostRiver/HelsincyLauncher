@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 65 - Downloads Driver Local Execution-Turn Classification
+Phase 66 - Downloads Segment Execution Ports Boundary
 
 ## Current Focus
 
@@ -532,6 +532,12 @@ Phase 65 - Downloads Driver Local Execution-Turn Classification
 - Atomic tasks: AT-2026-05-17-190
 - **Status:** complete
 
+### Phase 66: Downloads Segment Execution Ports Boundary
+
+- Outcome: update downloads README_IMPL after AT-190 and define the next segment execution ports boundary before coding any fetch/write/verify or runtime completion behavior.
+- Atomic tasks: AT-2026-05-17-191
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -718,6 +724,7 @@ Phase 65 - Downloads Driver Local Execution-Turn Classification
 182. AT-2026-05-16-188 - completed - persisted downloads segment checkpoint facts through `SqliteDownloadCheckpointRepository` with focused TDD, then committed locally.
 183. AT-2026-05-17-189 - completed - documented the downloads driver execution boundary after durable segment checkpoint persistence; scoped readback/status and `git diff --check` passed with CRLF warnings only, then committed locally.
 184. AT-2026-05-17-190 - completed - added downloads driver local execution-turn classification with focused TDD, preserving shared runtime and concrete IO boundaries; then committed locally.
+185. AT-2026-05-17-191 - completed - updated README_IMPL with the completed local execution-turn reality and defined the next segment execution ports boundary before coding; then committed locally.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

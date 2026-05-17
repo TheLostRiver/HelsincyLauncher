@@ -6102,6 +6102,19 @@
 - Path-limited status showed only the AT-190 code/PWF files in the intended commit set.
 - AT-190 was committed locally with only the code/PWF file set; verify the final amended hash with `git log --oneline -1`.
 
+## 2026-05-17 - AT-191 Started
+
+- After permissions were opened for local workspace work, confirmed AT-190 final commit as `f5d950d feat: add downloads driver execution classification`.
+- Confirmed the AT-190 file set is clean; broader dirty worktree remains unrelated and must be preserved.
+- Re-read README_IMPL 7.13 plus handoff/task-plan context.
+- Determined that the next direct coding task is not clear enough because README_IMPL still describes the just-completed local execution-turn method as a future option.
+- Started AT-191 as a docs-only implementation-boundary update before any more downloads backend coding.
+- Updated `docs/modules/downloads/README_IMPL.md` so 7.13 records the completed `DownloadDriverExecutionTurn` / `prepare_resume_execution_turn` slice.
+- Added README_IMPL 7.14 defining the segment execution ports boundary and the next code slice as request/result/port shell plus local driver helper only.
+- Scoped `git diff --check` passed for AT-191 files with CRLF warnings only.
+- Path-limited status showed only AT-191 docs/PWF files in the intended commit set.
+- AT-191 was committed locally with only the docs/PWF file set; verify the final amended hash with `git log --oneline -1`.
+
 ### Auto Record: 2026-05-17 00:12:03
 - Tool: apply_patch
 - Phase: Phase 64 - Downloads Driver Execution Boundary
@@ -6279,5 +6292,89 @@
 ### Auto Record: 2026-05-17 12:59:01
 - Tool: apply_patch
 - Phase: Phase 65 - Downloads Driver Local Execution-Turn Classification
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 13:21:05
+- Tool: apply_patch
+- Phase: Phase 65 - Downloads Driver Local Execution-Turn Classification
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-17 13:21:18
+- Tool: apply_patch
+- Phase: Phase 66 - Downloads Segment Execution Ports Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 13:21:36
+- Tool: apply_patch
+- Phase: Phase 66 - Downloads Segment Execution Ports Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 13:21:48
+- Tool: apply_patch
+- Phase: Phase 66 - Downloads Segment Execution Ports Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 13:22:02
+- Tool: apply_patch
+- Phase: Phase 66 - Downloads Segment Execution Ports Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (delete)
+
+### Auto Record: 2026-05-17 13:23:04
+- Tool: apply_patch
+- Phase: Phase 66 - Downloads Segment Execution Ports Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 13:23:27
+- Tool: apply_patch
+- Phase: Phase 66 - Downloads Segment Execution Ports Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 13:23:38
+- Tool: apply_patch
+- Phase: Phase 66 - Downloads Segment Execution Ports Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 13:23:51
+- Tool: apply_patch
+- Phase: Phase 66 - Downloads Segment Execution Ports Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 13:24:01
+- Tool: apply_patch
+- Phase: Phase 66 - Downloads Segment Execution Ports Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 13:24:31
+- Tool: apply_patch
+- Phase: Phase 66 - Downloads Segment Execution Ports Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 13:24:37
+- Tool: apply_patch
+- Phase: Phase 66 - Downloads Segment Execution Ports Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 13:24:43
+- Tool: apply_patch
+- Phase: Phase 66 - Downloads Segment Execution Ports Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 13:24:55
+- Tool: apply_patch
+- Phase: Phase 66 - Downloads Segment Execution Ports Boundary
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)

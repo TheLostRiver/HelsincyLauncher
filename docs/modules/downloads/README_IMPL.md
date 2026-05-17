@@ -84,6 +84,7 @@ Implementation truth should move through module facade and ports first. Do not p
 | resume scheduler/driver consumer boundary | `DownloadResumeWorkScheduler` consumes `DownloadResumeWorkPlan` before job-level runtime enqueue; composition currently uses the no-op placeholder | module facade tests + composition smoke |
 | resume scheduler execution shell | module-local `InMemoryDownloadResumeWorkScheduler` records pending `DownloadResumeWorkPlan` values before runtime enqueue; composition now wires this shell instead of the `()` placeholder; no fetch/write/verify or persistence behavior is wired yet | module facade test + composition smoke |
 | driver pending-work consumption boundary | `DownloadPendingResumeWorkSource` and job-id-scoped draining on `InMemoryDownloadResumeWorkScheduler` prove future driver consumption can drain one job without discarding unrelated pending work; current Rust still has no `JobDriver::run()` | module source/drain tests |
+| driver execution-turn classification | `DownloadJobDriver::prepare_resume_execution_turn(...)` reloads durable checkpoint facts before draining pending work and returns a downloads-owned classification; still no fetch/write/verify, runtime `run()`, snapshot completion, transport, or frontend projection | driver unit tests |
 | list/get/policy surfaces | not wired yet | future slices |
 
 ---
@@ -674,8 +675,9 @@ Current Rust reality:
 1. `resume_download_outcome()` reconstructs resume decisions, schedules pending work, then enqueues a job-level runtime request.
 2. `DownloadJobDriver::restore()` only checks whether durable checkpoint facts exist.
 3. `DownloadJobDriver::drain_pending_resume_work(&JobId)` is a local helper, not a shared runtime callback.
-4. `JobDriverRegistry::resolve(...)` returns trait objects that only support current `JobDriver` trait methods.
-5. There is no runtime-owned lease/execution loop that calls downloads-specific segment execution.
+4. `DownloadJobDriver::prepare_resume_execution_turn(&JobId)` is also a local helper. It reloads checkpoint facts, avoids draining pending work when checkpoint facts are missing, and returns an explicit module-owned classification.
+5. `JobDriverRegistry::resolve(...)` returns trait objects that only support current `JobDriver` trait methods.
+6. There is no runtime-owned lease/execution loop that calls downloads-specific segment execution.
 
 Execution-turn ownership rules:
 
@@ -686,18 +688,28 @@ Execution-turn ownership rules:
 5. It must report progress and terminal state through the future runtime execution context, not by directly editing `JobSnapshotStore`.
 6. Empty pending work is not success. It must become an explicit execution classification such as reconstruct-from-durable-facts, no-op/already-complete, or module execution failure.
 
-Next Rust slice options:
+Current Rust slice:
 
-1. module-local option: add a local `DownloadJobDriver` execution-turn method that drains pending work, reloads checkpoint facts, and returns a module-owned execution classification without performing fetch/write/verify;
-2. runtime-first option: document and then implement the minimal `kernel-jobs` `run()` boundary before adding downloads execution behavior;
+1. `DownloadDriverExecutionTurn` exists as a downloads-owned classification with `CheckpointMissing`, `NoPendingWork`, and `PendingWorkAccepted`.
+2. `DownloadJobDriver::prepare_resume_execution_turn(&JobId)` reloads `DownloadCheckpointRepository` before draining pending work.
+3. A missing checkpoint returns `CheckpointMissing` and preserves pending work in the source so a later durable recovery path can decide what to do.
+4. An existing checkpoint with no pending work returns `NoPendingWork`; this is explicitly not runtime completion.
+5. An existing checkpoint with pending work returns `PendingWorkAccepted` with the reloaded checkpoint and drained job-scoped work.
+6. Focused driver tests cover all three classifications.
+7. `kernel-jobs`, composition-root, host transport, frontend, SQLite schema, runtime snapshot mutation, completion APIs, and concrete fetch/write/verify execution remain unchanged.
+
+Next boundary options:
+
+1. segment-execution-ports option: define the downloads-owned request, port, and result boundary that would later consume `PendingWorkAccepted` work items without implementing real HTTP/disk/hash behavior;
+2. runtime-first option: document and then implement the minimal `kernel-jobs` `run()` boundary before any runtime-owned loop can call the downloads local execution turn;
 3. do not combine both options in one atomic task.
 
-The module-local option is the smaller next slice if the goal is to keep momentum inside downloads:
+The segment-execution-ports option is the smaller next slice if the goal is to keep momentum inside downloads:
 
-1. define a downloads-owned execution outcome such as pending work accepted, no pending work, checkpoint missing, or checkpoint present;
-2. add focused driver tests around `DownloadJobDriver` using injected pending-work source and checkpoint repository;
-3. keep the method local to `module-downloads`; do not modify `kernel-jobs::JobDriver`;
-4. do not call fetcher, writer, verifier, snapshot writer, host transport, frontend, or completion APIs.
+1. define a module-local segment execution request shape derived from `DownloadResumeWorkItem` plus the owning `JobId`;
+2. define narrow fetch/write/verify or executor port boundaries only as far as a focused test needs;
+3. keep all concrete IO implementations out of the first port-boundary slice;
+4. keep `kernel-jobs::JobDriver`, runtime snapshots, host transport, frontend projection, SQLite schema, and completion APIs unchanged.
 
 The runtime-first option is the better next slice if the goal is to make shared scheduling honest before more module-local driver methods:
 
@@ -705,13 +717,49 @@ The runtime-first option is the better next slice if the goal is to make shared 
 2. define the minimal `run()`/execution context API and how it preserves module-owned business checkpoints;
 3. add kernel-jobs tests before any downloads behavior depends on it.
 
-Out of scope until one of those execution boundaries lands:
+Out of scope until segment execution ports and a runtime execution boundary land:
 
 1. HTTP range requests or provider object fetches;
 2. staging file writes, sparse range writes, temp fragments, or final artifact moves;
 3. hash/length verification;
 4. runtime snapshot completion or terminal events for downloads;
 5. host transport or frontend projection of segment execution details.
+
+---
+
+### 7.14 Segment Execution Ports Boundary
+
+AT-190 proves that the driver can classify a future execution turn, not that it can execute segments. The next downloads-owned code boundary must translate `DownloadDriverExecutionTurn::PendingWorkAccepted` into a narrow segment execution handoff while preserving the same ownership split:
+
+1. `module-downloads` owns request/result semantics, checkpoint ordering, and error classification.
+2. provider adapters own provider-specific fetch details.
+3. staging/object-store adapters own disk writes and final artifact movement.
+4. verifier/hash logic owns integrity checks.
+5. `kernel-jobs` owns generic runtime snapshots and leases only after a runtime `run()` boundary exists.
+
+Minimum segment execution request requirements:
+
+1. include the owning `JobId`;
+2. preserve `segment_id`, `file_id`, `source_locator`, `write_target`, `expected_hash`, `start_offset`, `length`, `resume_mode`, and `checkpoint_ref` from `DownloadResumeWorkItem`;
+3. carry enough context for later checkpoint mutation to know which durable facts are being advanced;
+4. stay inside `module-downloads` and not become a host transport DTO or `kernel-jobs` extension.
+
+Port boundary rules:
+
+1. The first Rust slice may introduce request/result types and narrow trait boundaries with focused fake implementations.
+2. The first Rust slice may prove ordering from `PendingWorkAccepted` to request handoff.
+3. The first Rust slice must not perform real HTTP range requests, file writes, hash verification, checkpoint saves, snapshot updates, job completion, or event publication.
+4. Fetch/write/verify may be separate ports or an executor facade over separate internal ports, but the design must not collapse manifest parsing, scheduling, disk writes, verification, checkpoint mutation, and runtime completion into one long-lived worker object.
+5. Errors from a fake execution port must remain module-local until the concrete failure surface is designed.
+
+First Rust slice after this document:
+
+1. add focused RED tests in `launcher-module-downloads` proving `PendingWorkAccepted` can be converted into job-scoped segment execution requests in stable order;
+2. add only the request/result/port shell and local driver helper needed to pass those tests;
+3. keep `kernel-jobs`, composition-root, host transport, frontend, SQLite schema, real fetch/write/verify, checkpoint mutation, and runtime completion unchanged;
+4. run focused module tests, full module tests, rustfmt check, scoped `git diff --check`, and path-limited status before commit.
+
+Only after that request/port handoff exists should a later slice pick one concrete execution concern, such as fake fetch acceptance, staging write contract, verifier contract, or checkpoint mutation after a fake segment result. Each of those must remain its own atomic task.
 
 ---
 

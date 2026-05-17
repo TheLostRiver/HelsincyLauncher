@@ -677,3 +677,10 @@
 - Current `kernel-jobs::JobDriver` still has no `run()` in Rust, so the new behavior must stay a local downloads method and must not mutate runtime snapshots or shared job completion state.
 - `README_IMPL.md` 7.13 makes the smaller next slice explicit: add a downloads-owned execution classification such as pending work accepted, no pending work, checkpoint missing, or checkpoint present.
 - The RED test should prove ordering, especially that checkpoint-missing execution does not drain the in-memory pending-work source.
+
+## Phase 66 Downloads Segment Execution Ports Boundary Findings
+
+- AT-2026-05-17-190 committed locally as `f5d950d`; path-limited AT-190 file status was clean after commit.
+- `README_IMPL.md` 7.13 still described the module-local execution-turn method as a future option, so the implementation document must be updated before more backend coding.
+- The next code task should not jump directly to HTTP range requests, staging writes, hash verification, runtime snapshot completion, or host/frontend projection.
+- The safe next design boundary is a module-local segment execution ports boundary: define how `DownloadDriverExecutionTurn::PendingWorkAccepted` can be translated into future fetch/write/verify/checkpoint operations while keeping concrete IO and runtime `run()` out of scope until separately tested.
