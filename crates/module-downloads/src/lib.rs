@@ -12,8 +12,10 @@ pub use driver::{
     DownloadCheckpointRecord, DownloadCheckpointRepository, DownloadDriverExecutionTurn,
     DownloadJobDriver, DownloadSegmentCheckpointRecord, DownloadSegmentCheckpointStatus,
     DownloadSegmentExecutionPort, DownloadSegmentExecutionRequest, DownloadSegmentExecutionResult,
-    DownloadSegmentExecutor, DownloadSegmentFetchPort, DownloadSegmentFetchResult,
-    DownloadSegmentVerifyPort, DownloadSegmentWritePort, DownloadSegmentWriteResult,
+    DownloadSegmentExecutor, DownloadSegmentFetchOutcome, DownloadSegmentFetchPort,
+    DownloadSegmentFetchResult, DownloadSegmentHandledFailure, DownloadSegmentVerifyOutcome,
+    DownloadSegmentVerifyPort, DownloadSegmentWriteOutcome, DownloadSegmentWritePort,
+    DownloadSegmentWriteResult,
 };
 pub use facade::{
     build_resume_segment_decisions, build_resume_work_plan, DownloadFacade, DownloadJobRecord,

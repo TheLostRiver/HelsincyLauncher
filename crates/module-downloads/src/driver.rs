@@ -233,6 +233,71 @@ pub struct DownloadSegmentWriteResult {
     pub hash_state_ref: Option<String>,
 }
 
+/// Module-local handled failure produced by a fetch/write/verify sub-port.
+/// fetch/write/verify 子端口产生的模块本地已处理失败。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DownloadSegmentHandledFailure {
+    /// Best-known bytes completed before the handled failure was reported.
+    /// 报告已处理失败前已知的已完成字节数。
+    pub downloaded_bytes: u64,
+    /// Module-local diagnostic reason, not a public `DL_*` error code.
+    /// 模块本地诊断原因，不是公开的 `DL_*` 错误码。
+    pub reason: String,
+    /// Retry hint for later policy slices; this does not trigger retry here.
+    /// 供后续策略切片使用的重试提示；这里不会触发重试。
+    pub retryable: bool,
+}
+
+impl DownloadSegmentHandledFailure {
+    fn into_execution_result(
+        self,
+        request: &DownloadSegmentExecutionRequest,
+    ) -> DownloadSegmentExecutionResult {
+        DownloadSegmentExecutionResult::Failed {
+            request: request.clone(),
+            downloaded_bytes: self.downloaded_bytes,
+            reason: self.reason,
+            retryable: self.retryable,
+        }
+    }
+}
+
+/// Fetch sub-port outcome: either fetched bytes or a handled segment failure.
+/// fetch 子端口结果：已拉取字节，或一个已处理的 segment 失败。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum DownloadSegmentFetchOutcome {
+    /// Fetch succeeded and produced in-memory bytes for this boundary slice.
+    /// fetch 成功，并为当前边界切片产生内存字节。
+    Fetched(DownloadSegmentFetchResult),
+    /// Fetch made a segment decision and reported a handled local failure.
+    /// fetch 已经形成 segment 决策，并报告一个已处理的本地失败。
+    Failed(DownloadSegmentHandledFailure),
+}
+
+/// Write sub-port outcome: either staging write facts or a handled segment failure.
+/// write 子端口结果：staging 写入事实，或一个已处理的 segment 失败。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum DownloadSegmentWriteOutcome {
+    /// Write succeeded and produced staging facts for checkpoint mutation.
+    /// write 成功，并产生供 checkpoint mutation 使用的 staging 事实。
+    Written(DownloadSegmentWriteResult),
+    /// Write made a segment decision and reported a handled local failure.
+    /// write 已经形成 segment 决策，并报告一个已处理的本地失败。
+    Failed(DownloadSegmentHandledFailure),
+}
+
+/// Verify sub-port outcome: either verification succeeded or a handled segment failure.
+/// verify 子端口结果：校验成功，或一个已处理的 segment 失败。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum DownloadSegmentVerifyOutcome {
+    /// Verification succeeded for the fetched and written facts.
+    /// 对 fetch/write 事实的校验成功。
+    Verified,
+    /// Verify made a segment decision and reported a handled local failure.
+    /// verify 已经形成 segment 决策，并报告一个已处理的本地失败。
+    Failed(DownloadSegmentHandledFailure),
+}
+
 /// Module-owned fetch boundary used behind `DownloadSegmentExecutionPort`.
 /// 位于 `DownloadSegmentExecutionPort` 背后的模块自有 fetch 边界。
 pub trait DownloadSegmentFetchPort: Send + Sync {
@@ -241,7 +306,7 @@ pub trait DownloadSegmentFetchPort: Send + Sync {
     fn fetch_segment(
         &self,
         request: &DownloadSegmentExecutionRequest,
-    ) -> AppResult<DownloadSegmentFetchResult>;
+    ) -> AppResult<DownloadSegmentFetchOutcome>;
 }
 
 /// Module-owned staging writer boundary used behind `DownloadSegmentExecutionPort`.
@@ -253,7 +318,7 @@ pub trait DownloadSegmentWritePort: Send + Sync {
         &self,
         request: &DownloadSegmentExecutionRequest,
         fetched: &DownloadSegmentFetchResult,
-    ) -> AppResult<DownloadSegmentWriteResult>;
+    ) -> AppResult<DownloadSegmentWriteOutcome>;
 }
 
 /// Module-owned verifier boundary used behind `DownloadSegmentExecutionPort`.
@@ -266,7 +331,7 @@ pub trait DownloadSegmentVerifyPort: Send + Sync {
         request: &DownloadSegmentExecutionRequest,
         fetched: &DownloadSegmentFetchResult,
         written: &DownloadSegmentWriteResult,
-    ) -> AppResult<()>;
+    ) -> AppResult<DownloadSegmentVerifyOutcome>;
 }
 
 /// Port shell for handing segment requests to later fetch/write/verify code.
@@ -310,9 +375,24 @@ impl DownloadSegmentExecutionPort for DownloadSegmentExecutor {
         &self,
         request: &DownloadSegmentExecutionRequest,
     ) -> AppResult<DownloadSegmentExecutionResult> {
-        let fetched = self.fetcher.fetch_segment(request)?;
-        let written = self.writer.write_segment(request, &fetched)?;
-        self.verifier.verify_segment(request, &fetched, &written)?;
+        let fetched = match self.fetcher.fetch_segment(request)? {
+            DownloadSegmentFetchOutcome::Fetched(fetched) => fetched,
+            DownloadSegmentFetchOutcome::Failed(failure) => {
+                return Ok(failure.into_execution_result(request));
+            }
+        };
+        let written = match self.writer.write_segment(request, &fetched)? {
+            DownloadSegmentWriteOutcome::Written(written) => written,
+            DownloadSegmentWriteOutcome::Failed(failure) => {
+                return Ok(failure.into_execution_result(request));
+            }
+        };
+        match self.verifier.verify_segment(request, &fetched, &written)? {
+            DownloadSegmentVerifyOutcome::Verified => {}
+            DownloadSegmentVerifyOutcome::Failed(failure) => {
+                return Ok(failure.into_execution_result(request));
+            }
+        }
 
         Ok(DownloadSegmentExecutionResult::Completed {
             request: request.clone(),
@@ -650,7 +730,9 @@ mod tests {
     use std::collections::HashMap;
     use std::sync::{Arc, Mutex};
 
-    use launcher_kernel_foundation::{IsoDateTime, JobId};
+    use launcher_kernel_foundation::{
+        AppError, AppErrorSeverity, CorrelationId, IsoDateTime, JobId,
+    };
     use launcher_kernel_jobs::{
         JobDriver, JobExecutionContext, JobProgress, JobRunDisposition, JobState, JobUiState,
     };
@@ -665,9 +747,10 @@ mod tests {
         DownloadCheckpointRecord, DownloadCheckpointRepository, DownloadDriverExecutionTurn,
         DownloadJobDriver, DownloadSegmentCheckpointRecord, DownloadSegmentCheckpointStatus,
         DownloadSegmentExecutionPort, DownloadSegmentExecutionRequest,
-        DownloadSegmentExecutionResult, DownloadSegmentExecutor, DownloadSegmentFetchPort,
-        DownloadSegmentFetchResult, DownloadSegmentVerifyPort, DownloadSegmentWritePort,
-        DownloadSegmentWriteResult,
+        DownloadSegmentExecutionResult, DownloadSegmentExecutor, DownloadSegmentFetchOutcome,
+        DownloadSegmentFetchPort, DownloadSegmentFetchResult, DownloadSegmentHandledFailure,
+        DownloadSegmentVerifyOutcome, DownloadSegmentVerifyPort, DownloadSegmentWriteOutcome,
+        DownloadSegmentWritePort, DownloadSegmentWriteResult,
     };
 
     #[derive(Default)]
@@ -815,16 +898,18 @@ mod tests {
         fn fetch_segment(
             &self,
             request: &DownloadSegmentExecutionRequest,
-        ) -> launcher_kernel_foundation::AppResult<DownloadSegmentFetchResult> {
+        ) -> launcher_kernel_foundation::AppResult<DownloadSegmentFetchOutcome> {
             self.requests
                 .lock()
                 .expect("recording fetch port mutex should not be poisoned")
                 .push(request.clone());
 
-            Ok(DownloadSegmentFetchResult {
-                bytes: vec![1, 2, 3, 4],
-                etag: Some(format!("etag-{}", request.segment_id)),
-            })
+            Ok(DownloadSegmentFetchOutcome::Fetched(
+                DownloadSegmentFetchResult {
+                    bytes: vec![1, 2, 3, 4],
+                    etag: Some(format!("etag-{}", request.segment_id)),
+                },
+            ))
         }
     }
 
@@ -847,17 +932,37 @@ mod tests {
             &self,
             request: &DownloadSegmentExecutionRequest,
             fetched: &DownloadSegmentFetchResult,
-        ) -> launcher_kernel_foundation::AppResult<DownloadSegmentWriteResult> {
+        ) -> launcher_kernel_foundation::AppResult<DownloadSegmentWriteOutcome> {
             self.writes
                 .lock()
                 .expect("recording write port mutex should not be poisoned")
                 .push((request.clone(), fetched.bytes.clone()));
 
-            Ok(DownloadSegmentWriteResult {
-                downloaded_bytes: fetched.bytes.len() as u64,
-                partial_path: Some(request.write_target.clone()),
-                hash_state_ref: Some(format!("hash-{}", request.segment_id)),
-            })
+            Ok(DownloadSegmentWriteOutcome::Written(
+                DownloadSegmentWriteResult {
+                    downloaded_bytes: fetched.bytes.len() as u64,
+                    partial_path: Some(request.write_target.clone()),
+                    hash_state_ref: Some(format!("hash-{}", request.segment_id)),
+                },
+            ))
+        }
+    }
+
+    struct HandledFailureWritePort;
+
+    impl DownloadSegmentWritePort for HandledFailureWritePort {
+        fn write_segment(
+            &self,
+            _request: &DownloadSegmentExecutionRequest,
+            _fetched: &DownloadSegmentFetchResult,
+        ) -> launcher_kernel_foundation::AppResult<DownloadSegmentWriteOutcome> {
+            Ok(DownloadSegmentWriteOutcome::Failed(
+                DownloadSegmentHandledFailure {
+                    downloaded_bytes: 2,
+                    reason: "staging writer reported a handled short write".into(),
+                    retryable: true,
+                },
+            ))
         }
     }
 
@@ -881,7 +986,7 @@ mod tests {
             request: &DownloadSegmentExecutionRequest,
             _fetched: &DownloadSegmentFetchResult,
             written: &DownloadSegmentWriteResult,
-        ) -> launcher_kernel_foundation::AppResult<()> {
+        ) -> launcher_kernel_foundation::AppResult<DownloadSegmentVerifyOutcome> {
             self.verifications
                 .lock()
                 .expect("recording verify port mutex should not be poisoned")
@@ -891,7 +996,26 @@ mod tests {
                     written.downloaded_bytes,
                 ));
 
-            Ok(())
+            Ok(DownloadSegmentVerifyOutcome::Verified)
+        }
+    }
+
+    struct InfrastructureFailureVerifyPort;
+
+    impl DownloadSegmentVerifyPort for InfrastructureFailureVerifyPort {
+        fn verify_segment(
+            &self,
+            _request: &DownloadSegmentExecutionRequest,
+            _fetched: &DownloadSegmentFetchResult,
+            _written: &DownloadSegmentWriteResult,
+        ) -> launcher_kernel_foundation::AppResult<DownloadSegmentVerifyOutcome> {
+            Err(AppError::new(
+                "TEST_EXECUTOR_INFRASTRUCTURE",
+                "executor infrastructure is unavailable",
+                false,
+                AppErrorSeverity::Fatal,
+                CorrelationId::new("executor-infra"),
+            ))
         }
     }
 
@@ -1551,6 +1675,52 @@ mod tests {
             verifier.verifications(),
             vec![(request, Some("hash-segment-executor".into()), 4)],
             "verify port should receive the request hash expectation and written byte count"
+        );
+    }
+
+    #[test]
+    fn download_segment_executor_adapter_maps_handled_write_failure_to_failed_result() {
+        let job_id = JobId::generate();
+        let request = make_segment_execution_request(&job_id, "segment-write-failed");
+        let executor = DownloadSegmentExecutor::new(
+            Arc::new(RecordingFetchPort::default()),
+            Arc::new(HandledFailureWritePort),
+            Arc::new(RecordingVerifyPort::default()),
+        );
+
+        let result = executor
+            .accept_segment_execution(&request)
+            .expect("handled write failure should stay in the local result channel");
+
+        assert_eq!(
+            result,
+            DownloadSegmentExecutionResult::Failed {
+                request,
+                downloaded_bytes: 2,
+                reason: "staging writer reported a handled short write".into(),
+                retryable: true,
+            },
+            "handled sub-port failures should become module-local failed execution results"
+        );
+    }
+
+    #[test]
+    fn download_segment_executor_adapter_propagates_infrastructure_errors() {
+        let job_id = JobId::generate();
+        let request = make_segment_execution_request(&job_id, "segment-infrastructure-error");
+        let executor = DownloadSegmentExecutor::new(
+            Arc::new(RecordingFetchPort::default()),
+            Arc::new(RecordingWritePort::default()),
+            Arc::new(InfrastructureFailureVerifyPort),
+        );
+
+        let error = executor
+            .accept_segment_execution(&request)
+            .expect_err("infrastructure failures should propagate as AppError");
+
+        assert_eq!(
+            error.code, "TEST_EXECUTOR_INFRASTRUCTURE",
+            "true infrastructure errors must not be converted into local segment results"
         );
     }
 

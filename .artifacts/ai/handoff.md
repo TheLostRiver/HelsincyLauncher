@@ -279,6 +279,21 @@
   - separate test preserves true `AppError` propagation;
   - rerun focused adapter tests and existing failed-result checkpoint tests.
 
+## Latest Handoff - AT-2026-05-17-241
+
+- Status: implementation validated; commit/push pending at the time of this note.
+- Scope completed:
+  - Added module-local handled-failure/outcome types for fetch/write/verify sub-ports.
+  - Updated `DownloadSegmentExecutor` so handled sub-port failures become existing `DownloadSegmentExecutionResult::Failed`.
+  - Preserved `AppError` propagation for infrastructure/configuration failures.
+  - Re-exported the new outcome/failure types from `launcher-module-downloads`.
+- Validation passed:
+  - focused adapter tests
+  - failed-result checkpoint mutation test
+  - full `launcher-module-downloads --lib`
+  - `launcher-composition-root` check
+  - scoped rustfmt check
+
 ## Dirty Worktree To Preserve
 
 - Unrelated unstaged/unknown work remains present and must not be committed with AT-218:

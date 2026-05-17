@@ -1146,3 +1146,13 @@
 - The next safe code target should not invent retry/backoff or terminal runtime behavior. It should first define when a sub-port failure is a handled segment execution failure versus when an infrastructure/configuration error remains an `AppError`.
 - README_IMPL 7.36 now defines that handled fetch/write/verify segment failures become in-band `DownloadSegmentExecutionResult::Failed`, while infrastructure/configuration errors that prevent a segment decision may still propagate as `AppError`.
 - The next Rust slice is now concrete enough: add fake sub-port coverage for a handled write or verify failure, map it to `Failed`, preserve `AppError` propagation for true infrastructure failures, and rerun focused adapter plus existing failed-checkpoint tests.
+
+## Phase 116 Downloads Segment Executor Handled Failure Mapping Findings
+
+- Required context was read in focused chunks: README/docs routing, ModuleDocumentationStandard documentation-budget rules, README_IMPL 7.35/7.36, error handling/projection rules, `AppError` shape, and current executor/sub-port traits/tests.
+- `DownloadSegmentExecutor` currently maps only the successful fake path into `Completed`; sub-port failures can only be represented as `AppError` because fetch/write/verify trait methods return `AppResult<...>` or `AppResult<()>`.
+- To keep public `DL_*` projection out of scope, the code slice should add module-local handled-failure outcomes for sub-ports and have the adapter translate those to `DownloadSegmentExecutionResult::Failed`.
+- `AppError` should remain available for true infrastructure/configuration failures, e.g. the sub-port cannot make a segment decision at all.
+- RED/GREEN confirmed the adapter now distinguishes handled segment failures from infrastructure errors: `DownloadSegmentWriteOutcome::Failed` maps to `DownloadSegmentExecutionResult::Failed`, while a verifier `AppError` still propagates unchanged.
+- New outcome types remain module-local/public Rust extension points only; no public `DL_*` execution projection, transport DTO, retry/backoff, terminal runtime state, production wiring, real IO, or frontend work was added.
+- Validation passed for focused adapter tests, the existing failed-result checkpoint mutation test, full `launcher-module-downloads` lib tests, `launcher-composition-root` check, and scoped rustfmt.
