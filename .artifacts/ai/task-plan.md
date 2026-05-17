@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 77 - Downloads Fake Local Mixed-result Checkpoint Orchestration
+Phase 78 - Downloads Get-job Snapshot Query Boundary
 
 ## Current Focus
 
@@ -604,6 +604,12 @@ Phase 77 - Downloads Fake Local Mixed-result Checkpoint Orchestration
 - Atomic tasks: AT-2026-05-17-202
 - **Status:** complete
 
+### Phase 78: Downloads Get-job Snapshot Query Boundary
+
+- Outcome: document the first safe `list/get/policy surfaces` slice as `DownloadsFacade::get_job_snapshot(...)`, using existing module job lookup plus shared runtime snapshot lookup while keeping list pagination, policy persistence, runtime API expansion, adapters, transport, frontend, and concrete execution out of scope.
+- Atomic tasks: AT-2026-05-17-203
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -802,6 +808,7 @@ Phase 77 - Downloads Fake Local Mixed-result Checkpoint Orchestration
 194. AT-2026-05-17-200 - completed - added fake failed-result checkpoint mutation with focused TDD, keeping retry/backoff, public error projection, terminal runtime state, concrete IO, SQLite adapter changes, transport, composition-root, and frontend out of scope; then committed locally, with initial hash `94573e3` before PWF backfill amend.
 195. AT-2026-05-17-201 - completed - defined fake local mixed-result checkpoint orchestration boundary, keeping retry/backoff, public error projection, terminal runtime state, concrete IO, SQLite adapter changes, transport, composition-root, and frontend out of scope; then committed locally, with initial hash `9f6402a` before PWF backfill amend.
 196. AT-2026-05-17-202 - completed - updated fake local resume execution to persist failed fake results through existing checkpoint helpers, keeping retry/backoff, public error projection, terminal runtime state, concrete IO, SQLite adapter changes, transport, composition-root, and frontend out of scope; then committed locally, with initial hash `eae3c4f` before PWF backfill amend.
+197. AT-2026-05-17-203 - completed - documented the downloads get-job snapshot query boundary before Rust coding, after confirming `list_jobs` and policy surfaces need separate future design; then committed locally, with initial hash `98c491b` before PWF backfill amend.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

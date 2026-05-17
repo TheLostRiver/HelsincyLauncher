@@ -782,3 +782,13 @@
 - RED/GREEN confirmed `execute_local_resume_turn(...)` now records failed fake results through the existing failed checkpoint helper while preserving the existing completed-result orchestration path.
 - Full downloads module tests passed with 38 tests after the mixed-result orchestration update.
 - RED/GREEN confirmed `record_failed_segment_checkpoints(...)` can replace a matching failed segment checkpoint, preserve existing partial persistence tokens, ignore accepted/completed results, and save through the repository port without widening into retry/backoff, public error projection, runtime terminal state, concrete IO, transport, composition-root, SQLite adapter/schema, or frontend behavior.
+
+## Phase 78 Downloads Get-job Snapshot Query Boundary Findings
+
+- AT-2026-05-17-202 final commit is `043f3f7` and was pushed to `origin/main`.
+- README_IMPL listed `list/get/policy surfaces` as the only remaining broad unwired row, but it did not define an executable slice.
+- Current contracts already define `GetDownloadJobQueryDto`, `DownloadJobSnapshotDto`, and related list/policy DTOs.
+- Current facade methods still return `DOWNLOADS_NOT_WIRED` for `list_jobs`, `get_job_snapshot`, `get_policy`, and `update_policy`.
+- Current `JobRuntime` exposes `snapshot(job_id)` but no list query, so `list_jobs` should not be the first code slice without a separate runtime/read-source design.
+- Current policy DTOs exist, but there is no policy source of truth or policy repository in module deps, so `get_policy` / `update_policy` also need a separate boundary.
+- The smallest next Rust slice is `get_job_snapshot(...)`: verify the downloads module record exists, read the shared runtime snapshot, and project a `DownloadJobSnapshotDto` with conservative module extension facts.

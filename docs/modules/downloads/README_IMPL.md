@@ -93,7 +93,7 @@ Implementation truth should move through module facade and ports first. Do not p
 | fake segment failure result contract | `DownloadSegmentExecutionResult::Failed` carries request facts, downloaded bytes known at failure time, a local reason string, and a retryable hint without public `DL_*` execution projection, checkpoint mutation, retry policy, runtime completion, concrete IO, transport, or frontend behavior | driver unit tests |
 | fake failed-result checkpoint mutation | `DownloadJobDriver::record_failed_segment_checkpoints(...)` reloads checkpoint facts, applies same-job failed fake results as `Failed` segment status/progress, and saves through `DownloadCheckpointRepository` while deferring retry/backoff, public error projection, terminal runtime state, concrete IO, SQLite adapter/schema, transport, composition-root, and frontend behavior | driver unit tests |
 | fake local mixed-result checkpoint orchestration | `execute_local_resume_turn(...)` records both completed and failed fake results through existing checkpoint mutation helpers while deferring retry/backoff, public error projection, terminal runtime state, concrete IO, SQLite adapter/schema, transport, composition-root, and frontend behavior | driver unit tests |
-| list/get/policy surfaces | not wired yet | future slices |
+| list/get/policy surfaces | next boundary chooses `get_job_snapshot` first; `list_jobs` and policy persistence remain later | README_IMPL |
 
 ---
 
@@ -1048,6 +1048,48 @@ Completed by AT-202:
 
 ---
 
+### 7.22 Downloads Get-job Snapshot Query Boundary
+
+The remaining `list/get/policy surfaces` should not land as one broad query/policy feature. The first safe slice is `DownloadsFacade::get_job_snapshot(...)` because the current Rust surface already has both inputs needed for a narrow read:
+
+1. `DownloadJobRepository::get_job(...)` can confirm the requested job is owned by the downloads module and can provide intake metadata such as `target_id`, `kind`, `install_intent`, and `priority`.
+2. `JobRuntime::snapshot(...)` can read the shared runtime snapshot for the same `JobId`.
+3. `DownloadJobSnapshotDto` is already a module-owned read model alias over `JobSnapshot<DownloadJobExtensionDto>`.
+
+Current Rust reality:
+
+1. `ListDownloadJobsQueryDto`, `GetDownloadJobQueryDto`, and `GetDownloadPolicyQueryDto` already exist in the contracts layer.
+2. `DownloadJobListDto`, `DownloadJobSnapshotDto`, and `DownloadPolicyDto` already exist in the read-model layer.
+3. `DownloadsFacade::list_jobs(...)`, `DownloadsFacade::get_job_snapshot(...)`, `DownloadsFacade::get_policy(...)`, and `DownloadsFacade::update_policy(...)` still return `DOWNLOADS_NOT_WIRED`.
+4. The shared `JobRuntime` trait exposes `snapshot(job_id)` but does not expose a list query.
+5. The current downloads module has no persisted policy repository or user-facing policy settings adapter.
+
+Boundary rules:
+
+1. The next Rust slice should implement only `get_job_snapshot(...)`.
+2. The method should first verify the downloads module record exists with `DownloadJobRepository::get_job(...)`.
+3. If the module record is missing, reuse the existing `DL_JOB_NOT_FOUND` classification instead of inventing a query-specific duplicate.
+4. If the runtime snapshot is missing after the module record exists, return the stable downloads query error `DL_JOB_SNAPSHOT_MISSING`.
+5. If both records exist, return `DownloadJobSnapshotDto` by copying shared runtime snapshot facts and attaching a downloads extension built from the module job record plus conservative progress placeholders: `completed_bytes = 0`, `total_bytes = None`, `retryable = true`.
+6. This slice must not implement `list_jobs`, `get_policy`, or `update_policy`.
+7. This slice must not add runtime list APIs, pagination repositories, SQLite schema/adapter work, host transport changes, frontend behavior, concrete HTTP/file/hash execution, retry/backoff, or terminal runtime completion.
+
+First Rust slice:
+
+1. add a focused RED test proving `get_job_snapshot(...)` returns a downloads-owned snapshot after `start_download(...)` has persisted the module record and enqueued the shared runtime job;
+2. add a focused RED test proving a missing runtime snapshot after a present module record returns `DL_JOB_SNAPSHOT_MISSING`;
+3. implement only the facade query method and the smallest private projection helper needed by those tests;
+4. leave `list_jobs(...)`, `get_policy(...)`, and `update_policy(...)` as `DOWNLOADS_NOT_WIRED`;
+5. run focused module tests, full module tests, rustfmt check, scoped `git diff --check`, and path-limited status before commit.
+
+Later slices:
+
+1. `list_jobs(...)` needs an explicit read source or runtime list API design because the current `JobRuntime` trait only supports `snapshot(job_id)`.
+2. `get_policy(...)` and `update_policy(...)` need a policy source of truth before they can safely project `DownloadPolicyDto`.
+3. Policy persistence, queue-budget mutation, and user settings integration should stay separate from the first `get_job_snapshot(...)` slice.
+
+---
+
 ## 8. Error Semantics
 
 Downloads-domain errors use `DL_*` codes when they become stable public classifications.
@@ -1063,6 +1105,8 @@ Current stable resume errors:
 `DOWNLOADS_NOT_WIRED` remains a temporary implementation placeholder, not a final domain error.
 
 `DL_RESUME_SEGMENT_MISMATCH` is the current narrow projection for stale or unsafe segment checkpoint facts. It must stop before runtime enqueue, must not silently restart the whole job, and must not expose segment internals through host transport or frontend IPC.
+
+`DL_JOB_SNAPSHOT_MISSING` is reserved by the get-job snapshot boundary for the next code slice. It should become stable only when `DownloadsFacade::get_job_snapshot(...)` is implemented and tested.
 
 ---
 

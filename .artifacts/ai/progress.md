@@ -7833,3 +7833,54 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 15:01:09
+- Tool: apply_patch
+- Phase: Phase 77 - Downloads Fake Local Mixed-result Checkpoint Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-17 15:01:30
+- Tool: apply_patch
+- Phase: Phase 77 - Downloads Fake Local Mixed-result Checkpoint Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+## 2026-05-17 - AT-203 docs boundary selected
+
+- AT-202 final commit `043f3f7` was pushed to `origin/main`.
+- Read the required docs and code surfaces for the downloads query/policy gap in batches: root README, CONTRIBUTING, docs map, downloads module ARCH/API/FLOW/IMPL, download runtime query contracts, IPC query catalog/envelope, AI transaction protocol, downloads contracts DTOs, facade query stubs, and kernel-jobs runtime snapshot surface.
+- Selected a docs-first AT-203 boundary because README_IMPL only had a broad `list/get/policy surfaces` future row.
+- The chosen next code slice is `DownloadsFacade::get_job_snapshot(...)`, not `list_jobs` or policy, because existing code already has `DownloadJobRepository::get_job(...)` and `JobRuntime::snapshot(...)`.
+- Updated README_IMPL with section 7.22 to define current Rust reality, boundary rules, first RED-test targets, and explicit exclusions.
+- Tightened the missing runtime snapshot branch to the exact future query error code `DL_JOB_SNAPSHOT_MISSING`.
+- Scoped `git diff --check` over AT-203 files passed with CRLF normalization warnings only.
+- Initial AT-203 local commit before PWF hash backfill amend: `98c491b`.
+
+### Auto Record: 2026-05-17 15:02:21
+- Tool: apply_patch
+- Phase: Phase 78 - Downloads Get-job Snapshot Query Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 15:02:58
+- Tool: apply_patch
+- Phase: Phase 78 - Downloads Get-job Snapshot Query Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 15:03:36
+- Tool: apply_patch
+- Phase: Phase 78 - Downloads Get-job Snapshot Query Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
