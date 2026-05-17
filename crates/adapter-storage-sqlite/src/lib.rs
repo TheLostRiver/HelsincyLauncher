@@ -12,8 +12,9 @@ use launcher_kernel_jobs::{
     JobPriority, JobProgress, JobSnapshot, JobSnapshotStore, JobState, JobUiState,
 };
 use launcher_module_downloads::{
-    contracts::ListDownloadJobsQueryDto, DownloadCheckpointRecord, DownloadCheckpointRepository,
-    DownloadJobRecord, DownloadJobRecordState, DownloadJobRepository,
+    contracts::{DownloadPolicyDto, ListDownloadJobsQueryDto},
+    DownloadCheckpointRecord, DownloadCheckpointRepository, DownloadJobRecord,
+    DownloadJobRecordState, DownloadJobRepository, DownloadPolicyStore,
     DownloadSegmentCheckpointRecord, DownloadSegmentCheckpointStatus,
 };
 use launcher_module_fab::{
@@ -397,6 +398,186 @@ impl DownloadJobRepository for SqliteDownloadJobRepository {
         })?;
         Ok(())
     }
+}
+
+const DOWNLOAD_POLICY_SCOPE_DEFAULT: &str = "default";
+const MIN_DOWNLOAD_POLICY_CONCURRENCY_SLOTS: u32 = 1;
+const MAX_DOWNLOAD_POLICY_CONCURRENCY_SLOTS: u32 = 128;
+
+/// SQLite-backed downloads policy snapshot store.
+/// 基于 SQLite 的 downloads 策略快照存储。
+#[derive(Debug, Clone)]
+pub struct SqliteDownloadPolicyStore {
+    config: SqliteStorageAdapterConfig,
+    default_policy: DownloadPolicyDto,
+}
+
+impl SqliteDownloadPolicyStore {
+    /// Creates the store and ensures the policy snapshot table exists.
+    /// 创建策略存储，并确保策略快照表已经存在。
+    pub fn new(config: SqliteStorageAdapterConfig, default_concurrency_slots: u32) -> Self {
+        let store = Self {
+            config,
+            default_policy: default_download_policy_snapshot(default_concurrency_slots),
+        };
+        store
+            .ensure_table()
+            .expect("SqliteDownloadPolicyStore: failed to create policy table");
+        store
+    }
+
+    /// Exposes the read-only adapter configuration for wiring diagnostics.
+    /// 暴露只读 adapter 配置，供装配诊断确认数据库绑定。
+    pub fn config(&self) -> &SqliteStorageAdapterConfig {
+        &self.config
+    }
+
+    fn ensure_table(&self) -> AppResult<()> {
+        let conn = self.open_connection()?;
+        conn.execute_batch(
+            "CREATE TABLE IF NOT EXISTS download_policy_snapshot (
+                scope TEXT PRIMARY KEY NOT NULL,
+                concurrency_slots INTEGER NOT NULL,
+                bandwidth_limit_bytes_per_sec TEXT NULL,
+                auto_resume INTEGER NOT NULL,
+                updated_at TEXT NOT NULL
+            );",
+        )
+        .map_err(|e| sqlite_write_error(format!("download policy table init failed: {e}")))?;
+        Ok(())
+    }
+
+    fn open_connection(&self) -> AppResult<rusqlite::Connection> {
+        rusqlite::Connection::open(self.config.database_path()).map_err(|e| {
+            launcher_kernel_foundation::AppError::new(
+                "SQLITE_OPEN_ERROR",
+                format!("failed to open sqlite database: {e}"),
+                false,
+                launcher_kernel_foundation::AppErrorSeverity::Warning,
+                launcher_kernel_foundation::CorrelationId::generate(),
+            )
+        })
+    }
+
+    fn load_policy_snapshot(&self) -> AppResult<DownloadPolicyDto> {
+        let conn = self.open_connection()?;
+        let mut stmt = conn
+            .prepare(
+                "SELECT concurrency_slots, bandwidth_limit_bytes_per_sec, auto_resume
+                 FROM download_policy_snapshot
+                 WHERE scope = ?1",
+            )
+            .map_err(|e| {
+                sqlite_read_error(format!("failed to prepare download policy select: {e}"))
+            })?;
+        let mut rows = stmt
+            .query(rusqlite::params![DOWNLOAD_POLICY_SCOPE_DEFAULT])
+            .map_err(|e| sqlite_read_error(format!("download policy query failed: {e}")))?;
+
+        let Some(row) = rows
+            .next()
+            .map_err(|e| sqlite_read_error(format!("download policy row read failed: {e}")))?
+        else {
+            return Ok(self.default_policy.clone());
+        };
+
+        let concurrency_slots_raw: i64 = row.get(0).map_err(|e| {
+            sqlite_read_error(format!(
+                "download policy concurrency_slots decode failed: {e}"
+            ))
+        })?;
+        let bandwidth_limit_raw: Option<String> = row.get(1).map_err(|e| {
+            sqlite_read_error(format!(
+                "download policy bandwidth_limit_bytes_per_sec decode failed: {e}"
+            ))
+        })?;
+        let auto_resume_raw: i64 = row.get(2).map_err(|e| {
+            sqlite_read_error(format!("download policy auto_resume decode failed: {e}"))
+        })?;
+
+        Ok(normalize_download_policy_snapshot(DownloadPolicyDto {
+            concurrency_slots: clamp_download_policy_slots(concurrency_slots_raw),
+            bandwidth_limit_bytes_per_sec: decode_optional_u64_text(
+                "download policy bandwidth_limit_bytes_per_sec",
+                bandwidth_limit_raw.as_deref(),
+            )?,
+            auto_resume: auto_resume_raw != 0,
+        }))
+    }
+
+    fn save_policy_snapshot(&self, policy: &DownloadPolicyDto) -> AppResult<()> {
+        let normalized = normalize_download_policy_snapshot(policy.clone());
+        let conn = self.open_connection()?;
+        conn.execute(
+            "INSERT INTO download_policy_snapshot
+                (scope, concurrency_slots, bandwidth_limit_bytes_per_sec, auto_resume, updated_at)
+             VALUES (?1, ?2, ?3, ?4, ?5)
+             ON CONFLICT(scope) DO UPDATE SET
+                concurrency_slots = excluded.concurrency_slots,
+                bandwidth_limit_bytes_per_sec = excluded.bandwidth_limit_bytes_per_sec,
+                auto_resume = excluded.auto_resume,
+                updated_at = excluded.updated_at",
+            rusqlite::params![
+                DOWNLOAD_POLICY_SCOPE_DEFAULT,
+                i64::from(normalized.concurrency_slots),
+                normalized
+                    .bandwidth_limit_bytes_per_sec
+                    .map(|limit| limit.to_string()),
+                encode_bool(normalized.auto_resume),
+                IsoDateTime::now().to_string(),
+            ],
+        )
+        .map_err(|e| sqlite_write_error(format!("download policy upsert failed: {e}")))?;
+        Ok(())
+    }
+}
+
+impl DownloadPolicyStore for SqliteDownloadPolicyStore {
+    fn load_policy(&self) -> AppResult<DownloadPolicyDto> {
+        self.load_policy_snapshot()
+    }
+
+    fn save_policy(&self, policy: &DownloadPolicyDto) -> AppResult<()> {
+        self.save_policy_snapshot(policy)
+    }
+}
+
+// Builds the default persisted policy without deriving runtime queue budgets.
+// 构建默认持久化策略，但不在这里派生 runtime 队列预算。
+fn default_download_policy_snapshot(concurrency_slots: u32) -> DownloadPolicyDto {
+    normalize_download_policy_snapshot(DownloadPolicyDto {
+        concurrency_slots,
+        bandwidth_limit_bytes_per_sec: None,
+        auto_resume: true,
+    })
+}
+
+// Keeps adapter reads and writes aligned with the module-owned user policy range.
+// 让 adapter 读写与模块拥有的用户策略范围保持一致。
+fn normalize_download_policy_snapshot(policy: DownloadPolicyDto) -> DownloadPolicyDto {
+    DownloadPolicyDto {
+        concurrency_slots: policy.concurrency_slots.clamp(
+            MIN_DOWNLOAD_POLICY_CONCURRENCY_SLOTS,
+            MAX_DOWNLOAD_POLICY_CONCURRENCY_SLOTS,
+        ),
+        bandwidth_limit_bytes_per_sec: policy.bandwidth_limit_bytes_per_sec,
+        auto_resume: policy.auto_resume,
+    }
+}
+
+fn clamp_download_policy_slots(raw: i64) -> u32 {
+    raw.clamp(
+        i64::from(MIN_DOWNLOAD_POLICY_CONCURRENCY_SLOTS),
+        i64::from(MAX_DOWNLOAD_POLICY_CONCURRENCY_SLOTS),
+    ) as u32
+}
+
+fn decode_optional_u64_text(field: &str, raw: Option<&str>) -> AppResult<Option<u64>> {
+    raw.map(|value| decode_u64_text(field, value)).transpose()
+}
+
+fn encode_bool(value: bool) -> i64 {
+    i64::from(value)
 }
 
 fn encode_job_priority(priority: JobPriority) -> &'static str {
@@ -1129,8 +1310,82 @@ mod tests {
     use super::*;
 
     use launcher_module_downloads::{
-        DownloadSegmentCheckpointRecord, DownloadSegmentCheckpointStatus,
+        contracts::DownloadPolicyDto, DownloadSegmentCheckpointRecord,
+        DownloadSegmentCheckpointStatus,
     };
+
+    fn project_local_sqlite_path(name: &str) -> PathBuf {
+        let workspace_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .parent()
+            .and_then(Path::parent)
+            .expect("adapter-storage-sqlite should live under the workspace crates directory")
+            .to_path_buf();
+        let sqlite_path = workspace_root.join(".artifacts").join("tmp").join(name);
+        assert!(
+            sqlite_path.starts_with(&workspace_root),
+            "test sqlite path must stay inside the project workspace"
+        );
+        std::fs::create_dir_all(
+            sqlite_path
+                .parent()
+                .expect("test sqlite path should have a parent directory"),
+        )
+        .expect("project-local sqlite test directory should be creatable");
+        let _ = std::fs::remove_file(&sqlite_path);
+        sqlite_path
+    }
+
+    #[test]
+    fn sqlite_download_policy_store_loads_default_policy_when_snapshot_absent() {
+        let tmp_path = project_local_sqlite_path("at210_policy_default.sqlite3");
+        let store =
+            SqliteDownloadPolicyStore::new(SqliteStorageAdapterConfig::new(tmp_path.clone()), 9);
+
+        let policy = store
+            .load_policy()
+            .expect("loading an empty policy store should return the default snapshot");
+
+        assert_eq!(
+            policy,
+            DownloadPolicyDto {
+                concurrency_slots: 9,
+                bandwidth_limit_bytes_per_sec: None,
+                auto_resume: true,
+            }
+        );
+
+        let _ = std::fs::remove_file(&tmp_path);
+    }
+
+    #[test]
+    fn sqlite_download_policy_store_round_trips_normalized_policy_snapshot() {
+        let tmp_path = project_local_sqlite_path("at210_policy_round_trip.sqlite3");
+        let store =
+            SqliteDownloadPolicyStore::new(SqliteStorageAdapterConfig::new(tmp_path.clone()), 3);
+        let policy = DownloadPolicyDto {
+            concurrency_slots: 512,
+            bandwidth_limit_bytes_per_sec: Some(42_000),
+            auto_resume: false,
+        };
+
+        store
+            .save_policy(&policy)
+            .expect("saving a policy snapshot should succeed");
+        let loaded = store
+            .load_policy()
+            .expect("loading the saved policy snapshot should succeed");
+
+        assert_eq!(
+            loaded,
+            DownloadPolicyDto {
+                concurrency_slots: 128,
+                bandwidth_limit_bytes_per_sec: Some(42_000),
+                auto_resume: false,
+            }
+        );
+
+        let _ = std::fs::remove_file(&tmp_path);
+    }
 
     #[test]
     fn sqlite_download_checkpoint_round_trips_segment_facts() {

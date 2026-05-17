@@ -8220,6 +8220,31 @@
 - Added README_IMPL section 7.25 defining `SqliteDownloadPolicyStore`, a `download_policy_snapshot` singleton table shape, project-local test DB requirement, and deferred runtime/settings/transport/frontend surfaces.
 - Scoped `git diff --check` passed with CRLF normalization warnings only; path-limited status shows only AT-209 files.
 
+## Agent Note: 2026-05-17 17:10
+
+- Confirmed `main` and `origin/main` are both at AT-2026-05-17-209 commit `41f0b8c docs: define downloads policy sqlite boundary`.
+- Recovered PWF state from stale AT-209 validating records and opened AT-2026-05-17-210 for `SqliteDownloadPolicyStore`.
+- Read the current README/docs routing, downloads module docs, README_IMPL 7.25, storage placement rules, repository/adapter boundary rules, composition-root wiring rules, current SQLite adapter shapes, and current policy store surface.
+- AT-210 remains backend-only: no runtime queue-policy mutation, global settings, host transport, frontend, concrete IO, retry/backoff, active runtime job/lease/snapshot mutation, pending work changes, or terminal completion behavior.
+
+## Agent Note: 2026-05-17 17:25
+
+- AT-210 RED: focused adapter tests failed before production implementation because `SqliteDownloadPolicyStore` did not exist; the test also revealed `DownloadPolicyDto` should be imported through `launcher_module_downloads::contracts`.
+- Implemented `SqliteDownloadPolicyStore`, `download_policy_snapshot` table creation, default empty-table policy load, normalized save/load row mapping, and composition-root wiring from `DesktopBootstrapConfig.default_download_slots`.
+- Focused validation already run:
+  - `cargo test -p launcher-adapter-storage-sqlite --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml download_policy_store`: 2 passed / 0 failed.
+  - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`: passed.
+
+## Agent Note: 2026-05-17 17:35
+
+- Completed AT-210 implementation and README_IMPL update.
+- Final validation passed before commit:
+  - `cargo test -p launcher-adapter-storage-sqlite --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml download_policy_store`: 2 passed / 0 failed.
+  - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`: passed.
+  - `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml policy`: 2 passed / 0 failed.
+  - `cargo fmt -p launcher-adapter-storage-sqlite -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check`: passed.
+  - scoped `git diff --check`: passed with CRLF normalization warnings only.
+
 ### Auto Record: 2026-05-17 15:38:00
 - Tool: apply_patch
 - Phase: Phase 83 - Downloads Policy Store Implementation
@@ -8303,5 +8328,51 @@
 - Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
 - Files:
   - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-17 15:53:19
+- Tool: apply_patch
+- Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-17 15:53:46
+- Tool: apply_patch
+- Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
+- Files:
+  - `crates/adapter-storage-sqlite/src/lib.rs` (update)
+
+### Auto Record: 2026-05-17 15:55:02
+- Tool: apply_patch
+- Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
+- Files:
+  - `crates/adapter-storage-sqlite/src/lib.rs` (update)
+
+### Auto Record: 2026-05-17 15:55:27
+- Tool: apply_patch
+- Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
+- Files:
+  - `crates/composition-root/src/bootstrap.rs` (update)
+
+### Auto Record: 2026-05-17 15:56:17
+- Tool: apply_patch
+- Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
+- Files:
+  - `docs/modules/downloads/README_IMPL.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-17 15:57:49
+- Tool: apply_patch
+- Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
   - `.artifacts/ai/handoff.md` (update)
   - `.artifacts/ai/progress.md` (update)

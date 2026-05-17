@@ -1231,6 +1231,17 @@ First Rust slice:
 4. keep module facade behavior, runtime policy, host transport, frontend, concrete IO, retry/backoff, and terminal runtime completion unchanged;
 5. run the focused adapter policy test, downloads module tests if the module surface changes, `cargo check -p launcher-composition-root`, rustfmt check, scoped `git diff --check`, and path-limited status before commit.
 
+Completed by AT-210:
+
+1. `SqliteDownloadPolicyStore` now implements the existing downloads-owned `DownloadPolicyStore` port in `adapter-storage-sqlite`.
+2. The adapter creates and uses a singleton `download_policy_snapshot` row keyed by `default`.
+3. The persisted facts are `concurrency_slots`, optional `bandwidth_limit_bytes_per_sec`, `auto_resume`, and `updated_at`.
+4. Reads from an empty table return the normalized default policy derived from `DesktopBootstrapConfig.default_download_slots`.
+5. Saves normalize `concurrency_slots` to `1..=128` before upserting the snapshot; bandwidth limit and auto-resume round-trip as policy facts only.
+6. Composition-root wires `SqliteDownloadPolicyStore` into `DownloadFacade`, replacing the previous in-memory policy store for the desktop service graph.
+7. Focused adapter tests use project-local SQLite files under `.artifacts/tmp` rather than system temp paths.
+8. Runtime queue-policy application, active jobs, leases, snapshots, pending resume work, host transport, frontend settings, concrete IO, retry/backoff, and terminal runtime completion remain unchanged.
+
 Later slices:
 
 1. Runtime integration can translate the persisted downloads policy into `RuntimeQueuePolicy` only after a runtime policy-application boundary is documented.

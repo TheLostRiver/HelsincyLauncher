@@ -846,3 +846,13 @@
 - Current `adapter-storage-sqlite` has job, checkpoint, and shared snapshot stores but no policy store or policy table.
 - The first Rust slice should use project-local test database paths under `D:\DEV\MyEpicLauncher` to respect the user safety boundary and avoid deleting temp files outside the repo.
 - Runtime queue-policy application, host transport, frontend settings, global settings/config-system sync, concrete IO, retry/backoff, and terminal runtime completion remain later tasks.
+
+## Phase 85 Downloads SQLite Policy Store Implementation Findings
+
+- AT-2026-05-17-209 final commit is `41f0b8c` and is already pushed to `origin/main`.
+- Required docs confirm this Rust slice belongs in `adapter-storage-sqlite` plus composition-root wiring: SQLite stores structured downloads facts, the downloads module owns the `DownloadPolicyStore` port, and composition-root is the only place that should know the concrete adapter type.
+- The implementation must not turn `download_policy_snapshot` into a global settings system, mutate `RuntimeQueuePolicy`, touch active jobs/leases/snapshots/pending segment work, change host transport/frontend behavior, or perform concrete download IO.
+- Focused adapter tests must create any SQLite database under `D:\DEV\MyEpicLauncher`, not `std::env::temp_dir()`, so verification does not create or delete files outside the project boundary.
+- RED/GREEN confirmed `SqliteDownloadPolicyStore` can load a normalized default policy when no row exists, upsert a normalized policy snapshot, and round-trip bandwidth-limit plus auto-resume facts without applying them to runtime behavior.
+- Composition-root now uses the SQLite policy store for the desktop downloads facade while leaving `RuntimeQueuePolicy` and shared job runtime construction unchanged.
+- Verification passed for focused adapter policy tests, affected composition check, existing downloads module policy tests, rustfmt check, and scoped `git diff --check` with CRLF warnings only.

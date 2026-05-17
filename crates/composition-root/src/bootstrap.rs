@@ -14,7 +14,7 @@ use std::sync::Arc;
 
 use launcher_adapter_provider_fab::{EpicFabCatalogProviderAdapter, EpicFabCatalogProviderConfig};
 use launcher_adapter_storage_sqlite::{
-    SqliteDownloadCheckpointRepository, SqliteDownloadJobRepository,
+    SqliteDownloadCheckpointRepository, SqliteDownloadJobRepository, SqliteDownloadPolicyStore,
     SqliteFabInventoryProjectionRepository, SqliteFabMediaMetadataRepository,
     SqliteFabSyncCursorRepository, SqliteJobSnapshotStore, SqliteStorageAdapterConfig,
 };
@@ -24,8 +24,7 @@ use launcher_kernel_jobs::{
 };
 use launcher_module_downloads::{
     DownloadCheckpointRepository, DownloadFacade, DownloadJobDriver, DownloadModuleDeps,
-    DownloadPendingResumeWorkSource, InMemoryDownloadPolicyStore,
-    InMemoryDownloadResumeWorkScheduler,
+    DownloadPendingResumeWorkSource, InMemoryDownloadResumeWorkScheduler,
 };
 use launcher_module_engines::{EngineFacade, EngineJobDriver, EngineModuleDeps};
 use launcher_module_fab::{FabFacade, FabModuleDeps, FabPrewarmJobDriver, FabSyncJobDriver};
@@ -51,7 +50,7 @@ type DesktopDownloadFacade = DownloadFacade<
     (),
     InMemoryDownloadResumeWorkScheduler,
     SharedJobRuntimeHost,
-    InMemoryDownloadPolicyStore,
+    SqliteDownloadPolicyStore,
 >;
 
 type DesktopEngineFacade = EngineFacade<(), (), SharedJobRuntimeHost>;
@@ -274,7 +273,7 @@ fn build_downloads_module(
         staging_store: (),
         resume_scheduler,
         job_runtime,
-        policy_store: InMemoryDownloadPolicyStore::new(default_policy_slots),
+        policy_store: SqliteDownloadPolicyStore::new(sqlite_config, default_policy_slots),
     })
 }
 
