@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 114 - Downloads Segment Executor Adapter Shell
+Phase 114 - Downloads Segment Executor Adapter Shell (complete)
 
 ## Current Focus
 
@@ -28,7 +28,11 @@ Phase 114 - Downloads Segment Executor Adapter Shell
 - AT-2026-05-17-236 was published as commit `f720d9c` after adding the documented host runtime execution command.
 - AT-2026-05-17-237 was published as commit `a8e3492` after covering the production downloads deferred path through the host command.
 - AT-2026-05-17-238 was published as commit `d5af454` after defining the downloads concrete segment execution boundary.
-- AT-2026-05-17-239 is in progress to add the module-owned segment executor adapter shell behind `DownloadSegmentExecutionPort`.
+- AT-2026-05-17-239 was published as commit `1375a06` after adding the module-owned segment executor adapter shell behind `DownloadSegmentExecutionPort`.
+- AT-2026-05-17-240 was published as commit `62c6bb8` after documenting segment executor failure mapping.
+- AT-2026-05-17-241 was published as commit `cab15c2` after mapping handled segment failures in the downloads executor adapter.
+- AT-2026-05-17-242 was published as commit `7527476` after documenting the staging target guard boundary.
+- AT-2026-05-17-243 was published as commit `69ea5e7` after adding the pure downloads staging target guard.
 - AT-2026-05-17-220 was published as commit `aa8d6e3` after documenting the shared runtime execution-turn boundary.
 - AT-2026-05-17-219 was published as commit `f618718` after adding host transport smoke coverage for downloads policy runtime application.
 - AT-2026-05-17-218 was published as commit `5aae7f1` after adding documentation-budget rules.
@@ -844,9 +848,9 @@ Phase 114 - Downloads Segment Executor Adapter Shell
 
 ### Phase 114: Downloads Segment Executor Adapter Shell
 
-- Outcome: add a module-owned segment executor adapter shell behind `DownloadSegmentExecutionPort`, validated with fake/in-memory fetch/write/verify sub-ports and without real IO or production wiring.
-- Atomic tasks: AT-2026-05-17-239
-- **Status:** in_progress
+- Outcome: added a module-owned segment executor adapter shell behind `DownloadSegmentExecutionPort`, validated with fake/in-memory fetch/write/verify sub-ports and without real IO or production wiring; follow-up subtasks also documented and implemented handled failure mapping plus pure staging target guarding.
+- Atomic tasks: AT-2026-05-17-239, AT-2026-05-17-240, AT-2026-05-17-241, AT-2026-05-17-242, AT-2026-05-17-243
+- **Status:** complete
 
 ## Atomic Task Ledger
 
@@ -1086,7 +1090,7 @@ Phase 114 - Downloads Segment Executor Adapter Shell
 234. AT-2026-05-17-240 - completed - defined the downloads segment executor failure mapping boundary before Rust failure-path coding; committed and pushed as `62c6bb8`.
 235. AT-2026-05-17-241 - completed - added downloads segment executor handled failure mapping in Rust; committed and pushed as `cab15c2`.
 236. AT-2026-05-17-242 - completed - defined the downloads segment staging target guard boundary before real writer IO; committed and pushed as `7527476`.
-237. AT-2026-05-17-243 - completed - added a pure downloads staging target guard in Rust.
+237. AT-2026-05-17-243 - completed - added a pure downloads staging target guard in Rust; committed and pushed as `69ea5e7`.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

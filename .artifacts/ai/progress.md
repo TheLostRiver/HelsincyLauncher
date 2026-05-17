@@ -10311,6 +10311,22 @@
   - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
   - `rustfmt --edition 2021 --check crates\module-downloads\src\driver.rs crates\module-downloads\src\lib.rs` passed.
 
+## 2026-05-17 23:58 - Hook recovery checkpoint
+
+- Stop hook reported `Task incomplete (113/114 phases done)`.
+- AT-243 had already been validated, committed, and pushed as `69ea5e7` with message `feat: add downloads staging target guard`.
+- Per hook recovery flow, progress was updated first; next step is to read `.artifacts/ai/task-plan.md`, locate the remaining incomplete phase, and continue only within the project boundary.
+
+## 2026-05-18 00:02 - Phase 114 closure repair
+
+- Read `.artifacts/ai/task-plan.md` after the recovery checkpoint.
+- Found the hook mismatch: the atomic ledger had AT-239 through AT-243 completed, but the formal `### Phase 114` block still had `**Status:** in_progress`, and the current-focus/handoff snippets still described AT-239/AT-243 as pending.
+- Updated `task-plan.md` so Phase 114 is complete and lists AT-239 through AT-243 with pushed commit hashes.
+- Updated `handoff.md` stale pending statuses for AT-239 through AT-243.
+- Next:
+  - run the PWF completion check and scoped diff-check;
+  - commit/push the PWF closure repair if clean.
+
 ### Auto Record: 2026-05-17 22:51:54
 - Tool: apply_patch
 - Phase: Phase 114 - Downloads Segment Executor Adapter Shell
@@ -10634,3 +10650,27 @@
 - Phase: Phase 114 - Downloads Segment Executor Adapter Shell
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 23:13:04
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 23:13:59
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 23:14:14
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 23:14:30
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)

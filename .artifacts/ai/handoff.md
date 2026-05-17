@@ -106,7 +106,7 @@
 
 - task id: AT-2026-05-17-239
 - title: Add downloads segment executor adapter shell
-- status: in_progress
+- status: completed; final commit `1375a06`, pushed to `origin/main`
 
 ## Current Slice
 
@@ -120,8 +120,8 @@
 
 ## Next Resume Point
 
-1. Add RED driver test for a fake/in-memory segment executor adapter shell.
-2. Implement the minimal adapter/sub-port contracts, validate, then commit and push AT-239 if clean.
+1. Phase 114 follow-up subtasks through AT-243 are complete and pushed.
+2. The next backend slice should be opened as a new documented phase/task before coding.
 
 ## Validation
 
@@ -249,7 +249,7 @@
 
 ## Latest Handoff - AT-2026-05-17-239
 
-- Status: implementation validated; commit/push pending at the time of this note.
+- Status: completed; final commit `1375a06`, pushed to `origin/main`.
 - Scope completed:
   - Added `DownloadSegmentExecutor` behind the existing `DownloadSegmentExecutionPort`.
   - Added module-owned fetch/write/verify sub-port traits plus fake/in-memory result DTOs.
@@ -268,7 +268,7 @@
 
 ## Latest Handoff - AT-2026-05-17-240
 
-- Status: docs boundary validated; commit/push pending at the time of this note.
+- Status: completed; final commit `62c6bb8`, pushed to `origin/main`.
 - Scope completed:
   - Added README_IMPL 7.36 `Segment Executor Failure Mapping Boundary`.
   - Defined handled fetch/write/verify segment failures as in-band `DownloadSegmentExecutionResult::Failed`.
@@ -281,7 +281,7 @@
 
 ## Latest Handoff - AT-2026-05-17-241
 
-- Status: implementation validated; commit/push pending at the time of this note.
+- Status: completed; final commit `cab15c2`, pushed to `origin/main`.
 - Scope completed:
   - Added module-local handled-failure/outcome types for fetch/write/verify sub-ports.
   - Updated `DownloadSegmentExecutor` so handled sub-port failures become existing `DownloadSegmentExecutionResult::Failed`.
@@ -296,7 +296,7 @@
 
 ## Latest Handoff - AT-2026-05-17-242
 
-- Status: docs boundary validated; commit/push pending at the time of this note.
+- Status: completed; final commit `7527476`, pushed to `origin/main`.
 - Scope completed:
   - Added README_IMPL 7.37 `Segment Staging Target Guard Boundary`.
   - Defined safe staging-relative `write_target` acceptance and unsafe target rejection cases.
@@ -308,7 +308,7 @@
 
 ## Latest Handoff - AT-2026-05-17-243
 
-- Status: implementation validated; commit/push pending at the time of this note.
+- Status: completed; final commit `69ea5e7`, pushed to `origin/main`.
 - Scope completed:
   - Added `DownloadSegmentStagingTarget::parse(...)` as a pure staging-relative target guard.
   - Rejected unsafe targets as `DownloadSegmentHandledFailure` with zero bytes and `retryable = false`.
