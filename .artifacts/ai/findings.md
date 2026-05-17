@@ -1071,3 +1071,14 @@
 - `StartupPipelineFacade` already owns staged restore/prewarm entry points and has driver registry context; any execution helper must stay explicit and must not be automatically invoked by `build_desktop_services()`, stage 2 restore, or stage 3 prewarm.
 - The next Rust slice should remain one-shot and testable; scheduler loops, background tasks, leases, terminal projection, downloads concrete IO, transport, frontend, and schema changes remain separate.
 - `docs/TauriCompositionRootWiringDesign.md` 9.4 now defines the helper boundary and validation expectations; scoped docs/PWF diff-check passed with CRLF normalization warnings only.
+- AT-2026-05-17-233 final commit `01c206d` was pushed to `origin/main`.
+
+## Phase 109 Composition One-shot Runtime Execution Helper Findings
+
+- Required context was read in focused chunks: composition docs 9.4, startup pipeline restore/warmup rules, current `StartupPipelineFacade`, current bootstrap runtime/registry wiring, and existing startup/bootstrap tests.
+- `StartupPipelineFacade::new(...)` is used in multiple tests; preserving that constructor and adding an opt-in runtime wiring method should minimize churn.
+- `build_desktop_services(...)` currently consumes `job_runtime` into the engines module before building startup, so implementation will need to clone the runtime for engines/startup wiring rather than moving it once.
+- Bootstrap smoke can distinguish wired vs absent execution helper by expecting a no-queued deferred result from a fresh project-local SQLite store.
+- RED/GREEN confirmed `StartupPipelineFacade::run_one_runtime_execution_turn(...)` defers when runtime wiring is absent and delegates exactly one queued fake-driver job when runtime plus registry are wired.
+- Bootstrap wiring now clones the shared runtime into the startup surface and proves a fresh project-local store returns the runtime's no-queued deferred result.
+- Existing startup restore/prewarm tests remained green; no execution helper is invoked automatically by stage 2 or stage 3.

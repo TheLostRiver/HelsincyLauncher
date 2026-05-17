@@ -9444,6 +9444,28 @@
 - The helper must not be invoked automatically by service construction, stage 2 restore, or stage 3 prewarm.
 - Scoped command passed: `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- docs/TauriCompositionRootWiringDesign.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md` with CRLF normalization warnings only.
 
+## Session Note: 2026-05-17 AT-233 Publication / AT-234 Start
+
+- AT-2026-05-17-233 was committed and pushed to `origin/main` as `01c206d`.
+- Opened AT-2026-05-17-234 to implement the documented composition-root one-shot runtime execution helper.
+- Required context read in focused chunks: composition docs 9.4, startup pipeline restore/warmup rules, current `StartupPipelineFacade`, current bootstrap runtime/registry wiring, and existing startup/bootstrap tests.
+- Working hypothesis: preserve `StartupPipelineFacade::new(...)`, add opt-in runtime wiring plus an explicit helper, and wire a cloned runtime through `build_startup_pipeline(...)`.
+
+## Session Note: 2026-05-17 AT-234 RED
+
+- Added focused composition-root tests for absent runtime execution wiring, wired fake-driver execution, and bootstrap service wiring.
+- RED command: `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml runtime_execution`.
+- RED result: failed as expected because `StartupPipelineFacade::run_one_runtime_execution_turn(...)` and `with_runtime_execution(...)` do not exist yet.
+
+## Session Note: 2026-05-17 AT-234 GREEN/Validation
+
+- Implemented `StartupPipelineFacade::with_runtime_execution(...)` and `run_one_runtime_execution_turn(...)`.
+- Wired a cloned `SharedJobRuntimeHost` through `build_startup_pipeline(...)` while preserving explicit startup stage calls and existing module facade constructors.
+- GREEN focused command passed: `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml runtime_execution` => 3 passed / 0 failed.
+- Full composition lib command passed: `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` => 12 passed / 0 failed.
+- Compile gate passed: `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`.
+- Scoped formatting/checks passed: `rustfmt --edition 2021 --check crates\composition-root\src\startup.rs crates\composition-root\src\bootstrap.rs`; scoped `git diff --check` for touched Rust plus PWF files passed with CRLF normalization warnings only.
+
 ### Auto Record: 2026-05-17 21:25:04
 - Tool: apply_patch
 - Phase: Phase 105 - One-shot Queued Execution Selector
@@ -9609,6 +9631,67 @@
 ### Auto Record: 2026-05-17 21:44:57
 - Tool: apply_patch
 - Phase: Phase 108 - Composition One-shot Runtime Execution Helper Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 21:47:37
+- Tool: apply_patch
+- Phase: Phase 108 - Composition One-shot Runtime Execution Helper Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 21:48:50
+- Tool: apply_patch
+- Phase: Phase 109 - Composition One-shot Runtime Execution Helper
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 21:50:33
+- Tool: apply_patch
+- Phase: Phase 109 - Composition One-shot Runtime Execution Helper
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\composition-root\src\startup.rs` (update)
+
+### Auto Record: 2026-05-17 21:51:16
+- Tool: apply_patch
+- Phase: Phase 109 - Composition One-shot Runtime Execution Helper
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\composition-root\src\startup.rs` (update)
+
+### Auto Record: 2026-05-17 21:51:28
+- Tool: apply_patch
+- Phase: Phase 109 - Composition One-shot Runtime Execution Helper
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\composition-root\src\bootstrap.rs` (update)
+
+### Auto Record: 2026-05-17 21:51:50
+- Tool: apply_patch
+- Phase: Phase 109 - Composition One-shot Runtime Execution Helper
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 21:52:15
+- Tool: apply_patch
+- Phase: Phase 109 - Composition One-shot Runtime Execution Helper
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\composition-root\src\startup.rs` (update)
+
+### Auto Record: 2026-05-17 21:52:24
+- Tool: apply_patch
+- Phase: Phase 109 - Composition One-shot Runtime Execution Helper
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\composition-root\src\bootstrap.rs` (update)
+
+### Auto Record: 2026-05-17 21:53:40
+- Tool: apply_patch
+- Phase: Phase 109 - Composition One-shot Runtime Execution Helper
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)

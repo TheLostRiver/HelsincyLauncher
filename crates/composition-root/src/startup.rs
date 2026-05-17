@@ -14,12 +14,11 @@ use std::sync::Arc;
 
 use launcher_kernel_foundation::{AppResult, IsoDateTime};
 use launcher_kernel_jobs::{
-    AcceptedJob, JobDriverRegistry, JobSnapshotStore, JobState, JobUiState, RestoreDisposition,
+    AcceptedJob, JobDriverRegistry, JobRunDisposition, JobSnapshotStore, JobState, JobUiState,
+    RestoreDisposition, SharedJobRuntimeHost,
 };
 use launcher_module_fab::{
-    contracts::FabInventoryPrewarmRequestDto,
-    facade::FabStartupPrewarmJobAcceptance,
-    FabFacade,
+    contracts::FabInventoryPrewarmRequestDto, facade::FabStartupPrewarmJobAcceptance, FabFacade,
 };
 
 /// Startup-stage port that can enqueue the Fab prewarm job without exposing concrete wiring.
@@ -27,7 +26,8 @@ use launcher_module_fab::{
 pub trait FabStartupPrewarmPort: Send + Sync {
     /// Triggers the startup Fab prewarm path when stage 3 decides it is allowed.
     /// 在 stage 3 判定允许时触发 Fab startup prewarm 路径。
-    fn run_startup_prewarm(&self, request: FabInventoryPrewarmRequestDto) -> AppResult<AcceptedJob>;
+    fn run_startup_prewarm(&self, request: FabInventoryPrewarmRequestDto)
+        -> AppResult<AcceptedJob>;
 }
 
 impl<P, C, M, J, K> FabStartupPrewarmPort for FabFacade<P, C, M, J, K>
@@ -38,7 +38,10 @@ where
     J: FabStartupPrewarmJobAcceptance + Send + Sync,
     K: Send + Sync,
 {
-    fn run_startup_prewarm(&self, request: FabInventoryPrewarmRequestDto) -> AppResult<AcceptedJob> {
+    fn run_startup_prewarm(
+        &self,
+        request: FabInventoryPrewarmRequestDto,
+    ) -> AppResult<AcceptedJob> {
         FabFacade::run_startup_prewarm(self, request)
     }
 }
@@ -49,6 +52,7 @@ where
 pub struct StartupPipelineFacade {
     enable_startup_prewarm: bool,
     fab_prewarm: Option<Arc<dyn FabStartupPrewarmPort>>,
+    job_runtime: Option<SharedJobRuntimeHost>,
     snapshot_store: Option<Arc<dyn JobSnapshotStore<()>>>,
     driver_registry: Option<Arc<JobDriverRegistry<()>>>,
 }
@@ -59,6 +63,7 @@ impl Debug for StartupPipelineFacade {
             .debug_struct("StartupPipelineFacade")
             .field("enable_startup_prewarm", &self.enable_startup_prewarm)
             .field("has_fab_prewarm", &self.fab_prewarm.is_some())
+            .field("has_job_runtime", &self.job_runtime.is_some())
             .field("has_snapshot_store", &self.snapshot_store.is_some())
             .field("has_driver_registry", &self.driver_registry.is_some())
             .finish()
@@ -85,9 +90,36 @@ impl StartupPipelineFacade {
         Self {
             enable_startup_prewarm,
             fab_prewarm,
+            job_runtime: None,
             snapshot_store,
             driver_registry,
         }
+    }
+
+    /// Adds the shared runtime handle used by the explicit one-shot execution helper.
+    /// 娣诲姞鏄惧紡 one-shot 鎵ц helper 浣跨敤鐨勫叡浜?runtime 鍙ユ焺銆?
+    pub fn with_runtime_execution(mut self, job_runtime: SharedJobRuntimeHost) -> Self {
+        self.job_runtime = Some(job_runtime);
+        self
+    }
+
+    /// Runs one queued runtime execution turn when runtime and registry wiring are present.
+    /// 鍦?runtime 涓?registry 鎺ョ嚎瀛樺湪鏃讹紝鏄惧紡杩愯涓€娆℃帓闃熶綔涓氭墽琛屽洖鍚堛€?
+    pub fn run_one_runtime_execution_turn(&self) -> AppResult<JobRunDisposition> {
+        let Some(job_runtime) = self.job_runtime.as_ref() else {
+            return Ok(JobRunDisposition::Deferred {
+                reason: "runtime execution not wired".into(),
+            });
+        };
+        let Some(driver_registry) = self.driver_registry.as_ref() else {
+            return Ok(JobRunDisposition::Deferred {
+                reason: "runtime driver registry not wired".into(),
+            });
+        };
+
+        // Keep execution explicit; startup stages decide when, or whether, to call this helper.
+        // 鎵ц淇濇寔鏄惧紡锛涘惎鍔ㄩ樁娈电敱璋冪敤鏂瑰喅瀹氭槸鍚︽垨浣曟椂璋冪敤璇?helper銆?
+        job_runtime.run_next_execution_turn(driver_registry.as_ref())
     }
 
     /// Runs stage 1 of startup, which is currently a no-op once the shell/backend baseline exists.
@@ -214,8 +246,9 @@ mod tests {
 
     use launcher_kernel_foundation::{AppResult, IsoDateTime, JobId};
     use launcher_kernel_jobs::{
-        AcceptedJob, JobDriver, JobDriverRegistry, JobProgress, JobSnapshot,
-        JobSnapshotStore, JobState, JobUiState, RestoreDisposition,
+        AcceptedJob, JobDriver, JobDriverRegistry, JobExecutionContext, JobProgress,
+        JobRunDisposition, JobSnapshot, JobSnapshotStore, JobState, JobUiState, RestoreDisposition,
+        RuntimeQueuePolicy, SharedJobRuntimeHost,
     };
     use launcher_module_fab::contracts::FabInventoryPrewarmRequestDto;
 
@@ -230,22 +263,24 @@ mod tests {
 
     impl TestSnapshotStore {
         fn get_state(&self, job_id: &JobId) -> Option<JobState> {
-            self.snapshots
-                .lock()
-                .unwrap()
-                .get(job_id)
-                .map(|s| s.state)
+            self.snapshots.lock().unwrap().get(job_id).map(|s| s.state)
         }
     }
 
     impl JobSnapshotStore<()> for TestSnapshotStore {
         fn create(&self, snapshot: &JobSnapshot<()>) -> AppResult<()> {
-            self.snapshots.lock().unwrap().insert(snapshot.job_id.clone(), snapshot.clone());
+            self.snapshots
+                .lock()
+                .unwrap()
+                .insert(snapshot.job_id.clone(), snapshot.clone());
             Ok(())
         }
 
         fn update(&self, snapshot: &JobSnapshot<()>) -> AppResult<()> {
-            self.snapshots.lock().unwrap().insert(snapshot.job_id.clone(), snapshot.clone());
+            self.snapshots
+                .lock()
+                .unwrap()
+                .insert(snapshot.job_id.clone(), snapshot.clone());
             Ok(())
         }
 
@@ -255,10 +290,16 @@ mod tests {
 
         fn list_resumable(&self) -> AppResult<Vec<JobSnapshot<()>>> {
             let resumable = [
-                JobState::Queued, JobState::ClaimingLease,
-                JobState::Restoring, JobState::Running,
+                JobState::Queued,
+                JobState::ClaimingLease,
+                JobState::Restoring,
+                JobState::Running,
             ];
-            Ok(self.snapshots.lock().unwrap().values()
+            Ok(self
+                .snapshots
+                .lock()
+                .unwrap()
+                .values()
                 .filter(|s| resumable.contains(&s.state))
                 .cloned()
                 .collect())
@@ -285,11 +326,12 @@ mod tests {
     fn stage2_resets_orphaned_recoverable_running_job_to_queued() {
         let store = Arc::new(TestSnapshotStore::default());
         let job_id = JobId::generate();
-        store.create(&make_running_snapshot(job_id.clone(), true)).unwrap();
+        store
+            .create(&make_running_snapshot(job_id.clone(), true))
+            .unwrap();
 
         let facade = StartupPipelineFacade::new(false, None, Some(store.clone()), None);
-        block_on_ready(facade.run_stage2_restore_runtime_state())
-            .expect("stage-2 should succeed");
+        block_on_ready(facade.run_stage2_restore_runtime_state()).expect("stage-2 should succeed");
 
         assert_eq!(
             store.get_state(&job_id),
@@ -302,11 +344,12 @@ mod tests {
     fn stage2_marks_orphaned_nonrecoverable_running_job_as_failed() {
         let store = Arc::new(TestSnapshotStore::default());
         let job_id = JobId::generate();
-        store.create(&make_running_snapshot(job_id.clone(), false)).unwrap();
+        store
+            .create(&make_running_snapshot(job_id.clone(), false))
+            .unwrap();
 
         let facade = StartupPipelineFacade::new(false, None, Some(store.clone()), None);
-        block_on_ready(facade.run_stage2_restore_runtime_state())
-            .expect("stage-2 should succeed");
+        block_on_ready(facade.run_stage2_restore_runtime_state()).expect("stage-2 should succeed");
 
         assert_eq!(
             store.get_state(&job_id),
@@ -319,8 +362,12 @@ mod tests {
     // 驱动注册表测试：验证 queued job 的 driver restore 处置。
     struct AlwaysFailDriver;
     impl JobDriver<()> for AlwaysFailDriver {
-        fn module(&self) -> &'static str { "test" }
-        fn kind(&self) -> &'static str { "test_job" }
+        fn module(&self) -> &'static str {
+            "test"
+        }
+        fn kind(&self) -> &'static str {
+            "test_job"
+        }
         fn restore(&self, _snapshot: &JobSnapshot<()>) -> AppResult<RestoreDisposition> {
             Ok(RestoreDisposition::FailedAsUnrecoverable {
                 reason: "business checkpoint missing".into(),
@@ -334,28 +381,25 @@ mod tests {
         let job_id = JobId::generate();
         // Seed a Queued job (already in clean state, no orphan reset needed).
         // 写入一个 Queued job；它已经处于干净状态，不需要 orphan reset。
-        store.create(&JobSnapshot {
-            job_id: job_id.clone(),
-            module: "test".into(),
-            kind: "test_job".into(),
-            state: JobState::Queued,
-            ui_state: JobUiState::Queued,
-            progress: JobProgress::pending(),
-            recoverable: true,
-            updated_at: IsoDateTime::now(),
-            extension: None,
-        }).unwrap();
+        store
+            .create(&JobSnapshot {
+                job_id: job_id.clone(),
+                module: "test".into(),
+                kind: "test_job".into(),
+                state: JobState::Queued,
+                ui_state: JobUiState::Queued,
+                progress: JobProgress::pending(),
+                recoverable: true,
+                updated_at: IsoDateTime::now(),
+                extension: None,
+            })
+            .unwrap();
 
         let mut registry = JobDriverRegistry::new();
         registry.register(Arc::new(AlwaysFailDriver));
-        let facade = StartupPipelineFacade::new(
-            false,
-            None,
-            Some(store.clone()),
-            Some(Arc::new(registry)),
-        );
-        block_on_ready(facade.run_stage2_restore_runtime_state())
-            .expect("stage-2 should succeed");
+        let facade =
+            StartupPipelineFacade::new(false, None, Some(store.clone()), Some(Arc::new(registry)));
+        block_on_ready(facade.run_stage2_restore_runtime_state()).expect("stage-2 should succeed");
 
         assert_eq!(
             store.get_state(&job_id),
@@ -366,6 +410,96 @@ mod tests {
 
     // ── existing stage-3 tests ────────────────────────────────────────────────
     // 既有 stage-3 测试：验证能力门控后的后台 prewarm 触发行为。
+    #[derive(Default)]
+    struct RecordingRunDriver {
+        seen_job_ids: Arc<Mutex<Vec<JobId>>>,
+    }
+
+    impl RecordingRunDriver {
+        fn seen_job_ids(&self) -> Arc<Mutex<Vec<JobId>>> {
+            self.seen_job_ids.clone()
+        }
+    }
+
+    impl JobDriver<()> for RecordingRunDriver {
+        fn module(&self) -> &'static str {
+            "test"
+        }
+
+        fn kind(&self) -> &'static str {
+            "test_job"
+        }
+
+        fn restore(&self, _snapshot: &JobSnapshot<()>) -> AppResult<RestoreDisposition> {
+            Ok(RestoreDisposition::Resumed)
+        }
+
+        fn run(&self, context: JobExecutionContext<'_, ()>) -> AppResult<JobRunDisposition> {
+            self.seen_job_ids
+                .lock()
+                .expect("recording driver mutex should not be poisoned")
+                .push(context.job_id().clone());
+            Ok(JobRunDisposition::Accepted)
+        }
+    }
+
+    #[test]
+    fn runtime_execution_helper_defers_when_runtime_is_not_wired() {
+        let facade = StartupPipelineFacade::new(false, None, None, None);
+
+        let disposition = facade
+            .run_one_runtime_execution_turn()
+            .expect("missing runtime wiring should be a non-terminal execution result");
+
+        match disposition {
+            JobRunDisposition::Deferred { reason } => {
+                assert!(reason.contains("runtime execution not wired"));
+            }
+            other => panic!("missing runtime wiring should defer execution, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn runtime_execution_helper_dispatches_one_queued_job_when_wired() {
+        let store = Arc::new(TestSnapshotStore::default());
+        let runtime = SharedJobRuntimeHost::with_store(RuntimeQueuePolicy::new(1), store.clone());
+        let job_id = JobId::generate();
+        store
+            .create(&JobSnapshot {
+                job_id: job_id.clone(),
+                module: "test".into(),
+                kind: "test_job".into(),
+                state: JobState::Queued,
+                ui_state: JobUiState::Queued,
+                progress: JobProgress::pending(),
+                recoverable: true,
+                updated_at: IsoDateTime::now(),
+                extension: None,
+            })
+            .expect("fixture should store a queued snapshot");
+        let driver = Arc::new(RecordingRunDriver::default());
+        let seen_job_ids = driver.seen_job_ids();
+        let mut registry = JobDriverRegistry::new();
+        registry.register(driver);
+        let facade =
+            StartupPipelineFacade::new(false, None, Some(store.clone()), Some(Arc::new(registry)))
+                .with_runtime_execution(runtime);
+
+        let disposition = facade
+            .run_one_runtime_execution_turn()
+            .expect("wired helper should run one queued execution turn");
+
+        assert_eq!(disposition, JobRunDisposition::Accepted);
+        assert_eq!(
+            seen_job_ids
+                .lock()
+                .expect("recording driver mutex should not be poisoned")
+                .as_slice(),
+            &[job_id.clone()]
+        );
+        assert_eq!(store.get_state(&job_id), Some(JobState::Running));
+    }
+
     #[derive(Debug, Default)]
     struct RecordingFabPrewarmPort {
         captured_requests: Mutex<Vec<FabInventoryPrewarmRequestDto>>,
@@ -414,8 +548,9 @@ mod tests {
         let fab_prewarm = Arc::new(RecordingFabPrewarmPort::default());
         let facade = StartupPipelineFacade::new(false, Some(fab_prewarm.clone()), None, None);
 
-        block_on_ready(facade.run_stage3_background_prewarm())
-            .expect("stage-3 background prewarm should stay a no-op when the capability gate is disabled");
+        block_on_ready(facade.run_stage3_background_prewarm()).expect(
+            "stage-3 background prewarm should stay a no-op when the capability gate is disabled",
+        );
 
         assert!(fab_prewarm
             .captured_requests

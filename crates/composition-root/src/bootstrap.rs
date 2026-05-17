@@ -222,7 +222,7 @@ pub fn build_desktop_services(config: DesktopBootstrapConfig) -> AppResult<Deskt
         download_resume_scheduler.clone(),
         download_policy_store,
     ));
-    let engines = Arc::new(build_engines_module(job_runtime));
+    let engines = Arc::new(build_engines_module(job_runtime.clone()));
     let registry = build_job_driver_registry(
         Arc::new(download_checkpoint_repo),
         Arc::new(download_resume_scheduler),
@@ -230,6 +230,7 @@ pub fn build_desktop_services(config: DesktopBootstrapConfig) -> AppResult<Deskt
     let snapshot_store_dyn: Arc<dyn JobSnapshotStore<()>> = snapshot_store.clone();
     let startup = Arc::new(build_startup_pipeline(
         &config,
+        job_runtime,
         fab.clone(),
         snapshot_store,
         registry,
@@ -378,6 +379,7 @@ fn build_download_job_driver(
 // Startup 只依赖已装配的 facade/runtime 表面，不依赖具体 repository 类型。
 fn build_startup_pipeline(
     config: &DesktopBootstrapConfig,
+    job_runtime: SharedJobRuntimeHost,
     fab: Arc<DesktopFabFacade>,
     snapshot_store: Arc<SqliteJobSnapshotStore>,
     driver_registry: Arc<JobDriverRegistry<()>>,
@@ -388,6 +390,7 @@ fn build_startup_pipeline(
         Some(snapshot_store),
         Some(driver_registry),
     )
+    .with_runtime_execution(job_runtime)
 }
 
 // Builder validation failures are normalized into one composition-root owned error shape.
@@ -407,7 +410,7 @@ mod tests {
     use super::*;
 
     use launcher_kernel_foundation::JobId;
-    use launcher_kernel_jobs::RuntimeQueuePolicy;
+    use launcher_kernel_jobs::{JobRunDisposition, RuntimeQueuePolicy};
     use launcher_module_downloads::{
         contracts::{DownloadPolicyDto, UpdateDownloadPolicyRequestDto},
         DownloadPolicyStore, DownloadResumeWorkItem, DownloadResumeWorkMode,
@@ -479,6 +482,29 @@ mod tests {
 
         drop(job_runtime);
         drop(snapshot_store);
+        let _ = std::fs::remove_file(&tmp_path);
+    }
+
+    #[test]
+    fn build_desktop_services_wires_startup_runtime_execution_helper() {
+        let tmp_path = project_local_sqlite_path("at234_startup_runtime_execution_helper.sqlite3");
+        let config = DesktopBootstrapConfig::new("app-data", "cache", "logs", &tmp_path);
+
+        let services = build_desktop_services(config)
+            .expect("desktop services should wire startup runtime execution helper");
+        let disposition = services
+            .startup
+            .run_one_runtime_execution_turn()
+            .expect("wired helper should return a non-terminal result when no jobs are queued");
+
+        match disposition {
+            JobRunDisposition::Deferred { reason } => {
+                assert!(reason.contains("no queued job"));
+            }
+            other => panic!("fresh runtime should have no queued job, got {other:?}"),
+        }
+
+        drop(services);
         let _ = std::fs::remove_file(&tmp_path);
     }
 
