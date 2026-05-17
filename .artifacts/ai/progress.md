@@ -7892,6 +7892,15 @@
 - Scoped diff validation passed with CRLF normalization warnings only for the AT-206 file set.
 - Initial AT-206 local commit before PWF hash backfill amend: `87b09ab`.
 
+## 2026-05-17 - AT-207 policy boundary selected
+
+- AT-206 final commit `d0ad61a` was pushed to `origin/main`.
+- Read downloads policy/concurrency docs, kernel runtime queue policy docs, storage policy note, current policy DTO/request/query contracts, and facade policy stubs.
+- Chose a docs-first boundary because current `DownloadPolicyDto` has no source of truth and current `JobRuntime` does not expose queue-policy read/write APIs.
+- Updated README_IMPL with section 7.24, requiring a downloads-owned policy store/port before `get_policy(...)` or `update_policy(...)` stops returning `DOWNLOADS_NOT_WIRED`.
+- Scoped `git diff --check` over AT-207 files passed with CRLF normalization warnings only.
+- Initial AT-207 local commit before PWF hash backfill amend: `07bdcfb`.
+
 ### Auto Record: 2026-05-17 15:02:21
 - Tool: apply_patch
 - Phase: Phase 78 - Downloads Get-job Snapshot Query Boundary
@@ -8143,6 +8152,40 @@
 ### Auto Record: 2026-05-17 15:27:17
 - Tool: apply_patch
 - Phase: Phase 81 - Downloads List-jobs Query Implementation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 15:28:51
+- Tool: apply_patch
+- Phase: Phase 81 - Downloads List-jobs Query Implementation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-17 15:29:45
+- Tool: apply_patch
+- Phase: Phase 82 - Downloads Policy Source Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 15:30:18
+- Tool: apply_patch
+- Phase: Phase 82 - Downloads Policy Source Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 15:31:08
+- Tool: apply_patch
+- Phase: Phase 82 - Downloads Policy Source Boundary
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)

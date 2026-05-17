@@ -819,3 +819,12 @@
 - The module test repository already stores `created_jobs`, so it can implement a simple in-memory repository page for RED/GREEN tests.
 - Because `DownloadJobRepository` is implemented by `SqliteDownloadJobRepository`, the Rust slice must also add SQLite adapter compile support even if runtime list/live snapshot joins remain out of scope.
 - RED/GREEN confirmed `list_jobs(...)` now projects module repository records to conservative list DTO rows and applies optional `ui_state` filtering without adding runtime list APIs, live snapshot joins, policy storage, transport, frontend, or concrete IO.
+
+## Phase 82 Downloads Policy Source Boundary Findings
+
+- AT-2026-05-17-206 final commit is `d0ad61a` and was pushed to `origin/main`.
+- `DownloadPolicyDto`, `GetDownloadPolicyQueryDto`, and `UpdateDownloadPolicyRequestDto` exist, but the facade policy methods still return `DOWNLOADS_NOT_WIRED`.
+- `RuntimeQueuePolicy` is currently a kernel-jobs host setting with `max_concurrent_jobs`, not a downloads user policy store.
+- `JobRuntime` exposes no policy read/write API, so policy facade methods should not mutate runtime queue policy directly.
+- Storage docs mention `download_policy_snapshot`, but no SQLite schema/adapter exists yet.
+- The next safe Rust slice should introduce a downloads-owned policy store/port, clamp user-facing concurrency slots to `1..=128`, and keep runtime policy application separate.

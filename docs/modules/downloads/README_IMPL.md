@@ -1153,6 +1153,43 @@ Completed by AT-206:
 
 ---
 
+### 7.24 Downloads Policy Source Boundary
+
+The remaining policy surface should not be implemented by reading or mutating `RuntimeQueuePolicy` directly. `DownloadPolicyDto` is a downloads-facing user policy snapshot, while the shared runtime queue policy is a lower-level scheduling input with its own lifecycle. The first safe policy slice must introduce a downloads-owned policy source of truth before either public method stops returning `DOWNLOADS_NOT_WIRED`.
+
+Current Rust reality:
+
+1. `GetDownloadPolicyQueryDto`, `UpdateDownloadPolicyRequestDto`, and `DownloadPolicyDto` already exist.
+2. `DownloadsFacade::get_policy(...)` and `DownloadsFacade::update_policy(...)` still return `DOWNLOADS_NOT_WIRED`.
+3. `RuntimeQueuePolicy` currently contains only `max_concurrent_jobs` and is owned by `kernel-jobs`.
+4. `JobRuntime` has no API for reading or mutating queue policy.
+5. Storage design names `download_policy_snapshot` as a future downloads persistence fact, but no SQLite schema or adapter exists yet.
+
+Boundary rules:
+
+1. The next Rust slice should introduce a downloads-owned policy store/port rather than treating `RuntimeQueuePolicy` as the public policy source.
+2. The first implementation slice may keep the policy store in-memory or module-local if that is the smallest way to prove `get_policy(...)` and `update_policy(...)` semantics.
+3. `DownloadPolicyDto.concurrency_slots` should be clamped to the documented user-facing range `1..=128` before it becomes the effective downloads policy.
+4. `bandwidth_limit_bytes_per_sec` and `auto_resume` should be stored and returned as policy facts, but they must not drive runtime behavior in the first slice.
+5. Updating downloads policy must not mutate `RuntimeQueuePolicy`, shared runtime leases, active jobs, scheduler pending work, or segment retry behavior in the first slice.
+6. SQLite policy persistence, host transport changes, frontend settings wiring, runtime queue-budget application, concrete IO, retry/backoff, and terminal runtime completion remain later slices.
+
+First Rust slice:
+
+1. add focused RED tests proving `get_policy(...)` returns the current downloads policy snapshot from the policy store;
+2. add focused RED tests proving `update_policy(...)` stores a clamped policy snapshot and `get_policy(...)` can read it back;
+3. introduce the smallest downloads-owned policy store/port and in-memory implementation needed by module tests and composition wiring;
+4. keep `RuntimeQueuePolicy`, active runtime jobs, SQLite schema, host transport, frontend, concrete IO, retry/backoff, and terminal completion unchanged;
+5. run focused module tests, full downloads module tests, affected composition check if dependencies change, rustfmt check, scoped `git diff --check`, and path-limited status before commit.
+
+Later slices:
+
+1. SQLite persistence can map this policy store to `download_policy_snapshot`.
+2. Runtime integration can translate downloads policy into queue budgets only after a runtime policy-application boundary is documented.
+3. Host transport and frontend settings surfaces should wait until module policy semantics are stable.
+
+---
+
 ## 8. Error Semantics
 
 Downloads-domain errors use `DL_*` codes when they become stable public classifications.
