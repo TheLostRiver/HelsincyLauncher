@@ -929,3 +929,13 @@
 - The least disruptive rule change is not to delete existing docs immediately, but to add a forward rule: `.artifacts/ai` owns task logs/validation/commit facts; `docs/` owns durable boundaries and contracts.
 - Central rule surfaces to update are `docs/ModuleDocumentationStandard.md`, `docs/README.md`, `.github/copilot-instructions.md`, `.github/skills/strict-doc-driven-development/SKILL.md`, and `.windsurf/rules/repo-workflow.md`.
 - AT-218 validation passed for the intended rule surfaces: central docs now define a documentation budget, task execution records stay in `.artifacts/ai`, and long per-AT `README_IMPL.md` completion logs are discouraged.
+
+## Phase 94 Downloads Policy Host Transport Smoke Findings
+
+- AT-2026-05-17-218 final commit is `5aae7f1` and was pushed to `origin/main`.
+- README/docs routing, module docs, README_IMPL 7.28, IPC contracts, composition-root wiring, testing strategy, and task protocol docs were read in focused chunks before coding.
+- README_IMPL 7.28 explicitly leaves the next later slice as host transport tests proving `downloads_update_policy` persists policy and applies the runtime snapshot.
+- Current `src-tauri/src/commands/downloads.rs` already forwards `downloads_update_policy(...)` to `services.downloads.update_policy(...)`.
+- Current `DesktopAppServices.downloads.deps().job_runtime` is visible to the transport smoke test, so the smallest proof can assert `policy().max_concurrent_jobs` after the command succeeds without adding public host APIs.
+- The slice should not update README_IMPL because it validates an already-documented durable boundary rather than changing one.
+- The new host smoke assertion passed immediately, confirming no production code change was needed after AT-217; this task adds regression coverage for the existing host/composition path.

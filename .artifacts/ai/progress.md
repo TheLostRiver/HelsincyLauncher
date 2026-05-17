@@ -8797,6 +8797,19 @@
 - Attempted the repo-local `check-complete.ps1` with `RemoteSigned`; Windows blocked it because the script is not digitally signed.
 - Re-ran the same script with a process-local `ExecutionPolicy Bypass`; it exited 0 and reported no root `task_plan.md` active session, which is expected for this repo's `.artifacts/ai` planning surface.
 
+### Agent Note: 2026-05-17 20:00:47 +08:00
+- Phase: Phase 94 - Downloads Policy Host Transport Smoke
+- Started AT-2026-05-17-219 after AT-218 was pushed as `5aae7f1`.
+- Focused context read: README/docs routing, downloads module ARCH/API/FLOW, README_IMPL 7.28, IPC downloads contracts, composition-root transport/wiring rules, testing strategy transport smoke gate, task protocol lifecycle, `src-tauri` downloads command handler, existing transport smoke test, and composition-root runtime policy wiring.
+- Selected the next backend slice as a host transport smoke assertion for `downloads_update_policy`; this validates an already-documented boundary and should not add README_IMPL history.
+
+### Agent Note: 2026-05-17 20:03:37 +08:00
+- Phase: Phase 94 - Downloads Policy Host Transport Smoke
+- Added the host transport smoke assertion in `src-tauri/tests/transport_wiring_smoke.rs`.
+- Validation: `cargo test -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml transport_wiring_smoke` passed with 1 test passed / 0 failed.
+- Validation: `rustfmt --check src-tauri\tests\transport_wiring_smoke.rs` passed after formatting only the touched smoke test file.
+- The new assertion passed without production code changes, confirming AT-217 wiring already reaches the host transport path.
+
 ### Auto Record: 2026-05-17 19:55:06
 - Tool: apply_patch
 - Phase: Phase 93 - Documentation Budget Rules
@@ -8811,4 +8824,30 @@
 - Tool: apply_patch
 - Phase: Phase 93 - Documentation Budget Rules
 - Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 20:01:54
+- Tool: apply_patch
+- Phase: Phase 94 - Downloads Policy Host Transport Smoke
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 20:02:36
+- Tool: apply_patch
+- Phase: Phase 94 - Downloads Policy Host Transport Smoke
+- Files:
+  - `D:\DEV\MyEpicLauncher\src-tauri\tests\transport_wiring_smoke.rs` (update)
+
+### Auto Record: 2026-05-17 20:04:12
+- Tool: apply_patch
+- Phase: Phase 94 - Downloads Policy Host Transport Smoke
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)

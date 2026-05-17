@@ -2,91 +2,85 @@
 
 ## Identity
 
-- task id: AT-2026-05-17-218
-- title: Add documentation budget rules
+- task id: AT-2026-05-17-219
+- title: Prove downloads policy host transport runtime application
 - status: completed
 
 ## Goal
 
-Add concise repository rules that prevent module implementation documents from becoming per-task logs, while preserving strict doc-driven development and `.artifacts/ai` as the task execution record.
+Add a narrow host transport smoke assertion proving `downloads_update_policy` enters the already-wired downloads facade through `src-tauri` and updates the shared runtime policy snapshot through composition-root wiring.
 
 ## Scope
 
 - in scope:
-  - `docs/ModuleDocumentationStandard.md`
-  - `docs/README.md`
-  - `.github/copilot-instructions.md`
-  - `.github/skills/strict-doc-driven-development/SKILL.md`
-  - `.windsurf/rules/repo-workflow.md`
+  - `src-tauri/tests/transport_wiring_smoke.rs`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
   - `.artifacts/ai/progress.md`
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
-  - rewriting existing large module implementation history
-  - changing backend runtime behavior
-  - changing hooks or generated workflow scripts
-  - editing unrelated frontend, sqlite, `.codex`, Cargo.lock, or `src/` changes
+  - frontend settings UI
+  - new host commands or DTO shapes
+  - scheduler loops, active-job rescheduling, leases, snapshots migration, pending resume work mutation
+  - concrete HTTP/file/hash execution, retry/backoff, terminal completion
+  - SQLite schema changes or unrelated dirty files
+  - module implementation documentation churn unless a durable boundary changes
 
 ## Allowed Files
 
-1. docs/ModuleDocumentationStandard.md
-2. docs/README.md
-3. .github/copilot-instructions.md
-4. .github/skills/strict-doc-driven-development/SKILL.md
-5. .windsurf/rules/repo-workflow.md
-6. .artifacts/ai/active-task.md
-7. .artifacts/ai/task-plan.md
-8. .artifacts/ai/progress.md
-9. .artifacts/ai/findings.md
-10. .artifacts/ai/handoff.md
+1. src-tauri/tests/transport_wiring_smoke.rs
+2. .artifacts/ai/active-task.md
+3. .artifacts/ai/task-plan.md
+4. .artifacts/ai/progress.md
+5. .artifacts/ai/findings.md
+6. .artifacts/ai/handoff.md
 
 ## Required Context Read
 
-Read this turn before writing:
+Read before writing:
 
-1. docs/ModuleDocumentationStandard.md
-2. docs/README.md update routing section
-3. .github/copilot-instructions.md
-4. .github/skills/strict-doc-driven-development/SKILL.md
-5. .windsurf/rules/repo-workflow.md
-6. current PWF task plan and handoff tails
+1. README.md and docs/README.md relevant routing sections.
+2. docs/modules/downloads/README_ARCH.md.
+3. docs/modules/downloads/README_API.md.
+4. docs/modules/downloads/README_FLOW.md.
+5. docs/modules/downloads/README_IMPL.md section 7.28.
+6. docs/TauriIPCAndStateContractsDesign.md downloads command/query section.
+7. docs/TauriCompositionRootWiringDesign.md host transport/composition sections.
+8. docs/TauriTestingStrategyAndQualityGateDesign.md transport smoke gate sections.
+9. docs/TauriAIDevelopmentTransactionProtocolDesign.md task lifecycle sections.
+10. Current `src-tauri` transport test and downloads command handler code.
 
 ## Hypothesis
 
-- falsifiable local hypothesis: adding a small "documentation budget" rule to the central workflow/documentation entry points is enough to stop future README_IMPL overgrowth without weakening the requirement to read controlling docs before backend coding.
+- falsifiable local hypothesis: adding a RED host transport smoke assertion for `downloads_update_policy` will currently prove whether the existing command path reaches the composition-root runtime policy applier; if the assertion fails, the fix must remain in host/composition wiring only.
 
 ## Cheap Check
 
-1. Add the concise documentation-budget rule to module docs, docs navigation, Copilot rules, strict-doc skill, and Windsurf projection.
-2. Update PWF records, including AT-217 final commit `37765ef`.
-3. Run scoped `git diff --check` and path-limited status.
+1. Add the smallest transport smoke assertion around `downloads_update_policy`.
+2. Run the focused test first and confirm the new assertion fails if runtime application is not visible through the host path.
+3. If RED already passes because previous wiring is complete, record that no production code change is needed.
+4. Run `cargo test -p my-epic-launcher-desktop transport_wiring_smoke --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`.
+5. Run scoped `git diff --check` for the AT-219 file set.
 
 ## Validation Gate
 
-1. Central docs clearly separate durable docs from task logs.
-2. Rules explicitly send task logs, validation output, handoff notes, and commit ids to `.artifacts/ai`.
-3. Rules explicitly discourage long per-AT `README_IMPL.md` completion logs.
-4. Scoped `git diff --check` passes.
-5. Commit only AT-218 files locally, then push `main` to `origin`.
+1. Host transport test exercises `commands::downloads::downloads_update_policy(...)`.
+2. The test verifies the command returns success through the shared transport envelope.
+3. The test verifies `services.downloads.deps().job_runtime.policy().max_concurrent_jobs` reflects the requested policy slots.
+4. No frontend, scheduler, concrete IO, retry/backoff, terminal completion, or SQLite schema behavior changes.
+5. Commit only AT-219 files locally, then push `main` to `origin`.
 
 ## Validation Result
 
-- Central workflow and documentation entry points now separate durable `docs/` content from per-task execution logs.
-- Task logs, validation output, handoff notes, and commit ids are explicitly routed to `.artifacts/ai/`.
-- Long per-AT `README_IMPL.md` completion logs are discouraged in favor of short durable current-state notes.
-- Scoped `git diff --check` passed for the AT-218 file set with CRLF normalization warnings only.
-- Commit and push are pending for the AT-218 file set.
+- Added a host transport smoke assertion for `commands::downloads::downloads_update_policy(...)`.
+- The command returns a success envelope, `downloads_get_policy(...)` reads back the persisted policy, and `services.downloads.deps().job_runtime.policy().max_concurrent_jobs` reflects the requested `concurrency_slots`.
+- No production Rust behavior changes were needed; the existing AT-217 wiring already satisfied the host path assertion.
+- `cargo test -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml transport_wiring_smoke` passed with 1 test passed / 0 failed.
+- `rustfmt --check src-tauri\tests\transport_wiring_smoke.rs` passed after formatting only the touched transport smoke test file.
+- Scoped `git diff --check` passed for the AT-219 file set with CRLF normalization warnings only.
+- Commit and push are pending for the AT-219 file set.
 
 ## Notes
 
-- AT-2026-05-17-209 final commit is `41f0b8c` and is already pushed to `origin/main`.
-- AT-2026-05-17-210 final commit is `2f9e828` and is already pushed to `origin/main`.
-- AT-2026-05-17-211 final commit is `1d31f56` and is already pushed to `origin/main`.
-- AT-2026-05-17-212 final commit is `ed27996` and is already pushed to `origin/main`.
-- AT-2026-05-17-213 final commit is `38c32b2` and is already pushed to `origin/main`.
-- AT-2026-05-17-214 final commit is `c92be25` and is already pushed to `origin/main`.
-- AT-2026-05-17-215 final commit is `4ef3f10` and is already pushed to `origin/main`.
-- AT-2026-05-17-216 final commit is `1094c10` and is already pushed to `origin/main`.
-- AT-2026-05-17-217 final commit is `37765ef` and is already pushed to `origin/main`.
+- AT-2026-05-17-218 final commit is `5aae7f1` and is already pushed to `origin/main`.

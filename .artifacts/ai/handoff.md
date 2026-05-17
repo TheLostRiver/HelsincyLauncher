@@ -2,25 +2,19 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-17-216
-- title: Add downloads runtime policy applier port
-- task id: AT-2026-05-17-217
-- title: Wire downloads runtime policy applier in composition-root
-- status: completed; final local commit `37765ef`, pushed to `origin/main`
+- task id: AT-2026-05-17-218
+- title: Add documentation budget rules
+- status: completed; final local commit `5aae7f1`, pushed to `origin/main`
 
 ## Current Atomic Task
 
-- task id: AT-2026-05-17-218
-- title: Add documentation budget rules
+- task id: AT-2026-05-17-219
+- title: Prove downloads policy host transport runtime application
 - status: completed locally; validation passed, commit and push pending
 
 ## Current Slice
 
-- `docs/ModuleDocumentationStandard.md`
-- `docs/README.md`
-- `.github/copilot-instructions.md`
-- `.github/skills/strict-doc-driven-development/SKILL.md`
-- `.windsurf/rules/repo-workflow.md`
+- `src-tauri/tests/transport_wiring_smoke.rs`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -29,9 +23,9 @@
 
 ## Next Resume Point
 
-1. Commit only AT-218 files.
+1. Commit only AT-219 files.
 2. Push `main` to `origin`.
-3. Resume backend work under the new documentation-budget rule.
+3. Reassess the next backend slice under the documentation-budget rule.
 
 ## Validation
 
@@ -59,12 +53,16 @@
 - `rustfmt --check crates\composition-root\src\bootstrap.rs` passed after formatting.
 - AT-218 changes are docs/rules only; no Rust behavior changes are in scope.
 - AT-218 scoped `git diff --check` passed for the allowed file set with CRLF normalization warnings only.
+- AT-219 required context read in focused chunks: README/docs routing, downloads module ARCH/API/FLOW, README_IMPL 7.28, IPC downloads contract section, composition-root transport/wiring rule, testing strategy transport smoke gate, task protocol lifecycle, current downloads command handler, current transport smoke test, and composition-root runtime policy wiring.
+- AT-219 host transport smoke validation passed: `downloads_update_policy` returned success, `downloads_get_policy` read back the persisted policy, and the shared runtime policy snapshot reflected the updated concurrency slot count.
+- `cargo test -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml transport_wiring_smoke` passed with 1 test passed / 0 failed.
+- `rustfmt --check src-tauri\tests\transport_wiring_smoke.rs` passed after formatting only the touched smoke test.
 
 ## Boundaries
 
 - Do not modify files outside `D:\DEV\MyEpicLauncher`.
 - Do not run destructive commands.
-- Do not change backend behavior, hooks, frontend, sqlite files, `.codex`, Cargo.lock, or `src/` in AT-218.
+- Do not change frontend, scheduler execution, concrete IO, retry/backoff, terminal completion, SQLite schema, hooks, `.codex`, Cargo.lock, or unrelated dirty files in AT-219.
 - Push is authorized by the user-provided GitHub remote after each completed task commit.
 
 ## Dirty Worktree To Preserve
