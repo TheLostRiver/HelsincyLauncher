@@ -1200,6 +1200,45 @@ Completed by AT-208:
 
 ---
 
+### 7.25 Downloads Policy SQLite Persistence Boundary
+
+The next policy slice should persist the downloads-owned policy snapshot without turning it into a full application settings system. `DownloadPolicyStore` already gives the module a stable port; the next safe persistence step is a SQLite adapter that implements that port, not a runtime queue-policy mutation and not a frontend settings integration.
+
+Current Rust reality:
+
+1. `DownloadPolicyStore` exposes `load_policy(...)` and `save_policy(...)` over `DownloadPolicyDto`.
+2. `InMemoryDownloadPolicyStore` stores a normalized policy snapshot and clamps `concurrency_slots` to `1..=128`.
+3. Composition-root currently initializes the in-memory policy store from `DesktopBootstrapConfig.default_download_slots`.
+4. `adapter-storage-sqlite` has `SqliteDownloadJobRepository`, `SqliteDownloadCheckpointRepository`, and `SqliteJobSnapshotStore`, but no `SqliteDownloadPolicyStore`.
+5. Storage docs list `download_policy_snapshot` as a downloads persistence fact, while broader user-editable configuration remains a separate settings/config-system concern.
+
+Boundary rules:
+
+1. The next Rust slice should add `SqliteDownloadPolicyStore` in `adapter-storage-sqlite` and make it implement the existing `DownloadPolicyStore` trait.
+2. The adapter should create a small `download_policy_snapshot` table, independent from `download_jobs` and checkpoint tables.
+3. The first table shape may be a singleton row keyed by a stable scope such as `default`, with fields for `concurrency_slots`, optional `bandwidth_limit_bytes_per_sec`, `auto_resume`, and `updated_at`.
+4. `concurrency_slots` remains the user-facing `1..=128` slot budget; SQLite persistence must not reinterpret it as OS thread count.
+5. `bandwidth_limit_bytes_per_sec` and `auto_resume` should round-trip exactly as policy facts, but must not drive scheduler behavior in this slice.
+6. Composition-root may replace `InMemoryDownloadPolicyStore` with `SqliteDownloadPolicyStore` once the adapter compiles.
+7. This slice must not mutate `RuntimeQueuePolicy`, active runtime jobs, leases, snapshots, pending segment work, retry/backoff, host transport, frontend settings, or concrete download IO.
+8. This slice must not introduce a global `AppSettingsStorePort` or move unrelated settings into downloads.
+
+First Rust slice:
+
+1. add focused adapter RED tests proving `SqliteDownloadPolicyStore::save_policy(...)` / `load_policy(...)` round-trip the normalized policy snapshot;
+2. use a test database path under `D:\DEV\MyEpicLauncher` rather than `std::env::temp_dir()` so verification does not create or delete files outside the project boundary;
+3. add only the SQLite table creation, row mapping, adapter type, and composition-root wiring needed to replace the in-memory policy store;
+4. keep module facade behavior, runtime policy, host transport, frontend, concrete IO, retry/backoff, and terminal runtime completion unchanged;
+5. run the focused adapter policy test, downloads module tests if the module surface changes, `cargo check -p launcher-composition-root`, rustfmt check, scoped `git diff --check`, and path-limited status before commit.
+
+Later slices:
+
+1. Runtime integration can translate the persisted downloads policy into `RuntimeQueuePolicy` only after a runtime policy-application boundary is documented.
+2. Host transport and frontend settings surfaces should wait until persisted module semantics are stable.
+3. A broader settings/config-system adapter can later decide whether user-editable policy facts should sync with, seed, or replace this downloads-owned snapshot.
+
+---
+
 ## 8. Error Semantics
 
 Downloads-domain errors use `DL_*` codes when they become stable public classifications.

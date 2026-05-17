@@ -2,20 +2,18 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-17-207
-- title: Define downloads policy source boundary
-- status: completed; final local commit `1d9a04c`, pushed to `origin/main`
+- task id: AT-2026-05-17-208
+- title: Implement downloads policy store facade semantics
+- status: completed; final local commit `6d8c022`, pushed to `origin/main`
 
 ## Current Atomic Task
 
-- task id: AT-2026-05-17-208
-- title: Implement downloads policy store facade semantics
-- status: completed; local commit hash will be recorded after commit/push
+- task id: AT-2026-05-17-209
+- title: Define downloads policy SQLite persistence boundary
+- status: validating; docs-only boundary written, scoped diff check passed, awaiting commit/push
 
 ## Current Slice
 
-- `crates/module-downloads/src/facade/mod.rs`
-- `crates/composition-root/src/bootstrap.rs` only if facade dependencies change
 - `docs/modules/downloads/README_IMPL.md`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
@@ -25,30 +23,27 @@
 
 ## Next Resume Point
 
-1. Commit and push AT-208 only.
-2. Re-read README_IMPL and task plan to select the next downloads backend slice.
-3. Do not mutate `RuntimeQueuePolicy`, add SQLite schema/adapter policy persistence, host transport, frontend, concrete IO, retry/backoff, or runtime completion without a separate boundary.
+1. Run scoped `git diff --check` over AT-209 files and path-limited status.
+2. Commit and push AT-209 only.
+3. If continuing, start the documented Rust slice for `SqliteDownloadPolicyStore`.
 
 ## Validation
 
-- Required docs were read in focused chunks: root README, CONTRIBUTING, docs map, downloads module docs, README_IMPL 7.24, download runtime policy/concurrency docs, kernel queue policy docs, storage policy note, repository/adapters rules, composition wiring rules, testing gates, AI transaction protocol, and comment standard.
-- RED confirmed missing `InMemoryDownloadPolicyStore` / `policy_store` boundary before implementation.
-- Focused policy tests passed: 2 passed / 0 failed.
-- Full downloads module tests passed: 45 passed / 0 failed.
-- `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
-- rustfmt check passed.
-- Scoped `git diff --check` passed with CRLF normalization warnings only.
+- Required context read in focused chunks: README_IMPL policy sections, storage policy placement, port/adapter ownership rules, current SQLite adapter shapes, current policy store surface, and current PWF tails.
+- README_IMPL section 7.25 now defines the first SQLite policy persistence boundary, schema shape, project-local test DB requirement, and deferred runtime/settings/transport/frontend surfaces.
+- Scoped `git diff --check` passed with CRLF normalization warnings only; path-limited status shows only AT-209 files.
 
 ## Boundaries
 
 - Do not modify files outside `D:\DEV\MyEpicLauncher`.
 - Do not run destructive commands.
-- Do not implement runtime queue-policy mutation, active job mutation, SQLite schema or adapter policy persistence, transport, frontend, concrete IO, retry/backoff, or terminal completion.
+- Do not implement Rust code during AT-209.
+- Do not mutate `RuntimeQueuePolicy`, global settings, transport, frontend, concrete IO, retry/backoff, or runtime completion in AT-209.
 - Push is authorized by the user-provided GitHub remote after each completed task commit.
 
 ## Dirty Worktree To Preserve
 
-- Unrelated unstaged/unknown work remains present and must not be committed with AT-208:
+- Unrelated unstaged/unknown work remains present and must not be committed with AT-209:
   - `Cargo.lock`
   - `MyEpicLauncher.pen`
   - frontend files under `app/` and `components/`

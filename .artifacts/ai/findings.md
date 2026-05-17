@@ -837,3 +837,12 @@
 - `concurrency_slots` must clamp to `1..=128`; `bandwidth_limit_bytes_per_sec` and `auto_resume` should be stored/read back but must not drive runtime behavior in this slice.
 - SQLite `download_policy_snapshot`, runtime queue-budget application, host transport, frontend settings wiring, concrete IO, retry/backoff, and terminal runtime completion remain later slices.
 - RED/GREEN confirmed `get_policy(...)` reads `DownloadPolicyStore`, `update_policy(...)` stores a normalized snapshot, and composition-root initializes the in-memory store from `default_download_slots` without changing shared runtime queue policy.
+
+## Phase 84 Downloads Policy SQLite Persistence Boundary Findings
+
+- AT-2026-05-17-208 final commit is `6d8c022` and was pushed to `origin/main`.
+- Storage docs list `download_policy_snapshot` as a downloads persistence fact, but also say broad user-editable configuration belongs to the settings/config system by default.
+- The next safe boundary is therefore a downloads-owned policy snapshot adapter (`SqliteDownloadPolicyStore`) for the existing `DownloadPolicyStore` port, not a global settings implementation.
+- Current `adapter-storage-sqlite` has job, checkpoint, and shared snapshot stores but no policy store or policy table.
+- The first Rust slice should use project-local test database paths under `D:\DEV\MyEpicLauncher` to respect the user safety boundary and avoid deleting temp files outside the repo.
+- Runtime queue-policy application, host transport, frontend settings, global settings/config-system sync, concrete IO, retry/backoff, and terminal runtime completion remain later tasks.

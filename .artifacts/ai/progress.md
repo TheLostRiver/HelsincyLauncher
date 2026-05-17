@@ -8212,6 +8212,14 @@
   - `cargo fmt -p launcher-module-downloads -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check`: passed.
   - scoped `git diff --check`: passed with CRLF normalization warnings only.
 
+## Agent Note: 2026-05-17 16:40
+
+- AT-2026-05-17-208 was committed and pushed as `6d8c022 feat: add downloads policy store`.
+- Started AT-2026-05-17-209 as a docs-only boundary task before SQLite policy persistence coding.
+- Read README_IMPL policy sections, storage placement docs, port/adapter ownership docs, current SQLite adapter repository shapes, and current policy store surface.
+- Added README_IMPL section 7.25 defining `SqliteDownloadPolicyStore`, a `download_policy_snapshot` singleton table shape, project-local test DB requirement, and deferred runtime/settings/transport/frontend surfaces.
+- Scoped `git diff --check` passed with CRLF normalization warnings only; path-limited status shows only AT-209 files.
+
 ### Auto Record: 2026-05-17 15:38:00
 - Tool: apply_patch
 - Phase: Phase 83 - Downloads Policy Store Implementation
@@ -8271,5 +8279,29 @@
   - `.artifacts/ai/active-task.md` (update)
   - `.artifacts/ai/task-plan.md` (update)
   - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-17 15:46:45
+- Tool: apply_patch
+- Phase: Phase 83 - Downloads Policy Store Implementation
+- Files:
+  - `docs/modules/downloads/README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 15:47:35
+- Tool: apply_patch
+- Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/handoff.md` (delete)
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-17 15:47:58
+- Tool: apply_patch
+- Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
   - `.artifacts/ai/handoff.md` (update)
   - `.artifacts/ai/progress.md` (update)
