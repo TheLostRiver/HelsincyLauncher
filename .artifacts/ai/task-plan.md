@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 68 - Downloads Fake Segment Execution Acceptance
+Phase 69 - Downloads Fake Segment Completion Result Contract
 
 ## Current Focus
 
@@ -550,6 +550,12 @@ Phase 68 - Downloads Fake Segment Execution Acceptance
 - Atomic tasks: AT-2026-05-17-193
 - **Status:** complete
 
+### Phase 69: Downloads Fake Segment Completion Result Contract
+
+- Outcome: document and add a module-local fake completed segment execution result shape that can be collected through the existing execution port helper without concrete HTTP, writes, verification, checkpoint mutation, runtime completion, transport, or frontend work.
+- Atomic tasks: AT-2026-05-17-194
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -739,6 +745,7 @@ Phase 68 - Downloads Fake Segment Execution Acceptance
 185. AT-2026-05-17-191 - completed - updated README_IMPL with the completed local execution-turn reality and defined the next segment execution ports boundary before coding; then committed locally.
 186. AT-2026-05-17-192 - completed - added downloads segment execution request handoff shell with focused TDD, keeping concrete IO/runtime completion out of scope; then committed locally.
 187. AT-2026-05-17-193 - completed - documented and added fake segment execution port acceptance with focused TDD, keeping concrete IO/runtime completion out of scope; then committed locally, with initial hash `0655ac2` before PWF backfill amend.
+188. AT-2026-05-17-194 - completed - documented and added fake segment completion result contract with focused TDD, keeping checkpoint mutation and concrete IO out of scope; then committed locally, with initial hash `0f8a1a2` before PWF backfill amend.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

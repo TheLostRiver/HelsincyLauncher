@@ -86,6 +86,8 @@ Implementation truth should move through module facade and ports first. Do not p
 | driver pending-work consumption boundary | `DownloadPendingResumeWorkSource` and job-id-scoped draining on `InMemoryDownloadResumeWorkScheduler` prove future driver consumption can drain one job without discarding unrelated pending work; current Rust still has no `JobDriver::run()` | module source/drain tests |
 | driver execution-turn classification | `DownloadJobDriver::prepare_resume_execution_turn(...)` reloads durable checkpoint facts before draining pending work and returns a downloads-owned classification; still no fetch/write/verify, runtime `run()`, snapshot completion, transport, or frontend projection | driver unit tests |
 | segment execution request handoff | `DownloadSegmentExecutionRequest` / `DownloadSegmentExecutionPort` exist and `DownloadJobDriver::prepare_segment_execution_requests(...)` converts accepted pending work into ordered job-scoped requests; still no real execution | driver unit tests |
+| fake segment execution acceptance | `DownloadJobDriver::accept_segment_execution_requests(...)` hands prepared requests to an injected `DownloadSegmentExecutionPort` and collects module-local results in stable order; still no checkpoint mutation, real IO, runtime completion, transport, or frontend projection | driver unit tests |
+| fake segment completion result contract | `DownloadSegmentExecutionResult::Completed` carries the original request, completed byte count, and optional fake persistence tokens for later checkpoint mutation; still no checkpoint save, real IO, runtime completion, transport, or frontend projection | driver unit tests |
 | list/get/policy surfaces | not wired yet | future slices |
 
 ---
@@ -780,8 +782,9 @@ The next safe code slice is fake/local execution acceptance through `DownloadSeg
 Current Rust reality:
 
 1. `DownloadSegmentExecutionRequest` values can already be prepared from `PendingWorkAccepted`.
-2. `DownloadSegmentExecutionPort` exists but no driver helper delegates a batch of requests to it.
-3. There is no concrete fetcher, writer, verifier, checkpoint mutation, runtime completion, host transport, or frontend projection.
+2. `DownloadSegmentExecutionPort` exists.
+3. `DownloadJobDriver::accept_segment_execution_requests(...)` delegates a batch of prepared requests to that port and preserves result order.
+4. There is no completed-result payload, concrete fetcher, writer, verifier, checkpoint mutation, runtime completion, host transport, or frontend projection.
 
 Boundary rules:
 
@@ -797,6 +800,50 @@ First Rust slice:
 2. add only the local `DownloadJobDriver` helper required for those tests;
 3. keep request/result/port shapes stable unless the tests reveal a missing field;
 4. run focused module tests, full module tests, rustfmt check, scoped `git diff --check`, and path-limited status before commit.
+
+Completed by AT-193:
+
+1. `DownloadJobDriver::accept_segment_execution_requests(...)` now accepts a `&dyn DownloadSegmentExecutionPort` and a slice of prepared requests.
+2. The helper calls the port once per request, preserves input/result order, and propagates the first port `AppResult` error through the existing result channel.
+3. The accepted-result shape remains `DownloadSegmentExecutionResult::Accepted`; no completed-result payload or checkpoint mutation exists yet.
+4. `kernel-jobs`, composition-root, host transport, frontend, SQLite schema, real fetch/write/verify, checkpoint mutation, and runtime completion remain unchanged.
+
+---
+
+### 7.16 Fake Segment Completion Result Boundary
+
+The next safe code slice is a fake/local completed segment result contract. This still is not HTTP fetching, writing, verifying, or checkpoint persistence. It only defines the module-owned result shape that a fake or future executor can return after a segment is considered complete.
+
+Current Rust reality:
+
+1. `DownloadSegmentExecutionRequest` carries job id, segment id, file id, source locator, write target, expected hash, byte range, resume mode, and optional checkpoint reference.
+2. `DownloadSegmentExecutionResult::Accepted` proves a request crossed the local execution boundary.
+3. `DownloadSegmentExecutionResult::Completed` carries the original request, completed byte count, and optional fake persistence tokens.
+4. `DownloadJobDriver::accept_segment_execution_requests(...)` already collects any `DownloadSegmentExecutionResult` values returned by the port.
+5. No checkpoint mutation helper consumes completed results yet.
+
+Boundary rules:
+
+1. Add a `DownloadSegmentExecutionResult::Completed` variant only after a RED test proves the missing result shape.
+2. The completed result may carry the original `DownloadSegmentExecutionRequest` plus the fake completion facts needed by a later checkpoint-mutation slice: downloaded bytes and optional `partial_path`, `etag`, and `hash_state_ref`.
+3. The variant is a module-local contract only; it must not perform IO, validate hashes, save checkpoints, update runtime snapshots, publish events, or expose segment details through transport/frontend.
+4. Do not introduce public `DL_*` execution errors in this slice.
+5. Keep `DownloadSegmentExecutionPort` unchanged unless the RED test proves the existing return type cannot carry the result.
+
+First Rust slice:
+
+1. add a focused RED test whose fake port returns `DownloadSegmentExecutionResult::Completed`;
+2. verify RED with the `segment_completion_result` filter;
+3. add only the `Completed` result variant and bilingual public comments needed for the test;
+4. prove the existing driver acceptance helper preserves the completed result;
+5. run focused module tests, full module tests, rustfmt check, scoped `git diff --check`, and path-limited status before commit.
+
+Completed by AT-194:
+
+1. `DownloadSegmentExecutionResult::Completed` now exists as a module-local fake completion result.
+2. The variant carries the original request, `downloaded_bytes`, optional `partial_path`, optional `etag`, and optional `hash_state_ref`.
+3. Driver tests prove the existing acceptance helper preserves a fake completed result payload.
+4. Checkpoint mutation, SQLite persistence, concrete IO, runtime completion, transport, and frontend projection remain unchanged.
 
 ---
 

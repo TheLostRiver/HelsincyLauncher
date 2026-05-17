@@ -167,6 +167,25 @@ pub enum DownloadSegmentExecutionResult {
         /// 穿过本地执行边界的 segment 请求。
         request: DownloadSegmentExecutionRequest,
     },
+    /// A fake or future executor reports that the segment completed locally.
+    /// fake 或后续 executor 报告该 segment 已在本地完成。
+    Completed {
+        /// Segment request that produced the completion result.
+        /// 产生完成结果的 segment 请求。
+        request: DownloadSegmentExecutionRequest,
+        /// Bytes completed by this result; later checkpoint logic owns validation.
+        /// 本次结果完成的字节数；后续 checkpoint 逻辑负责校验。
+        downloaded_bytes: u64,
+        /// Optional staging-relative partial path produced by fake or future writer code.
+        /// fake 或后续 writer 代码产生的可选 staging 相对 partial 路径。
+        partial_path: Option<String>,
+        /// Optional provider validator token retained for later resume safety checks.
+        /// 为后续安全恢复检查保留的可选 provider 校验 token。
+        etag: Option<String>,
+        /// Optional hash-state reference retained for later verifier/checkpoint slices.
+        /// 为后续 verifier/checkpoint 切片保留的可选 hash 状态引用。
+        hash_state_ref: Option<String>,
+    },
 }
 
 /// Port shell for handing segment requests to later fetch/write/verify code.
@@ -389,6 +408,23 @@ mod tests {
 
             Ok(DownloadSegmentExecutionResult::Accepted {
                 request: request.clone(),
+            })
+        }
+    }
+
+    struct CompletedSegmentExecutionPort;
+
+    impl DownloadSegmentExecutionPort for CompletedSegmentExecutionPort {
+        fn accept_segment_execution(
+            &self,
+            request: &DownloadSegmentExecutionRequest,
+        ) -> launcher_kernel_foundation::AppResult<DownloadSegmentExecutionResult> {
+            Ok(DownloadSegmentExecutionResult::Completed {
+                request: request.clone(),
+                downloaded_bytes: request.length,
+                partial_path: Some(request.write_target.clone()),
+                etag: Some(format!("etag-{}", request.segment_id)),
+                hash_state_ref: Some(format!("hash-{}", request.segment_id)),
             })
         }
     }
@@ -725,6 +761,31 @@ mod tests {
                 },
             ],
             "driver acceptance helper must preserve result order"
+        );
+    }
+
+    #[test]
+    fn download_job_driver_segment_completion_result_preserves_fake_completion_payload() {
+        let repo = Arc::new(InMemoryCheckpointRepository::default());
+        let driver = DownloadJobDriver::new(repo);
+        let execution_port = CompletedSegmentExecutionPort;
+        let job_id = JobId::generate();
+        let request = make_segment_execution_request(&job_id, "segment-completed");
+
+        let results = driver
+            .accept_segment_execution_requests(&execution_port, std::slice::from_ref(&request))
+            .expect("fake segment completion result should stay in the local result channel");
+
+        assert_eq!(
+            results,
+            vec![DownloadSegmentExecutionResult::Completed {
+                request,
+                downloaded_bytes: 1024,
+                partial_path: Some("segment-completed.part".into()),
+                etag: Some("etag-segment-completed".into()),
+                hash_state_ref: Some("hash-segment-completed".into()),
+            }],
+            "fake completion must preserve payload facts for a later checkpoint mutation slice"
         );
     }
 }

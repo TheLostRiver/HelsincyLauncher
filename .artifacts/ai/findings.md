@@ -700,3 +700,12 @@
 - The next smallest concern is fake/local execution port acceptance, not real HTTP fetch: use `DownloadSegmentExecutionPort` as the boundary and test with a recording fake.
 - The driver helper should preserve request order and collect `DownloadSegmentExecutionResult` values, while leaving retry, checkpoint mutation, snapshot updates, and concrete IO to later slices.
 - RED/GREEN confirmed that a module-local helper can delegate prepared requests through `DownloadSegmentExecutionPort` in stable order without widening into HTTP fetch, staging writes, verification, checkpoint mutation, runtime completion, transport, or frontend work.
+
+## Phase 69 Downloads Fake Segment Completion Result Findings
+
+- AT-2026-05-17-193 committed locally as `7e8d6bd`; its file set was clean after commit.
+- README_IMPL 7.15 now needs to be brought forward from "helper does not exist" to "helper exists and preserves ordered results".
+- Jumping directly to checkpoint mutation would force decisions about save semantics before the result payload exists.
+- The smaller next slice is therefore a fake completed result contract on `DownloadSegmentExecutionResult`, collected through the existing port helper.
+- The result may carry request facts plus optional fake persistence tokens, but it must not perform HTTP fetch, staging writes, hash verification, checkpoint save, runtime completion, transport, or frontend projection.
+- RED/GREEN confirmed that the existing port helper can carry a fake completed result payload unchanged, so a later checkpoint-mutation slice can consume a typed result instead of inventing payload semantics inline.
