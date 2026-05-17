@@ -1419,6 +1419,30 @@ Current Rust state:
 2. `JobDriver::run(...)` exists and defaults to `JobRunDisposition::Deferred`, so existing module drivers do not claim concrete execution.
 3. Focused `launcher-kernel-jobs` tests prove a fake driver can override `run(...)` and accept one execution turn through the registry-resolved driver.
 
+### 7.30 Shared Runtime Execution Dispatch Boundary
+
+The execution-turn contract exists, but the shared runtime still does not own a dispatch entry point that reads a queued snapshot, resolves its driver, and invokes one `run(...)` turn. The next backend slice should stay in `kernel-jobs` and add that smallest dispatch surface before downloads overrides concrete execution.
+
+Current Rust reality:
+
+1. `SharedJobRuntimeHost` owns the snapshot store and can read a job snapshot by id.
+2. `JobDriverRegistry` owns module/kind routing and can resolve the matching driver.
+3. `JobDriver::run(...)` accepts a read-only `JobExecutionContext` and returns `JobRunDisposition`.
+4. No runtime method currently composes those three facts into a single execution-turn dispatch.
+
+First Rust slice:
+
+1. add a focused `SharedJobRuntimeHost` dispatch method that takes a `JobId` plus `JobDriverRegistry<()>`, loads the snapshot, resolves the driver, and calls `driver.run(JobExecutionContext::new(&snapshot))`;
+2. return explicit `JobRunDisposition::Deferred` results for missing snapshots or missing drivers instead of silently succeeding;
+3. keep the method synchronous and one-shot; it must not start a loop, spawn background work, acquire durable leases, mutate terminal state, or assume concrete downloads IO exists;
+4. keep snapshot writer, cancellation token, lease persistence, retry/backoff, host transport, frontend, SQLite schema, and downloads driver override out of this slice.
+
+Validation should remain in `launcher-kernel-jobs` first:
+
+1. a fake driver registered in `JobDriverRegistry` is called exactly once for the queued snapshot;
+2. unknown job ids and missing drivers produce explicit deferred dispositions;
+3. existing enqueue/snapshot/policy tests keep passing.
+
 ---
 
 ## 8. Error Semantics

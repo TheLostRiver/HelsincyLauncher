@@ -2,20 +2,18 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-17-220
-- title: Document shared runtime execution-turn boundary
-- status: completed; final local commit `aa8d6e3`, pushed to `origin/main`
+- task id: AT-2026-05-17-221
+- title: Add minimal kernel-jobs execution-turn contract
+- status: completed; final commit `89d3a19`, pushed to `origin/main`
 
 ## Current Atomic Task
 
-- task id: AT-2026-05-17-221
-- title: Add minimal kernel-jobs execution-turn contract
-- status: completed locally; validation passed, commit and push pending
+- task id: AT-2026-05-17-222
+- title: Document shared runtime execution dispatch boundary
+- status: completed locally; docs/PWF validation passed, commit and push pending
 
 ## Current Slice
 
-- `crates/kernel-jobs/src/runtime.rs`
-- `crates/kernel-jobs/src/lib.rs`
 - `docs/modules/downloads/README_IMPL.md`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
@@ -25,8 +23,8 @@
 
 ## Next Resume Point
 
-1. Commit only AT-221 files and push `main` to `origin`.
-2. Reassess the next backend slice from README_IMPL 7.29 current state.
+1. Validate and publish AT-222 docs/PWF changes.
+2. If continuing, start the next Rust slice from README_IMPL 7.30: add a one-shot `SharedJobRuntimeHost` execution dispatch method in `kernel-jobs` with focused TDD.
 
 ## Validation
 
@@ -64,12 +62,15 @@
 - AT-221 RED/GREEN validation passed: missing execution-turn contract failed first, then `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed with 4 tests passed / 0 failed.
 - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
 - `rustfmt --edition 2021 --check crates\kernel-jobs\src\runtime.rs` passed; broader rustfmt remains blocked by pre-existing out-of-scope `crates/kernel-jobs/src/model.rs` formatting.
+- AT-222 required context read in focused chunks: README/docs routing, downloads module docs, README_IMPL 7.29, kernel-jobs runtime driver/runtime-host/runtime-context sections, download runtime scheduler/budget notes, current runtime/lib/model code, and composition-root driver-registry wiring.
+- README_IMPL 7.30 now defines the next Rust slice as a one-shot `SharedJobRuntimeHost` dispatch method over snapshot lookup, driver registry resolution, and `driver.run(...)`.
+- AT-222 scoped `git diff --check` passed for README_IMPL and PWF files with CRLF normalization warnings only.
 
 ## Boundaries
 
 - Do not modify files outside `D:\DEV\MyEpicLauncher`.
 - Do not run destructive commands.
-- Do not change downloads execution, frontend, host transport, scheduler loop, concrete IO, retry/backoff, durable lease persistence, terminal completion, SQLite schema, hooks, `.codex`, Cargo.lock, or unrelated dirty files in AT-221.
+- Do not change downloads execution, frontend, host transport, scheduler loop, concrete IO, retry/backoff, durable lease persistence, terminal completion, SQLite schema, hooks, `.codex`, Cargo.lock, or unrelated dirty files in AT-222.
 - Push is authorized by the user-provided GitHub remote after each completed task commit.
 
 ## Dirty Worktree To Preserve

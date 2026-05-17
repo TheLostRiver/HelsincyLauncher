@@ -8954,3 +8954,37 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+## 2026-05-17 - AT-2026-05-17-222 started
+
+- Published AT-2026-05-17-221 as commit `89d3a19` and pushed it to `origin/main`.
+- Started AT-2026-05-17-222 because README_IMPL 7.29 recorded the minimal `JobDriver::run(...)` contract but did not yet define the next dispatch slice.
+- Required context read in focused chunks: README.md, CONTRIBUTING.md, docs/README.md, downloads module ARCH/API/FLOW/README_IMPL, kernel-jobs runtime driver/runtime-host/runtime-context sections, download runtime scheduler/budget notes, current runtime/lib/model code, and composition-root driver-registry wiring.
+- Selected a docs-first boundary task: document a one-shot `SharedJobRuntimeHost` dispatch method that reads a snapshot, resolves a driver, and calls `driver.run(...)` without scheduler loops, leases, snapshot writer/cancellation context, terminal state, downloads execution, host transport, frontend, or SQLite schema changes.
+
+## 2026-05-17 - AT-2026-05-17-222 completed
+
+- Added README_IMPL 7.30 with the one-shot shared runtime dispatch boundary and focused `launcher-kernel-jobs` validation expectations.
+- Scoped `git diff --check` passed for README_IMPL and PWF files with CRLF normalization warnings only.
+- Marked AT-2026-05-17-222 complete locally; remaining publication step is selective stage, commit, and push.
+
+### Auto Record: 2026-05-17 20:44:38
+- Tool: apply_patch
+- Phase: Phase 97 - Shared Runtime Execution Dispatch Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 20:45:19
+- Tool: apply_patch
+- Phase: Phase 97 - Shared Runtime Execution Dispatch Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)

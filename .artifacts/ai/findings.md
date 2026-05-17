@@ -957,3 +957,12 @@
 - To preserve existing modules without claiming real execution, the default `JobDriver::run(...)` should return an explicit deferred disposition until a module overrides it.
 - RED/GREEN confirmed the contract: missing `JobExecutionContext`, `JobRunDisposition`, and `JobDriver::run(...)` failed first; after implementation, focused and full `launcher-kernel-jobs` lib tests passed.
 - `cargo check -p launcher-composition-root` also passed, proving current Fab/downloads/engines drivers compile through the default deferred run path.
+
+## Phase 97 Shared Runtime Execution Dispatch Boundary Findings
+
+- AT-2026-05-17-221 final commit is `89d3a19` and was pushed to `origin/main`.
+- Required context was read in focused chunks: README/docs routing, downloads module ARCH/API/FLOW/README_IMPL 7.29, kernel-jobs runtime driver/runtime-host/runtime-context sections, download runtime scheduler/budget notes, current `kernel-jobs` runtime/lib/model code, and composition-root driver-registry wiring.
+- The next Rust slice should stay in `kernel-jobs` and compose existing facts rather than jumping into downloads execution: `SharedJobRuntimeHost` can read snapshots, `JobDriverRegistry` can resolve drivers, and `JobDriver::run(...)` can accept one read-only context.
+- The first dispatch boundary should be one-shot and explicit: missing snapshot or missing driver should return `JobRunDisposition::Deferred`, not silently succeed.
+- Scheduler loops, durable leases, snapshot writer/cancellation context, terminal state mutation, downloads driver overrides, concrete IO, retry/backoff, host transport, frontend, and SQLite schema remain later boundaries.
+- Scoped docs-only validation passed with `git diff --check` for README_IMPL and PWF files; warnings were CRLF normalization only.

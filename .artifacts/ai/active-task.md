@@ -2,19 +2,17 @@
 
 ## Identity
 
-- task id: AT-2026-05-17-221
-- title: Add minimal kernel-jobs execution-turn contract
+- task id: AT-2026-05-17-222
+- title: Document shared runtime execution dispatch boundary
 - status: completed
 
 ## Goal
 
-Introduce the smallest module-neutral execution-turn contract in `kernel-jobs` so drivers can later be asked to run a queued job through a runtime-owned context, without wiring downloads execution, concrete IO, retry, lease persistence, or terminal completion.
+Define the next durable backend implementation boundary after the minimal `JobDriver::run(...)` contract: a one-shot `SharedJobRuntimeHost` dispatch method that composes snapshot lookup, driver registry resolution, and one driver execution turn without starting a scheduler loop or concrete downloads IO.
 
 ## Scope
 
 - in scope:
-  - `crates/kernel-jobs/src/runtime.rs`
-  - `crates/kernel-jobs/src/lib.rs`
   - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
@@ -22,6 +20,7 @@ Introduce the smallest module-neutral execution-turn contract in `kernel-jobs` s
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
+  - Rust production or test code
   - downloads driver integration
   - concrete HTTP/file/hash execution
   - retry/backoff
@@ -31,58 +30,41 @@ Introduce the smallest module-neutral execution-turn contract in `kernel-jobs` s
 
 ## Allowed Files
 
-1. crates/kernel-jobs/src/runtime.rs
-2. crates/kernel-jobs/src/lib.rs
-3. docs/modules/downloads/README_IMPL.md
-4. .artifacts/ai/active-task.md
-5. .artifacts/ai/task-plan.md
-6. .artifacts/ai/progress.md
-7. .artifacts/ai/findings.md
-8. .artifacts/ai/handoff.md
+1. docs/modules/downloads/README_IMPL.md
+2. .artifacts/ai/active-task.md
+3. .artifacts/ai/task-plan.md
+4. .artifacts/ai/progress.md
+5. .artifacts/ai/findings.md
+6. .artifacts/ai/handoff.md
 
 ## Required Context Read
 
 Read before writing:
 
-1. docs/modules/downloads/README_IMPL.md section 7.29.
-2. docs/TauriKernelJobsRuntimeDesign.md driver, queue policy, lease, recovery, and runtime-context sections.
-3. docs/TauriDownloadRuntimeDesign.md scheduler and budget sections.
-4. current `crates/kernel-jobs/src/runtime.rs`, `lib.rs`, and `model.rs` surfaces.
-5. current module driver implementations only to confirm compatibility boundaries.
+1. README.md, CONTRIBUTING.md, and docs/README.md routing guidance.
+2. docs/modules/downloads/README_ARCH.md, README_API.md, README_FLOW.md, and README_IMPL.md section 7.29.
+3. docs/TauriKernelJobsRuntimeDesign.md driver, runtime-host, runtime-context, lease, and first-slice sections.
+4. docs/TauriDownloadRuntimeDesign.md scheduler/budget/ownership notes.
+5. current `crates/kernel-jobs/src/runtime.rs`, `lib.rs`, and existing composition-root driver-registry wiring.
 
 ## Hypothesis
 
-- falsifiable local hypothesis: a focused kernel-jobs RED test around a fake driver can prove the missing execution-turn contract; the minimal implementation can add a read-only `JobExecutionContext` plus explicit `JobRunDisposition` without touching concrete module execution.
+- falsifiable local hypothesis: the next Rust slice is clear only after README_IMPL records whether dispatch belongs in `SharedJobRuntimeHost`, `JobDriverRegistry`, or downloads. If the doc can pin a host-owned one-shot dispatch method with explicit non-goals, coding can continue in the following task without guessing.
 
 ## Cheap Check
 
-1. Add focused RED tests in `crates/kernel-jobs/src/runtime.rs`.
-2. Run `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib execution_turn`.
-3. Implement the minimal contract and re-run the focused test.
-4. Run affected package check and scoped rustfmt checks.
-5. Run scoped `git diff --check`.
+1. Add README_IMPL section 7.30.
+2. Update PWF records with AT-221 final commit/push and AT-222 scope.
+3. Run scoped `git diff --check` for the allowed files.
 
 ## Validation Gate
 
-1. Fake driver tests prove `JobDriver::run(...)` can observe a read-only execution context.
-2. Default driver `run(...)` returns an explicit deferred disposition rather than pretending execution exists.
-3. `kernel-jobs` exports the new contract types.
-4. Existing module driver impls compile without concrete execution wiring.
-5. No downloads IO, retry/backoff, lease persistence, terminal completion, host transport, frontend, or SQLite schema changes.
-6. Commit only AT-221 files locally, then push `main` to `origin`.
+1. README_IMPL 7.30 names the next Rust slice and required `launcher-kernel-jobs` tests.
+2. The doc explicitly keeps scheduler loop, leases, snapshot writer, terminal state, downloads execution, transport, frontend, and SQLite schema out of scope.
+3. PWF records show AT-221 was committed and pushed as `89d3a19`.
 
 ## Validation Result
 
-- Added `JobRunDisposition`, `JobExecutionContext`, and default `JobDriver::run(...)` in `crates/kernel-jobs/src/runtime.rs`.
-- Exported `JobExecutionContext` and `JobRunDisposition` from `crates/kernel-jobs/src/lib.rs`.
-- Added focused fake-driver tests proving default run is explicitly deferred and a registry-resolved fake driver can accept an execution turn through a read-only context.
-- Updated README_IMPL 7.29 current Rust state without adding a long per-task log.
-- RED validation failed before implementation with missing `JobExecutionContext`, `JobRunDisposition`, and `JobDriver::run(...)`.
-- `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed with 4 tests passed / 0 failed.
-- `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
-- `rustfmt --edition 2021 --check crates\kernel-jobs\src\runtime.rs` passed; broader rustfmt still sees a pre-existing out-of-scope `model.rs` formatting diff.
-- Commit and push are pending for the AT-221 file set.
-
-## Notes
-
-- AT-2026-05-17-220 final commit is `aa8d6e3` and is already pushed to `origin/main`.
+- Added README_IMPL 7.30 defining the one-shot shared runtime dispatch boundary and validation expectations.
+- Updated PWF records to publish AT-221 as commit `89d3a19` and scope AT-222.
+- Scoped `git diff --check` passed for the allowed file set with CRLF normalization warnings only.
