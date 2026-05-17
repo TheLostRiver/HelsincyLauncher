@@ -792,3 +792,13 @@
 - Current `JobRuntime` exposes `snapshot(job_id)` but no list query, so `list_jobs` should not be the first code slice without a separate runtime/read-source design.
 - Current policy DTOs exist, but there is no policy source of truth or policy repository in module deps, so `get_policy` / `update_policy` also need a separate boundary.
 - The smallest next Rust slice is `get_job_snapshot(...)`: verify the downloads module record exists, read the shared runtime snapshot, and project a `DownloadJobSnapshotDto` with conservative module extension facts.
+
+## Phase 79 Downloads Get-job Snapshot Query Implementation Findings
+
+- AT-2026-05-17-203 final commit is `fb5a94e` and was pushed to `origin/main`.
+- `DownloadJobRepository::get_job(...)` already records looked-up job ids in tests and can prove the module-record precondition.
+- `RecordingJobRuntime::snapshot(...)` currently always returns a queued downloads snapshot, so it can support the success RED test with minimal fixture changes.
+- A missing-runtime-snapshot RED test will need the recording runtime to optionally return `None`; this remains test fixture behavior, not a production runtime change.
+- The production slice can stay inside `crates/module-downloads/src/facade/mod.rs` by projecting `JobSnapshot<()>` into `DownloadJobSnapshotDto` with `DownloadJobExtensionDto` built from `DownloadJobRecord`.
+- RED confirmed all three focused tests currently fail because `DownloadsFacade::get_job_snapshot(...)` returns `DOWNLOADS_NOT_WIRED` before touching module job lookup or runtime snapshot lookup.
+- GREEN confirmed `get_job_snapshot(...)` now composes module job facts and runtime snapshot facts, reuses `DL_JOB_NOT_FOUND` for missing module records, and returns `DL_JOB_SNAPSHOT_MISSING` when the runtime snapshot is absent after module ownership is confirmed.

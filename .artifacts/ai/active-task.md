@@ -2,19 +2,20 @@
 
 ## Identity
 
-- task id: AT-2026-05-17-203
-- title: Define downloads get-job snapshot query boundary
+- task id: AT-2026-05-17-204
+- title: Implement downloads get-job snapshot query
 - status: completed
 
 ## Goal
 
-After AT-202 finished fake local mixed-result checkpoint orchestration, document the next safe `list/get/policy surfaces` slice before coding.
+Implement the first `list/get/policy surfaces` code slice defined by AT-203: `DownloadsFacade::get_job_snapshot(...)`.
 
-The first slice should be `DownloadsFacade::get_job_snapshot(...)` because it can compose existing module job records with the existing shared runtime `snapshot(...)` query. It must not start list pagination, policy persistence, runtime list APIs, SQLite adapter work, transport changes, frontend changes, or concrete execution work.
+The method should verify the downloads module record exists, read the shared runtime snapshot, and project a `DownloadJobSnapshotDto` with conservative downloads extension facts. It must leave `list_jobs`, `get_policy`, and `update_policy` as `DOWNLOADS_NOT_WIRED`.
 
 ## Scope
 
 - in scope:
+  - `crates/module-downloads/src/facade/mod.rs`
   - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
@@ -22,29 +23,31 @@ The first slice should be `DownloadsFacade::get_job_snapshot(...)` because it ca
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
-  - Rust production code
-  - Rust tests
   - `list_jobs`
   - `get_policy`
   - `update_policy`
-  - runtime list/query API expansion
+  - runtime list APIs
+  - policy storage
   - SQLite schema or adapter changes
   - host transport or frontend changes
-  - retry/backoff, public segment execution projection, terminal runtime completion, or concrete IO
+  - concrete HTTP/file/hash execution
+  - retry/backoff
+  - terminal runtime completion
   - unrelated dirty worktree files
 
 ## Allowed Files
 
-1. docs/modules/downloads/README_IMPL.md
-2. .artifacts/ai/active-task.md
-3. .artifacts/ai/task-plan.md
-4. .artifacts/ai/progress.md
-5. .artifacts/ai/findings.md
-6. .artifacts/ai/handoff.md
+1. crates/module-downloads/src/facade/mod.rs
+2. docs/modules/downloads/README_IMPL.md
+3. .artifacts/ai/active-task.md
+4. .artifacts/ai/task-plan.md
+5. .artifacts/ai/progress.md
+6. .artifacts/ai/findings.md
+7. .artifacts/ai/handoff.md
 
 ## Required Context Read
 
-Read this turn before writing:
+Read this turn before coding:
 
 1. README.md
 2. CONTRIBUTING.md
@@ -52,43 +55,50 @@ Read this turn before writing:
 4. docs/modules/downloads/README_ARCH.md
 5. docs/modules/downloads/README_API.md
 6. docs/modules/downloads/README_FLOW.md
-7. docs/modules/downloads/README_IMPL.md current-state table and sections 7.21 / 8 / 9
+7. docs/modules/downloads/README_IMPL.md section 7.22 and validation section
 8. docs/TauriDownloadRuntimeDesign.md query contract section
 9. docs/TauriIPCAndStateContractsDesign.md downloads query catalog and query envelope section
 10. docs/TauriAIDevelopmentTransactionProtocolDesign.md atomic-task protocol
-11. current `crates/module-downloads/src/contracts/*` query/read-model DTOs
-12. current `crates/module-downloads/src/facade/mod.rs` list/get/policy stubs
-13. current `crates/kernel-jobs/src/runtime.rs` snapshot query surface
+11. current downloads contracts DTOs
+12. current downloads facade stubs/test helpers
+13. current kernel-jobs runtime snapshot surface
+14. superpowers TDD skill
 
 ## Hypothesis
 
-- falsifiable local hypothesis: the implementation docs can define a narrow `get_job_snapshot` query boundary that reuses existing module job lookup and runtime snapshot lookup without requiring list pagination, policy storage, adapter schema changes, transport changes, frontend work, or concrete segment execution.
+- falsifiable local hypothesis: focused facade tests can prove `get_job_snapshot(...)` returns a downloads-owned snapshot by composing `DownloadJobRepository::get_job(...)` with `JobRuntime::snapshot(...)`, and returns `DL_JOB_SNAPSHOT_MISSING` when the runtime snapshot is absent after the module record exists.
 
 ## Cheap Check
 
-1. Add a README_IMPL section that chooses `get_job_snapshot` as the first query surface slice.
-2. Record current Rust reality, first Rust slice, error semantics, validation, and explicit exclusions.
-3. Update PWF records so AT-202 is published as `043f3f7` and AT-203 is the active docs task.
-4. Run scoped `git diff --check` and path-limited status.
+1. Add focused RED tests for successful snapshot projection and missing-runtime-snapshot error.
+2. Run focused `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml get_job_snapshot`.
+3. Implement only the facade method and smallest helper/error needed.
+4. Update README_IMPL current state.
+5. Run focused tests, full downloads module tests, rustfmt check, scoped `git diff --check`, and path-limited status.
 
 ## Validation Gate
 
-1. README_IMPL names `get_job_snapshot` as the next code slice and leaves `list_jobs` / policy surfaces for later.
-2. The boundary requires a future RED test before Rust code.
-3. The boundary uses existing `DownloadJobRepository::get_job(...)` and `JobRuntime::snapshot(...)`.
-4. The boundary explicitly forbids runtime list API expansion, SQLite adapter/schema work, transport/frontend changes, concrete IO, and terminal runtime completion.
-5. Scoped `git diff --check` passes.
-6. Commit only AT-203 files locally, then push `main` to `origin`.
+1. RED fails on current `DOWNLOADS_NOT_WIRED` behavior.
+2. GREEN returns `DownloadJobSnapshotDto` with runtime snapshot facts and downloads extension facts from the module job record.
+3. Missing module record reuses `DL_JOB_NOT_FOUND`.
+4. Missing runtime snapshot after a present module record returns `DL_JOB_SNAPSHOT_MISSING`.
+5. `list_jobs`, `get_policy`, and `update_policy` remain `DOWNLOADS_NOT_WIRED`.
+6. Public comments added or changed in code are bilingual and existing English comments are preserved.
+7. Focused and full module tests pass.
+8. Formatting and scoped diff checks pass.
+9. Commit only AT-204 files locally, then push `main` to `origin`.
 
 ## Validation Result
 
-1. README_IMPL section 7.22 now chooses `DownloadsFacade::get_job_snapshot(...)` as the first `list/get/policy surfaces` code slice.
-2. The documented boundary requires a future RED test before Rust code and keeps `list_jobs`, `get_policy`, and `update_policy` out of scope.
-3. The boundary uses existing `DownloadJobRepository::get_job(...)` plus `JobRuntime::snapshot(...)` and reserves `DL_JOB_SNAPSHOT_MISSING` for the missing-runtime-snapshot branch.
-4. Scoped `git diff --check` passed for the AT-203 files with CRLF normalization warnings only.
-5. No Rust code, runtime APIs, adapters, transport handlers, frontend files, concrete IO, retry/backoff, or terminal runtime completion behavior were changed.
+1. RED command `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml get_job_snapshot` failed with 0 passed and 3 failed because the current facade stub returned `DOWNLOADS_NOT_WIRED`.
+2. GREEN focused validation passed with 3 passed, 0 failed after implementing only `get_job_snapshot(...)`, `DL_JOB_SNAPSHOT_MISSING`, and the local snapshot projection helper.
+3. Full downloads module validation passed after formatting: 41 passed, 0 failed.
+4. `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed after applying rustfmt.
+5. `list_jobs(...)`, `get_policy(...)`, and `update_policy(...)` remain `DOWNLOADS_NOT_WIRED`.
+6. No runtime list API, policy storage, SQLite adapter/schema, host transport, frontend, concrete IO, retry/backoff, or terminal runtime completion behavior was added.
+7. Scoped `git diff --check` passed with CRLF normalization warnings only.
 
 ## Notes
 
-- AT-2026-05-17-202 final local commit is `043f3f7` and was pushed to `origin/main`.
-- AT-2026-05-17-203 initial local commit is `98c491b` before PWF hash backfill amend.
+- AT-2026-05-17-203 final local commit is `fb5a94e` and was pushed to `origin/main`.
+- AT-2026-05-17-204 initial local commit is `d1de743` before PWF hash backfill amend.

@@ -93,7 +93,7 @@ Implementation truth should move through module facade and ports first. Do not p
 | fake segment failure result contract | `DownloadSegmentExecutionResult::Failed` carries request facts, downloaded bytes known at failure time, a local reason string, and a retryable hint without public `DL_*` execution projection, checkpoint mutation, retry policy, runtime completion, concrete IO, transport, or frontend behavior | driver unit tests |
 | fake failed-result checkpoint mutation | `DownloadJobDriver::record_failed_segment_checkpoints(...)` reloads checkpoint facts, applies same-job failed fake results as `Failed` segment status/progress, and saves through `DownloadCheckpointRepository` while deferring retry/backoff, public error projection, terminal runtime state, concrete IO, SQLite adapter/schema, transport, composition-root, and frontend behavior | driver unit tests |
 | fake local mixed-result checkpoint orchestration | `execute_local_resume_turn(...)` records both completed and failed fake results through existing checkpoint mutation helpers while deferring retry/backoff, public error projection, terminal runtime state, concrete IO, SQLite adapter/schema, transport, composition-root, and frontend behavior | driver unit tests |
-| list/get/policy surfaces | next boundary chooses `get_job_snapshot` first; `list_jobs` and policy persistence remain later | README_IMPL |
+| list/get/policy surfaces | `get_job_snapshot` composes module job records with shared runtime snapshots; `list_jobs` and policy persistence remain later | module facade tests |
 
 ---
 
@@ -1087,6 +1087,15 @@ Later slices:
 1. `list_jobs(...)` needs an explicit read source or runtime list API design because the current `JobRuntime` trait only supports `snapshot(job_id)`.
 2. `get_policy(...)` and `update_policy(...)` need a policy source of truth before they can safely project `DownloadPolicyDto`.
 3. Policy persistence, queue-budget mutation, and user settings integration should stay separate from the first `get_job_snapshot(...)` slice.
+
+Completed by AT-204:
+
+1. `DownloadsFacade::get_job_snapshot(...)` verifies the downloads module record before reading the shared runtime snapshot.
+2. The successful query path returns `DownloadJobSnapshotDto` with shared runtime snapshot facts plus conservative downloads extension facts from the module job record.
+3. Missing module records reuse `DL_JOB_NOT_FOUND`.
+4. Missing shared runtime snapshots after a present module record return `DL_JOB_SNAPSHOT_MISSING`.
+5. `list_jobs(...)`, `get_policy(...)`, and `update_policy(...)` remain `DOWNLOADS_NOT_WIRED`.
+6. Runtime list APIs, policy persistence, SQLite adapter/schema work, host transport, frontend behavior, concrete IO, retry/backoff, and terminal runtime completion remain unchanged.
 
 ---
 

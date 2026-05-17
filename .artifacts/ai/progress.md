@@ -7857,6 +7857,19 @@
 - Scoped `git diff --check` over AT-203 files passed with CRLF normalization warnings only.
 - Initial AT-203 local commit before PWF hash backfill amend: `98c491b`.
 
+## 2026-05-17 - AT-204 implementation slice started
+
+- AT-203 final commit `fb5a94e` was pushed to `origin/main`.
+- Re-read the AT-203 boundary in README_IMPL 7.22 and the relevant facade/test/runtime snippets before coding.
+- Current code still has `DownloadsFacade::get_job_snapshot(...)` returning `DOWNLOADS_NOT_WIRED`.
+- The next action is RED tests for `get_job_snapshot` success projection and `DL_JOB_SNAPSHOT_MISSING` when the module job exists but runtime snapshot is absent.
+- RED validation: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml get_job_snapshot` failed with 0 passed and 3 failed because the current facade stub returned `DOWNLOADS_NOT_WIRED` without module job lookup or runtime snapshot lookup.
+- GREEN focused validation: the same command passed with 3 passed, 0 failed after implementing only `get_job_snapshot(...)`, `DL_JOB_SNAPSHOT_MISSING`, and the local projection helper.
+- Full module validation after formatting: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 41 passed, 0 failed.
+- Formatting validation after applying rustfmt: `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed.
+- Scoped diff validation: `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- crates/module-downloads/src/facade/mod.rs docs/modules/downloads/README_IMPL.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md` passed with CRLF normalization warnings only.
+- Initial AT-204 local commit before PWF hash backfill amend: `d1de743`.
+
 ### Auto Record: 2026-05-17 15:02:21
 - Tool: apply_patch
 - Phase: Phase 78 - Downloads Get-job Snapshot Query Boundary
@@ -7879,6 +7892,86 @@
 ### Auto Record: 2026-05-17 15:03:36
 - Tool: apply_patch
 - Phase: Phase 78 - Downloads Get-job Snapshot Query Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 15:05:59
+- Tool: apply_patch
+- Phase: Phase 78 - Downloads Get-job Snapshot Query Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-17 15:06:38
+- Tool: apply_patch
+- Phase: Phase 79 - Downloads Get-job Snapshot Query Implementation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 15:07:32
+- Tool: apply_patch
+- Phase: Phase 79 - Downloads Get-job Snapshot Query Implementation
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-17 15:08:50
+- Tool: apply_patch
+- Phase: Phase 79 - Downloads Get-job Snapshot Query Implementation
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-17 15:08:58
+- Tool: apply_patch
+- Phase: Phase 79 - Downloads Get-job Snapshot Query Implementation
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-17 15:09:15
+- Tool: apply_patch
+- Phase: Phase 79 - Downloads Get-job Snapshot Query Implementation
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-17 15:09:30
+- Tool: apply_patch
+- Phase: Phase 79 - Downloads Get-job Snapshot Query Implementation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 15:10:11
+- Tool: apply_patch
+- Phase: Phase 79 - Downloads Get-job Snapshot Query Implementation
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 15:11:31
+- Tool: apply_patch
+- Phase: Phase 79 - Downloads Get-job Snapshot Query Implementation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 15:12:01
+- Tool: apply_patch
+- Phase: Phase 79 - Downloads Get-job Snapshot Query Implementation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 15:12:56
+- Tool: apply_patch
+- Phase: Phase 79 - Downloads Get-job Snapshot Query Implementation
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)

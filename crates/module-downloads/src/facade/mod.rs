@@ -8,11 +8,11 @@
 use std::sync::{Arc, Mutex};
 
 use launcher_kernel_foundation::{AppError, AppErrorSeverity, AppResult, CorrelationId, JobId};
-use launcher_kernel_jobs::{AcceptedJob, EnqueueJobRequest, JobPriority, JobRuntime};
+use launcher_kernel_jobs::{AcceptedJob, EnqueueJobRequest, JobPriority, JobRuntime, JobSnapshot};
 
 use crate::contracts::{
-    CancelDownloadRequestDto, DownloadJobListDto, DownloadJobSnapshotDto, DownloadPolicyDto,
-    GetDownloadJobQueryDto, GetDownloadPolicyQueryDto, ListDownloadJobsQueryDto,
+    CancelDownloadRequestDto, DownloadJobExtensionDto, DownloadJobListDto, DownloadJobSnapshotDto,
+    DownloadPolicyDto, GetDownloadJobQueryDto, GetDownloadPolicyQueryDto, ListDownloadJobsQueryDto,
     PauseDownloadRequestDto, ResumeDownloadRequestDto, StartDownloadRequestDto,
     UpdateDownloadPolicyRequestDto,
 };
@@ -594,8 +594,17 @@ impl<J: DownloadJobRepository, C, M, S, W, R: JobRuntime<Extension = ()>>
         &self,
         query: GetDownloadJobQueryDto,
     ) -> AppResult<Option<DownloadJobSnapshotDto>> {
-        let _ = query;
-        Err(not_wired("get_job_snapshot"))
+        let job = match self.deps.job_repo.get_job(&query.job_id)? {
+            Some(job) => job,
+            None => return Err(missing_job_record(&query.job_id)),
+        };
+
+        let snapshot = match self.deps.job_runtime.snapshot(&query.job_id)? {
+            Some(snapshot) => snapshot,
+            None => return Err(missing_job_snapshot(&query.job_id)),
+        };
+
+        Ok(Some(project_download_job_snapshot(&job, snapshot)))
     }
 
     /// 预留下载策略读取；当前仍由模块边界返回未接线错误。
@@ -713,6 +722,43 @@ fn missing_job_record(job_id: &JobId) -> AppError {
     )
 }
 
+// Reports a missing shared runtime snapshot for a module-owned downloads job.
+// 当 downloads 模块记录存在但共享 runtime 快照缺失时，返回稳定查询错误。
+fn missing_job_snapshot(job_id: &JobId) -> AppError {
+    AppError::new(
+        "DL_JOB_SNAPSHOT_MISSING",
+        format!("download runtime snapshot missing for job {job_id}; query cannot continue"),
+        false,
+        AppErrorSeverity::Error,
+        CorrelationId::generate(),
+    )
+}
+
+// Projects shared runtime facts plus downloads intake metadata into the public snapshot read model.
+// 将共享 runtime 事实和 downloads intake 元数据组合成公开快照读模型。
+fn project_download_job_snapshot(
+    job: &DownloadJobRecord,
+    snapshot: JobSnapshot<()>,
+) -> DownloadJobSnapshotDto {
+    DownloadJobSnapshotDto {
+        job_id: snapshot.job_id,
+        module: snapshot.module,
+        kind: snapshot.kind,
+        state: snapshot.state,
+        ui_state: snapshot.ui_state,
+        progress: snapshot.progress,
+        recoverable: snapshot.recoverable,
+        updated_at: snapshot.updated_at,
+        extension: Some(DownloadJobExtensionDto {
+            target_id: job.target_id.clone(),
+            install_intent: job.install_intent.clone(),
+            completed_bytes: 0,
+            total_bytes: None,
+            retryable: true,
+        }),
+    }
+}
+
 // Projects unsafe segment checkpoint facts as a downloads-domain resume failure.
 // 将不安全的 segment checkpoint 事实投影为 downloads 域恢复失败。
 fn resume_segment_mismatch(job_id: &JobId) -> AppError {
@@ -783,8 +829,8 @@ mod tests {
         DownloadStagingRoot, InMemoryDownloadResumeWorkScheduler,
     };
     use crate::contracts::{
-        CancelDownloadRequestDto, PauseDownloadRequestDto, ResumeDownloadRequestDto,
-        StartDownloadRequestDto,
+        CancelDownloadRequestDto, GetDownloadJobQueryDto, PauseDownloadRequestDto,
+        ResumeDownloadRequestDto, StartDownloadRequestDto,
     };
     use crate::driver::{DownloadSegmentCheckpointRecord, DownloadSegmentCheckpointStatus};
 
@@ -1058,18 +1104,25 @@ mod tests {
     #[derive(Default)]
     struct RecordingJobRuntime {
         enqueued_requests: Mutex<Vec<launcher_kernel_jobs::EnqueueJobRequest<()>>>,
+        snapshotted_job_ids: Mutex<Vec<JobId>>,
         paused_job_ids: Mutex<Vec<JobId>>,
         canceled_job_ids: Mutex<Vec<JobId>>,
         events: ResumeRuntimeEvents,
+        snapshots_missing: bool,
     }
 
     impl RecordingJobRuntime {
         fn with_events(events: ResumeRuntimeEvents) -> Self {
             Self {
-                enqueued_requests: Mutex::new(Vec::new()),
-                paused_job_ids: Mutex::new(Vec::new()),
-                canceled_job_ids: Mutex::new(Vec::new()),
                 events,
+                ..Self::default()
+            }
+        }
+
+        fn missing_snapshot() -> Self {
+            Self {
+                snapshots_missing: true,
+                ..Self::default()
             }
         }
 
@@ -1077,6 +1130,13 @@ mod tests {
             self.enqueued_requests
                 .lock()
                 .expect("enqueued requests mutex should not be poisoned")
+                .clone()
+        }
+
+        fn snapshotted_job_ids(&self) -> Vec<JobId> {
+            self.snapshotted_job_ids
+                .lock()
+                .expect("snapshotted job ids mutex should not be poisoned")
                 .clone()
         }
 
@@ -1117,6 +1177,14 @@ mod tests {
         }
 
         fn snapshot(&self, job_id: &JobId) -> AppResult<Option<JobSnapshot<Self::Extension>>> {
+            self.snapshotted_job_ids
+                .lock()
+                .expect("snapshotted job ids mutex should not be poisoned")
+                .push(job_id.clone());
+            if self.snapshots_missing {
+                return Ok(None);
+            }
+
             Ok(Some(JobSnapshot {
                 job_id: job_id.clone(),
                 module: "downloads".into(),
@@ -1304,6 +1372,119 @@ mod tests {
         assert_eq!(enqueued_request.job_id, accepted.job_id);
         assert_eq!(enqueued_request.priority, request.priority);
         assert_eq!(enqueued_request.kind, "download");
+    }
+
+    #[test]
+    fn get_job_snapshot_projects_download_record_with_runtime_snapshot() {
+        let facade = DownloadFacade::new(DownloadModuleDeps {
+            job_repo: RecordingDownloadJobRepository::default(),
+            checkpoint_repo: (),
+            manifest_provider: (),
+            staging_store: (),
+            resume_scheduler: (),
+            job_runtime: RecordingJobRuntime::default(),
+        });
+        let request = StartDownloadRequestDto {
+            target_id: "asset-123".into(),
+            kind: "engine".into(),
+            install_intent: Some("install".into()),
+            priority: JobPriority::High,
+        };
+        let accepted = facade
+            .start_download(request.clone())
+            .expect("start_download should create a queryable downloads job");
+
+        let snapshot = facade
+            .get_job_snapshot(GetDownloadJobQueryDto {
+                job_id: accepted.job_id.clone(),
+            })
+            .expect("get_job_snapshot should return the shared runtime snapshot")
+            .expect("existing downloads job should have a snapshot projection");
+
+        assert_eq!(
+            facade.deps().job_repo.looked_up_job_ids(),
+            vec![accepted.job_id.clone()],
+            "get_job_snapshot should verify the module job record first"
+        );
+        assert_eq!(
+            facade.deps().job_runtime.snapshotted_job_ids(),
+            vec![accepted.job_id.clone()],
+            "get_job_snapshot should load the shared runtime snapshot after module lookup"
+        );
+        assert_eq!(snapshot.job_id, accepted.job_id);
+        assert_eq!(snapshot.module, "downloads");
+        assert_eq!(snapshot.kind, "download");
+        assert_eq!(snapshot.state, JobState::Queued);
+        assert_eq!(snapshot.ui_state, JobUiState::Queued);
+        assert_eq!(snapshot.progress, JobProgress::pending());
+        assert!(snapshot.recoverable);
+        let extension = snapshot
+            .extension
+            .expect("downloads snapshot should include module extension facts");
+        assert_eq!(extension.target_id, request.target_id);
+        assert_eq!(extension.install_intent, request.install_intent);
+        assert_eq!(extension.completed_bytes, 0);
+        assert_eq!(extension.total_bytes, None);
+        assert!(extension.retryable);
+    }
+
+    #[test]
+    fn get_job_snapshot_returns_stable_error_when_job_record_is_missing() {
+        let facade = DownloadFacade::new(DownloadModuleDeps {
+            job_repo: RecordingDownloadJobRepository::default(),
+            checkpoint_repo: (),
+            manifest_provider: (),
+            staging_store: (),
+            resume_scheduler: (),
+            job_runtime: RecordingJobRuntime::default(),
+        });
+        let job_id = JobId::generate();
+
+        let error = facade
+            .get_job_snapshot(GetDownloadJobQueryDto {
+                job_id: job_id.clone(),
+            })
+            .expect_err("missing module record should stop the query before runtime snapshot");
+
+        assert_eq!(facade.deps().job_repo.looked_up_job_ids(), vec![job_id]);
+        assert!(
+            facade.deps().job_runtime.snapshotted_job_ids().is_empty(),
+            "missing module record must stop before runtime snapshot lookup"
+        );
+        assert_eq!(error.code, "DL_JOB_NOT_FOUND");
+        assert!(!error.retryable);
+        assert_eq!(error.severity, AppErrorSeverity::Error);
+    }
+
+    #[test]
+    fn get_job_snapshot_returns_stable_error_when_runtime_snapshot_is_missing() {
+        let job_id = JobId::generate();
+        let facade = DownloadFacade::new(DownloadModuleDeps {
+            job_repo: RecordingDownloadJobRepository::with_job(make_download_job(job_id.clone())),
+            checkpoint_repo: (),
+            manifest_provider: (),
+            staging_store: (),
+            resume_scheduler: (),
+            job_runtime: RecordingJobRuntime::missing_snapshot(),
+        });
+
+        let error = facade
+            .get_job_snapshot(GetDownloadJobQueryDto {
+                job_id: job_id.clone(),
+            })
+            .expect_err("missing runtime snapshot should be a stable downloads query error");
+
+        assert_eq!(
+            facade.deps().job_repo.looked_up_job_ids(),
+            vec![job_id.clone()]
+        );
+        assert_eq!(
+            facade.deps().job_runtime.snapshotted_job_ids(),
+            vec![job_id]
+        );
+        assert_eq!(error.code, "DL_JOB_SNAPSHOT_MISSING");
+        assert!(!error.retryable);
+        assert_eq!(error.severity, AppErrorSeverity::Error);
     }
 
     #[test]
