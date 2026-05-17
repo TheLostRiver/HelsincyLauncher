@@ -1280,6 +1280,16 @@ First Rust slice:
 5. keep `update_policy(...)` live runtime behavior unchanged and document that runtime hot-apply remains a later boundary;
 6. run focused composition-root tests, affected adapter/module policy tests if touched, rustfmt check, scoped `git diff --check`, and path-limited status before commit.
 
+Completed by AT-212:
+
+1. Composition-root now constructs one `SqliteDownloadPolicyStore` before building the shared runtime.
+2. `build_job_runtime(...)` loads the persisted downloads policy and seeds `RuntimeQueuePolicy::new(...)` from `DownloadPolicyDto.concurrency_slots`.
+3. An empty policy table still falls back to the normalized default derived from `DesktopBootstrapConfig.default_download_slots`.
+4. The same policy store instance is passed into `DownloadFacade`, so startup runtime budget and downloads policy reads share the same persisted snapshot.
+5. Focused composition-root tests cover persisted-policy startup seeding and empty-store fallback.
+6. `DownloadsFacade::update_policy(...)` remains persistence-only; live runtime policy mutation is still a later boundary.
+7. Scheduler loop behavior, active jobs, runtime leases, runtime snapshots, pending resume work, transport/frontend settings, concrete IO, retry/backoff, and terminal completion remain unchanged.
+
 Later slices:
 
 1. Live runtime policy updates need an explicit kernel-jobs mutation contract before `DownloadsFacade::update_policy(...)` can affect active scheduling.

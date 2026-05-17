@@ -865,3 +865,13 @@
 - Current `JobRuntime` exposes no policy mutation API, so applying persisted downloads policy live would require a separate kernel-jobs boundary.
 - The first safe integration slice should be startup seeding: composition-root can load the persisted downloads policy before constructing the shared runtime and pass the loaded `concurrency_slots` to `RuntimeQueuePolicy::new(...)`.
 - README_IMPL 7.26 now pins the first Rust slice to focused composition-root coverage for persisted-policy startup seeding and empty-store fallback, with live `update_policy(...)` runtime mutation explicitly deferred.
+
+## Phase 87 Downloads Runtime Policy Startup Seeding Findings
+
+- AT-2026-05-17-211 final commit is `1d31f56` and was pushed to `origin/main`.
+- Current composition-root constructs `SharedJobRuntimeHost` before constructing the downloads facade policy store, so persisted policy cannot yet influence runtime startup budget.
+- A focused RED test can call the private `build_job_runtime(...)` from the composition-root unit-test module after seeding `SqliteDownloadPolicyStore` on a project-local SQLite path.
+- The implementation should pass the same `SqliteDownloadPolicyStore` through composition-root into both `build_job_runtime(...)` and `DownloadModuleDeps.policy_store`.
+- RED/GREEN confirmed persisted `DownloadPolicyDto.concurrency_slots` now seeds the initial `RuntimeQueuePolicy.max_concurrent_jobs`, while an empty policy table falls back to `DesktopBootstrapConfig.default_download_slots`.
+- The same `SqliteDownloadPolicyStore` object is constructed before runtime assembly and then moved into the downloads facade; live `update_policy(...)` runtime mutation remains absent.
+- Full composition-root integration tests were not run because existing integration tests still create/delete sqlite files under system temp/default package paths; focused lib tests used project-local `.artifacts/tmp` paths instead.

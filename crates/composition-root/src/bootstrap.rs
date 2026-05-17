@@ -24,7 +24,7 @@ use launcher_kernel_jobs::{
 };
 use launcher_module_downloads::{
     DownloadCheckpointRepository, DownloadFacade, DownloadJobDriver, DownloadModuleDeps,
-    DownloadPendingResumeWorkSource, InMemoryDownloadResumeWorkScheduler,
+    DownloadPendingResumeWorkSource, DownloadPolicyStore, InMemoryDownloadResumeWorkScheduler,
 };
 use launcher_module_engines::{EngineFacade, EngineJobDriver, EngineModuleDeps};
 use launcher_module_fab::{FabFacade, FabModuleDeps, FabPrewarmJobDriver, FabSyncJobDriver};
@@ -176,7 +176,11 @@ impl<F, D, E> DesktopAppServices<F, D, E> {
 pub fn build_desktop_services(config: DesktopBootstrapConfig) -> AppResult<DesktopAppServices> {
     let sqlite_config = build_storage_config(&config)?;
     let fab_provider = build_fab_provider_adapter()?;
-    let (job_runtime, snapshot_store) = build_job_runtime(&config)?;
+    let download_policy_store = SqliteDownloadPolicyStore::new(
+        sqlite_config.clone(),
+        u32::from(config.default_download_slots),
+    );
+    let (job_runtime, snapshot_store) = build_job_runtime(&config, &download_policy_store)?;
     let download_checkpoint_repo = SqliteDownloadCheckpointRepository::new(sqlite_config.clone());
     let download_resume_scheduler = InMemoryDownloadResumeWorkScheduler::new();
 
@@ -190,7 +194,7 @@ pub fn build_desktop_services(config: DesktopBootstrapConfig) -> AppResult<Deskt
         download_checkpoint_repo.clone(),
         job_runtime.clone(),
         download_resume_scheduler.clone(),
-        u32::from(config.default_download_slots),
+        download_policy_store,
     ));
     let engines = Arc::new(build_engines_module(job_runtime));
     let registry = build_job_driver_registry(
@@ -264,7 +268,7 @@ fn build_downloads_module(
     checkpoint_repo: SqliteDownloadCheckpointRepository,
     job_runtime: SharedJobRuntimeHost,
     resume_scheduler: InMemoryDownloadResumeWorkScheduler,
-    default_policy_slots: u32,
+    policy_store: SqliteDownloadPolicyStore,
 ) -> DesktopDownloadFacade {
     DownloadFacade::new(DownloadModuleDeps {
         job_repo: SqliteDownloadJobRepository::new(sqlite_config.clone()),
@@ -273,7 +277,7 @@ fn build_downloads_module(
         staging_store: (),
         resume_scheduler,
         job_runtime,
-        policy_store: SqliteDownloadPolicyStore::new(sqlite_config, default_policy_slots),
+        policy_store,
     })
 }
 
@@ -289,6 +293,7 @@ fn build_engines_module(job_runtime: SharedJobRuntimeHost) -> DesktopEngineFacad
 // 共享 runtime host 只装配一次，然后分发给所有 queued-job 模块。
 fn build_job_runtime(
     config: &DesktopBootstrapConfig,
+    download_policy_store: &impl DownloadPolicyStore,
 ) -> AppResult<(SharedJobRuntimeHost, Arc<SqliteJobSnapshotStore>)> {
     if config.default_download_slots == 0 {
         return Err(invalid_builder_input(
@@ -300,8 +305,11 @@ fn build_job_runtime(
     let store = Arc::new(SqliteJobSnapshotStore::new(
         SqliteStorageAdapterConfig::new(config.sqlite_path.clone()),
     ));
+    let download_policy = download_policy_store.load_policy()?;
+    // Seed the immutable runtime policy from the persisted downloads policy at startup only.
+    // 仅在启动时用已持久化的 downloads 策略播种不可变 runtime 策略。
     let runtime = SharedJobRuntimeHost::with_store(
-        RuntimeQueuePolicy::new(usize::from(config.default_download_slots)),
+        RuntimeQueuePolicy::new(download_policy.concurrency_slots as usize),
         store.clone(),
     );
     Ok((runtime, store))
@@ -371,14 +379,81 @@ mod tests {
     use launcher_kernel_foundation::JobId;
     use launcher_kernel_jobs::RuntimeQueuePolicy;
     use launcher_module_downloads::{
-        DownloadResumeWorkItem, DownloadResumeWorkMode, DownloadResumeWorkPlan,
-        DownloadResumeWorkScheduler,
+        contracts::DownloadPolicyDto, DownloadPolicyStore, DownloadResumeWorkItem,
+        DownloadResumeWorkMode, DownloadResumeWorkPlan, DownloadResumeWorkScheduler,
     };
+
+    fn project_local_sqlite_path(name: &str) -> PathBuf {
+        let workspace_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .parent()
+            .and_then(std::path::Path::parent)
+            .expect("composition-root should live under the workspace crates directory")
+            .to_path_buf();
+        let sqlite_path = workspace_root.join(".artifacts").join("tmp").join(name);
+        assert!(
+            sqlite_path.starts_with(&workspace_root),
+            "test sqlite path must stay inside the project workspace"
+        );
+        std::fs::create_dir_all(
+            sqlite_path
+                .parent()
+                .expect("test sqlite path should have a parent directory"),
+        )
+        .expect("project-local sqlite test directory should be creatable");
+        let _ = std::fs::remove_file(&sqlite_path);
+        sqlite_path
+    }
+
+    #[test]
+    fn build_job_runtime_uses_persisted_download_policy_slots() {
+        let tmp_path = project_local_sqlite_path("at212_runtime_policy_seeded.sqlite3");
+        let mut config = DesktopBootstrapConfig::new("app-data", "cache", "logs", &tmp_path);
+        config.default_download_slots = 3;
+        let policy_store = SqliteDownloadPolicyStore::new(
+            SqliteStorageAdapterConfig::new(tmp_path.clone()),
+            u32::from(config.default_download_slots),
+        );
+        policy_store
+            .save_policy(&DownloadPolicyDto {
+                concurrency_slots: 11,
+                bandwidth_limit_bytes_per_sec: None,
+                auto_resume: true,
+            })
+            .expect("seed policy should be persisted for runtime bootstrap");
+
+        let (job_runtime, snapshot_store) = build_job_runtime(&config, &policy_store)
+            .expect("runtime construction should load persisted downloads policy");
+
+        assert_eq!(job_runtime.policy().max_concurrent_jobs, 11);
+
+        drop(job_runtime);
+        drop(snapshot_store);
+        let _ = std::fs::remove_file(&tmp_path);
+    }
+
+    #[test]
+    fn build_job_runtime_falls_back_to_default_slots_when_policy_is_empty() {
+        let tmp_path = project_local_sqlite_path("at212_runtime_policy_default.sqlite3");
+        let mut config = DesktopBootstrapConfig::new("app-data", "cache", "logs", &tmp_path);
+        config.default_download_slots = 5;
+        let policy_store = SqliteDownloadPolicyStore::new(
+            SqliteStorageAdapterConfig::new(tmp_path.clone()),
+            u32::from(config.default_download_slots),
+        );
+
+        let (job_runtime, snapshot_store) = build_job_runtime(&config, &policy_store)
+            .expect("runtime construction should fall back to default policy slots");
+
+        assert_eq!(job_runtime.policy().max_concurrent_jobs, 5);
+
+        drop(job_runtime);
+        drop(snapshot_store);
+        let _ = std::fs::remove_file(&tmp_path);
+    }
 
     #[test]
     fn download_driver_drains_work_scheduled_through_shared_facade_scheduler() {
-        let tmp_path = std::env::temp_dir().join("at186_downloads_shared_scheduler_wiring.sqlite3");
-        let _ = std::fs::remove_file(&tmp_path);
+        let tmp_path = project_local_sqlite_path("at186_downloads_shared_scheduler_wiring.sqlite3");
         let sqlite_config = SqliteStorageAdapterConfig::new(tmp_path.clone());
         let checkpoint_repo = SqliteDownloadCheckpointRepository::new(sqlite_config.clone());
         let job_runtime = SharedJobRuntimeHost::new(RuntimeQueuePolicy::new(1));
@@ -386,11 +461,11 @@ mod tests {
         // 使用同一个 scheduler 句柄同时接入 facade 准备路径与 driver source 接线。
         let scheduler = InMemoryDownloadResumeWorkScheduler::new();
         let downloads = build_downloads_module(
-            sqlite_config,
+            sqlite_config.clone(),
             checkpoint_repo.clone(),
             job_runtime,
             scheduler.clone(),
-            1,
+            SqliteDownloadPolicyStore::new(sqlite_config.clone(), 1),
         );
         let driver = build_download_job_driver(Arc::new(checkpoint_repo), Arc::new(scheduler));
         let job_id = JobId::generate();

@@ -8253,6 +8253,26 @@
 - Added README_IMPL section 7.26 selecting startup seeding from persisted downloads policy as the first safe runtime integration slice.
 - Scoped `git diff --check` passed with CRLF normalization warnings only; path-limited status shows only AT-211 files.
 
+## Agent Note: 2026-05-17 18:10
+
+- AT-2026-05-17-211 was committed and pushed as `1d31f56 docs: define downloads runtime policy boundary`.
+- Started AT-2026-05-17-212 to implement README_IMPL 7.26 startup seeding with focused composition-root TDD.
+- Re-read README_IMPL 7.26, current composition-root bootstrap/tests, `RuntimeQueuePolicy` / `SharedJobRuntimeHost`, and `SqliteDownloadPolicyStore` surfaces.
+
+## Agent Note: 2026-05-17 18:30
+
+- AT-212 RED: focused composition-root tests failed before implementation because `build_job_runtime(...)` did not accept a `DownloadPolicyStore`.
+- Implemented startup seeding by constructing one `SqliteDownloadPolicyStore` before runtime construction, loading it in `build_job_runtime(...)`, and passing the same store into `DownloadFacade`.
+- Moved the existing shared scheduler wiring unit test from system temp to project-local `.artifacts/tmp` sqlite path.
+- Final focused validation passed:
+  - `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib build_job_runtime_`: 2 passed / 0 failed.
+  - `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib download_driver_drains_work_scheduled_through_shared_facade_scheduler`: 1 passed / 0 failed.
+  - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`: passed.
+  - `cargo test -p launcher-adapter-storage-sqlite --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml download_policy_store`: 2 passed / 0 failed.
+  - `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml policy`: 2 passed / 0 failed.
+  - `cargo fmt -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check`: passed.
+- Full composition-root integration tests were not run because existing tests still create/delete sqlite files under system temp/default package paths.
+
 ### Auto Record: 2026-05-17 15:38:00
 - Tool: apply_patch
 - Phase: Phase 83 - Downloads Policy Store Implementation
@@ -8400,6 +8420,52 @@
 - Tool: apply_patch
 - Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
 - Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-17 16:03:27
+- Tool: apply_patch
+- Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-17 16:03:47
+- Tool: apply_patch
+- Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `crates/composition-root/src/bootstrap.rs` (update)
+
+### Auto Record: 2026-05-17 16:04:24
+- Tool: apply_patch
+- Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
+- Files:
+  - `crates/composition-root/src/bootstrap.rs` (update)
+
+### Auto Record: 2026-05-17 16:04:48
+- Tool: apply_patch
+- Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
+- Files:
+  - `crates/composition-root/src/bootstrap.rs` (update)
+
+### Auto Record: 2026-05-17 16:06:32
+- Tool: apply_patch
+- Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
+- Files:
+  - `crates/composition-root/src/bootstrap.rs` (update)
+
+### Auto Record: 2026-05-17 16:08:00
+- Tool: apply_patch
+- Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
+- Files:
+  - `docs/modules/downloads/README_IMPL.md` (update)
   - `.artifacts/ai/active-task.md` (update)
   - `.artifacts/ai/task-plan.md` (update)
   - `.artifacts/ai/findings.md` (update)
