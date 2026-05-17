@@ -6992,6 +6992,15 @@
 - Scoped diff validation passed with CRLF normalization warnings only.
 - Initial local commit created as `c4156bb`; PWF backfill is being amended into the same task commit before push.
 
+## 2026-05-17 - AT-199 Started
+
+- AT-198 final commit is `89f5a06` and `git push origin main` succeeded.
+- Re-read README_IMPL current-state table, checkpoint mutation sections 7.17/7.19, error semantics, TauriDownloadRuntimeDesign checkpoint/failure/retry snippets, current status, and recent commit log.
+- Decision: the next safe task is documentation-first failed-result checkpoint mutation. The Rust result carries reason/retryable, but the current checkpoint record has no public failure projection fields; the next boundary should persist durable segment status/progress only and defer policy/projection.
+- Updated README_IMPL with section 7.20. The next Rust slice is now constrained to local failed-result checkpoint mutation through `DownloadCheckpointRepository`, preserving existing partial metadata on replacement and deferring retry/backoff, public error projection, terminal runtime state, concrete IO, SQLite adapter/schema, transport, composition-root, and frontend work.
+- Validation: scoped `git diff --check` over AT-199 files passed with CRLF normalization warnings only.
+- Initial local commit created as `fa71553`; PWF backfill is being amended into the same task commit before push.
+
 ### Auto Record: 2026-05-17 14:13:18
 - Tool: apply_patch
 - Phase: Phase 71 - Downloads Fake Local Resume Execution Orchestration
@@ -7331,5 +7340,101 @@
 ### Auto Record: 2026-05-17 14:33:26
 - Tool: apply_patch
 - Phase: Phase 73 - Downloads Fake Segment Failure Result Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:34:29
+- Tool: apply_patch
+- Phase: Phase 73 - Downloads Fake Segment Failure Result Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-17 14:34:43
+- Tool: apply_patch
+- Phase: Phase 74 - Downloads Fake Failed-result Checkpoint Mutation Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 14:34:50
+- Tool: apply_patch
+- Phase: Phase 74 - Downloads Fake Failed-result Checkpoint Mutation Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:35:02
+- Tool: apply_patch
+- Phase: Phase 74 - Downloads Fake Failed-result Checkpoint Mutation Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 14:35:35
+- Tool: apply_patch
+- Phase: Phase 74 - Downloads Fake Failed-result Checkpoint Mutation Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 14:35:59
+- Tool: apply_patch
+- Phase: Phase 74 - Downloads Fake Failed-result Checkpoint Mutation Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 14:36:08
+- Tool: apply_patch
+- Phase: Phase 74 - Downloads Fake Failed-result Checkpoint Mutation Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 14:36:17
+- Tool: apply_patch
+- Phase: Phase 74 - Downloads Fake Failed-result Checkpoint Mutation Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 14:36:25
+- Tool: apply_patch
+- Phase: Phase 74 - Downloads Fake Failed-result Checkpoint Mutation Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:36:32
+- Tool: apply_patch
+- Phase: Phase 74 - Downloads Fake Failed-result Checkpoint Mutation Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 14:36:39
+- Tool: apply_patch
+- Phase: Phase 74 - Downloads Fake Failed-result Checkpoint Mutation Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 14:36:57
+- Tool: apply_patch
+- Phase: Phase 74 - Downloads Fake Failed-result Checkpoint Mutation Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:37:30
+- Tool: apply_patch
+- Phase: Phase 74 - Downloads Fake Failed-result Checkpoint Mutation Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 14:37:37
+- Tool: apply_patch
+- Phase: Phase 74 - Downloads Fake Failed-result Checkpoint Mutation Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 14:37:42
+- Tool: apply_patch
+- Phase: Phase 74 - Downloads Fake Failed-result Checkpoint Mutation Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 14:37:52
+- Tool: apply_patch
+- Phase: Phase 74 - Downloads Fake Failed-result Checkpoint Mutation Boundary
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)

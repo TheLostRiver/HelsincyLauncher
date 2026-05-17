@@ -751,3 +751,11 @@
 - README_IMPL 7.19 makes the next RED target precise: a fake port should return a local failed result value in-band without changing the port signature or adding checkpoint mutation, retry/backoff, public `DL_*` projection, concrete IO, runtime completion, transport, frontend, or composition wiring.
 - RED/GREEN confirmed `DownloadSegmentExecutionResult::Failed` can carry request facts, downloaded bytes known at failure time, a local reason string, and a retryable hint through the existing execution port helper without changing the helper or widening scope.
 - Full downloads module tests passed with 36 tests after adding the failed result contract.
+
+## Phase 74 Downloads Fake Failed-result Checkpoint Mutation Boundary Findings
+
+- AT-2026-05-17-198 final commit is `89f5a06` and was pushed to `origin/main`.
+- Current checkpoint records can already store `DownloadSegmentCheckpointStatus::Failed` plus downloaded bytes, offset, length, and optional persistence tokens, but they do not store a public failure code, local reason string, or retryable flag.
+- TauriDownloadRuntimeDesign says failed/canceled/completed terminal transitions need checkpointing and retryable errors may retry locally per segment, but retry policy and terminal job state are separate concerns from segment checkpoint mutation.
+- The next safe boundary should record failed segment status/progress through `DownloadCheckpointRepository` while preserving existing partial metadata on replacement, and defer retry/backoff, public `DL_*` projection, terminal runtime state, concrete IO, SQLite adapter/schema, transport, composition-root, and frontend behavior.
+- README_IMPL 7.20 now pins the first Rust slice: a local helper should apply only same-job failed results, replace or append segment checkpoint facts, set status to `Failed`, copy `downloaded_bytes`, preserve existing offset/partial persistence tokens on replacement, and leave reason/retryable outside the persisted checkpoint shape for now.

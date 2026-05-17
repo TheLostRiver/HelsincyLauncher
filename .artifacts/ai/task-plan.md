@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 73 - Downloads Fake Segment Failure Result Contract
+Phase 74 - Downloads Fake Failed-result Checkpoint Mutation Boundary
 
 ## Current Focus
 
@@ -580,6 +580,12 @@ Phase 73 - Downloads Fake Segment Failure Result Contract
 - Atomic tasks: AT-2026-05-17-198
 - **Status:** complete
 
+### Phase 74: Downloads Fake Failed-result Checkpoint Mutation Boundary
+
+- Outcome: document the next local failed-result checkpoint mutation helper before coding, preserving the boundary that retry/backoff, public error projection, terminal runtime state, concrete IO, SQLite adapter/schema changes, transport, composition-root, and frontend behavior remain out of scope.
+- Atomic tasks: AT-2026-05-17-199
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -774,6 +780,7 @@ Phase 73 - Downloads Fake Segment Failure Result Contract
 190. AT-2026-05-17-196 - completed - documented and added fake local resume execution orchestration with focused TDD, keeping runtime `run()`, concrete IO, SQLite adapter changes, transport, and frontend out of scope; then committed locally, with initial hash `3d6f4f7` before PWF backfill amend.
 191. AT-2026-05-17-197 - completed - defined the fake segment failure result boundary before Rust coding, keeping public `DL_*` execution errors, runtime completion, concrete IO, SQLite adapter changes, transport, composition-root, and frontend out of scope; then committed locally, with initial hash `83315bf` before PWF backfill amend.
 192. AT-2026-05-17-198 - completed - added the fake segment failure result contract with focused TDD, keeping checkpoint mutation, retry/backoff, public error projection, runtime completion, concrete IO, transport, composition-root, and frontend out of scope; then committed locally, with initial hash `c4156bb` before PWF backfill amend.
+193. AT-2026-05-17-199 - completed - defined the fake failed-result checkpoint mutation boundary, keeping retry/backoff, public error projection, terminal runtime state, concrete IO, SQLite adapter changes, transport, composition-root, and frontend out of scope; then committed locally, with initial hash `fa71553` before PWF backfill amend.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
