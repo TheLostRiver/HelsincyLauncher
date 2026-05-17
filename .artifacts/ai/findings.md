@@ -883,3 +883,12 @@
 - Current `SharedJobRuntimeHost` exposes `policy()` but has no update method; current `DownloadsFacade::update_policy(...)` persists policy only.
 - The next safe design boundary is a `kernel-jobs` runtime policy control surface first, followed later by downloads facade/composition wiring.
 - README_IMPL 7.27 now pins the first Rust slice to focused kernel-jobs tests for `SharedJobRuntimeHost` policy update/readback, with downloads facade wiring and transport/frontend work deferred.
+
+## Phase 89 Kernel Jobs Runtime Policy Control Findings
+
+- AT-2026-05-17-213 final commit is `38c32b2` and was pushed to `origin/main`.
+- Current `SharedJobRuntimeHost` stores `RuntimeQueuePolicy` by value, so clones cannot observe a later policy replacement without changing the internal storage shape.
+- The narrow RED target is a cloned-host readback test: update through one host handle, then assert both the original and clone return the new `RuntimeQueuePolicy` snapshot.
+- RED/GREEN confirmed `SharedJobRuntimeHost::update_policy(...)` replaces a shared runtime policy snapshot while `policy()` keeps returning by-value `RuntimeQueuePolicy` copies.
+- The implementation stores policy behind `Arc<Mutex<RuntimeQueuePolicy>>`; cloned hosts now observe the same updated snapshot without changing the public `JobRuntime` trait or downloads facade behavior.
+- Package-level `cargo fmt -p launcher-kernel-jobs --check` is still blocked by pre-existing out-of-scope formatting diffs in `crates/kernel-jobs/src/lib.rs` and `crates/kernel-jobs/src/model.rs`; AT-214 formatted and checked only `crates/kernel-jobs/src/runtime.rs`.

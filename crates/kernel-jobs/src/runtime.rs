@@ -141,8 +141,9 @@ impl JobSnapshotStore<()> for InMemoryJobSnapshotStore {
 #[derive(Clone)]
 /// 表示共享作业运行时的宿主对象，持有队列策略和快照存储端口。
 pub struct SharedJobRuntimeHost {
-    /// 当前 host 使用的队列策略。
-    policy: RuntimeQueuePolicy,
+    /// Holds the runtime queue policy shared by cloned host handles.
+    /// 持有由克隆 host 句柄共享的运行时队列策略。
+    policy: Arc<Mutex<RuntimeQueuePolicy>>,
     /// 当前 host 读写通用作业快照的存储端口。
     snapshot_store: Arc<dyn JobSnapshotStore<()>>,
 }
@@ -154,16 +155,32 @@ impl SharedJobRuntimeHost {
     }
 
     /// 使用外部提供的快照存储端口构造共享运行时 host。
-    pub fn with_store(policy: RuntimeQueuePolicy, snapshot_store: Arc<dyn JobSnapshotStore<()>>) -> Self {
+    pub fn with_store(
+        policy: RuntimeQueuePolicy,
+        snapshot_store: Arc<dyn JobSnapshotStore<()>>,
+    ) -> Self {
         Self {
-            policy,
+            policy: Arc::new(Mutex::new(policy)),
             snapshot_store,
         }
     }
 
-    /// 返回当前 host 的队列策略快照。
+    /// Returns the current queue policy as a by-value snapshot.
+    /// 以按值快照形式返回当前 host 的队列策略。
     pub fn policy(&self) -> RuntimeQueuePolicy {
-        self.policy
+        *self
+            .policy
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner())
+    }
+
+    /// Replaces the runtime queue-policy snapshot for future scheduling reads.
+    /// 替换 runtime 队列策略快照，供后续调度读取。
+    pub fn update_policy(&self, policy: RuntimeQueuePolicy) {
+        *self
+            .policy
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner()) = policy;
     }
 }
 
@@ -171,7 +188,7 @@ impl Debug for SharedJobRuntimeHost {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
         formatter
             .debug_struct("SharedJobRuntimeHost")
-            .field("policy", &self.policy)
+            .field("policy", &self.policy())
             .finish_non_exhaustive()
     }
 }
@@ -292,5 +309,16 @@ mod tests {
         assert_eq!(snapshot.ui_state, JobUiState::Queued);
         assert_eq!(snapshot.module, "fab");
         assert_eq!(snapshot.kind, "inventory_sync");
+    }
+
+    #[test]
+    fn shared_job_runtime_host_updates_policy_for_cloned_handles() {
+        let runtime = SharedJobRuntimeHost::new(RuntimeQueuePolicy::new(3));
+        let cloned_runtime = runtime.clone();
+
+        runtime.update_policy(RuntimeQueuePolicy::new(9));
+
+        assert_eq!(runtime.policy().max_concurrent_jobs, 9);
+        assert_eq!(cloned_runtime.policy().max_concurrent_jobs, 9);
     }
 }

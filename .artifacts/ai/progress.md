@@ -8281,6 +8281,12 @@
 - Added README_IMPL section 7.27 selecting a `kernel-jobs` runtime policy control surface as the first safe live-update slice, with downloads facade wiring and transport/frontend work deferred.
 - Scoped `git diff --check` passed with CRLF normalization warnings only; path-limited status shows only AT-213 files.
 
+## Agent Note: 2026-05-17 19:05
+
+- AT-2026-05-17-213 was committed and pushed as `38c32b2 docs: define live runtime policy boundary`.
+- Started AT-2026-05-17-214 to implement the kernel-jobs runtime policy control surface.
+- Re-read README_IMPL 7.27, kernel-jobs queue-policy design, and current `RuntimeQueuePolicy` / `SharedJobRuntimeHost` code before writing tests.
+
 ### Auto Record: 2026-05-17 15:38:00
 - Tool: apply_patch
 - Phase: Phase 83 - Downloads Policy Store Implementation
@@ -8500,3 +8506,50 @@
   - `.artifacts/ai/findings.md` (update)
   - `.artifacts/ai/handoff.md` (update)
   - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-17 16:14:06
+- Tool: apply_patch
+- Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-17 16:14:21
+- Tool: apply_patch
+- Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
+- Files:
+  - `crates/kernel-jobs/src/runtime.rs` (update)
+
+### Agent Note: 2026-05-17 19:26:47
+- Phase: Phase 89 - Kernel Jobs Runtime Policy Control
+- AT-2026-05-17-214 implemented the minimal runtime policy control surface in `crates/kernel-jobs/src/runtime.rs`: policy storage moved behind shared synchronization, `policy()` remains a by-value snapshot, and `update_policy(...)` replaces the shared snapshot observed by cloned handles.
+- README_IMPL 7.27 now records the AT-214 completed boundary and explicitly leaves downloads facade wiring, composition-root wiring, transport, frontend, scheduler execution, active jobs, leases, snapshots, pending work, concrete IO, retry/backoff, and terminal runtime completion unchanged.
+- RED evidence: the focused cloned-handle policy test first failed because `SharedJobRuntimeHost` had no `update_policy` method.
+- GREEN evidence after implementation: focused kernel-jobs cloned-handle policy test passed, existing enqueued snapshot runtime test passed, composition-root `cargo check` passed, and composition-root `build_job_runtime_` tests passed.
+- Formatting evidence: `rustfmt --check crates\kernel-jobs\src\runtime.rs` passed after formatting the AT-214 file. Package-level `cargo fmt -p launcher-kernel-jobs --check` still reports pre-existing out-of-scope formatting diffs in `crates/kernel-jobs/src/lib.rs` and `crates/kernel-jobs/src/model.rs`; those files remain untouched for AT-214.
+- Final scoped diff check, commit, and push are next.
+
+### Auto Record: 2026-05-17 19:24:27
+- Tool: apply_patch
+- Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\kernel-jobs\src\runtime.rs` (update)
+
+### Auto Record: 2026-05-17 19:24:51
+- Tool: apply_patch
+- Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 19:27:25
+- Tool: apply_patch
+- Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)

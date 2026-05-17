@@ -1332,6 +1332,14 @@ Later slices:
 2. Composition-root can wire that applier to `SharedJobRuntimeHost` after the kernel-jobs control surface is stable.
 3. Host transport tests can then prove `downloads_update_policy` persists policy and applies the runtime snapshot without adding frontend work.
 
+Completed by AT-214:
+
+1. `SharedJobRuntimeHost` now stores its runtime queue policy behind shared synchronization, so cloned host handles observe the same policy snapshot.
+2. `SharedJobRuntimeHost::policy()` still returns a by-value `RuntimeQueuePolicy` snapshot.
+3. `SharedJobRuntimeHost::update_policy(...)` replaces the runtime-level queue-policy snapshot for future scheduling reads.
+4. Focused `kernel-jobs` tests cover policy update/readback through cloned runtime handles.
+5. Downloads facade wiring, composition-root wiring, host transport, frontend settings, scheduler execution, active jobs, leases, snapshots, pending work, concrete IO, retry/backoff, and terminal runtime completion remain unchanged.
+
 ---
 
 ## 8. Error Semantics
