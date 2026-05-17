@@ -9368,3 +9368,85 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+## Session Note: 2026-05-17 AT-230 Start
+
+- Opened AT-2026-05-17-230 for the `kernel-jobs` one-shot queued execution selector.
+- Corrected stale PWF state: AT-2026-05-17-229 is already committed and pushed as `d339db7`.
+- Required context read in focused chunks: README.md, docs/README.md, ModuleDocumentationStandard, README_IMPL 7.33, kernel-jobs queue policy notes, testing strategy kernel-jobs guidance, current `run_one_execution_turn(...)`, `JobId`/`IsoDateTime`, and memory/SQLite `list_resumable(...)`.
+- Recovery notes: the home PWF catchup script path was missing, so project-local `.artifacts/ai` files were used for recovery; plain git commands hit ownership protection, so subsequent git commands use temporary `-c safe.directory=D:/DEV/MyEpicLauncher` without modifying global config.
+
+## Session Note: 2026-05-17 AT-230 RED
+
+- Added focused `launcher-kernel-jobs` tests for `run_next_execution_turn(...)`: one deterministic queued selection case and one no-queued deferral case.
+- RED command: `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml next_execution_turn`.
+- RED result: failed as expected with `E0599` because `SharedJobRuntimeHost::run_next_execution_turn(...)` does not exist yet.
+
+## Session Note: 2026-05-17 AT-230 GREEN/Validation
+
+- Implemented `SharedJobRuntimeHost::run_next_execution_turn(...)` in `crates/kernel-jobs/src/runtime.rs`.
+- Behavior: read resumable snapshots, filter `JobState::Queued`, sort deterministically by `(updated_at, job_id.to_string())`, return `Deferred` when no queued snapshot exists, and delegate the selected job to `run_one_execution_turn(...)`.
+- GREEN focused command passed: `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml next_execution_turn` => 2 passed / 0 failed.
+- Full package command passed: `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` => 9 passed / 0 failed.
+- Compile gate passed: `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`.
+- Scoped formatting/checks passed: `rustfmt --edition 2021 --check crates\kernel-jobs\src\runtime.rs`; scoped `git diff --check` for runtime plus PWF files passed with CRLF normalization warnings only.
+- First commit attempt failed because Git author identity was not configured in this shell. Resolution: use one-shot commit config from the previous commit author (`Codex <codex@example.local>`) instead of writing global config.
+- AT-230 commit was created with one-shot Git author config; the commit may be amended once to remove stale PWF "pending" wording before push.
+
+### Auto Record: 2026-05-17 21:25:04
+- Tool: apply_patch
+- Phase: Phase 105 - One-shot Queued Execution Selector
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 21:25:44
+- Tool: apply_patch
+- Phase: Phase 105 - One-shot Queued Execution Selector
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\kernel-jobs\src\runtime.rs` (update)
+
+### Auto Record: 2026-05-17 21:26:01
+- Tool: apply_patch
+- Phase: Phase 105 - One-shot Queued Execution Selector
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 21:26:29
+- Tool: apply_patch
+- Phase: Phase 105 - One-shot Queued Execution Selector
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\kernel-jobs\src\runtime.rs` (update)
+
+### Auto Record: 2026-05-17 21:27:37
+- Tool: apply_patch
+- Phase: Phase 105 - One-shot Queued Execution Selector
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 21:27:58
+- Tool: apply_patch
+- Phase: Phase 105 - One-shot Queued Execution Selector
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 21:28:43
+- Tool: apply_patch
+- Phase: Phase 105 - One-shot Queued Execution Selector
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 21:29:28
+- Tool: apply_patch
+- Phase: Phase 105 - One-shot Queued Execution Selector
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)

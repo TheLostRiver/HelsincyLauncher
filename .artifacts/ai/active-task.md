@@ -2,28 +2,25 @@
 
 ## Identity
 
-- task id: AT-2026-05-17-227
-- task id: AT-2026-05-17-228
-- task id: AT-2026-05-17-229
-- title: Define one-shot queued execution selection boundary
+- task id: AT-2026-05-17-230
+- title: Add one-shot queued execution selector
 - status: completed
 
 ## Goal
 
-Define the next `kernel-jobs` boundary after accepted dispatch projection: a deterministic one-shot method can select the next queued snapshot and dispatch it, while full scheduler loops, leases, active-slot accounting, terminal projection, and downloads IO remain out of scope.
+Implement the documented `kernel-jobs` one-shot selector that chooses exactly one queued snapshot deterministically and delegates to existing execution dispatch, while full scheduler loops, leases, active-slot accounting, terminal projection, and downloads IO remain out of scope.
 
 ## Scope
 
 - in scope:
-  - `docs/modules/downloads/README_IMPL.md`
+  - `crates/kernel-jobs/src/runtime.rs`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
   - `.artifacts/ai/progress.md`
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
-  - Rust code changes
-  - docs updates beyond PWF records
+  - durable docs updates beyond PWF records
   - downloads driver/concrete execution changes
   - composition-root wiring
   - durable leases
@@ -35,7 +32,7 @@ Define the next `kernel-jobs` boundary after accepted dispatch projection: a det
 
 ## Allowed Files
 
-1. docs/modules/downloads/README_IMPL.md
+1. crates/kernel-jobs/src/runtime.rs
 2. .artifacts/ai/active-task.md
 3. .artifacts/ai/task-plan.md
 4. .artifacts/ai/progress.md
@@ -46,31 +43,34 @@ Define the next `kernel-jobs` boundary after accepted dispatch projection: a det
 
 Read before writing:
 
-1. README_IMPL 7.32 and current Rust state after AT-228.
-2. docs/TauriKernelJobsRuntimeDesign.md queue policy and eligible-job selection notes.
-3. docs/TauriTestingStrategyAndQualityGateDesign.md kernel-jobs test guidance.
-4. current `SharedJobRuntimeHost::run_one_execution_turn(...)`.
-5. current `JobSnapshotStore::list_resumable(...)` implementations.
+1. README.md and docs/README.md routing.
+2. Module documentation budget and README_IMPL 7.33.
+3. docs/TauriKernelJobsRuntimeDesign.md queue policy and eligible-job selection notes.
+4. docs/TauriTestingStrategyAndQualityGateDesign.md kernel-jobs test guidance.
+5. current `SharedJobRuntimeHost::run_one_execution_turn(...)`.
+6. current `JobSnapshotStore::list_resumable(...)` implementations.
 
 ## Hypothesis
 
-- falsifiable documentation hypothesis: the next safe Rust slice is a one-shot queued selector, likely `run_next_execution_turn(...)`, which filters `Queued` snapshots from `list_resumable()`, applies deterministic ordering, dispatches one selected job, and leaves loops/leases/fairness/terminal/download IO for later.
+- falsifiable implementation hypothesis: `run_next_execution_turn(...)` can use `list_resumable()`, filter `JobState::Queued`, sort by `(updated_at, job_id)`, and call `run_one_execution_turn(...)` without changing existing dispatch semantics.
 
 ## Cheap Check
 
-1. Update README_IMPL with current AT-228 state and a concise queued selector boundary.
-2. Run scoped `git diff --check` for README_IMPL and PWF files.
-3. Commit and push before Rust changes.
+1. Add RED tests in `launcher-kernel-jobs` proving deterministic queued selection and no-queued deferral.
+2. Implement the smallest selector method inside `SharedJobRuntimeHost`.
+3. Run focused tests, full `launcher-kernel-jobs` lib tests, composition-root check, scoped rustfmt, and scoped diff check.
 
 ## Validation Gate
 
-1. The document states current Rust state after AT-228.
-2. The document defines deterministic queued selection and explicit non-goals.
-3. The document keeps task-log detail out of README_IMPL.
-4. Scoped `git diff --check` passes before commit.
+1. Focused queued-selector tests fail before implementation and pass after implementation.
+2. Existing accepted/deferred dispatch behavior remains unchanged.
+3. No store ordering contract, scheduler loop, lease, active-slot accounting, downloads IO, transport, frontend, or SQLite schema changes are introduced.
+4. Verification commands pass before commit/push.
 
 ## Validation Result
 
-1. `docs/modules/downloads/README_IMPL.md` now includes section 7.33 for one-shot queued execution selection.
-2. The section requires deterministic `(updated_at, job_id)` selection from queued snapshots and keeps loops, leases, active-slot accounting, fairness, terminal projection, downloads IO, transport, frontend, and SQLite schema out of scope.
-3. Scoped `git diff --check` passed with CRLF normalization warnings only.
+1. RED: `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml next_execution_turn` failed with `E0599` because `run_next_execution_turn(...)` did not exist yet.
+2. GREEN focused: the same command passed with 2 tests passed / 0 failed.
+3. Full package: `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed with 9 tests passed / 0 failed.
+4. Integration compile gate: `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
+5. Scoped format/checks: `rustfmt --edition 2021 --check crates\kernel-jobs\src\runtime.rs` passed; scoped `git diff --check` passed with CRLF normalization warnings only.

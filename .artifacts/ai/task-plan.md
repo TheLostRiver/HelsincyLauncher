@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 104 - One-shot Queued Execution Selection Boundary
+Phase 105 - One-shot Queued Execution Selector
 
 ## Current Focus
 
@@ -18,7 +18,8 @@ Phase 104 - One-shot Queued Execution Selection Boundary
 - AT-2026-05-17-226 was published as commit `d2d5405` after covering the remaining guarded `run(...)` deferred branches and fixing non-mutating checkpoint helper semantics.
 - AT-2026-05-17-227 was published as commit `fc615db` after defining the accepted execution state projection boundary.
 - AT-2026-05-17-228 was published as commit `fb9fb57` after implementing accepted dispatch projection in `kernel-jobs`.
-- AT-2026-05-17-229 is complete locally after defining a deterministic one-shot queued execution selection boundary; commit/push pending.
+- AT-2026-05-17-229 was published as commit `d339db7` after defining a deterministic one-shot queued execution selection boundary.
+- AT-2026-05-17-230 completed the TDD-backed `kernel-jobs` one-shot queued selector.
 - AT-2026-05-17-220 was published as commit `aa8d6e3` after documenting the shared runtime execution-turn boundary.
 - AT-2026-05-17-219 was published as commit `f618718` after adding host transport smoke coverage for downloads policy runtime application.
 - AT-2026-05-17-218 was published as commit `5aae7f1` after adding documentation-budget rules.
@@ -778,6 +779,12 @@ Phase 104 - One-shot Queued Execution Selection Boundary
 - Atomic tasks: AT-2026-05-17-229
 - **Status:** complete
 
+### Phase 105: One-shot Queued Execution Selector
+
+- Outcome: implement the documented `kernel-jobs` selector that filters queued snapshots, orders candidates deterministically by `(updated_at, job_id)`, and delegates exactly one candidate to existing execution dispatch.
+- Atomic tasks: AT-2026-05-17-230
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -1002,7 +1009,8 @@ Phase 104 - One-shot Queued Execution Selection Boundary
 220. AT-2026-05-17-226 - completed - covered guarded downloads driver `run(...)` deferred branches and fixed the non-mutating checkpoint helper gap; committed and pushed as `d2d5405`.
 221. AT-2026-05-17-227 - completed - defined the accepted execution state projection boundary before `kernel-jobs` Rust changes; committed and pushed as `fc615db`.
 222. AT-2026-05-17-228 - completed - implemented accepted dispatch projection in `kernel-jobs`; committed and pushed as `fb9fb57`.
-223. AT-2026-05-17-229 - completed - defined deterministic one-shot queued execution selection before Rust changes; commit/push pending.
+223. AT-2026-05-17-229 - completed - defined deterministic one-shot queued execution selection before Rust changes; committed and pushed as `d339db7`.
+224. AT-2026-05-17-230 - completed - implemented deterministic one-shot queued execution selection in `kernel-jobs`; publication handled in Git history.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

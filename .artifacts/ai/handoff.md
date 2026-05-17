@@ -46,11 +46,17 @@
 
 - task id: AT-2026-05-17-229
 - title: Define one-shot queued execution selection boundary
-- status: completed locally; validation passed; commit/push pending
+- status: completed; final commit `d339db7`, pushed to `origin/main`
+
+## Active Atomic Task
+
+- task id: AT-2026-05-17-230
+- title: Add one-shot queued execution selector
+- status: completed; validation passed; publication handled in Git history
 
 ## Current Slice
 
-- `docs/modules/downloads/README_IMPL.md`
+- `crates/kernel-jobs/src/runtime.rs`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -59,8 +65,7 @@
 
 ## Next Resume Point
 
-1. Commit and push AT-2026-05-17-229.
-2. If continuing, implement the documented `kernel-jobs` selector as a RED/GREEN slice.
+1. If continuing, choose the next backend slice from the documented runtime/downloads execution path before coding.
 
 ## Validation
 
@@ -111,6 +116,12 @@
 - AT-229 required context read in focused chunks: README_IMPL 7.32/current state, kernel-jobs queue policy and eligible-job selection notes, testing strategy kernel-jobs guidance, current `run_one_execution_turn(...)`, and current `JobSnapshotStore::list_resumable(...)` implementations.
 - AT-229 README_IMPL 7.33 defines the next Rust slice: a one-shot queued selector filters `JobState::Queued`, orders candidates deterministically by `(updated_at, job_id)`, and delegates to `run_one_execution_turn(...)`.
 - AT-229 scoped docs diff check passed with CRLF normalization warnings only.
+- AT-229 final commit `d339db7` is present on `origin/main`.
+- AT-230 required context read in focused chunks: README.md, docs/README.md, ModuleDocumentationStandard, README_IMPL 7.33, kernel-jobs queue policy notes, testing strategy kernel-jobs guidance, current runtime dispatch code, ID/time contracts, and memory/SQLite list-resumable behavior.
+- Git ownership protection requires temporary `git -c safe.directory=D:/DEV/MyEpicLauncher ...`; do not write global git config.
+- AT-230 RED command failed as expected with missing `run_next_execution_turn(...)`; GREEN focused command passed with 2 tests passed / 0 failed.
+- AT-230 full validation passed: `launcher-kernel-jobs --lib` 9 passed / 0 failed, `launcher-composition-root` check passed, scoped rustfmt passed, and scoped diff-check passed with CRLF warnings only.
+- AT-230 was committed with one-shot Git author config because this shell has no default author identity and global config must not be changed.
 - Scoped `git diff --check` passed with CRLF normalization warnings only.
 - AT-224 found that downloads should not call `prepare_resume_execution_turn(...)` from `run(...)` unless an execution-port path is present, because that helper drains pending work after checkpoint reload.
 - README_IMPL 7.31 defines the next Rust slice: add an optional downloads-owned segment execution port or equivalent explicit strategy, keep the default constructor deferred/non-draining, and test fake completed execution through `run(...)`.

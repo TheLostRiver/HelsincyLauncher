@@ -273,6 +273,35 @@ impl SharedJobRuntimeHost {
 
         Ok(disposition)
     }
+
+    /// Selects one queued snapshot deterministically and dispatches one execution turn.
+    /// 确定性选择一个已排队快照，并调度一次执行回合。
+    pub fn run_next_execution_turn(
+        &self,
+        registry: &JobDriverRegistry<()>,
+    ) -> AppResult<JobRunDisposition> {
+        let mut queued_snapshots = self
+            .snapshot_store
+            .list_resumable()?
+            .into_iter()
+            .filter(|snapshot| snapshot.state == JobState::Queued)
+            .collect::<Vec<_>>();
+        queued_snapshots.sort_by(|left, right| {
+            left.updated_at
+                .cmp(&right.updated_at)
+                .then_with(|| left.job_id.to_string().cmp(&right.job_id.to_string()))
+        });
+
+        let Some(snapshot) = queued_snapshots.first() else {
+            return Ok(JobRunDisposition::Deferred {
+                reason: "no queued job available for execution".into(),
+            });
+        };
+
+        // Selection remains one-shot and deterministic; richer scheduler policy stays separate.
+        // 选择逻辑保持单次且确定；更完整的调度策略保留给后续 scheduler 边界。
+        self.run_one_execution_turn(&snapshot.job_id, registry)
+    }
 }
 
 impl Debug for SharedJobRuntimeHost {
@@ -621,6 +650,121 @@ mod tests {
         );
     }
 
+    #[test]
+    fn next_execution_turn_selects_queued_snapshot_deterministically() {
+        let runtime = SharedJobRuntimeHost::new(RuntimeQueuePolicy::new(1));
+        let timestamp = launcher_kernel_foundation::IsoDateTime::now();
+        let ignored_running = test_snapshot_with_id_state(
+            "job-0",
+            "test",
+            "run",
+            JobState::Running,
+            JobUiState::Running,
+            timestamp.clone(),
+        );
+        let queued_later_by_id = test_snapshot_with_id_state(
+            "job-b",
+            "test",
+            "run",
+            JobState::Queued,
+            JobUiState::Queued,
+            timestamp.clone(),
+        );
+        let queued_first_by_id = test_snapshot_with_id_state(
+            "job-a",
+            "test",
+            "run",
+            JobState::Queued,
+            JobUiState::Queued,
+            timestamp,
+        );
+        let expected_job_id = queued_first_by_id.job_id.clone();
+        let skipped_job_id = queued_later_by_id.job_id.clone();
+
+        runtime
+            .snapshot_store
+            .create(&ignored_running)
+            .expect("fixture should store a non-queued resumable snapshot");
+        runtime
+            .snapshot_store
+            .create(&queued_later_by_id)
+            .expect("fixture should store the later queued snapshot");
+        runtime
+            .snapshot_store
+            .create(&queued_first_by_id)
+            .expect("fixture should store the first queued snapshot");
+
+        let driver = Arc::new(RecordingRunDriver::default());
+        let seen_job_ids = driver.seen_job_ids();
+        let mut registry = super::JobDriverRegistry::new();
+        registry.register(driver);
+
+        let disposition = runtime
+            .run_next_execution_turn(&registry)
+            .expect("next execution turn should dispatch one queued snapshot");
+
+        assert_eq!(disposition, JobRunDisposition::Accepted);
+        assert_eq!(
+            seen_job_ids
+                .lock()
+                .expect("recording driver mutex should not be poisoned")
+                .as_slice(),
+            &[expected_job_id.clone()]
+        );
+        let selected_snapshot = runtime
+            .snapshot(&expected_job_id)
+            .expect("selected snapshot query should succeed")
+            .expect("selected snapshot should still exist");
+        assert_eq!(selected_snapshot.state, JobState::Running);
+        let skipped_snapshot = runtime
+            .snapshot(&skipped_job_id)
+            .expect("skipped snapshot query should succeed")
+            .expect("skipped snapshot should still exist");
+        assert_eq!(skipped_snapshot.state, JobState::Queued);
+    }
+
+    #[test]
+    fn next_execution_turn_defers_when_no_queued_snapshot_exists() {
+        let runtime = SharedJobRuntimeHost::new(RuntimeQueuePolicy::new(1));
+        let timestamp = launcher_kernel_foundation::IsoDateTime::now();
+        let running_snapshot = test_snapshot_with_id_state(
+            "job-running",
+            "test",
+            "run",
+            JobState::Running,
+            JobUiState::Running,
+            timestamp.clone(),
+        );
+        let restoring_snapshot = test_snapshot_with_id_state(
+            "job-restoring",
+            "test",
+            "run",
+            JobState::Restoring,
+            JobUiState::Running,
+            timestamp,
+        );
+        runtime
+            .snapshot_store
+            .create(&running_snapshot)
+            .expect("fixture should store a running snapshot");
+        runtime
+            .snapshot_store
+            .create(&restoring_snapshot)
+            .expect("fixture should store a restoring snapshot");
+        let registry = super::JobDriverRegistry::new();
+
+        let disposition = runtime
+            .run_next_execution_turn(&registry)
+            .expect("no queued work should be a non-terminal dispatch result");
+
+        match disposition {
+            JobRunDisposition::Deferred { reason } => {
+                assert!(reason.contains("no queued job"));
+            }
+            other => panic!("no queued work should defer dispatch, got {other:?}"),
+        }
+    }
+
     fn test_snapshot(module: &str, kind: &str) -> JobSnapshot<()> {
         JobSnapshot {
             job_id: JobId::generate(),
@@ -631,6 +775,27 @@ mod tests {
             progress: JobProgress::pending(),
             recoverable: true,
             updated_at: launcher_kernel_foundation::IsoDateTime::now(),
+            extension: None,
+        }
+    }
+
+    fn test_snapshot_with_id_state(
+        job_id: &str,
+        module: &str,
+        kind: &str,
+        state: JobState,
+        ui_state: JobUiState,
+        updated_at: launcher_kernel_foundation::IsoDateTime,
+    ) -> JobSnapshot<()> {
+        JobSnapshot {
+            job_id: JobId::new(job_id),
+            module: module.into(),
+            kind: kind.into(),
+            state,
+            ui_state,
+            progress: JobProgress::pending(),
+            recoverable: true,
+            updated_at,
             extension: None,
         }
     }

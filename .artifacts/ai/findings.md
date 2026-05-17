@@ -1033,3 +1033,13 @@
 - The safest next Rust slice is a runtime-owned one-shot selector that filters `JobState::Queued`, orders selected candidates deterministically, and calls the existing `run_one_execution_turn(...)` for exactly one job.
 - Scheduler loops, active-slot accounting, per-module fairness, lease acquisition, cancellation/snapshot-writer context, terminal projection, downloads concrete IO, host transport, frontend, and SQLite schema remain later boundaries.
 - README_IMPL 7.33 now defines the next Rust slice and scoped validation; docs-only `git diff --check` passed with CRLF normalization warnings only.
+
+## Phase 105 One-shot Queued Execution Selector Findings
+
+- Required context was read in focused chunks: README.md, docs/README.md, ModuleDocumentationStandard documentation-budget rules, README_IMPL 7.33, kernel-jobs queue/eligible selection notes, testing strategy kernel-jobs guidance, current runtime dispatch code, `JobId`/`IsoDateTime` contracts, and current memory/SQLite `list_resumable(...)` implementations.
+- AT-2026-05-17-229 is already published at `d339db7` on `origin/main`; stale PWF notes that said commit/push pending were corrected while opening AT-230.
+- `JobId` does not implement `Ord`, but it implements `Display`, so selector tie-breaking should use `job_id.to_string()` rather than changing the shared ID type.
+- `IsoDateTime` derives `Ord`, so `(updated_at, job_id)` ordering can be expressed in the runtime selector without adding store ordering or schema changes.
+- Plain git commands are blocked by repository ownership protection in this shell; use temporary `git -c safe.directory=D:/DEV/MyEpicLauncher ...` so no global config or project-external files are modified.
+- RED/GREEN confirmed `SharedJobRuntimeHost::run_next_execution_turn(...)` filters only `Queued` snapshots, orders ties by job id after `updated_at`, delegates one selected job to existing dispatch, and returns `Deferred` when no queued snapshot exists.
+- Validation passed for focused queued-selector tests, full `launcher-kernel-jobs` lib tests, `launcher-composition-root` check, scoped rustfmt, and scoped diff-check.
