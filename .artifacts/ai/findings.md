@@ -733,3 +733,13 @@
 - RED failed on the missing `DownloadJobDriver::execute_local_resume_turn(...)` method, confirming the test targeted the new orchestration helper.
 - GREEN confirmed `execute_local_resume_turn(...)` can chain the existing local helpers and persist completed segment checkpoint facts without adding runtime `run()`, concrete IO, SQLite adapter/schema, composition wiring, transport, frontend, or public execution errors.
 - Full downloads module tests passed with 35 tests after rustfmt, so existing facade, driver restore, execution-turn, request handoff, fake acceptance, and checkpoint mutation behavior stayed intact.
+
+## Phase 72 Downloads Fake Segment Failure Result Boundary Findings
+
+- AT-2026-05-17-196 final commit is `9294f9d` and was pushed to `origin/main`; older PWF mentions of initial hash `3d6f4f7` are pre-amend history.
+- README_IMPL 7.18 closes fake/local successful orchestration but still explicitly leaves the concrete execution failure surface undesigned.
+- TauriDownloadRuntimeDesign says failed/canceled/completed terminal transitions require checkpointing, retryable errors may retry locally per segment, and verification failures should redownload affected segments rather than restarting the whole job.
+- TauriErrorHandlingAndProjectionDesign says public errors must use stable codes, retryable is a hint rather than a retry engine, and public projection belongs at application/transport/job snapshot boundaries.
+- Current Rust has `DownloadSegmentExecutionResult::Accepted` and `Completed`; it can propagate an `AppResult` from the execution port, but it has no module-local result value for a fake executor to report a handled segment failure.
+- The next safe boundary should define a local failed segment result contract for the next TDD slice, not public `DL_*` codes, checkpoint mutation, runtime completion, concrete fetch/write/verify, transport, frontend, or composition wiring.
+- README_IMPL 7.19 now pins the first Rust slice: add a focused test whose fake port returns `DownloadSegmentExecutionResult::Failed`, carrying request facts, a local failure reason string, a retryable hint, and downloaded bytes known at failure time.

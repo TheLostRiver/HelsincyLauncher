@@ -6967,6 +6967,16 @@
 - Scoped diff validation passed with CRLF normalization warnings only.
 - Initial local commit created as `3d6f4f7`; PWF backfill is being amended into the same task commit before the authorized push attempt.
 
+## 2026-05-17 - AT-197 Started
+
+- AT-196 final commit is `9294f9d` and `git push origin main` succeeded; current `main` is aligned with `origin/main`.
+- User requested continuing autonomously: plan when needed, code when the task is clear, commit and push each completed task, and never modify/delete outside `D:\DEV\MyEpicLauncher`.
+- Read current handoff, findings tail, task-plan Phase 71/ledger, status, README, CONTRIBUTING, docs map, downloads ARCH/API/FLOW/README_IMPL 7.18 through validation, TauriDownloadRuntimeDesign failure/retry/checkpoint snippets, TauriKernelJobsRuntimeDesign runtime ownership snippets, TauriErrorHandlingAndProjectionDesign retryable/severity/public-error snippets, TauriTestingStrategy snippets, and CodeCommentStandard snippets.
+- Decision: the next safe slice is documentation/planning for a module-local fake failed segment result contract. Coding it directly would force failure semantics before the boundary is written; concrete IO and public `DL_*` execution projection remain future work.
+- Updated README_IMPL with section 7.19. The next Rust slice is now constrained to a local `DownloadSegmentExecutionResult::Failed` contract only, with checkpoint mutation, retry policy, public error projection, runtime completion, concrete IO, SQLite adapter/schema, transport, composition-root, and frontend work deferred.
+- Validation: scoped `git diff --check` over AT-197 files passed with CRLF normalization warnings only.
+- Initial local commit created as `83315bf`; PWF backfill is being amended into the same task commit before push.
+
 ### Auto Record: 2026-05-17 14:13:18
 - Tool: apply_patch
 - Phase: Phase 71 - Downloads Fake Local Resume Execution Orchestration
@@ -7072,5 +7082,101 @@
 ### Auto Record: 2026-05-17 14:19:41
 - Tool: apply_patch
 - Phase: Phase 71 - Downloads Fake Local Resume Execution Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:23:45
+- Tool: apply_patch
+- Phase: Phase 71 - Downloads Fake Local Resume Execution Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-17 14:24:00
+- Tool: apply_patch
+- Phase: Phase 72 - Downloads Fake Segment Failure Result Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 14:24:12
+- Tool: apply_patch
+- Phase: Phase 72 - Downloads Fake Segment Failure Result Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:24:24
+- Tool: apply_patch
+- Phase: Phase 72 - Downloads Fake Segment Failure Result Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 14:24:40
+- Tool: apply_patch
+- Phase: Phase 72 - Downloads Fake Segment Failure Result Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 14:25:02
+- Tool: apply_patch
+- Phase: Phase 72 - Downloads Fake Segment Failure Result Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 14:25:10
+- Tool: apply_patch
+- Phase: Phase 72 - Downloads Fake Segment Failure Result Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 14:25:20
+- Tool: apply_patch
+- Phase: Phase 72 - Downloads Fake Segment Failure Result Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 14:25:27
+- Tool: apply_patch
+- Phase: Phase 72 - Downloads Fake Segment Failure Result Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:25:34
+- Tool: apply_patch
+- Phase: Phase 72 - Downloads Fake Segment Failure Result Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 14:25:45
+- Tool: apply_patch
+- Phase: Phase 72 - Downloads Fake Segment Failure Result Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 14:26:07
+- Tool: apply_patch
+- Phase: Phase 72 - Downloads Fake Segment Failure Result Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:26:38
+- Tool: apply_patch
+- Phase: Phase 72 - Downloads Fake Segment Failure Result Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 14:26:45
+- Tool: apply_patch
+- Phase: Phase 72 - Downloads Fake Segment Failure Result Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 14:26:50
+- Tool: apply_patch
+- Phase: Phase 72 - Downloads Fake Segment Failure Result Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 14:26:55
+- Tool: apply_patch
+- Phase: Phase 72 - Downloads Fake Segment Failure Result Boundary
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
