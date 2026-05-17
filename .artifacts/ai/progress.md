@@ -10190,6 +10190,31 @@
   - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
   - `rustfmt --edition 2021 --check crates\module-downloads\src\driver.rs crates\module-downloads\src\lib.rs` passed.
 
+## 2026-05-17 23:05 - AT-239 commit and AT-240 opening
+
+- AT-239 was committed and pushed:
+  - commit `1375a06`
+  - message `feat: add downloads segment executor shell`
+  - pushed to `origin/main`
+- Opened AT-240 as a docs-boundary task before coding executor failure mapping.
+- Read focused context for AT-240:
+  - root README/docs routing
+  - ModuleDocumentationStandard documentation budget
+  - downloads README_IMPL 7.35 and error semantics
+  - Tauri error handling/projection design
+  - downloads architecture boundary snippets
+- Next:
+  - add a compact README_IMPL subsection defining in-band `Failed` versus propagated `AppError` for segment executor sub-port failures.
+
+## 2026-05-17 23:09 - AT-240 docs boundary complete
+
+- Added README_IMPL 7.36 `Segment Executor Failure Mapping Boundary`.
+- Documented that handled fetch/write/verify segment failures should become in-band `DownloadSegmentExecutionResult::Failed`.
+- Documented that infrastructure/configuration errors that prevent a segment decision may still propagate as `AppError`.
+- Kept public `DL_*` execution codes, transport DTOs, user-facing messages, retry/backoff, terminal runtime state, scheduler behavior, production wiring, and real IO out of scope.
+- Validation:
+  - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- docs/modules/downloads/README_IMPL.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md` passed with CRLF normalization warnings only.
+
 ### Auto Record: 2026-05-17 22:51:54
 - Tool: apply_patch
 - Phase: Phase 114 - Downloads Segment Executor Adapter Shell
@@ -10239,6 +10264,66 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
 
 ### Auto Record: 2026-05-17 22:55:29
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 22:57:10
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-17 22:57:19
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 22:57:32
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 22:57:44
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 22:58:00
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 22:58:13
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 22:58:21
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 22:58:29
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 22:58:39
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 22:58:49
 - Tool: apply_patch
 - Phase: Phase 114 - Downloads Segment Executor Adapter Shell
 - Files:

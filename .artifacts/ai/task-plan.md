@@ -1082,7 +1082,8 @@ Phase 114 - Downloads Segment Executor Adapter Shell
 230. AT-2026-05-17-236 - completed - added the documented host runtime execution command with focused transport smoke TDD; committed and pushed as `f720d9c`.
 231. AT-2026-05-17-237 - completed - covered the host runtime command production downloads deferred path without production code changes; committed and pushed as `a8e3492`.
 232. AT-2026-05-17-238 - completed - defined the downloads concrete segment execution boundary before Rust IO work; committed and pushed as `d5af454`.
-233. AT-2026-05-17-239 - completed - added the downloads segment executor adapter shell behind `DownloadSegmentExecutionPort`, with fake in-memory fetch/write/verify sub-port TDD and no production wiring or real IO.
+233. AT-2026-05-17-239 - completed - added the downloads segment executor adapter shell behind `DownloadSegmentExecutionPort`, with fake in-memory fetch/write/verify sub-port TDD and no production wiring or real IO; committed and pushed as `1375a06`.
+234. AT-2026-05-17-240 - completed - defined the downloads segment executor failure mapping boundary before Rust failure-path coding.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

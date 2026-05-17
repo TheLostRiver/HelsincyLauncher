@@ -1137,3 +1137,12 @@
 - RED/GREEN confirmed `DownloadSegmentExecutor` composes fake in-memory `DownloadSegmentFetchPort`, `DownloadSegmentWritePort`, and `DownloadSegmentVerifyPort` implementations behind the existing driver-facing `DownloadSegmentExecutionPort`.
 - The adapter returns the existing `DownloadSegmentExecutionResult::Completed` shape from sub-port facts and does not change driver request/result shape, checkpoint mutation helpers, `kernel-jobs`, composition-root production wiring, host transport, frontend, SQLite schema, retry/backoff, or real HTTP/disk/hash IO.
 - Validation passed for the focused adapter test, existing `driver_run` tests, full `launcher-module-downloads` lib tests, `launcher-composition-root` compile gate, and scoped rustfmt.
+
+## Phase 115 Downloads Segment Executor Failure Mapping Boundary Findings
+
+- Required context was read in focused chunks: README/docs routing, ModuleDocumentationStandard documentation-budget rules, downloads ARCH/API/FLOW boundaries, README_IMPL 7.35 plus error semantics, Tauri error handling/projection rules, and download runtime error taxonomy notes.
+- README_IMPL 7.35 already says fake sub-ports can produce an existing `Completed` or `Failed` result, but AT-239 only implemented the successful `Completed` adapter path.
+- Existing docs separate module-local `DownloadSegmentExecutionResult::Failed` from stable public `DL_*` execution projection; public execution errors must still wait for a later projection boundary.
+- The next safe code target should not invent retry/backoff or terminal runtime behavior. It should first define when a sub-port failure is a handled segment execution failure versus when an infrastructure/configuration error remains an `AppError`.
+- README_IMPL 7.36 now defines that handled fetch/write/verify segment failures become in-band `DownloadSegmentExecutionResult::Failed`, while infrastructure/configuration errors that prevent a segment decision may still propagate as `AppError`.
+- The next Rust slice is now concrete enough: add fake sub-port coverage for a handled write or verify failure, map it to `Failed`, preserve `AppError` propagation for true infrastructure failures, and rerun focused adapter plus existing failed-checkpoint tests.

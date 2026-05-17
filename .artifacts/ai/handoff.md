@@ -266,6 +266,19 @@
   - `launcher-composition-root` check
   - scoped rustfmt check
 
+## Latest Handoff - AT-2026-05-17-240
+
+- Status: docs boundary validated; commit/push pending at the time of this note.
+- Scope completed:
+  - Added README_IMPL 7.36 `Segment Executor Failure Mapping Boundary`.
+  - Defined handled fetch/write/verify segment failures as in-band `DownloadSegmentExecutionResult::Failed`.
+  - Kept infrastructure/configuration errors that prevent a segment decision on the propagated `AppError` path.
+- Next likely code task:
+  - fake write or verify failure test against `DownloadSegmentExecutor`;
+  - adapter maps handled failure to `Failed`;
+  - separate test preserves true `AppError` propagation;
+  - rerun focused adapter tests and existing failed-result checkpoint tests.
+
 ## Dirty Worktree To Preserve
 
 - Unrelated unstaged/unknown work remains present and must not be committed with AT-218:

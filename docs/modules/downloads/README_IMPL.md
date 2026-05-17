@@ -1597,6 +1597,25 @@ Validation should stay in `launcher-module-downloads` first:
 3. existing driver run/deferred tests keep passing;
 4. composition-root wiring remains unchanged until a later slice explicitly scopes production execution-port wiring.
 
+### 7.36 Segment Executor Failure Mapping Boundary
+
+The first executor adapter slice proves the successful fake/in-memory path only. Before adding concrete IO, the next narrow boundary is how the adapter reports handled segment execution failures without confusing them with infrastructure or programming errors.
+
+Boundary rules:
+
+1. a handled fetch/write/verify segment failure should become `DownloadSegmentExecutionResult::Failed` with the original request, best-known downloaded byte count, module-local reason text, and retryable hint;
+2. infrastructure/configuration errors that mean the executor could not make a segment decision may still propagate as `AppError`;
+3. the adapter must not introduce stable public `DL_*` execution codes, transport DTOs, user-facing messages, retry/backoff, terminal runtime state, or scheduler behavior in this slice;
+4. checkpoint mutation may continue using the existing failed-result helper after the in-band `Failed` result is produced;
+5. production composition-root wiring remains absent until fake failure and success behavior are both covered in module tests.
+
+Next Rust slice:
+
+1. add fake sub-port coverage for a handled write or verify failure;
+2. map that handled failure into `DownloadSegmentExecutionResult::Failed`;
+3. preserve propagation for true `AppError` infrastructure failures;
+4. run focused adapter tests plus existing driver failed-result checkpoint tests.
+
 ---
 
 ## 8. Error Semantics
