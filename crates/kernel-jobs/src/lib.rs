@@ -8,6 +8,6 @@ pub use model::{
     JobState, JobUiState, RestoreDisposition,
 };
 pub use runtime::{
-    JobDriver, JobDriverRegistry, JobRuntime, JobSnapshotStore, RuntimeQueuePolicy,
-    SharedJobRuntimeHost,
+    JobDriver, JobDriverRegistry, JobExecutionContext, JobRunDisposition, JobRuntime,
+    JobSnapshotStore, RuntimeQueuePolicy, SharedJobRuntimeHost,
 };

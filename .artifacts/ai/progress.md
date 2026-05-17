@@ -8822,6 +8822,19 @@
 - Validation: `rg` confirmed the new section exists; scoped `git diff --check` passed for the AT-220 file set with CRLF normalization warnings only.
 - No code files changed in AT-220.
 
+### Agent Note: 2026-05-17 20:33:05 +08:00
+- Phase: Phase 96 - Kernel Jobs Execution-Turn Contract
+- Corrected local planning context: AT-220 was committed and pushed as `aa8d6e3`.
+- Started AT-2026-05-17-221 after reading README_IMPL 7.29, kernel-jobs runtime design driver/queue/lease/recovery/runtime-context sections, downloads scheduler/budget notes, current `kernel-jobs` runtime/lib/model code, and current module driver implementations.
+- Planned code shape: focused fake-driver TDD for a read-only execution context, explicit run disposition, and a default deferred `JobDriver::run(...)` path that avoids pretending concrete module execution exists.
+
+### Agent Note: 2026-05-17 20:37:25 +08:00
+- Phase: Phase 96 - Kernel Jobs Execution-Turn Contract
+- RED validation: `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib execution_turn` failed before implementation because `JobExecutionContext`, `JobRunDisposition`, and `JobDriver::run(...)` were missing.
+- GREEN validation: `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed with 4 tests passed / 0 failed.
+- Affected compile validation: `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
+- Formatting validation: `rustfmt --edition 2021 --check crates\kernel-jobs\src\runtime.rs` passed; broader rustfmt still sees a pre-existing out-of-scope `model.rs` formatting diff.
+
 ### Auto Record: 2026-05-17 19:55:06
 - Tool: apply_patch
 - Phase: Phase 93 - Documentation Budget Rules
@@ -8895,3 +8908,49 @@
 - Phase: Phase 95 - Shared Runtime Execution-Turn Boundary
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 20:34:05
+- Tool: apply_patch
+- Phase: Phase 96 - Kernel Jobs Execution-Turn Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 20:34:40
+- Tool: apply_patch
+- Phase: Phase 96 - Kernel Jobs Execution-Turn Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\kernel-jobs\src\runtime.rs` (update)
+
+### Auto Record: 2026-05-17 20:36:28
+- Tool: apply_patch
+- Phase: Phase 96 - Kernel Jobs Execution-Turn Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\kernel-jobs\src\runtime.rs` (update)
+
+### Auto Record: 2026-05-17 20:36:35
+- Tool: apply_patch
+- Phase: Phase 96 - Kernel Jobs Execution-Turn Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\kernel-jobs\src\runtime.rs` (update)
+
+### Auto Record: 2026-05-17 20:36:43
+- Tool: apply_patch
+- Phase: Phase 96 - Kernel Jobs Execution-Turn Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\kernel-jobs\src\runtime.rs` (update)
+  - `D:\DEV\MyEpicLauncher\crates\kernel-jobs\src\lib.rs` (update)
+
+### Auto Record: 2026-05-17 20:38:02
+- Tool: apply_patch
+- Phase: Phase 96 - Kernel Jobs Execution-Turn Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)

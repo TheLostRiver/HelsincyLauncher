@@ -6,12 +6,13 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 95 - Shared Runtime Execution-Turn Boundary
+Phase 96 - Kernel Jobs Execution-Turn Contract
 
 ## Current Focus
 
+- AT-2026-05-17-220 was published as commit `aa8d6e3` after documenting the shared runtime execution-turn boundary.
+- AT-2026-05-17-221 is in progress to implement the minimal `kernel-jobs` execution-turn contract with focused TDD.
 - AT-2026-05-17-219 was published as commit `f618718` after adding host transport smoke coverage for downloads policy runtime application.
-- AT-2026-05-17-220 completed the shared runtime execution-turn boundary documentation locally; commit and push are pending.
 - AT-2026-05-17-218 was published as commit `5aae7f1` after adding documentation-budget rules.
 - AT-2026-05-06-082 has been published as commit `bfdbf9a` after documenting the crate-entry boundary in `crates/module-engines/src/lib.rs`.
 - AT-2026-05-06-083 has been published as commit `92696c0` after documenting the crate-entry boundary in `crates/module-downloads/src/lib.rs`.
@@ -715,6 +716,12 @@ Phase 95 - Shared Runtime Execution-Turn Boundary
 - Atomic tasks: AT-2026-05-17-220
 - **Status:** complete
 
+### Phase 96: Kernel Jobs Execution-Turn Contract
+
+- Outcome: add the minimal module-neutral `kernel-jobs` execution-turn contract and focused fake-driver tests, without wiring concrete downloads execution or terminal runtime completion.
+- Atomic tasks: AT-2026-05-17-221
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -930,7 +937,8 @@ Phase 95 - Shared Runtime Execution-Turn Boundary
 211. AT-2026-05-17-217 - completed - wired the concrete downloads runtime policy applier in composition-root with focused TDD while keeping host transport, frontend, scheduler work, active runtime mutation, concrete IO, retry/backoff, and terminal completion out of scope; committed and pushed as `37765ef`.
 212. AT-2026-05-17-218 - completed - added documentation-budget rules to keep task logs in `.artifacts/ai` and reserve `docs/` updates for durable boundaries, contracts, models, error semantics, wiring, and validation rules; committed and pushed as `5aae7f1`.
 213. AT-2026-05-17-219 - completed - added a host transport smoke assertion proving `downloads_update_policy` persists the policy and applies the shared runtime policy snapshot through existing composition-root wiring; committed and pushed as `f618718`.
-214. AT-2026-05-17-220 - completed - documented the shared runtime execution-turn boundary before coding a minimal `kernel-jobs` run contract; commit and push pending.
+214. AT-2026-05-17-220 - completed - documented the shared runtime execution-turn boundary before coding a minimal `kernel-jobs` run contract; committed and pushed as `aa8d6e3`.
+215. AT-2026-05-17-221 - completed - added the minimal `kernel-jobs` execution-turn contract with focused fake-driver TDD while keeping downloads execution, IO, retry/backoff, leases, terminal completion, transport, frontend, and SQLite schema out of scope; commit and push pending.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

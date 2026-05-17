@@ -2,18 +2,20 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-17-219
-- title: Prove downloads policy host transport runtime application
-- status: completed; final local commit `f618718`, pushed to `origin/main`
+- task id: AT-2026-05-17-220
+- title: Document shared runtime execution-turn boundary
+- status: completed; final local commit `aa8d6e3`, pushed to `origin/main`
 
 ## Current Atomic Task
 
-- task id: AT-2026-05-17-220
-- title: Document shared runtime execution-turn boundary
+- task id: AT-2026-05-17-221
+- title: Add minimal kernel-jobs execution-turn contract
 - status: completed locally; validation passed, commit and push pending
 
 ## Current Slice
 
+- `crates/kernel-jobs/src/runtime.rs`
+- `crates/kernel-jobs/src/lib.rs`
 - `docs/modules/downloads/README_IMPL.md`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
@@ -23,9 +25,8 @@
 
 ## Next Resume Point
 
-1. Commit only AT-220 files and push `main` to `origin`.
-2. Stop, per user request.
-3. Future resume point: code the minimal `kernel-jobs` execution-turn contract described in README_IMPL 7.29, after re-reading the relevant docs.
+1. Commit only AT-221 files and push `main` to `origin`.
+2. Reassess the next backend slice from README_IMPL 7.29 current state.
 
 ## Validation
 
@@ -59,14 +60,17 @@
 - `rustfmt --check src-tauri\tests\transport_wiring_smoke.rs` passed after formatting only the touched smoke test.
 - AT-220 required context read in focused chunks: README_IMPL 7.13 and 7.28, kernel-jobs runtime design driver/lease/recovery/runtime-context sections, download scheduler/budget sections, and current `kernel-jobs` runtime/lib/model surfaces.
 - AT-220 docs-only validation passed: README_IMPL 7.29 now defines current Rust reality, first Rust slice, and non-goals for the shared runtime execution-turn boundary; scoped `git diff --check` passed with CRLF normalization warnings only.
+- AT-221 required context read in focused chunks: README_IMPL 7.29, kernel-jobs runtime design driver/queue/lease/recovery/runtime-context sections, downloads scheduler/budget notes, current `kernel-jobs` runtime/lib/model code, and current module driver implementations.
+- AT-221 RED/GREEN validation passed: missing execution-turn contract failed first, then `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed with 4 tests passed / 0 failed.
+- `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
+- `rustfmt --edition 2021 --check crates\kernel-jobs\src\runtime.rs` passed; broader rustfmt remains blocked by pre-existing out-of-scope `crates/kernel-jobs/src/model.rs` formatting.
 
 ## Boundaries
 
 - Do not modify files outside `D:\DEV\MyEpicLauncher`.
 - Do not run destructive commands.
-- Do not change Rust code, frontend, host transport, scheduler execution, concrete IO, retry/backoff, terminal completion, SQLite schema, hooks, `.codex`, Cargo.lock, or unrelated dirty files in AT-220.
+- Do not change downloads execution, frontend, host transport, scheduler loop, concrete IO, retry/backoff, durable lease persistence, terminal completion, SQLite schema, hooks, `.codex`, Cargo.lock, or unrelated dirty files in AT-221.
 - Push is authorized by the user-provided GitHub remote after each completed task commit.
-- Stop after completing and pushing AT-220 because the user said quota is low.
 
 ## Dirty Worktree To Preserve
 

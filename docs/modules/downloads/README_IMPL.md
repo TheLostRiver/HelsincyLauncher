@@ -1413,6 +1413,12 @@ First Rust slice:
 
 Validation for that later code slice should stay in `launcher-kernel-jobs` first. Downloads-specific execution should wait until the shared execution-turn contract exists and has its own tests.
 
+Current Rust state:
+
+1. `kernel-jobs` exposes `JobExecutionContext` as a read-only snapshot wrapper for one execution turn.
+2. `JobDriver::run(...)` exists and defaults to `JobRunDisposition::Deferred`, so existing module drivers do not claim concrete execution.
+3. Focused `launcher-kernel-jobs` tests prove a fake driver can override `run(...)` and accept one execution turn through the registry-resolved driver.
+
 ---
 
 ## 8. Error Semantics

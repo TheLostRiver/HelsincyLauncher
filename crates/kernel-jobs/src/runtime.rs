@@ -25,6 +25,50 @@ impl RuntimeQueuePolicy {
     }
 }
 
+/// Disposition returned by one module driver execution turn.
+/// 模块 driver 执行一个运行回合后返回的处置。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum JobRunDisposition {
+    /// The driver accepted the execution turn without claiming terminal completion.
+    /// driver 已接受执行回合，但不声明终态完成。
+    Accepted,
+    /// The driver has no concrete execution path yet; this is not terminal failure.
+    /// driver 尚未接入具体执行路径；这不是终态失败。
+    Deferred { reason: String },
+    /// The driver rejected or failed this execution turn without projecting terminal state.
+    /// driver 拒绝或执行失败该回合，但不直接投影终态状态。
+    Failed { reason: String },
+}
+
+/// Read-only context passed from the shared runtime into a module execution turn.
+/// 共享 runtime 传给模块执行回合的只读上下文。
+#[derive(Debug, Clone, Copy)]
+pub struct JobExecutionContext<'a, E> {
+    /// Runtime-owned snapshot for the job being executed.
+    /// runtime 拥有的当前执行作业快照。
+    snapshot: &'a JobSnapshot<E>,
+}
+
+impl<'a, E> JobExecutionContext<'a, E> {
+    /// Creates a context for one execution turn from a runtime snapshot.
+    /// 从 runtime 快照创建一次执行回合的上下文。
+    pub fn new(snapshot: &'a JobSnapshot<E>) -> Self {
+        Self { snapshot }
+    }
+
+    /// Returns the runtime snapshot without giving the driver mutation rights.
+    /// 返回 runtime 快照，但不授予 driver 修改权限。
+    pub fn snapshot(&self) -> &'a JobSnapshot<E> {
+        self.snapshot
+    }
+
+    /// Returns the stable job id for this execution turn.
+    /// 返回该执行回合的稳定作业标识。
+    pub fn job_id(&self) -> &'a JobId {
+        &self.snapshot.job_id
+    }
+}
+
 /// 表示模块提供给共享作业运行时的作业驱动边界。
 ///
 /// 运行时只用 `module` 与 `kind` 做路由，并在恢复阶段回调驱动；具体业务执行和 checkpoint 仍由模块拥有。
@@ -35,6 +79,17 @@ pub trait JobDriver<E>: Send + Sync {
     fn kind(&self) -> &'static str;
     /// 基于持久化快照尝试恢复模块作业，并返回运行时应采用的恢复处置。
     fn restore(&self, snapshot: &JobSnapshot<E>) -> AppResult<RestoreDisposition>;
+    /// Runs one module execution turn through a runtime-owned read-only context.
+    /// 通过 runtime 拥有的只读上下文执行一个模块回合。
+    fn run(&self, context: JobExecutionContext<'_, E>) -> AppResult<JobRunDisposition> {
+        Ok(JobRunDisposition::Deferred {
+            reason: format!(
+                "execution not wired for {}/{}",
+                context.snapshot().module,
+                context.snapshot().kind
+            ),
+        })
+    }
 }
 
 /// 表示共享运行时用于按模块和作业类型查找驱动的注册表。
@@ -278,10 +333,18 @@ impl JobRuntime for SharedJobRuntimeHost {
 
 #[cfg(test)]
 mod tests {
-    use launcher_kernel_foundation::JobId;
+    use std::sync::{Arc, Mutex};
 
-    use super::{JobRuntime, RuntimeQueuePolicy, SharedJobRuntimeHost};
-    use crate::{EnqueueJobRequest, JobPriority, JobState, JobUiState};
+    use launcher_kernel_foundation::{AppResult, JobId};
+
+    use super::{
+        JobDriver, JobExecutionContext, JobRunDisposition, JobRuntime, RuntimeQueuePolicy,
+        SharedJobRuntimeHost,
+    };
+    use crate::{
+        EnqueueJobRequest, JobPriority, JobProgress, JobSnapshot, JobState, JobUiState,
+        RestoreDisposition,
+    };
 
     #[test]
     fn shared_job_runtime_host_records_enqueued_snapshot() {
@@ -320,5 +383,111 @@ mod tests {
 
         assert_eq!(runtime.policy().max_concurrent_jobs, 9);
         assert_eq!(cloned_runtime.policy().max_concurrent_jobs, 9);
+    }
+
+    struct RestoreOnlyDriver;
+
+    impl JobDriver<()> for RestoreOnlyDriver {
+        fn module(&self) -> &'static str {
+            "test"
+        }
+
+        fn kind(&self) -> &'static str {
+            "restore_only"
+        }
+
+        fn restore(&self, _snapshot: &JobSnapshot<()>) -> AppResult<RestoreDisposition> {
+            Ok(RestoreDisposition::Resumed)
+        }
+    }
+
+    #[test]
+    fn job_driver_default_run_is_deferred_until_module_execution_is_wired() {
+        let snapshot = test_snapshot("test", "restore_only");
+
+        let disposition = RestoreOnlyDriver
+            .run(JobExecutionContext::new(&snapshot))
+            .expect("default run disposition should be explicit");
+
+        match disposition {
+            JobRunDisposition::Deferred { reason } => {
+                assert!(reason.contains("execution not wired"));
+            }
+            other => panic!("default run should be deferred, got {other:?}"),
+        }
+    }
+
+    #[derive(Default)]
+    struct RecordingRunDriver {
+        seen_job_ids: Arc<Mutex<Vec<JobId>>>,
+    }
+
+    impl RecordingRunDriver {
+        fn seen_job_ids(&self) -> Arc<Mutex<Vec<JobId>>> {
+            self.seen_job_ids.clone()
+        }
+    }
+
+    impl JobDriver<()> for RecordingRunDriver {
+        fn module(&self) -> &'static str {
+            "test"
+        }
+
+        fn kind(&self) -> &'static str {
+            "run"
+        }
+
+        fn restore(&self, _snapshot: &JobSnapshot<()>) -> AppResult<RestoreDisposition> {
+            Ok(RestoreDisposition::Resumed)
+        }
+
+        fn run(&self, context: JobExecutionContext<'_, ()>) -> AppResult<JobRunDisposition> {
+            self.seen_job_ids
+                .lock()
+                .expect("recording driver mutex should not be poisoned")
+                .push(context.job_id().clone());
+            assert_eq!(context.snapshot().module, "test");
+            assert_eq!(context.snapshot().kind, "run");
+            Ok(JobRunDisposition::Accepted)
+        }
+    }
+
+    #[test]
+    fn registry_resolved_driver_can_accept_execution_turn_with_read_only_context() {
+        let driver = Arc::new(RecordingRunDriver::default());
+        let seen_job_ids = driver.seen_job_ids();
+        let mut registry = super::JobDriverRegistry::new();
+        registry.register(driver);
+        let snapshot = test_snapshot("test", "run");
+        let expected_job_id = snapshot.job_id.clone();
+
+        let disposition = registry
+            .resolve("test", "run")
+            .expect("registered driver should resolve by module and kind")
+            .run(JobExecutionContext::new(&snapshot))
+            .expect("fake driver should accept the execution turn");
+
+        assert_eq!(disposition, JobRunDisposition::Accepted);
+        assert_eq!(
+            seen_job_ids
+                .lock()
+                .expect("recording driver mutex should not be poisoned")
+                .as_slice(),
+            &[expected_job_id]
+        );
+    }
+
+    fn test_snapshot(module: &str, kind: &str) -> JobSnapshot<()> {
+        JobSnapshot {
+            job_id: JobId::generate(),
+            module: module.into(),
+            kind: kind.into(),
+            state: JobState::Queued,
+            ui_state: JobUiState::Queued,
+            progress: JobProgress::pending(),
+            recoverable: true,
+            updated_at: launcher_kernel_foundation::IsoDateTime::now(),
+            extension: None,
+        }
     }
 }

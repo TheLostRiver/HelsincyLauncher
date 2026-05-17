@@ -948,3 +948,12 @@
 - Current `kernel-jobs` Rust has `JobDriverRegistry::resolve(...)`, `SharedJobRuntimeHost` enqueue/snapshot/pause/resume/cancel/policy methods, and no runtime-owned execution turn or lease API.
 - The next code task needs a narrow `kernel-jobs` contract first; concrete downloads fetch/write/verify, retry/backoff, terminal completion, host transport, and frontend work must remain deferred.
 - README_IMPL 7.29 now pins that next durable boundary: add a module-neutral execution-turn contract in `kernel-jobs` first, validated with fake-driver tests, before downloads integrates concrete execution.
+
+## Phase 96 Kernel Jobs Execution-Turn Contract Findings
+
+- AT-2026-05-17-220 final commit is `aa8d6e3` and was pushed to `origin/main`.
+- Required context was read in focused chunks: README_IMPL 7.29, kernel-jobs runtime design driver/queue/lease/recovery/runtime-context sections, downloads scheduler/budget notes, current `kernel-jobs` runtime/lib/model code, and current module driver implementations.
+- The smallest code slice is inside `kernel-jobs`: add a read-only execution context and explicit run disposition, then prove a fake driver can override `run(...)`.
+- To preserve existing modules without claiming real execution, the default `JobDriver::run(...)` should return an explicit deferred disposition until a module overrides it.
+- RED/GREEN confirmed the contract: missing `JobExecutionContext`, `JobRunDisposition`, and `JobDriver::run(...)` failed first; after implementation, focused and full `launcher-kernel-jobs` lib tests passed.
+- `cargo check -p launcher-composition-root` also passed, proving current Fab/downloads/engines drivers compile through the default deferred run path.
