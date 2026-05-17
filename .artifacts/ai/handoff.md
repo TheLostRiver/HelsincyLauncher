@@ -28,11 +28,17 @@
 
 - task id: AT-2026-05-17-226
 - title: Cover downloads driver run deferred branches
+- status: completed; final commit `d2d5405`, pushed to `origin/main`
+
+## Active Atomic Task
+
+- task id: AT-2026-05-17-227
+- title: Define accepted execution state projection boundary
 - status: completed locally; validation passed; commit/push pending
 
 ## Current Slice
 
-- `crates/module-downloads/src/driver.rs`
+- `docs/modules/downloads/README_IMPL.md`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -41,8 +47,8 @@
 
 ## Next Resume Point
 
-1. Commit and push AT-2026-05-17-226.
-2. Re-read README_IMPL 7.31/current runtime execution state and select the next backend slice only if the next boundary is clear.
+1. Commit and push AT-2026-05-17-227.
+2. If continuing, implement the documented `kernel-jobs` accepted-state projection as the next RED/GREEN slice.
 
 ## Validation
 
@@ -98,6 +104,10 @@
 - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
 - `rustfmt --edition 2021 --check crates\module-downloads\src\driver.rs` passed.
 - Scoped `git diff --check` passed for AT-226 files with CRLF normalization warnings only.
+- AT-226 final commit `d2d5405` was pushed to `origin/main`.
+- AT-227 required context read in focused chunks: README/CONTRIBUTING routing, README_IMPL 7.29-7.31, kernel-jobs lifecycle/driver/context/snapshot sections, composition-root runtime/driver wiring, testing strategy backend test placement, current runtime dispatch code, current downloads driver run behavior, and composition-root driver registry wiring.
+- AT-227 README_IMPL 7.32 defines the next Rust slice: `Accepted` dispatch projects queued snapshots to non-terminal `Running`; `Deferred` remains non-mutating; `Failed`, terminal state, leases, scheduler loops, downloads IO, host transport, frontend, and SQLite schema remain out of scope.
+- AT-227 scoped docs diff check passed with CRLF normalization warnings only.
 - Scoped `git diff --check` passed with CRLF normalization warnings only.
 - AT-226 required context read in focused chunks: README_IMPL 7.31, current run implementation, and driver fake execution port tests.
 - AT-226 RED/GREEN validation passed: missing checkpoint deferred and preserved pending work; no-pending-work and Accepted-only/no-mutation initially misclassified as `Accepted` until checkpoint helpers returned `None` for non-mutating turns.
@@ -110,7 +120,7 @@
 
 - Do not modify files outside `D:\DEV\MyEpicLauncher`.
 - Do not run destructive commands.
-- Do not change composition-root wiring, frontend, host transport, scheduler loop, concrete IO, retry/backoff, durable lease persistence, terminal completion, SQLite schema, hooks, `.codex`, Cargo.lock, or unrelated dirty files in AT-226.
+- Do not change Rust code, composition-root wiring, frontend, host transport, scheduler loop, concrete IO, retry/backoff, durable lease persistence, terminal completion, SQLite schema, hooks, `.codex`, Cargo.lock, or unrelated dirty files in AT-227.
 - Push is authorized by the user-provided GitHub remote after each completed task commit.
 
 ## Dirty Worktree To Preserve

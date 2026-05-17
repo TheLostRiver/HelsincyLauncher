@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 101 - Downloads Driver Run Deferred Branch Coverage
+Phase 102 - Accepted Execution State Projection Boundary
 
 ## Current Focus
 
@@ -15,7 +15,8 @@ Phase 101 - Downloads Driver Run Deferred Branch Coverage
 - AT-2026-05-17-223 was published as commit `f87df03` after adding the TDD-backed one-shot `kernel-jobs` dispatch method.
 - AT-2026-05-17-224 was published as commit `597c0e5` after documenting the safe downloads driver `run(...)` override boundary.
 - AT-2026-05-17-225 was published as commit `c5b0695` after implementing the guarded downloads driver `run(...)` override.
-- AT-2026-05-17-226 is complete locally after covering the remaining guarded `run(...)` deferred branches; commit/push pending.
+- AT-2026-05-17-226 was published as commit `d2d5405` after covering the remaining guarded `run(...)` deferred branches and fixing non-mutating checkpoint helper semantics.
+- AT-2026-05-17-227 is complete locally after defining the accepted execution state projection boundary; commit/push pending.
 - AT-2026-05-17-220 was published as commit `aa8d6e3` after documenting the shared runtime execution-turn boundary.
 - AT-2026-05-17-219 was published as commit `f618718` after adding host transport smoke coverage for downloads policy runtime application.
 - AT-2026-05-17-218 was published as commit `5aae7f1` after adding documentation-budget rules.
@@ -757,6 +758,12 @@ Phase 101 - Downloads Driver Run Deferred Branch Coverage
 - Atomic tasks: AT-2026-05-17-226
 - **Status:** complete
 
+### Phase 102: Accepted Execution State Projection Boundary
+
+- Outcome: document the first shared-runtime lifecycle mutation after one-shot dispatch: `JobRunDisposition::Accepted` may project a queued snapshot to non-terminal `Running`, while deferred dispatch, leases, terminal state, scheduler loops, downloads IO, transport, frontend, and SQLite schema remain out of scope.
+- Atomic tasks: AT-2026-05-17-227
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -978,7 +985,8 @@ Phase 101 - Downloads Driver Run Deferred Branch Coverage
 217. AT-2026-05-17-223 - completed - added one-shot `SharedJobRuntimeHost` execution dispatch with focused TDD; committed and pushed as `f87df03`.
 218. AT-2026-05-17-224 - completed - documented the downloads driver runtime-run override boundary; committed and pushed as `597c0e5`.
 219. AT-2026-05-17-225 - completed - added guarded downloads driver `run(...)` override with focused TDD; committed and pushed as `c5b0695`.
-220. AT-2026-05-17-226 - completed - covered guarded downloads driver `run(...)` deferred branches and fixed the non-mutating checkpoint helper gap; commit/push pending.
+220. AT-2026-05-17-226 - completed - covered guarded downloads driver `run(...)` deferred branches and fixed the non-mutating checkpoint helper gap; committed and pushed as `d2d5405`.
+221. AT-2026-05-17-227 - completed - defined the accepted execution state projection boundary before `kernel-jobs` Rust changes; commit/push pending.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

@@ -9045,6 +9045,15 @@
   - Scoped `git diff --check` passed with CRLF normalization warnings only.
 - Commit/push pending.
 
+## 2026-05-17 - AT-2026-05-17-226 published / AT-2026-05-17-227 started
+
+- Published AT-2026-05-17-226 as commit `d2d5405` and pushed it to `origin/main`.
+- Re-read README/CONTRIBUTING routing, README_IMPL 7.29-7.31, kernel-jobs lifecycle/driver/context/snapshot sections, composition-root runtime/driver wiring, testing strategy backend placement, current runtime dispatch code, downloads driver run behavior, and composition-root driver registry wiring.
+- Selected a docs-first boundary for accepted execution state projection: `JobRunDisposition::Accepted` may move a queued snapshot to non-terminal `Running`, while `Deferred` remains non-mutating and terminal completion remains out of scope.
+- Updated README_IMPL 7.32 with the accepted execution state projection boundary and validation plan.
+- Validation passed: scoped `git diff --check` for README_IMPL and PWF files passed with CRLF normalization warnings only.
+- Commit/push pending.
+
 ### Auto Record: 2026-05-17 20:44:38
 - Tool: apply_patch
 - Phase: Phase 97 - Shared Runtime Execution Dispatch Boundary
@@ -9237,5 +9246,31 @@
 - Phase: Phase 101 - Downloads Driver Run Deferred Branch Coverage
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 21:11:19
+- Tool: apply_patch
+- Phase: Phase 102 - Accepted Execution State Projection Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 21:11:38
+- Tool: apply_patch
+- Phase: Phase 102 - Accepted Execution State Projection Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 21:12:17
+- Tool: apply_patch
+- Phase: Phase 102 - Accepted Execution State Projection Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)

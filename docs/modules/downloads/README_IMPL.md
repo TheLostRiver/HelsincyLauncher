@@ -1482,6 +1482,33 @@ Current Rust state:
 2. `DownloadJobDriver::new(...)` and `with_pending_resume_work_source(...)` keep the no-execution path and return `JobRunDisposition::Deferred` from `run(...)` without draining pending work.
 3. `with_pending_resume_work_source_and_execution_port(...)` wires the opt-in fake/future segment execution path for tests and later composition work.
 4. `DownloadJobDriver::run(...)` calls `execute_local_resume_turn(...)` only when the execution port exists, returns `Accepted` when checkpoint mutation occurs, and otherwise returns an explicit deferred disposition.
+5. Completed/failed checkpoint recording helpers return `None` when they receive only accepted/empty/non-matching results, so accepted-only execution cannot masquerade as checkpoint mutation.
+
+### 7.32 Accepted Execution State Projection Boundary
+
+The shared runtime can now dispatch one execution turn and downloads can honestly defer or accept that turn. The next backend slice should make `kernel-jobs` project the first non-terminal runtime state change when a driver accepts work. This is a shared runtime lifecycle boundary, not a downloads concrete IO boundary.
+
+Current Rust reality:
+
+1. `SharedJobRuntimeHost::run_one_execution_turn(...)` loads a snapshot, resolves a driver, and calls `driver.run(...)`.
+2. The method currently returns the driver disposition without mutating the stored snapshot.
+3. `JobRunDisposition::Accepted` means the driver accepted a non-terminal execution turn; it does not mean completed, failed, or canceled.
+4. Production downloads wiring still registers a no-execution-port `DownloadJobDriver`, so downloads dispatch returns `Deferred` until a real execution strategy is wired.
+
+First Rust slice:
+
+1. in `kernel-jobs`, update `run_one_execution_turn(...)` so `JobRunDisposition::Accepted` projects the stored snapshot to `JobState::Running` and `JobUiState::Running`;
+2. keep `Deferred` non-mutating so missing drivers, missing snapshots, and production downloads no-execution dispatch do not consume pending work or change lifecycle state;
+3. keep `Failed` non-terminal for this slice unless a later boundary defines stable failure projection semantics;
+4. update focused `kernel-jobs` dispatch tests to prove accepted dispatch mutates to `Running` while deferred dispatch leaves snapshots unchanged;
+5. keep durable leases, background scheduler loops, snapshot-writer/cancellation context, downloads concrete HTTP/file/hash execution, retry/backoff, terminal completion/failure, host transport, frontend, and SQLite schema changes out of this slice.
+
+Validation should stay narrow:
+
+1. `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml dispatch`;
+2. full `launcher-kernel-jobs` lib tests;
+3. `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`;
+4. scoped rustfmt/diff checks for touched Rust and PWF files.
 
 ---
 

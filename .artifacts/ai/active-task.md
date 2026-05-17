@@ -2,34 +2,34 @@
 
 ## Identity
 
-- task id: AT-2026-05-17-226
-- title: Cover downloads driver run deferred branches
+- task id: AT-2026-05-17-227
+- title: Define accepted execution state projection boundary
 - status: completed
 
 ## Goal
 
-Add focused module-downloads coverage for the remaining guarded `DownloadJobDriver::run(...)` deferred branches from README_IMPL 7.31: missing checkpoint, no pending work, and no checkpoint mutation.
+Define the next durable backend boundary after one-shot dispatch: when a registered driver returns `JobRunDisposition::Accepted`, the shared runtime may project the queued snapshot to non-terminal `Running` state, while `Deferred` remains non-mutating and terminal completion/failure stays out of scope.
 
 ## Scope
 
 - in scope:
-  - `crates/module-downloads/src/driver.rs`
+  - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
   - `.artifacts/ai/progress.md`
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
-  - production behavior changes unless a test exposes a gap
-  - docs updates beyond PWF records
-  - composition-root wiring
-  - concrete HTTP/file/hash execution
-  - retry/backoff
-  - terminal snapshot completion, host transport, frontend, SQLite schema, and unrelated dirty files
+  - Rust code changes
+  - downloads concrete execution or composition-root execution-port wiring
+  - durable leases
+  - scheduler loops/background tasks
+  - terminal completion/failure projection
+  - host transport, frontend, SQLite schema, and unrelated dirty files
 
 ## Allowed Files
 
-1. crates/module-downloads/src/driver.rs
+1. docs/modules/downloads/README_IMPL.md
 2. .artifacts/ai/active-task.md
 3. .artifacts/ai/task-plan.md
 4. .artifacts/ai/progress.md
@@ -40,31 +40,32 @@ Add focused module-downloads coverage for the remaining guarded `DownloadJobDriv
 
 Read before writing:
 
-1. docs/modules/downloads/README_IMPL.md section 7.31.
-2. current `DownloadJobDriver::run(...)`, `execute_local_resume_turn(...)`, and fake execution port tests.
-3. current module-downloads validation expectations.
+1. README.md and CONTRIBUTING.md routing/validation rules.
+2. docs/modules/downloads/README_IMPL.md sections 7.29-7.31.
+3. docs/TauriKernelJobsRuntimeDesign.md lifecycle, driver, context, and snapshot rules.
+4. docs/TauriCompositionRootWiringDesign.md runtime/driver wiring boundaries.
+5. docs/TauriTestingStrategyAndQualityGateDesign.md backend test placement rules.
+6. current `SharedJobRuntimeHost::run_one_execution_turn(...)` and `DownloadJobDriver::run(...)`.
 
 ## Hypothesis
 
-- falsifiable local hypothesis: branch tests for missing checkpoint, no pending work, and Accepted-only/no-mutation fake port should pass against the guarded run implementation; if any fail, fix only the smallest behavior gap in `DownloadJobDriver::run(...)`.
+- falsifiable documentation hypothesis: the next safe Rust slice is a `kernel-jobs` state projection step where `Accepted` maps to non-terminal `Running`, `Deferred` stays non-mutating, and terminal state/retry/lease/download IO remain later boundaries.
 
 ## Cheap Check
 
-1. Add focused branch tests in `crates/module-downloads/src/driver.rs`.
-2. Run `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml driver_run`.
-3. Run module-downloads lib tests, rustfmt check, and scoped `git diff --check`.
+1. Add a concise README_IMPL section defining the accepted dispatch projection boundary.
+2. Run scoped `git diff --check` for README_IMPL and PWF files.
+3. Commit and push AT-227 before any Rust implementation.
 
 ## Validation Gate
 
-1. Missing checkpoint with an execution port returns deferred and does not drain pending work.
-2. Existing checkpoint with no pending work returns deferred.
-3. Accepted-only/no checkpoint mutation fake port returns deferred.
-4. Existing driver_run tests still pass.
+1. The document states current Rust reality after AT-226.
+2. The document defines the first Rust slice and explicit non-goals.
+3. The document avoids task-log detail and keeps `.artifacts/ai` as the task record surface.
+4. Scoped `git diff --check` passes before commit.
 
 ## Validation Result
 
-1. `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml driver_run` passed, 5 passed / 0 failed.
-2. `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed, 52 passed / 0 failed.
-3. `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
-4. `rustfmt --edition 2021 --check crates\module-downloads\src\driver.rs` passed.
-5. Scoped `git diff --check` passed with CRLF normalization warnings only.
+1. `docs/modules/downloads/README_IMPL.md` now includes section 7.32 for accepted execution state projection.
+2. The section defines `Accepted -> Running`, keeps `Deferred` non-mutating, and leaves terminal state, leases, scheduler loops, downloads IO, host transport, frontend, and SQLite schema out of scope.
+3. Scoped `git diff --check` passed with CRLF normalization warnings only.

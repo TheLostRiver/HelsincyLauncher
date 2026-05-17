@@ -1004,3 +1004,13 @@
 - Root cause: `record_completed_segment_checkpoints(...)` and `record_failed_segment_checkpoints(...)` returned `Some(checkpoint)` even when no completed/failed result was recorded, so `DownloadJobDriver::run(...)` misclassified a non-mutating local turn as accepted.
 - The minimal behavior fix is for those helpers to return `None` when they do not record a matching result; checkpoint-mutating completed/failed paths still return `Some(checkpoint)` after saving.
 - Validation passed for focused `driver_run` tests, full `launcher-module-downloads` lib tests, `launcher-composition-root` check, and scoped rustfmt on `driver.rs`.
+- AT-2026-05-17-226 final commit is `d2d5405` and was pushed to `origin/main`.
+
+## Phase 102 Accepted Execution State Projection Boundary Findings
+
+- Required context was read in focused chunks: README/CONTRIBUTING routing, README_IMPL 7.29-7.31, kernel-jobs lifecycle/driver/context/snapshot sections, composition-root runtime/driver wiring, testing strategy backend test placement, current runtime dispatch code, current downloads driver run behavior, and composition-root driver registry wiring.
+- Current `SharedJobRuntimeHost::run_one_execution_turn(...)` dispatches to the driver but intentionally leaves the snapshot lifecycle unchanged from AT-223.
+- `JobRunDisposition::Accepted` explicitly means the driver accepted a non-terminal execution turn; the next safe shared-runtime projection is therefore `Queued -> Running` / UI `Running`, not `Completed` or `Failed`.
+- `Deferred` must remain non-mutating because downloads production wiring still uses a no-execution-port driver and should not consume pending work or claim execution.
+- Durable lease acquisition, background scheduler loops, cancellation/snapshot-writer context, downloads concrete IO, retry/backoff, terminal completion/failure, host transport, frontend, and SQLite schema remain later boundaries.
+- README_IMPL 7.32 now defines the next Rust slice and scoped validation; docs-only `git diff --check` passed with CRLF normalization warnings only.
