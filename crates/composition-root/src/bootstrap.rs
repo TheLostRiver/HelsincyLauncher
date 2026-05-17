@@ -23,8 +23,9 @@ use launcher_kernel_jobs::{
     JobDriverRegistry, JobSnapshotStore, RuntimeQueuePolicy, SharedJobRuntimeHost,
 };
 use launcher_module_downloads::{
-    DownloadCheckpointRepository, DownloadFacade, DownloadJobDriver, DownloadModuleDeps,
-    DownloadPendingResumeWorkSource, DownloadPolicyStore, InMemoryDownloadResumeWorkScheduler,
+    contracts::DownloadPolicyDto, DownloadCheckpointRepository, DownloadFacade, DownloadJobDriver,
+    DownloadModuleDeps, DownloadPendingResumeWorkSource, DownloadPolicyStore,
+    DownloadRuntimePolicyApplier, InMemoryDownloadResumeWorkScheduler,
 };
 use launcher_module_engines::{EngineFacade, EngineJobDriver, EngineModuleDeps};
 use launcher_module_fab::{FabFacade, FabModuleDeps, FabPrewarmJobDriver, FabSyncJobDriver};
@@ -54,6 +55,31 @@ type DesktopDownloadFacade = DownloadFacade<
 >;
 
 type DesktopEngineFacade = EngineFacade<(), (), SharedJobRuntimeHost>;
+
+/// Applies downloads policy updates to the shared runtime owned by composition-root.
+/// 将 downloads 策略更新应用到 composition-root 持有的共享 runtime。
+#[derive(Debug, Clone)]
+struct SharedRuntimeDownloadPolicyApplier {
+    /// Cloned runtime handle that shares policy state with the desktop runtime graph.
+    /// 与桌面 runtime 图共享策略状态的克隆 runtime 句柄。
+    job_runtime: SharedJobRuntimeHost,
+}
+
+impl SharedRuntimeDownloadPolicyApplier {
+    /// Creates an applier for the concrete shared job runtime.
+    /// 为具体共享 job runtime 创建策略应用器。
+    fn new(job_runtime: SharedJobRuntimeHost) -> Self {
+        Self { job_runtime }
+    }
+}
+
+impl DownloadRuntimePolicyApplier for SharedRuntimeDownloadPolicyApplier {
+    fn apply_download_policy(&self, policy: &DownloadPolicyDto) -> AppResult<()> {
+        self.job_runtime
+            .update_policy(RuntimeQueuePolicy::new(policy.concurrency_slots as usize));
+        Ok(())
+    }
+}
 
 /// Wiring configuration owned by composition-root for the current desktop baseline.
 /// 当前桌面基线中由 composition-root 持有的接线配置。
@@ -270,15 +296,19 @@ fn build_downloads_module(
     resume_scheduler: InMemoryDownloadResumeWorkScheduler,
     policy_store: SqliteDownloadPolicyStore,
 ) -> DesktopDownloadFacade {
-    DownloadFacade::new(DownloadModuleDeps {
-        job_repo: SqliteDownloadJobRepository::new(sqlite_config.clone()),
-        checkpoint_repo,
-        manifest_provider: (),
-        staging_store: (),
-        resume_scheduler,
-        job_runtime,
-        policy_store,
-    })
+    let runtime_policy_applier = SharedRuntimeDownloadPolicyApplier::new(job_runtime.clone());
+    DownloadFacade::with_runtime_policy_applier(
+        DownloadModuleDeps {
+            job_repo: SqliteDownloadJobRepository::new(sqlite_config.clone()),
+            checkpoint_repo,
+            manifest_provider: (),
+            staging_store: (),
+            resume_scheduler,
+            job_runtime,
+            policy_store,
+        },
+        runtime_policy_applier,
+    )
 }
 
 fn build_engines_module(job_runtime: SharedJobRuntimeHost) -> DesktopEngineFacade {
@@ -379,8 +409,9 @@ mod tests {
     use launcher_kernel_foundation::JobId;
     use launcher_kernel_jobs::RuntimeQueuePolicy;
     use launcher_module_downloads::{
-        contracts::DownloadPolicyDto, DownloadPolicyStore, DownloadResumeWorkItem,
-        DownloadResumeWorkMode, DownloadResumeWorkPlan, DownloadResumeWorkScheduler,
+        contracts::{DownloadPolicyDto, UpdateDownloadPolicyRequestDto},
+        DownloadPolicyStore, DownloadResumeWorkItem, DownloadResumeWorkMode,
+        DownloadResumeWorkPlan, DownloadResumeWorkScheduler,
     };
 
     fn project_local_sqlite_path(name: &str) -> PathBuf {
@@ -491,6 +522,35 @@ mod tests {
             "driver drain should consume the work registered through the facade scheduler"
         );
 
+        let _ = std::fs::remove_file(&tmp_path);
+    }
+
+    #[test]
+    fn downloads_policy_update_applies_runtime_policy_through_composition_wiring() {
+        let tmp_path = project_local_sqlite_path("at217_downloads_runtime_policy_apply.sqlite3");
+        let sqlite_config = SqliteStorageAdapterConfig::new(tmp_path.clone());
+        let checkpoint_repo = SqliteDownloadCheckpointRepository::new(sqlite_config.clone());
+        let job_runtime = SharedJobRuntimeHost::new(RuntimeQueuePolicy::new(2));
+        let scheduler = InMemoryDownloadResumeWorkScheduler::new();
+        let downloads = build_downloads_module(
+            sqlite_config.clone(),
+            checkpoint_repo,
+            job_runtime.clone(),
+            scheduler,
+            SqliteDownloadPolicyStore::new(sqlite_config, 2),
+        );
+
+        downloads
+            .update_policy(UpdateDownloadPolicyRequestDto {
+                concurrency_slots: 17,
+                bandwidth_limit_bytes_per_sec: None,
+                auto_resume: true,
+            })
+            .expect("downloads policy update should persist and apply runtime policy");
+
+        assert_eq!(job_runtime.policy().max_concurrent_jobs, 17);
+
+        drop(downloads);
         let _ = std::fs::remove_file(&tmp_path);
     }
 

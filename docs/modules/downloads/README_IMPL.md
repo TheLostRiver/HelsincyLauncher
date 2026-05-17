@@ -1384,6 +1384,13 @@ Completed by AT-216:
 4. `DownloadsFacade::update_policy(...)` saves the normalized downloads policy snapshot, then passes that same normalized `DownloadPolicyDto` to the applier.
 5. Composition-root concrete wiring, direct `SharedJobRuntimeHost` calls from downloads code, host transport/frontend behavior, scheduler execution, active jobs, leases, snapshots, pending work, concrete IO, retry/backoff, and terminal runtime completion remain unchanged.
 
+Completed by AT-217:
+
+1. Composition-root now owns a private `SharedRuntimeDownloadPolicyApplier` that maps `DownloadPolicyDto.concurrency_slots` to `RuntimeQueuePolicy::new(...)`.
+2. `build_downloads_module(...)` wires that applier through `DownloadFacade::with_runtime_policy_applier(...)` using a cloned `SharedJobRuntimeHost`.
+3. Focused composition-root tests prove `downloads.update_policy(...)` persists the policy and updates the shared runtime policy snapshot.
+4. Host transport/frontend behavior, scheduler execution, active jobs, leases, snapshots, pending work, concrete IO, retry/backoff, and terminal runtime completion remain unchanged.
+
 ---
 
 ## 8. Error Semantics

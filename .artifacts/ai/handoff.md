@@ -2,20 +2,19 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-17-215
-- title: Define downloads runtime policy applier boundary
-- status: completed; final local commit `4ef3f10`, pushed to `origin/main`
+- task id: AT-2026-05-17-216
+- title: Add downloads runtime policy applier port
+- status: completed; final local commit `1094c10`, pushed to `origin/main`
 
 ## Current Atomic Task
 
-- task id: AT-2026-05-17-216
-- title: Add downloads runtime policy applier port
+- task id: AT-2026-05-17-217
+- title: Wire downloads runtime policy applier in composition-root
 - status: completed locally; validation passed, final scoped diff check and commit/push pending
 
 ## Current Slice
 
-- `crates/module-downloads/src/facade/mod.rs`
-- `crates/module-downloads/src/lib.rs`
+- `crates/composition-root/src/bootstrap.rs`
 - `docs/modules/downloads/README_IMPL.md`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
@@ -25,9 +24,9 @@
 
 ## Next Resume Point
 
-1. Run final scoped `git diff --check` for AT-216 files.
-2. Commit only AT-216 files.
-3. Push `main` to `origin`, then define or implement the composition-root concrete runtime policy applier wiring if continuing.
+1. Run final scoped `git diff --check` for AT-217 files.
+2. Commit only AT-217 files.
+3. Push `main` to `origin`, then choose the next backend slice if continuing.
 
 ## Validation
 
@@ -47,17 +46,23 @@
 - Full downloads module tests passed, 47 passed / 0 failed.
 - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
 - `rustfmt --check crates\module-downloads\src\facade\mod.rs crates\module-downloads\src\lib.rs` passed.
+- AT-217 required docs/code were read in focused chunks: README_IMPL 7.28, `TauriCompositionRootWiringDesign.md`, current composition-root runtime/downloads builders, current composition-root project-local SQLite tests, and PWF tails.
+- AT-217 RED/GREEN validation passed for composition-root runtime policy applier wiring.
+- `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib build_job_runtime_` passed, 2 passed / 0 failed.
+- `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml update_policy` passed, 3 passed / 0 failed.
+- `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
+- `rustfmt --check crates\composition-root\src\bootstrap.rs` passed after formatting.
 
 ## Boundaries
 
 - Do not modify files outside `D:\DEV\MyEpicLauncher`.
 - Do not run destructive commands.
-- Do not add composition-root policy-applier wiring, direct `SharedJobRuntimeHost` calls from downloads code, global settings, transport, frontend, concrete IO, retry/backoff, pending resume work mutation, active runtime job mutation, runtime lease mutation, runtime snapshot migration, or scheduler execution in AT-216.
+- Do not add host transport, frontend, global settings, concrete IO, retry/backoff, pending resume work mutation, active runtime job mutation, runtime lease mutation, runtime snapshot migration, or scheduler execution in AT-217.
 - Push is authorized by the user-provided GitHub remote after each completed task commit.
 
 ## Dirty Worktree To Preserve
 
-- Unrelated unstaged/unknown work remains present and must not be committed with AT-216:
+- Unrelated unstaged/unknown work remains present and must not be committed with AT-217:
   - `Cargo.lock`
   - `MyEpicLauncher.pen`
   - frontend files under `app/` and `components/`

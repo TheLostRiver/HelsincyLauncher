@@ -8550,6 +8550,21 @@
 - Affected composition check and touched-file rustfmt check passed.
 - Final scoped diff check, commit, and push are next.
 
+### Agent Note: 2026-05-17 19:40:05
+- Phase: Phase 92 - Composition-root Downloads Runtime Policy Applier Wiring
+- AT-2026-05-17-216 was committed and pushed as `1094c10`.
+- Started AT-2026-05-17-217 to wire the concrete runtime policy applier in composition-root.
+- Read current composition-root imports, `build_desktop_services(...)`, `build_downloads_module(...)`, `build_job_runtime(...)`, project-local SQLite test helpers, README_IMPL 7.28, and composition-root wiring docs in focused chunks.
+- Next action is to add a RED composition-root test proving `downloads.update_policy(...)` updates a cloned `SharedJobRuntimeHost` policy through composition wiring.
+
+### Agent Note: 2026-05-17 19:44:00
+- Phase: Phase 92 - Composition-root Downloads Runtime Policy Applier Wiring
+- RED evidence: the focused composition-root test failed before implementation because `job_runtime.policy().max_concurrent_jobs` stayed at `2` instead of updating to `17`.
+- Implemented private `SharedRuntimeDownloadPolicyApplier` in `crates/composition-root/src/bootstrap.rs` and wired it through `DownloadFacade::with_runtime_policy_applier(...)` in `build_downloads_module(...)`.
+- GREEN evidence: focused composition-root runtime policy wiring test passed; `build_job_runtime_` tests passed; downloads module `update_policy` tests passed; composition-root check passed; touched-file rustfmt check passed.
+- README_IMPL 7.28 now records AT-217 completed composition-root wiring while keeping transport/frontend, scheduler execution, active jobs, leases, snapshots, pending work, concrete IO, retry/backoff, and terminal completion unchanged.
+- Final scoped diff check, commit, and push are next.
+
 ### Auto Record: 2026-05-17 19:24:27
 - Tool: apply_patch
 - Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
@@ -8661,6 +8676,62 @@
 ### Auto Record: 2026-05-17 19:38:39
 - Tool: apply_patch
 - Phase: Phase 91 - Downloads Runtime Policy Applier Port
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 19:41:07
+- Tool: apply_patch
+- Phase: Phase 92 - Composition-root Downloads Runtime Policy Applier Wiring
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 19:41:19
+- Tool: apply_patch
+- Phase: Phase 92 - Composition-root Downloads Runtime Policy Applier Wiring
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 19:41:38
+- Tool: apply_patch
+- Phase: Phase 92 - Composition-root Downloads Runtime Policy Applier Wiring
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\composition-root\src\bootstrap.rs` (update)
+
+### Auto Record: 2026-05-17 19:42:33
+- Tool: apply_patch
+- Phase: Phase 92 - Composition-root Downloads Runtime Policy Applier Wiring
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\composition-root\src\bootstrap.rs` (update)
+
+### Auto Record: 2026-05-17 19:42:52
+- Tool: apply_patch
+- Phase: Phase 92 - Composition-root Downloads Runtime Policy Applier Wiring
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\composition-root\src\bootstrap.rs` (update)
+
+### Auto Record: 2026-05-17 19:42:59
+- Tool: apply_patch
+- Phase: Phase 92 - Composition-root Downloads Runtime Policy Applier Wiring
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\composition-root\src\bootstrap.rs` (update)
+
+### Auto Record: 2026-05-17 19:43:56
+- Tool: apply_patch
+- Phase: Phase 92 - Composition-root Downloads Runtime Policy Applier Wiring
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 19:44:30
+- Tool: apply_patch
+- Phase: Phase 92 - Composition-root Downloads Runtime Policy Applier Wiring
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)

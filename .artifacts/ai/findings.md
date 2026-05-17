@@ -912,3 +912,12 @@
 - The applier should receive `DownloadPolicyDto`, not `RuntimeQueuePolicy`, so downloads code stays independent from concrete runtime policy construction and `SharedJobRuntimeHost`.
 - RED/GREEN confirmed `DownloadsFacade::update_policy(...)` saves the normalized policy and passes that same normalized `DownloadPolicyDto` to a dedicated `DownloadRuntimePolicyApplier`.
 - `NoopDownloadRuntimePolicyApplier` keeps existing `DownloadFacade::new(...)` behavior stable; the opt-in `with_runtime_policy_applier(...)` constructor supports focused tests and later composition-root wiring without changing `DownloadModuleDeps`.
+
+## Phase 92 Composition-root Downloads Runtime Policy Applier Wiring Findings
+
+- AT-2026-05-17-216 final commit is `1094c10` and was pushed to `origin/main`.
+- README_IMPL 7.28 leaves composition-root as the owner of concrete mapping from `DownloadPolicyDto.concurrency_slots` to `RuntimeQueuePolicy::new(...)` and `SharedJobRuntimeHost::update_policy(...)`.
+- Current `build_downloads_module(...)` receives a `SharedJobRuntimeHost` clone and constructs `DownloadFacade::new(...)`, so it can create a private applier from the same cloned runtime without changing public service types.
+- Focused composition-root tests already use project-local SQLite paths under `.artifacts/tmp`; AT-217 should keep that safety boundary.
+- RED/GREEN confirmed composition-root now wires downloads policy updates to the shared runtime policy snapshot: `downloads.update_policy(...)` changes the cloned `SharedJobRuntimeHost::policy().max_concurrent_jobs`.
+- The concrete mapping remains private to composition-root: `DownloadPolicyDto.concurrency_slots` becomes `RuntimeQueuePolicy::new(policy.concurrency_slots as usize)`.
