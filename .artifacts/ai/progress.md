@@ -6939,3 +6939,138 @@
 - Phase: Phase 70 - Downloads Fake Completed-result Checkpoint Mutation
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 14:10:08
+- Tool: apply_patch
+- Phase: Phase 70 - Downloads Fake Completed-result Checkpoint Mutation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-17 14:10:23
+- Tool: apply_patch
+- Phase: Phase 71 - Downloads Fake Local Resume Execution Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+## 2026-05-17 - AT-196 Started
+
+- Resumed from AT-195 commit `227458a` and confirmed the current branch is `main` ahead of `origin/main` by 69 commits.
+- Confirmed `origin` already points to the user-provided repository `https://github.com/TheLostRiver/HelsincyLauncher.git`; after AT-196 commit, attempt `git push origin main`.
+- Read the current AT-196 active task, Phase 71 plan/ledger entries, recent progress, handoff, downloads README_IMPL current-state table, and README_IMPL section 7.17 before coding.
+- Re-read the planning-with-files, TDD, and verification-before-completion skill instructions for this implementation slice.
+- Updated README_IMPL with section 7.18 to pin the fake/local orchestration boundary before writing Rust: chain existing downloads helpers only, with no runtime `run()`, concrete IO, SQLite adapter/schema, transport, frontend, or public `DL_*` execution errors.
+- RED: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml fake_local_resume_execution` failed as expected with missing `DownloadJobDriver::execute_local_resume_turn`.
+- GREEN: added `DownloadJobDriver::execute_local_resume_turn(...)` and a recording fake completion port test. The helper only chains `prepare_resume_execution_turn`, `prepare_segment_execution_requests`, `accept_segment_execution_requests`, and `record_completed_segment_checkpoints`.
+- Focused validation after formatting: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml fake_local_resume_execution` passed with 1 passed, 0 failed.
+- Full downloads validation after formatting: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 35 passed, 0 failed.
+- Format validation: `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed after a mechanical `cargo fmt`.
+- Scoped diff validation passed with CRLF normalization warnings only.
+- Initial local commit created as `3d6f4f7`; PWF backfill is being amended into the same task commit before the authorized push attempt.
+
+### Auto Record: 2026-05-17 14:13:18
+- Tool: apply_patch
+- Phase: Phase 71 - Downloads Fake Local Resume Execution Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 14:13:27
+- Tool: apply_patch
+- Phase: Phase 71 - Downloads Fake Local Resume Execution Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:13:40
+- Tool: apply_patch
+- Phase: Phase 71 - Downloads Fake Local Resume Execution Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 14:13:54
+- Tool: apply_patch
+- Phase: Phase 71 - Downloads Fake Local Resume Execution Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 14:14:00
+- Tool: apply_patch
+- Phase: Phase 71 - Downloads Fake Local Resume Execution Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 14:14:41
+- Tool: apply_patch
+- Phase: Phase 71 - Downloads Fake Local Resume Execution Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-17 14:15:00
+- Tool: apply_patch
+- Phase: Phase 71 - Downloads Fake Local Resume Execution Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:15:27
+- Tool: apply_patch
+- Phase: Phase 71 - Downloads Fake Local Resume Execution Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-17 14:16:58
+- Tool: apply_patch
+- Phase: Phase 71 - Downloads Fake Local Resume Execution Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 14:17:10
+- Tool: apply_patch
+- Phase: Phase 71 - Downloads Fake Local Resume Execution Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 14:17:19
+- Tool: apply_patch
+- Phase: Phase 71 - Downloads Fake Local Resume Execution Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 14:17:40
+- Tool: apply_patch
+- Phase: Phase 71 - Downloads Fake Local Resume Execution Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:17:48
+- Tool: apply_patch
+- Phase: Phase 71 - Downloads Fake Local Resume Execution Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 14:18:05
+- Tool: apply_patch
+- Phase: Phase 71 - Downloads Fake Local Resume Execution Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 14:19:19
+- Tool: apply_patch
+- Phase: Phase 71 - Downloads Fake Local Resume Execution Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 14:19:30
+- Tool: apply_patch
+- Phase: Phase 71 - Downloads Fake Local Resume Execution Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 14:19:35
+- Tool: apply_patch
+- Phase: Phase 71 - Downloads Fake Local Resume Execution Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 14:19:41
+- Tool: apply_patch
+- Phase: Phase 71 - Downloads Fake Local Resume Execution Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)

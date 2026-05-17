@@ -369,6 +369,19 @@ impl DownloadJobDriver {
 
         Ok(Some(checkpoint))
     }
+
+    /// Executes one fake/local resume turn by chaining downloads-owned helpers.
+    /// 通过串联 downloads 自有 helper 执行一次 fake/local resume turn。
+    pub fn execute_local_resume_turn(
+        &self,
+        job_id: &JobId,
+        execution_port: &dyn DownloadSegmentExecutionPort,
+    ) -> AppResult<Option<DownloadCheckpointRecord>> {
+        let turn = self.prepare_resume_execution_turn(job_id)?;
+        let requests = self.prepare_segment_execution_requests(&turn)?;
+        let results = self.accept_segment_execution_requests(execution_port, &requests)?;
+        self.record_completed_segment_checkpoints(job_id, &results)
+    }
 }
 
 impl JobDriver<()> for DownloadJobDriver {
@@ -481,6 +494,40 @@ mod tests {
             &self,
             request: &DownloadSegmentExecutionRequest,
         ) -> launcher_kernel_foundation::AppResult<DownloadSegmentExecutionResult> {
+            Ok(DownloadSegmentExecutionResult::Completed {
+                request: request.clone(),
+                downloaded_bytes: request.length,
+                partial_path: Some(request.write_target.clone()),
+                etag: Some(format!("etag-{}", request.segment_id)),
+                hash_state_ref: Some(format!("hash-{}", request.segment_id)),
+            })
+        }
+    }
+
+    #[derive(Default)]
+    struct RecordingCompletedSegmentExecutionPort {
+        accepted_requests: Mutex<Vec<DownloadSegmentExecutionRequest>>,
+    }
+
+    impl RecordingCompletedSegmentExecutionPort {
+        fn accepted_requests(&self) -> Vec<DownloadSegmentExecutionRequest> {
+            self.accepted_requests
+                .lock()
+                .expect("recording completed execution port mutex should not be poisoned")
+                .clone()
+        }
+    }
+
+    impl DownloadSegmentExecutionPort for RecordingCompletedSegmentExecutionPort {
+        fn accept_segment_execution(
+            &self,
+            request: &DownloadSegmentExecutionRequest,
+        ) -> launcher_kernel_foundation::AppResult<DownloadSegmentExecutionResult> {
+            self.accepted_requests
+                .lock()
+                .expect("recording completed execution port mutex should not be poisoned")
+                .push(request.clone());
+
             Ok(DownloadSegmentExecutionResult::Completed {
                 request: request.clone(),
                 downloaded_bytes: request.length,
@@ -947,6 +994,69 @@ mod tests {
                 .segments,
             expected_segments,
             "driver helper must persist the mutated checkpoint through the repository port"
+        );
+    }
+
+    #[test]
+    fn download_job_driver_fake_local_resume_execution_records_completed_checkpoint() {
+        let repo = Arc::new(InMemoryCheckpointRepository::default());
+        let scheduler = InMemoryDownloadResumeWorkScheduler::new();
+        let job_id = JobId::generate();
+        let checkpoint = DownloadCheckpointRecord::empty(job_id.clone());
+        let plan = make_resume_work_plan("segment-orchestrated");
+        let execution_port = RecordingCompletedSegmentExecutionPort::default();
+        let driver = DownloadJobDriver::with_pending_resume_work_source(
+            repo.clone(),
+            Arc::new(scheduler.clone()),
+        );
+
+        repo.save(&checkpoint)
+            .expect("saving a synthetic checkpoint should succeed");
+        scheduler
+            .schedule_resume_work(&job_id, &plan)
+            .expect("scheduling pending work for the driver should succeed");
+
+        let saved_checkpoint = driver
+            .execute_local_resume_turn(&job_id, &execution_port)
+            .expect("fake local resume turn should chain existing driver helpers")
+            .expect("completed fake execution should save checkpoint facts");
+
+        let expected_request = make_segment_execution_request(&job_id, "segment-orchestrated");
+        assert_eq!(
+            execution_port.accepted_requests(),
+            vec![expected_request],
+            "fake local orchestration should hand the prepared request to the execution port"
+        );
+        assert!(
+            scheduler.pending_work().is_empty(),
+            "fake local orchestration should drain accepted pending work for the job"
+        );
+
+        let expected_completed_segment = DownloadSegmentCheckpointRecord {
+            job_id: job_id.clone(),
+            segment_id: "segment-orchestrated".into(),
+            file_id: "file-1".into(),
+            offset: 0,
+            length: 1024,
+            downloaded_bytes: 1024,
+            status: DownloadSegmentCheckpointStatus::Completed,
+            partial_path: Some("segment-orchestrated.part".into()),
+            etag: Some("etag-segment-orchestrated".into()),
+            hash_state_ref: Some("hash-segment-orchestrated".into()),
+        };
+
+        assert_eq!(
+            saved_checkpoint.segments,
+            vec![expected_completed_segment.clone()],
+            "fake local orchestration should return the saved completed segment facts"
+        );
+        assert_eq!(
+            repo.load(&job_id)
+                .expect("loading saved checkpoint should succeed")
+                .expect("saved checkpoint should exist")
+                .segments,
+            vec![expected_completed_segment],
+            "fake local orchestration must persist completed segment facts through the repository port"
         );
     }
 }

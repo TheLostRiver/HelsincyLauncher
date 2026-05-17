@@ -89,6 +89,7 @@ Implementation truth should move through module facade and ports first. Do not p
 | fake segment execution acceptance | `DownloadJobDriver::accept_segment_execution_requests(...)` hands prepared requests to an injected `DownloadSegmentExecutionPort` and collects module-local results in stable order; still no checkpoint mutation, real IO, runtime completion, transport, or frontend projection | driver unit tests |
 | fake segment completion result contract | `DownloadSegmentExecutionResult::Completed` carries the original request, completed byte count, and optional fake persistence tokens for later checkpoint mutation; still no checkpoint save, real IO, runtime completion, transport, or frontend projection | driver unit tests |
 | fake completed-result checkpoint mutation | `DownloadJobDriver::record_completed_segment_checkpoints(...)` reloads checkpoint facts, applies same-job completed fake results into `DownloadSegmentCheckpointRecord` values, and saves via `DownloadCheckpointRepository`; still no SQLite adapter/schema, concrete IO, runtime completion, transport, or frontend changes | driver unit tests |
+| fake local resume execution orchestration | `DownloadJobDriver::execute_local_resume_turn(...)` chains the local execution-turn, request handoff, fake execution port, and checkpoint mutation helpers without runtime `run()`, concrete IO, SQLite adapter/schema changes, transport, or frontend behavior | driver unit tests |
 | list/get/policy surfaces | not wired yet | future slices |
 
 ---
@@ -886,6 +887,42 @@ Completed by AT-195:
 4. Existing checkpoint `offset` is preserved on replacement; appended facts use the request's current `start_offset` until a later manifest-backed execution slice carries separate manifest/resume offsets.
 5. The helper saves through `DownloadCheckpointRepository` only when at least one completed result is applied.
 6. Concrete HTTP fetch, staging writes, hash verification, SQLite adapter/schema changes, runtime completion, transport, and frontend projection remain unchanged.
+
+---
+
+### 7.18 Fake Local Resume Execution Orchestration Boundary
+
+The next safe code slice is fake/local orchestration for one resume execution turn. This is still not shared runtime execution. It only proves that `DownloadJobDriver` can chain the downloads-owned helper steps already introduced in the preceding slices.
+
+Current Rust reality:
+
+1. `prepare_resume_execution_turn(...)` reloads checkpoint facts and drains pending work only when a checkpoint exists.
+2. `prepare_segment_execution_requests(...)` converts accepted pending work into ordered segment execution requests.
+3. `accept_segment_execution_requests(...)` delegates those requests to an injected `DownloadSegmentExecutionPort`.
+4. `record_completed_segment_checkpoints(...)` persists same-job completed fake results through `DownloadCheckpointRepository`.
+5. `execute_local_resume_turn(...)` now proves that a fake local resume turn can flow end to end through those downloads-owned helpers.
+
+Boundary rules:
+
+1. The orchestration helper may call only the existing local execution-turn, request handoff, fake execution port, and checkpoint mutation helpers.
+2. It should return `AppResult<Option<DownloadCheckpointRecord>>`; missing checkpoint or no durable mutation can remain a local `None`/unchanged optional result until the concrete execution failure surface is designed.
+3. It must not implement or alter `kernel-jobs::JobDriver::run()`, runtime snapshots, leases, shared completion state, event publication, host transport, frontend behavior, composition wiring, or job lifecycle policy.
+4. It must not perform concrete HTTP range requests, provider object fetches, staging file writes, artifact moves, hash or length verification, SQLite schema changes, or SQLite adapter changes.
+5. It must not bypass the existing checkpoint reload semantics before draining pending work or before mutating checkpoint facts.
+6. It must not introduce public `DL_*` execution errors in this slice.
+
+First Rust slice:
+
+1. add a focused RED test with an existing checkpoint, one pending resume work item, and a fake execution port that records requests and returns a completed result;
+2. prove the scheduler drains that job's pending work, the port sees the ordered request, and the repository stores the completed segment checkpoint;
+3. implement only the minimal `DownloadJobDriver` helper that chains the existing helpers;
+4. run focused module tests, full module tests, rustfmt check, scoped `git diff --check`, and path-limited status before commit.
+
+Completed by AT-196:
+
+1. `DownloadJobDriver::execute_local_resume_turn(...)` chains `prepare_resume_execution_turn(...)`, `prepare_segment_execution_requests(...)`, `accept_segment_execution_requests(...)`, and `record_completed_segment_checkpoints(...)`.
+2. The focused driver test proves an existing checkpoint plus one pending work item is drained, handed to a recording fake completion port, and persisted as a completed segment checkpoint.
+3. The helper stays module-local and does not alter runtime `run()`, snapshots, leases, completion state, concrete IO, SQLite adapter/schema, transport, frontend, composition wiring, or public execution errors.
 
 ---
 

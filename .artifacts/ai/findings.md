@@ -720,3 +720,16 @@
 - Current Rust has `DownloadSegmentExecutionResult::Completed`, but no driver helper consumes it into `DownloadSegmentCheckpointRecord`.
 - The next RED test should prove completed results replace or append segment checkpoint facts and save through `DownloadCheckpointRepository`, while non-completed results and concrete IO remain out of scope.
 - RED/GREEN confirmed the driver can reload checkpoint facts, replace a matching completed segment in place, preserve unrelated segment order, and save through the repository port without touching concrete IO, SQLite adapter/schema, runtime completion, transport, or frontend code.
+
+## Phase 71 Downloads Fake Local Resume Execution Orchestration Findings
+
+- AT-2026-05-17-195 committed locally as `227458a`; its path-limited file set was clean after commit.
+- The current branch is `main` and is ahead of `origin/main` by 69 commits; `origin` already points to the user-provided `https://github.com/TheLostRiver/HelsincyLauncher.git`.
+- README_IMPL 7.17 confirms completed fake results can already be turned into saved checkpoint facts through `DownloadJobDriver::record_completed_segment_checkpoints(...)`.
+- `TauriKernelJobsRuntimeDesign.md` still describes broader runtime ownership for snapshots, leases, and lifecycle; current Rust still does not expose a `JobDriver::run()` callback, so this slice must stay module-local.
+- `TauriDownloadRuntimeDesign.md` keeps scheduler/fetch/write/verify/checkpoint responsibilities separate, so local orchestration must not collapse into concrete HTTP, staging writes, hash verification, or runtime completion.
+- README_IMPL 7.18 now defines the AT-196 boundary: add a narrow driver helper that chains existing helper steps for one fake/local resume turn and returns `AppResult<Option<DownloadCheckpointRecord>>`.
+- The focused RED test should use an existing checkpoint, one pending work item, and a recording fake completed execution port to prove ordered request handoff, pending-work drain, and saved completed segment checkpoint facts.
+- RED failed on the missing `DownloadJobDriver::execute_local_resume_turn(...)` method, confirming the test targeted the new orchestration helper.
+- GREEN confirmed `execute_local_resume_turn(...)` can chain the existing local helpers and persist completed segment checkpoint facts without adding runtime `run()`, concrete IO, SQLite adapter/schema, composition wiring, transport, frontend, or public execution errors.
+- Full downloads module tests passed with 35 tests after rustfmt, so existing facade, driver restore, execution-turn, request handoff, fake acceptance, and checkpoint mutation behavior stayed intact.
