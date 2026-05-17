@@ -773,4 +773,12 @@
 - `execute_local_resume_turn(...)` currently prepares a turn, builds requests, delegates to the execution port, and records completed segment checkpoints only.
 - Since failed-result checkpoint mutation now exists, the next orchestration boundary should define how the local helper records both completed and failed fake result facts while still avoiding retry/backoff, public error projection, terminal runtime state, concrete IO, runtime `run()`, transport, composition-root, SQLite adapter/schema, and frontend behavior.
 - README_IMPL 7.21 now pins the first Rust slice: update `execute_local_resume_turn(...)` to delegate to both existing checkpoint mutation helpers after collecting execution results, keeping mutation logic inside those helpers.
+
+## Phase 77 Downloads Fake Local Mixed-result Checkpoint Orchestration Findings
+
+- AT-2026-05-17-201 final commit is `8790f8d` and was pushed to `origin/main`.
+- The current orchestration helper calls `record_completed_segment_checkpoints(...)` only, so fake failed results collected from `DownloadSegmentExecutionPort` are not persisted during a local resume turn.
+- The next test should use the existing `FailedSegmentExecutionPort` and scheduler path to prove the orchestration helper records a failed checkpoint fact end to end.
+- RED/GREEN confirmed `execute_local_resume_turn(...)` now records failed fake results through the existing failed checkpoint helper while preserving the existing completed-result orchestration path.
+- Full downloads module tests passed with 38 tests after the mixed-result orchestration update.
 - RED/GREEN confirmed `record_failed_segment_checkpoints(...)` can replace a matching failed segment checkpoint, preserve existing partial persistence tokens, ignore accepted/completed results, and save through the repository port without widening into retry/backoff, public error projection, runtime terminal state, concrete IO, transport, composition-root, SQLite adapter/schema, or frontend behavior.

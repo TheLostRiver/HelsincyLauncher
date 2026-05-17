@@ -464,7 +464,9 @@ impl DownloadJobDriver {
         let turn = self.prepare_resume_execution_turn(job_id)?;
         let requests = self.prepare_segment_execution_requests(&turn)?;
         let results = self.accept_segment_execution_requests(execution_port, &requests)?;
-        self.record_completed_segment_checkpoints(job_id, &results)
+        let completed_checkpoint = self.record_completed_segment_checkpoints(job_id, &results)?;
+        let failed_checkpoint = self.record_failed_segment_checkpoints(job_id, &results)?;
+        Ok(failed_checkpoint.or(completed_checkpoint))
     }
 }
 
@@ -1268,6 +1270,63 @@ mod tests {
                 .segments,
             vec![expected_completed_segment],
             "fake local orchestration must persist completed segment facts through the repository port"
+        );
+    }
+
+    #[test]
+    fn download_job_driver_fake_local_resume_execution_records_failed_checkpoint() {
+        let repo = Arc::new(InMemoryCheckpointRepository::default());
+        let scheduler = InMemoryDownloadResumeWorkScheduler::new();
+        let job_id = JobId::generate();
+        let checkpoint = DownloadCheckpointRecord::empty(job_id.clone());
+        let plan = make_resume_work_plan("segment-failed-orchestrated");
+        let execution_port = FailedSegmentExecutionPort;
+        let driver = DownloadJobDriver::with_pending_resume_work_source(
+            repo.clone(),
+            Arc::new(scheduler.clone()),
+        );
+
+        repo.save(&checkpoint)
+            .expect("saving a synthetic checkpoint should succeed");
+        scheduler
+            .schedule_resume_work(&job_id, &plan)
+            .expect("scheduling pending work for the driver should succeed");
+
+        let saved_checkpoint = driver
+            .execute_local_resume_turn(&job_id, &execution_port)
+            .expect("fake local resume turn should chain existing driver helpers")
+            .expect("failed fake execution should save checkpoint facts");
+
+        assert!(
+            scheduler.pending_work().is_empty(),
+            "fake local orchestration should drain accepted pending work for the job"
+        );
+
+        let expected_failed_segment = DownloadSegmentCheckpointRecord {
+            job_id: job_id.clone(),
+            segment_id: "segment-failed-orchestrated".into(),
+            file_id: "file-1".into(),
+            offset: 0,
+            length: 1024,
+            downloaded_bytes: 128,
+            status: DownloadSegmentCheckpointStatus::Failed,
+            partial_path: None,
+            etag: None,
+            hash_state_ref: None,
+        };
+
+        assert_eq!(
+            saved_checkpoint.segments,
+            vec![expected_failed_segment.clone()],
+            "fake local orchestration should return the saved failed segment facts"
+        );
+        assert_eq!(
+            repo.load(&job_id)
+                .expect("loading saved checkpoint should succeed")
+                .expect("saved checkpoint should exist")
+                .segments,
+            vec![expected_failed_segment],
+            "fake local orchestration must persist failed segment facts through the repository port"
         );
     }
 }

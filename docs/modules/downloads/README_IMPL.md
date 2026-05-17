@@ -92,7 +92,7 @@ Implementation truth should move through module facade and ports first. Do not p
 | fake local resume execution orchestration | `DownloadJobDriver::execute_local_resume_turn(...)` chains the local execution-turn, request handoff, fake execution port, and checkpoint mutation helpers without runtime `run()`, concrete IO, SQLite adapter/schema changes, transport, or frontend behavior | driver unit tests |
 | fake segment failure result contract | `DownloadSegmentExecutionResult::Failed` carries request facts, downloaded bytes known at failure time, a local reason string, and a retryable hint without public `DL_*` execution projection, checkpoint mutation, retry policy, runtime completion, concrete IO, transport, or frontend behavior | driver unit tests |
 | fake failed-result checkpoint mutation | `DownloadJobDriver::record_failed_segment_checkpoints(...)` reloads checkpoint facts, applies same-job failed fake results as `Failed` segment status/progress, and saves through `DownloadCheckpointRepository` while deferring retry/backoff, public error projection, terminal runtime state, concrete IO, SQLite adapter/schema, transport, composition-root, and frontend behavior | driver unit tests |
-| fake local mixed-result checkpoint orchestration | not wired yet; next Rust slice may have `execute_local_resume_turn(...)` record both completed and failed fake results through existing checkpoint mutation helpers while deferring retry/backoff, public error projection, terminal runtime state, concrete IO, SQLite adapter/schema, transport, composition-root, and frontend behavior | future driver unit tests |
+| fake local mixed-result checkpoint orchestration | `execute_local_resume_turn(...)` records both completed and failed fake results through existing checkpoint mutation helpers while deferring retry/backoff, public error projection, terminal runtime state, concrete IO, SQLite adapter/schema, transport, composition-root, and frontend behavior | driver unit tests |
 | list/get/policy surfaces | not wired yet | future slices |
 
 ---
@@ -1020,7 +1020,7 @@ Current Rust reality:
 1. `execute_local_resume_turn(...)` prepares the execution turn, builds segment requests, delegates to the execution port, and calls `record_completed_segment_checkpoints(...)`.
 2. `record_completed_segment_checkpoints(...)` records same-job completed results.
 3. `record_failed_segment_checkpoints(...)` records same-job failed results.
-4. A fake local execution turn that returns only failed results is currently collected but not persisted by `execute_local_resume_turn(...)`.
+4. A fake local execution turn that returns only failed results is now persisted by `execute_local_resume_turn(...)` through `record_failed_segment_checkpoints(...)`.
 
 Boundary rules:
 
@@ -1038,6 +1038,13 @@ First Rust slice:
 2. keep the existing completed-result orchestration behavior green;
 3. update only the local orchestration helper to call both existing mutation helpers;
 4. run focused module tests, full module tests, rustfmt check, scoped `git diff --check`, and path-limited status before commit.
+
+Completed by AT-202:
+
+1. `execute_local_resume_turn(...)` delegates collected results to both `record_completed_segment_checkpoints(...)` and `record_failed_segment_checkpoints(...)`.
+2. The focused driver test proves a fake failed result is persisted end to end through the local resume orchestration helper.
+3. Existing completed-result orchestration behavior remains covered by its prior focused test.
+4. Retry/backoff, public `DL_*` projection, terminal runtime state, concrete IO, SQLite adapter/schema, transport, composition-root, and frontend behavior remain unchanged.
 
 ---
 

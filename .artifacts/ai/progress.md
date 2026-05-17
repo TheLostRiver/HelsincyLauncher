@@ -7025,6 +7025,18 @@
 - Validation: scoped `git diff --check` over AT-201 files passed with CRLF normalization warnings only.
 - Initial local commit created as `9f6402a`; PWF backfill is being amended into the same task commit before push.
 
+## 2026-05-17 - AT-202 Started
+
+- AT-201 final commit is `8790f8d` and `git push origin main` succeeded.
+- Re-read README_IMPL 7.21 and current `driver.rs` snippets for local orchestration and checkpoint helpers before coding.
+- Scope is only updating `execute_local_resume_turn(...)` to delegate to existing completed and failed checkpoint mutation helpers; no retry/backoff, public error projection, terminal runtime state, concrete IO, SQLite adapter/schema, transport, composition-root, or frontend work.
+- RED: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml fake_local_resume_execution_records_failed` failed as expected because `execute_local_resume_turn(...)` returned an empty checkpoint instead of persisted failed segment facts.
+- GREEN: updated `execute_local_resume_turn(...)` to delegate to both completed and failed checkpoint mutation helpers; focused `fake_local_resume_execution_records_failed` passed with 1 passed, 0 failed.
+- Updated README_IMPL 7.21 to mark mixed-result checkpoint orchestration implemented while keeping retry/backoff, public error projection, terminal runtime state, concrete IO, SQLite adapter/schema, transport, composition-root, and frontend work deferred.
+- Final focused validation: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml fake_local_resume_execution_records_failed` passed with 1 passed, 0 failed.
+- Full downloads validation: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 38 passed, 0 failed.
+- Format validation: `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed.
+
 ### Auto Record: 2026-05-17 14:13:18
 - Tool: apply_patch
 - Phase: Phase 71 - Downloads Fake Local Resume Execution Orchestration
@@ -7689,4 +7701,135 @@
 - Tool: apply_patch
 - Phase: Phase 76 - Downloads Fake Local Mixed-result Checkpoint Orchestration Boundary
 - Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:50:58
+- Tool: apply_patch
+- Phase: Phase 76 - Downloads Fake Local Mixed-result Checkpoint Orchestration Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-17 14:51:15
+- Tool: apply_patch
+- Phase: Phase 77 - Downloads Fake Local Mixed-result Checkpoint Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 14:51:35
+- Tool: apply_patch
+- Phase: Phase 77 - Downloads Fake Local Mixed-result Checkpoint Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:51:47
+- Tool: apply_patch
+- Phase: Phase 77 - Downloads Fake Local Mixed-result Checkpoint Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 14:52:27
+- Tool: apply_patch
+- Phase: Phase 77 - Downloads Fake Local Mixed-result Checkpoint Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 14:52:43
+- Tool: apply_patch
+- Phase: Phase 77 - Downloads Fake Local Mixed-result Checkpoint Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-17 14:52:58
+- Tool: apply_patch
+- Phase: Phase 77 - Downloads Fake Local Mixed-result Checkpoint Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:53:06
+- Tool: apply_patch
+- Phase: Phase 77 - Downloads Fake Local Mixed-result Checkpoint Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-17 14:53:26
+- Tool: apply_patch
+- Phase: Phase 77 - Downloads Fake Local Mixed-result Checkpoint Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 14:53:35
+- Tool: apply_patch
+- Phase: Phase 77 - Downloads Fake Local Mixed-result Checkpoint Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:53:46
+- Tool: apply_patch
+- Phase: Phase 77 - Downloads Fake Local Mixed-result Checkpoint Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 14:54:12
+- Tool: apply_patch
+- Phase: Phase 77 - Downloads Fake Local Mixed-result Checkpoint Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 14:54:25
+- Tool: apply_patch
+- Phase: Phase 77 - Downloads Fake Local Mixed-result Checkpoint Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 14:54:38
+- Tool: apply_patch
+- Phase: Phase 77 - Downloads Fake Local Mixed-result Checkpoint Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:54:46
+- Tool: apply_patch
+- Phase: Phase 77 - Downloads Fake Local Mixed-result Checkpoint Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 14:54:58
+- Tool: apply_patch
+- Phase: Phase 77 - Downloads Fake Local Mixed-result Checkpoint Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+## 2026-05-17 - AT-202 scoped diff validation
+
+- Ran scoped `git diff --check` for the AT-202 files after focused/full downloads module validation and rustfmt.
+- Result: exit 0 with CRLF normalization warnings only.
+- Next: stage only AT-202 files, commit, backfill the final hash in PWF files, amend, and push `main` to `origin`.
+
+## 2026-05-17 - AT-202 pre-commit verification
+
+- Fresh full module validation: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 38 passed, 0 failed.
+- Fresh formatting validation: `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed.
+- Fresh scoped diff validation: `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- docs/modules/downloads/README_IMPL.md crates/module-downloads/src/driver.rs .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md` passed with CRLF normalization warnings only.
+- Initial AT-202 local commit before PWF hash backfill amend: `eae3c4f`.
+
+### Auto Record: 2026-05-17 14:57:03
+- Tool: apply_patch
+- Phase: Phase 77 - Downloads Fake Local Mixed-result Checkpoint Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:57:32
+- Tool: apply_patch
+- Phase: Phase 77 - Downloads Fake Local Mixed-result Checkpoint Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:58:28
+- Tool: apply_patch
+- Phase: Phase 77 - Downloads Fake Local Mixed-result Checkpoint Orchestration
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
