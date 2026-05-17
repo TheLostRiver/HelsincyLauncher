@@ -1165,3 +1165,13 @@
 - Unsafe `write_target` values are a handled module-local segment failure for now, not a stable public `DL_*` error or host transport projection.
 - README_IMPL 7.37 now defines accepted/rejected staging target cases and keeps the first Rust guard pure: no directory creation, file opening, host canonicalization, artifact movement, hash verification, provider inspection, production wiring, or public error projection.
 - The next Rust slice is now concrete: add focused RED tests for safe and unsafe staging-relative targets, implement a module-owned guard, and prove unsafe targets can become the existing handled failure path without disk IO.
+
+## Phase 118 Downloads Staging Target Guard Findings
+
+- Required context was read in focused chunks: README/docs routing and documentation-budget rules from this session, README_IMPL 7.37, Tauri download runtime SegmentWriter/staging sections, storage design staging file ownership notes, and current handled-failure/writer sub-port contracts.
+- The guard should be pure path-component inspection: it must not canonicalize through the host file system because future staging targets may not exist yet.
+- Unsafe target rejection should reuse `DownloadSegmentHandledFailure` with zero downloaded bytes and `retryable = false`.
+- Re-exporting the guard type is appropriate if future writer sub-ports need it as a module-owned extension point.
+- RED/GREEN confirmed `DownloadSegmentStagingTarget::parse(...)` accepts a normal relative target and rejects empty, current-dir, parent-dir, drive-prefixed, UNC/rooted, and absolute-looking targets as handled failures.
+- The implementation uses path component inspection only and does not create directories, open files, canonicalize, move artifacts, inspect provider URLs, or introduce public error projection.
+- Validation passed for focused guard tests, focused adapter tests, full `launcher-module-downloads` lib tests, `launcher-composition-root` check, and scoped rustfmt.

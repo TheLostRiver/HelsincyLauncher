@@ -306,6 +306,20 @@
   - implement pure module-owned target guard with no file system side effects;
   - optionally prove guard rejection can feed `DownloadSegmentHandledFailure` for future write sub-ports.
 
+## Latest Handoff - AT-2026-05-17-243
+
+- Status: implementation validated; commit/push pending at the time of this note.
+- Scope completed:
+  - Added `DownloadSegmentStagingTarget::parse(...)` as a pure staging-relative target guard.
+  - Rejected unsafe targets as `DownloadSegmentHandledFailure` with zero bytes and `retryable = false`.
+  - Re-exported `DownloadSegmentStagingTarget` for future writer sub-ports.
+- Validation passed:
+  - focused staging target guard tests
+  - focused adapter tests
+  - full `launcher-module-downloads --lib`
+  - `launcher-composition-root` check
+  - scoped rustfmt check
+
 ## Dirty Worktree To Preserve
 
 - Unrelated unstaged/unknown work remains present and must not be committed with AT-218:

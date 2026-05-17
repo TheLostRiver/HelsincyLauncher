@@ -10278,6 +10278,39 @@
 - Validation:
   - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- docs/modules/downloads/README_IMPL.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md` passed with CRLF normalization warnings only.
 
+## 2026-05-17 23:39 - AT-242 commit and AT-243 opening
+
+- AT-242 was committed and pushed:
+  - commit `7527476`
+  - message `docs: define downloads staging target guard`
+  - pushed to `origin/main`
+- Opened AT-243 for Rust TDD against README_IMPL 7.37.
+- Read focused context for AT-243:
+  - README_IMPL 7.37 staging target guard boundary
+  - Tauri download runtime SegmentWriter/staging sections
+  - storage design staging file ownership notes
+  - current handled-failure and writer sub-port contracts
+- Next:
+  - write RED tests for safe and unsafe staging target guard behavior.
+
+## 2026-05-17 23:47 - AT-243 implementation and validation
+
+- Added RED guard tests for:
+  - accepting `file-a/segment-0001.part`;
+  - rejecting empty/current-dir/parent-dir/drive-prefixed/UNC/rooted/absolute-looking targets as handled failures.
+- RED command:
+  - `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml download_segment_staging_target`
+- RED result:
+  - failed as expected with unresolved import `DownloadSegmentStagingTarget`.
+- Implemented `DownloadSegmentStagingTarget::parse(...)` using path component inspection only.
+- Re-exported `DownloadSegmentStagingTarget` from `launcher-module-downloads`.
+- Validation:
+  - `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml download_segment_staging_target` passed with 2 tests.
+  - `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml download_segment_executor_adapter` passed with 3 tests.
+  - `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed with 57 tests.
+  - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
+  - `rustfmt --edition 2021 --check crates\module-downloads\src\driver.rs crates\module-downloads\src\lib.rs` passed.
+
 ### Auto Record: 2026-05-17 22:51:54
 - Tool: apply_patch
 - Phase: Phase 114 - Downloads Segment Executor Adapter Shell
@@ -10525,6 +10558,78 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
 
 ### Auto Record: 2026-05-17 23:07:07
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 23:08:16
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-17 23:08:22
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 23:08:31
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 23:08:41
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 23:09:05
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-17 23:09:37
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-17 23:09:44
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\lib.rs` (update)
+
+### Auto Record: 2026-05-17 23:10:41
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 23:10:46
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 23:10:59
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 23:11:11
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 23:11:20
 - Tool: apply_patch
 - Phase: Phase 114 - Downloads Segment Executor Adapter Shell
 - Files:

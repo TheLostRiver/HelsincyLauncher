@@ -2,28 +2,28 @@
 
 ## Identity
 
-- task id: AT-2026-05-17-242
-- title: Define downloads segment staging target guard boundary
+- task id: AT-2026-05-17-243
+- title: Add downloads staging target guard
 - status: completed
 
 ## Goal
 
-Document the next safe downloads Rust slice after executor success/failure mapping: a pure staging-relative write-target guard that can reject unsafe `write_target` values before any real file writes, without adding HTTP, disk IO, hash verification, production wiring, host transport, frontend, or public `DL_*` execution projection.
+Implement README_IMPL 7.37 as a pure Rust guard for staging-relative `write_target` values, rejecting unsafe targets as module-local handled segment failures without touching the file system or adding real writer IO.
 
 ## Scope
 
 - in scope:
-  - `docs/modules/downloads/README_IMPL.md`
+  - `crates/module-downloads/src/driver.rs`
+  - `crates/module-downloads/src/lib.rs`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
   - `.artifacts/ai/progress.md`
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
-  - Rust production code
-  - Rust tests
   - real HTTP range requests or provider object fetches
-  - real staging writes, artifact moves, or hash verification
+  - real staging writes, directory creation, file opening, artifact moves, or hash verification
+  - host file-system canonicalization
   - composition-root production execution-port wiring
   - retry/backoff policy
   - terminal runtime completion/failure projection
@@ -33,37 +33,39 @@ Document the next safe downloads Rust slice after executor success/failure mappi
 
 ## Allowed Files
 
-1. docs/modules/downloads/README_IMPL.md
-2. .artifacts/ai/active-task.md
-3. .artifacts/ai/task-plan.md
-4. .artifacts/ai/progress.md
-5. .artifacts/ai/findings.md
-6. .artifacts/ai/handoff.md
+1. crates/module-downloads/src/driver.rs
+2. crates/module-downloads/src/lib.rs
+3. .artifacts/ai/active-task.md
+4. .artifacts/ai/task-plan.md
+5. .artifacts/ai/progress.md
+6. .artifacts/ai/findings.md
+7. .artifacts/ai/handoff.md
 
 ## Required Context Read
 
 Read before writing:
 
-1. README/docs routing and documentation-budget rules already refreshed in this session.
-2. docs/modules/downloads/README_IMPL.md 7.35 and 7.36.
-3. docs/TauriDownloadRuntimeDesign.md SegmentWriter/staging/checkpoint/failure sections.
-4. docs/TauriStorageAndDatabaseDesign.md storage placement for staging files.
-5. Current `DownloadSegmentExecutionRequest.write_target` and writer sub-port shape.
+1. README/docs routing and documentation-budget rules from this session.
+2. docs/modules/downloads/README_IMPL.md 7.37.
+3. docs/TauriDownloadRuntimeDesign.md SegmentWriter/staging sections.
+4. docs/TauriStorageAndDatabaseDesign.md staging file ownership notes.
+5. Current `DownloadSegmentHandledFailure` and writer sub-port contracts.
 
 ## Hypothesis
 
-- falsifiable documentation hypothesis: the first safe step toward real writer IO is a pure staging target guard that validates `write_target` as a relative, normalized, non-empty, non-escaping path before any file system side effect exists.
+- falsifiable implementation hypothesis: a pure `DownloadSegmentStagingTarget` guard can accept normal relative target components and reject unsafe target strings as `DownloadSegmentHandledFailure { downloaded_bytes: 0, retryable: false, ... }` without file-system side effects.
 
 ## Cheap Check
 
-1. Add a compact README_IMPL subsection after 7.36.
-2. Define the next Rust slice as pure write-target guard logic.
-3. Keep real IO, production wiring, public error projection, and retry/terminal behavior out of scope.
-4. Run scoped docs/PWF diff-check.
+1. Add RED tests for accepted relative target and rejected unsafe targets.
+2. Implement the smallest guard using path component inspection only.
+3. Re-export the guard type if it is a module-owned extension point for future writer sub-ports.
+4. Run focused guard tests, focused adapter tests, full module tests, composition-root check, scoped rustfmt, and scoped diff-check.
 
 ## Validation Gate
 
-1. README_IMPL explicitly names the next code test target.
-2. README_IMPL defines accepted/rejected staging target cases.
-3. README_IMPL states whether rejection maps to local handled failure versus `AppError`.
-4. Scoped docs/PWF diff-check passes before commit/push.
+1. RED test fails before production code because the guard type is missing.
+2. GREEN focused guard tests pass after implementation.
+3. Existing adapter tests still pass.
+4. Full `launcher-module-downloads` lib tests and composition-root compile gate pass.
+5. Scoped rustfmt and diff-check pass before commit/push.

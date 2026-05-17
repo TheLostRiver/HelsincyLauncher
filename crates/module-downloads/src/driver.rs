@@ -1,3 +1,4 @@
+use std::path::{Component, Path};
 use std::sync::Arc;
 
 use launcher_kernel_foundation::{AppResult, JobId};
@@ -258,6 +259,60 @@ impl DownloadSegmentHandledFailure {
             downloaded_bytes: self.downloaded_bytes,
             reason: self.reason,
             retryable: self.retryable,
+        }
+    }
+}
+
+/// Validated staging-relative write target for future segment writer sub-ports.
+/// 供后续 segment writer 子端口使用的已验证 staging 相对写入目标。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DownloadSegmentStagingTarget {
+    normalized_relative_path: String,
+}
+
+impl DownloadSegmentStagingTarget {
+    /// Parses a staging-relative write target without touching the host file system.
+    /// 在不访问宿主文件系统的前提下解析 staging 相对写入目标。
+    pub fn parse(write_target: &str) -> Result<Self, DownloadSegmentHandledFailure> {
+        if write_target.trim().is_empty() {
+            return Err(Self::unsafe_target_failure(write_target));
+        }
+
+        let mut components = Vec::new();
+        for component in Path::new(write_target).components() {
+            match component {
+                Component::Normal(value) => {
+                    components.push(value.to_string_lossy().into_owned());
+                }
+                Component::Prefix(_)
+                | Component::RootDir
+                | Component::CurDir
+                | Component::ParentDir => {
+                    return Err(Self::unsafe_target_failure(write_target));
+                }
+            }
+        }
+
+        if components.is_empty() {
+            return Err(Self::unsafe_target_failure(write_target));
+        }
+
+        Ok(Self {
+            normalized_relative_path: components.join("/"),
+        })
+    }
+
+    /// Returns the normalized staging-relative target string.
+    /// 返回规范化后的 staging 相对目标字符串。
+    pub fn as_str(&self) -> &str {
+        &self.normalized_relative_path
+    }
+
+    fn unsafe_target_failure(write_target: &str) -> DownloadSegmentHandledFailure {
+        DownloadSegmentHandledFailure {
+            downloaded_bytes: 0,
+            reason: format!("unsafe staging write target: {write_target}"),
+            retryable: false,
         }
     }
 }
@@ -749,8 +804,8 @@ mod tests {
         DownloadSegmentExecutionPort, DownloadSegmentExecutionRequest,
         DownloadSegmentExecutionResult, DownloadSegmentExecutor, DownloadSegmentFetchOutcome,
         DownloadSegmentFetchPort, DownloadSegmentFetchResult, DownloadSegmentHandledFailure,
-        DownloadSegmentVerifyOutcome, DownloadSegmentVerifyPort, DownloadSegmentWriteOutcome,
-        DownloadSegmentWritePort, DownloadSegmentWriteResult,
+        DownloadSegmentStagingTarget, DownloadSegmentVerifyOutcome, DownloadSegmentVerifyPort,
+        DownloadSegmentWriteOutcome, DownloadSegmentWritePort, DownloadSegmentWriteResult,
     };
 
     #[derive(Default)]
@@ -1016,6 +1071,50 @@ mod tests {
                 AppErrorSeverity::Fatal,
                 CorrelationId::new("executor-infra"),
             ))
+        }
+    }
+
+    #[test]
+    fn download_segment_staging_target_accepts_normal_relative_components() {
+        let target = DownloadSegmentStagingTarget::parse("file-a/segment-0001.part")
+            .expect("normal relative staging target should be accepted");
+
+        assert_eq!(
+            target.as_str(),
+            "file-a/segment-0001.part",
+            "accepted target should preserve normalized relative components"
+        );
+    }
+
+    #[test]
+    fn download_segment_staging_target_rejects_unsafe_targets_as_handled_failure() {
+        let unsafe_targets = [
+            "",
+            ".",
+            "../escape.part",
+            "file-a/../escape.part",
+            r"C:\escape.part",
+            r"\\server\share\escape.part",
+            r"\absolute\escape.part",
+            "/absolute/escape.part",
+        ];
+
+        for unsafe_target in unsafe_targets {
+            let failure = DownloadSegmentStagingTarget::parse(unsafe_target)
+                .expect_err("unsafe staging target should become a handled failure");
+
+            assert_eq!(
+                failure.downloaded_bytes, 0,
+                "unsafe target rejection should not claim written bytes"
+            );
+            assert!(
+                !failure.retryable,
+                "unsafe target rejection should not be retried automatically"
+            );
+            assert!(
+                failure.reason.contains("unsafe staging write target"),
+                "unsafe target rejection should stay module-local and diagnostic"
+            );
         }
     }
 
