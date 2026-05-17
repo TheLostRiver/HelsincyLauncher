@@ -93,7 +93,7 @@ Implementation truth should move through module facade and ports first. Do not p
 | fake segment failure result contract | `DownloadSegmentExecutionResult::Failed` carries request facts, downloaded bytes known at failure time, a local reason string, and a retryable hint without public `DL_*` execution projection, checkpoint mutation, retry policy, runtime completion, concrete IO, transport, or frontend behavior | driver unit tests |
 | fake failed-result checkpoint mutation | `DownloadJobDriver::record_failed_segment_checkpoints(...)` reloads checkpoint facts, applies same-job failed fake results as `Failed` segment status/progress, and saves through `DownloadCheckpointRepository` while deferring retry/backoff, public error projection, terminal runtime state, concrete IO, SQLite adapter/schema, transport, composition-root, and frontend behavior | driver unit tests |
 | fake local mixed-result checkpoint orchestration | `execute_local_resume_turn(...)` records both completed and failed fake results through existing checkpoint mutation helpers while deferring retry/backoff, public error projection, terminal runtime state, concrete IO, SQLite adapter/schema, transport, composition-root, and frontend behavior | driver unit tests |
-| list/get/policy surfaces | `get_job_snapshot` composes module job records with shared runtime snapshots; `list_jobs` projects module repository pages; policy persistence remains later | module facade tests + adapter check |
+| list/get/policy surfaces | `get_job_snapshot` composes module job records with shared runtime snapshots; `list_jobs` projects module repository pages; `get_policy` / `update_policy` use a downloads-owned in-memory policy store while runtime application and SQLite persistence remain later | module facade tests + adapter/composition check |
 
 ---
 
@@ -1187,6 +1187,16 @@ Later slices:
 1. SQLite persistence can map this policy store to `download_policy_snapshot`.
 2. Runtime integration can translate downloads policy into queue budgets only after a runtime policy-application boundary is documented.
 3. Host transport and frontend settings surfaces should wait until module policy semantics are stable.
+
+Completed by AT-208:
+
+1. `DownloadPolicyStore` now defines the downloads-owned policy snapshot port.
+2. `InMemoryDownloadPolicyStore` provides the first module-local implementation for facade tests and composition wiring.
+3. `DownloadsFacade::get_policy(...)` reads the current policy snapshot from the store.
+4. `DownloadsFacade::update_policy(...)` stores a normalized policy snapshot and clamps `concurrency_slots` to `1..=128`.
+5. `bandwidth_limit_bytes_per_sec` and `auto_resume` are stored and returned without driving runtime behavior.
+6. Composition-root initializes the in-memory policy store from `DesktopBootstrapConfig.default_download_slots`.
+7. Runtime queue-policy mutation, SQLite schema/adapter persistence, host transport, frontend settings wiring, concrete IO, retry/backoff, and terminal runtime completion remain unchanged.
 
 ---
 

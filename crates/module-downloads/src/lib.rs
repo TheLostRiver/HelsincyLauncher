@@ -17,7 +17,8 @@ pub use facade::{
     build_resume_segment_decisions, build_resume_work_plan, DownloadFacade, DownloadJobRecord,
     DownloadJobRecordState, DownloadJobRepository, DownloadManifestPlan,
     DownloadManifestProviderPort, DownloadManifestSegment, DownloadModuleDeps,
-    DownloadPendingResumeWork, DownloadPendingResumeWorkSource, DownloadResumeSegmentAction,
-    DownloadResumeSegmentDecision, DownloadResumeWorkItem, DownloadResumeWorkMode,
-    DownloadResumeWorkPlan, DownloadResumeWorkScheduler, InMemoryDownloadResumeWorkScheduler,
+    DownloadPendingResumeWork, DownloadPendingResumeWorkSource, DownloadPolicyStore,
+    DownloadResumeSegmentAction, DownloadResumeSegmentDecision, DownloadResumeWorkItem,
+    DownloadResumeWorkMode, DownloadResumeWorkPlan, DownloadResumeWorkScheduler,
+    InMemoryDownloadPolicyStore, InMemoryDownloadResumeWorkScheduler,
 };

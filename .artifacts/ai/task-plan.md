@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 82 - Downloads Policy Source Boundary
+Phase 83 - Downloads Policy Store Implementation
 
 ## Current Focus
 
@@ -634,6 +634,12 @@ Phase 82 - Downloads Policy Source Boundary
 - Atomic tasks: AT-2026-05-17-207
 - **Status:** complete
 
+### Phase 83: Downloads Policy Store Implementation
+
+- Outcome: implement `DownloadsFacade::get_policy(...)` and `DownloadsFacade::update_policy(...)` against a downloads-owned policy store/port with clamped user-facing concurrency slots, while deferring runtime queue-policy mutation, SQLite schema/adapter persistence, host transport, frontend, concrete IO, retry/backoff, and terminal completion.
+- Atomic tasks: AT-2026-05-17-208
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -837,6 +843,7 @@ Phase 82 - Downloads Policy Source Boundary
 199. AT-2026-05-17-205 - completed - documented the downloads list-jobs query boundary before Rust coding, selecting the downloads-owned job repository page as the first read source; then committed locally, with initial hash `c66d3bb` before PWF backfill amend.
 200. AT-2026-05-17-206 - completed - implemented the downloads list-jobs query with focused TDD and SQLite adapter compile support while keeping policy/runtime-list/live-join/transport/frontend surfaces out of scope; then committed locally, with initial hash `87b09ab` before PWF backfill amend.
 201. AT-2026-05-17-207 - completed - documented the downloads policy source boundary before Rust coding, keeping runtime queue-policy mutation and persistence integration out of scope; then committed locally, with initial hash `07bdcfb` before PWF backfill amend.
+202. AT-2026-05-17-208 - completed - implemented the downloads policy store facade semantics with focused TDD, keeping runtime policy application, SQLite persistence, transport, frontend, concrete IO, retry/backoff, and terminal completion out of scope; local commit hash will be recorded after commit.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
@@ -855,7 +862,7 @@ Phase 82 - Downloads Policy Source Boundary
 
 ## Follow-up Queue
 
-1. Reassess the next downloads backend slice from README_IMPL before coding.
+1. Complete AT-2026-05-17-208 policy store facade implementation, then reassess the next downloads backend slice from README_IMPL.
 2. Leave unrelated dirty frontend, pen, sqlite, Cargo.lock, `.codex`, and `src/` changes untouched unless the user explicitly scopes them into a task.
 
 ## Legacy Note

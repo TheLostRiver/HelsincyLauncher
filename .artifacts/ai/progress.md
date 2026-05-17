@@ -8191,3 +8191,85 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+## Agent Note: 2026-05-17 16:00
+
+- Confirmed `main` and `origin/main` are both at AT-207 final commit `1d9a04c`.
+- Read the required root, collaboration, downloads module, runtime policy, storage, ports/adapters, composition, testing, AI transaction, and comment-standard docs in focused chunks.
+- Started AT-2026-05-17-208 to implement downloads policy store facade semantics with focused TDD.
+- Boundary remains backend-only: no runtime queue-policy mutation, SQLite schema/adapter policy persistence, host transport, frontend, concrete IO, retry/backoff, or terminal runtime completion.
+
+## Agent Note: 2026-05-17 16:20
+
+- AT-2026-05-17-208 RED: focused `policy` tests failed because `InMemoryDownloadPolicyStore` and `policy_store` were not implemented.
+- Implemented `DownloadPolicyStore`, `InMemoryDownloadPolicyStore`, `DownloadsFacade::get_policy(...)`, and `DownloadsFacade::update_policy(...)`.
+- Wired composition-root to initialize the downloads policy store from `DesktopBootstrapConfig.default_download_slots`.
+- Updated README_IMPL with the AT-208 completed state and remaining out-of-scope work.
+- Validation passed:
+  - `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml policy`: 2 passed / 0 failed.
+  - `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`: 45 passed / 0 failed.
+  - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`: passed.
+  - `cargo fmt -p launcher-module-downloads -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check`: passed.
+  - scoped `git diff --check`: passed with CRLF normalization warnings only.
+
+### Auto Record: 2026-05-17 15:38:00
+- Tool: apply_patch
+- Phase: Phase 83 - Downloads Policy Store Implementation
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/handoff.md` (delete)
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-17 15:38:57
+- Tool: apply_patch
+- Phase: Phase 83 - Downloads Policy Store Implementation
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-17 15:39:28
+- Tool: apply_patch
+- Phase: Phase 83 - Downloads Policy Store Implementation
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-17 15:40:57
+- Tool: apply_patch
+- Phase: Phase 83 - Downloads Policy Store Implementation
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-17 15:41:17
+- Tool: apply_patch
+- Phase: Phase 83 - Downloads Policy Store Implementation
+- Files:
+  - `crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-17 15:42:30
+- Tool: apply_patch
+- Phase: Phase 83 - Downloads Policy Store Implementation
+- Files:
+  - `crates/composition-root/src/bootstrap.rs` (update)
+
+### Auto Record: 2026-05-17 15:42:55
+- Tool: apply_patch
+- Phase: Phase 83 - Downloads Policy Store Implementation
+- Files:
+  - `crates/module-downloads/src/lib.rs` (update)
+
+### Auto Record: 2026-05-17 15:43:22
+- Tool: apply_patch
+- Phase: Phase 83 - Downloads Policy Store Implementation
+- Files:
+  - `docs/modules/downloads/README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 15:44:49
+- Tool: apply_patch
+- Phase: Phase 83 - Downloads Policy Store Implementation
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+  - `.artifacts/ai/progress.md` (update)

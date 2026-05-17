@@ -2,18 +2,20 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-17-206
-- title: Implement downloads list-jobs query
-- status: completed; final local commit `d0ad61a`, pushed to `origin/main`
-
-## Current In-progress Atomic Task
-
 - task id: AT-2026-05-17-207
 - title: Define downloads policy source boundary
-- status: completed; initial local commit `07bdcfb` before PWF backfill amend
+- status: completed; final local commit `1d9a04c`, pushed to `origin/main`
+
+## Current Atomic Task
+
+- task id: AT-2026-05-17-208
+- title: Implement downloads policy store facade semantics
+- status: completed; local commit hash will be recorded after commit/push
 
 ## Current Slice
 
+- `crates/module-downloads/src/facade/mod.rs`
+- `crates/composition-root/src/bootstrap.rs` only if facade dependencies change
 - `docs/modules/downloads/README_IMPL.md`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
@@ -23,28 +25,30 @@
 
 ## Next Resume Point
 
-1. Amend AT-207 with the PWF hash backfill and push `main` to `origin`.
-2. Start the next code slice with RED tests for downloads policy store/get/update semantics.
-3. Next code slice should start with RED tests for downloads policy store/get/update semantics.
-4. Do not mutate `RuntimeQueuePolicy`, add SQLite schema, transport, frontend, concrete IO, retry/backoff, or runtime completion without a separate boundary.
+1. Commit and push AT-208 only.
+2. Re-read README_IMPL and task plan to select the next downloads backend slice.
+3. Do not mutate `RuntimeQueuePolicy`, add SQLite schema/adapter policy persistence, host transport, frontend, concrete IO, retry/backoff, or runtime completion without a separate boundary.
 
 ## Validation
 
-- AT-206 pushed: `d0ad61a`.
-- AT-207 required context read: root docs, README_IMPL policy/query state, download runtime policy/concurrency docs, kernel runtime queue policy docs, storage policy note, current policy DTOs, and facade policy stubs.
-- AT-207 scoped `git diff --check` passed with CRLF normalization warnings only.
+- Required docs were read in focused chunks: root README, CONTRIBUTING, docs map, downloads module docs, README_IMPL 7.24, download runtime policy/concurrency docs, kernel queue policy docs, storage policy note, repository/adapters rules, composition wiring rules, testing gates, AI transaction protocol, and comment standard.
+- RED confirmed missing `InMemoryDownloadPolicyStore` / `policy_store` boundary before implementation.
+- Focused policy tests passed: 2 passed / 0 failed.
+- Full downloads module tests passed: 45 passed / 0 failed.
+- `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
+- rustfmt check passed.
+- Scoped `git diff --check` passed with CRLF normalization warnings only.
 
 ## Boundaries
 
 - Do not modify files outside `D:\DEV\MyEpicLauncher`.
 - Do not run destructive commands.
-- Do not implement concrete HTTP fetch, staging writes, hash verification, SQLite schema or adapter changes, runtime completion, transport, frontend, composition-root changes, or `kernel-jobs` changes.
-- Do not implement Rust code during AT-207.
+- Do not implement runtime queue-policy mutation, active job mutation, SQLite schema or adapter policy persistence, transport, frontend, concrete IO, retry/backoff, or terminal completion.
 - Push is authorized by the user-provided GitHub remote after each completed task commit.
 
 ## Dirty Worktree To Preserve
 
-- Unrelated unstaged/unknown work remains present and must not be committed with AT-207:
+- Unrelated unstaged/unknown work remains present and must not be committed with AT-208:
   - `Cargo.lock`
   - `MyEpicLauncher.pen`
   - frontend files under `app/` and `components/`

@@ -828,3 +828,12 @@
 - `JobRuntime` exposes no policy read/write API, so policy facade methods should not mutate runtime queue policy directly.
 - Storage docs mention `download_policy_snapshot`, but no SQLite schema/adapter exists yet.
 - The next safe Rust slice should introduce a downloads-owned policy store/port, clamp user-facing concurrency slots to `1..=128`, and keep runtime policy application separate.
+
+## Phase 83 Downloads Policy Store Implementation Findings
+
+- AT-2026-05-17-207 final commit is `1d9a04c` and was pushed to `origin/main`.
+- Required docs confirm the first policy implementation must stay backend-owned and module-local: `DownloadPolicyDto` is a user-facing downloads policy snapshot, while `RuntimeQueuePolicy` remains a lower-level shared runtime queue budget.
+- The safe Rust boundary is a downloads-owned policy store/port plus in-memory implementation for module tests and composition wiring.
+- `concurrency_slots` must clamp to `1..=128`; `bandwidth_limit_bytes_per_sec` and `auto_resume` should be stored/read back but must not drive runtime behavior in this slice.
+- SQLite `download_policy_snapshot`, runtime queue-budget application, host transport, frontend settings wiring, concrete IO, retry/backoff, and terminal runtime completion remain later slices.
+- RED/GREEN confirmed `get_policy(...)` reads `DownloadPolicyStore`, `update_policy(...)` stores a normalized snapshot, and composition-root initializes the in-memory store from `default_download_slots` without changing shared runtime queue policy.

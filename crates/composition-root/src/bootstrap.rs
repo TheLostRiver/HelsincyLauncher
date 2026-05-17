@@ -24,7 +24,8 @@ use launcher_kernel_jobs::{
 };
 use launcher_module_downloads::{
     DownloadCheckpointRepository, DownloadFacade, DownloadJobDriver, DownloadModuleDeps,
-    DownloadPendingResumeWorkSource, InMemoryDownloadResumeWorkScheduler,
+    DownloadPendingResumeWorkSource, InMemoryDownloadPolicyStore,
+    InMemoryDownloadResumeWorkScheduler,
 };
 use launcher_module_engines::{EngineFacade, EngineJobDriver, EngineModuleDeps};
 use launcher_module_fab::{FabFacade, FabModuleDeps, FabPrewarmJobDriver, FabSyncJobDriver};
@@ -50,6 +51,7 @@ type DesktopDownloadFacade = DownloadFacade<
     (),
     InMemoryDownloadResumeWorkScheduler,
     SharedJobRuntimeHost,
+    InMemoryDownloadPolicyStore,
 >;
 
 type DesktopEngineFacade = EngineFacade<(), (), SharedJobRuntimeHost>;
@@ -189,6 +191,7 @@ pub fn build_desktop_services(config: DesktopBootstrapConfig) -> AppResult<Deskt
         download_checkpoint_repo.clone(),
         job_runtime.clone(),
         download_resume_scheduler.clone(),
+        u32::from(config.default_download_slots),
     ));
     let engines = Arc::new(build_engines_module(job_runtime));
     let registry = build_job_driver_registry(
@@ -262,6 +265,7 @@ fn build_downloads_module(
     checkpoint_repo: SqliteDownloadCheckpointRepository,
     job_runtime: SharedJobRuntimeHost,
     resume_scheduler: InMemoryDownloadResumeWorkScheduler,
+    default_policy_slots: u32,
 ) -> DesktopDownloadFacade {
     DownloadFacade::new(DownloadModuleDeps {
         job_repo: SqliteDownloadJobRepository::new(sqlite_config.clone()),
@@ -270,6 +274,7 @@ fn build_downloads_module(
         staging_store: (),
         resume_scheduler,
         job_runtime,
+        policy_store: InMemoryDownloadPolicyStore::new(default_policy_slots),
     })
 }
 
@@ -386,6 +391,7 @@ mod tests {
             checkpoint_repo.clone(),
             job_runtime,
             scheduler.clone(),
+            1,
         );
         let driver = build_download_job_driver(Arc::new(checkpoint_repo), Arc::new(scheduler));
         let job_id = JobId::generate();

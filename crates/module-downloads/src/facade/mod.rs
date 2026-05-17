@@ -77,6 +77,110 @@ pub trait DownloadJobRepository: Send + Sync {
     fn update_state(&self, job_id: &JobId, state: DownloadJobRecordState) -> AppResult<()>;
 }
 
+const MIN_DOWNLOAD_POLICY_CONCURRENCY_SLOTS: u32 = 1;
+const MAX_DOWNLOAD_POLICY_CONCURRENCY_SLOTS: u32 = 128;
+
+// Builds the default user-facing downloads policy without touching runtime queue internals.
+// 构建面向用户的默认 downloads 策略，但不触碰 shared runtime 的队列内部状态。
+fn default_download_policy(concurrency_slots: u32) -> DownloadPolicyDto {
+    normalize_download_policy(DownloadPolicyDto {
+        concurrency_slots,
+        bandwidth_limit_bytes_per_sec: None,
+        auto_resume: true,
+    })
+}
+
+// Normalizes policy facts at the module boundary before they become the stored snapshot.
+// 在模块边界先规整策略事实，然后才写入当前策略快照。
+fn normalize_download_policy(policy: DownloadPolicyDto) -> DownloadPolicyDto {
+    DownloadPolicyDto {
+        concurrency_slots: policy.concurrency_slots.clamp(
+            MIN_DOWNLOAD_POLICY_CONCURRENCY_SLOTS,
+            MAX_DOWNLOAD_POLICY_CONCURRENCY_SLOTS,
+        ),
+        bandwidth_limit_bytes_per_sec: policy.bandwidth_limit_bytes_per_sec,
+        auto_resume: policy.auto_resume,
+    }
+}
+
+// Projects an update command into the stored policy snapshot shape.
+// 将更新命令投影为模块内部保存的策略快照形状。
+fn policy_from_update_request(request: UpdateDownloadPolicyRequestDto) -> DownloadPolicyDto {
+    normalize_download_policy(DownloadPolicyDto {
+        concurrency_slots: request.concurrency_slots,
+        bandwidth_limit_bytes_per_sec: request.bandwidth_limit_bytes_per_sec,
+        auto_resume: request.auto_resume,
+    })
+}
+
+/// Downloads-owned policy snapshot store used before SQLite persistence is introduced.
+/// SQLite 持久化落地前，由 downloads 模块拥有的策略快照存储端口。
+pub trait DownloadPolicyStore: Send + Sync {
+    /// Reads the current user-facing downloads policy snapshot.
+    /// 读取当前面向用户的 downloads 策略快照。
+    fn load_policy(&self) -> AppResult<DownloadPolicyDto>;
+
+    /// Stores a normalized downloads policy snapshot for later queries.
+    /// 保存已规整的 downloads 策略快照，供后续查询读取。
+    fn save_policy(&self, policy: &DownloadPolicyDto) -> AppResult<()>;
+}
+
+/// In-memory policy store that keeps AT-208 inside the module boundary.
+/// 内存态策略存储，让 AT-208 仍然停留在模块边界内。
+#[derive(Debug, Clone)]
+pub struct InMemoryDownloadPolicyStore {
+    /// Shared snapshot protected by a mutex because facade clones may share the store.
+    /// 使用 mutex 保护共享快照，因为 facade 克隆后可能共享同一个 store。
+    current_policy: Arc<Mutex<DownloadPolicyDto>>,
+}
+
+impl InMemoryDownloadPolicyStore {
+    /// Creates a store initialized from the current downloads concurrency-slot baseline.
+    /// 使用当前 downloads 并发槽位基线创建策略 store。
+    pub fn new(concurrency_slots: u32) -> Self {
+        Self::with_policy(default_download_policy(concurrency_slots))
+    }
+
+    /// Creates a store from an explicit policy snapshot after boundary normalization.
+    /// 从显式策略快照创建 store，并先执行模块边界规整。
+    pub fn with_policy(policy: DownloadPolicyDto) -> Self {
+        Self {
+            current_policy: Arc::new(Mutex::new(normalize_download_policy(policy))),
+        }
+    }
+}
+
+impl Default for InMemoryDownloadPolicyStore {
+    /// Uses the current desktop bootstrap default until persisted settings land.
+    /// 在持久化设置落地前，使用当前桌面 bootstrap 的默认槽位。
+    fn default() -> Self {
+        Self::new(3)
+    }
+}
+
+impl DownloadPolicyStore for InMemoryDownloadPolicyStore {
+    /// Returns the current snapshot without deriving runtime queue budgets.
+    /// 返回当前策略快照，不在这里派生 runtime 队列预算。
+    fn load_policy(&self) -> AppResult<DownloadPolicyDto> {
+        Ok(self
+            .current_policy
+            .lock()
+            .expect("download policy mutex should not be poisoned")
+            .clone())
+    }
+
+    /// Replaces the snapshot after normalization; runtime policy application is later work.
+    /// 规整后替换快照；应用到 runtime 策略属于后续任务。
+    fn save_policy(&self, policy: &DownloadPolicyDto) -> AppResult<()> {
+        *self
+            .current_policy
+            .lock()
+            .expect("download policy mutex should not be poisoned") =
+            normalize_download_policy(policy.clone());
+        Ok(())
+    }
+}
+
 /// Minimal staging root handle returned before later manifest/runtime resume work.
 /// 后续 manifest/runtime 恢复编排前返回的最小 staging 根句柄。
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -518,7 +622,7 @@ pub fn build_resume_work_plan(
 
 /// 组装 downloads facade 所需的依赖束。
 #[derive(Debug, Clone)]
-pub struct DownloadModuleDeps<J, C, M, S, W, R> {
+pub struct DownloadModuleDeps<J, C, M, S, W, R, P> {
     /// 保存 intake 元数据与粗粒度下载状态的模块仓储。
     pub job_repo: J,
     /// 为暂停、恢复和重启场景保留的 checkpoint 能力。
@@ -531,27 +635,37 @@ pub struct DownloadModuleDeps<J, C, M, S, W, R> {
     pub resume_scheduler: W,
     /// 真正拥有 accepted job 生命周期的共享 job runtime。
     pub job_runtime: R,
+    /// Stores downloads-facing policy snapshots without mutating runtime queue policy.
+    /// 保存面向 downloads 的策略快照，但不直接修改 runtime 队列策略。
+    pub policy_store: P,
 }
 
 /// downloads 模块对外暴露的 use-case facade。
-pub struct DownloadFacade<J, C, M, S, W, R> {
-    deps: DownloadModuleDeps<J, C, M, S, W, R>,
+pub struct DownloadFacade<J, C, M, S, W, R, P> {
+    deps: DownloadModuleDeps<J, C, M, S, W, R, P>,
 }
 
-impl<J, C, M, S, W, R> DownloadFacade<J, C, M, S, W, R> {
+impl<J, C, M, S, W, R, P> DownloadFacade<J, C, M, S, W, R, P> {
     /// 用已经装配好的依赖束创建 downloads facade。
-    pub fn new(deps: DownloadModuleDeps<J, C, M, S, W, R>) -> Self {
+    pub fn new(deps: DownloadModuleDeps<J, C, M, S, W, R, P>) -> Self {
         Self { deps }
     }
 
     /// 暴露依赖束，主要服务于 composition-root smoke test 与局部诊断。
-    pub fn deps(&self) -> &DownloadModuleDeps<J, C, M, S, W, R> {
+    pub fn deps(&self) -> &DownloadModuleDeps<J, C, M, S, W, R, P> {
         &self.deps
     }
 }
 
-impl<J: DownloadJobRepository, C, M, S, W, R: JobRuntime<Extension = ()>>
-    DownloadFacade<J, C, M, S, W, R>
+impl<
+        J: DownloadJobRepository,
+        C,
+        M,
+        S,
+        W,
+        R: JobRuntime<Extension = ()>,
+        P: DownloadPolicyStore,
+    > DownloadFacade<J, C, M, S, W, R, P>
 {
     /// 记录用户下载意图并向共享 job runtime 提交后端拥有的下载任务。
     pub fn start_download(&self, request: StartDownloadRequestDto) -> AppResult<AcceptedJob> {
@@ -623,16 +737,18 @@ impl<J: DownloadJobRepository, C, M, S, W, R: JobRuntime<Extension = ()>>
         Ok(Some(project_download_job_snapshot(&job, snapshot)))
     }
 
-    /// 预留下载策略读取；当前仍由模块边界返回未接线错误。
+    /// Reads the current downloads-facing policy snapshot.
+    /// 读取当前面向 downloads 的策略快照。
     pub fn get_policy(&self, query: GetDownloadPolicyQueryDto) -> AppResult<DownloadPolicyDto> {
         let _ = query;
-        Err(not_wired("get_policy"))
+        self.deps.policy_store.load_policy()
     }
 
-    /// 预留下载策略更新；当前仍由模块边界返回未接线错误。
+    /// Stores the downloads-facing policy snapshot without mutating runtime queue policy.
+    /// 保存面向 downloads 的策略快照，但不修改 runtime 队列策略。
     pub fn update_policy(&self, request: UpdateDownloadPolicyRequestDto) -> AppResult<()> {
-        let _ = request;
-        Err(not_wired("update_policy"))
+        let policy = policy_from_update_request(request);
+        self.deps.policy_store.save_policy(&policy)
     }
 }
 
@@ -643,7 +759,8 @@ impl<
         S: DownloadStagingObjectStore,
         W: DownloadResumeWorkScheduler,
         R: JobRuntime<Extension = ()>,
-    > DownloadFacade<J, C, M, S, W, R>
+        P,
+    > DownloadFacade<J, C, M, S, W, R, P>
 {
     /// Loads module state, checkpoint, staging, and manifest before resume decisions.
     /// 先读取模块状态、checkpoint、staging 和 manifest，然后才进入恢复决策。
@@ -868,11 +985,12 @@ mod tests {
         DownloadPendingResumeWork, DownloadPendingResumeWorkSource, DownloadResumeOutcome,
         DownloadResumeSegmentAction, DownloadResumeWorkItem, DownloadResumeWorkMode,
         DownloadResumeWorkPlan, DownloadResumeWorkScheduler, DownloadStagingObjectStore,
-        DownloadStagingRoot, InMemoryDownloadResumeWorkScheduler,
+        DownloadStagingRoot, InMemoryDownloadPolicyStore, InMemoryDownloadResumeWorkScheduler,
     };
     use crate::contracts::{
-        CancelDownloadRequestDto, GetDownloadJobQueryDto, ListDownloadJobsQueryDto,
-        PauseDownloadRequestDto, ResumeDownloadRequestDto, StartDownloadRequestDto,
+        CancelDownloadRequestDto, DownloadPolicyDto, GetDownloadJobQueryDto,
+        GetDownloadPolicyQueryDto, ListDownloadJobsQueryDto, PauseDownloadRequestDto,
+        ResumeDownloadRequestDto, StartDownloadRequestDto, UpdateDownloadPolicyRequestDto,
     };
     use crate::driver::{DownloadSegmentCheckpointRecord, DownloadSegmentCheckpointStatus};
 
@@ -1404,6 +1522,7 @@ mod tests {
             staging_store: (),
             resume_scheduler: (),
             job_runtime: runtime,
+            policy_store: InMemoryDownloadPolicyStore::new(3),
         });
 
         let request = StartDownloadRequestDto {
@@ -1454,6 +1573,7 @@ mod tests {
             staging_store: (),
             resume_scheduler: (),
             job_runtime: RecordingJobRuntime::default(),
+            policy_store: InMemoryDownloadPolicyStore::new(3),
         });
         let first = StartDownloadRequestDto {
             target_id: "asset-a".into(),
@@ -1514,6 +1634,7 @@ mod tests {
             staging_store: (),
             resume_scheduler: (),
             job_runtime: RecordingJobRuntime::default(),
+            policy_store: InMemoryDownloadPolicyStore::new(3),
         });
 
         let page = facade
@@ -1530,6 +1651,71 @@ mod tests {
     }
 
     #[test]
+    fn get_policy_returns_current_downloads_policy_snapshot_from_store() {
+        let expected = DownloadPolicyDto {
+            concurrency_slots: 7,
+            bandwidth_limit_bytes_per_sec: Some(64 * 1024),
+            auto_resume: false,
+        };
+        let facade = DownloadFacade::new(DownloadModuleDeps {
+            job_repo: RecordingDownloadJobRepository::default(),
+            checkpoint_repo: (),
+            manifest_provider: (),
+            staging_store: (),
+            resume_scheduler: (),
+            job_runtime: RecordingJobRuntime::default(),
+            policy_store: InMemoryDownloadPolicyStore::with_policy(expected.clone()),
+        });
+
+        let policy = facade
+            .get_policy(GetDownloadPolicyQueryDto::default())
+            .expect("get_policy should read the downloads-owned policy store");
+
+        assert_eq!(policy, expected);
+    }
+
+    #[test]
+    fn update_policy_clamps_and_stores_snapshot_for_later_reads() {
+        let facade = DownloadFacade::new(DownloadModuleDeps {
+            job_repo: RecordingDownloadJobRepository::default(),
+            checkpoint_repo: (),
+            manifest_provider: (),
+            staging_store: (),
+            resume_scheduler: (),
+            job_runtime: RecordingJobRuntime::default(),
+            policy_store: InMemoryDownloadPolicyStore::new(3),
+        });
+
+        facade
+            .update_policy(UpdateDownloadPolicyRequestDto {
+                concurrency_slots: 0,
+                bandwidth_limit_bytes_per_sec: Some(128 * 1024),
+                auto_resume: false,
+            })
+            .expect("update_policy should store a low-clamped policy");
+        let low_clamped = facade
+            .get_policy(GetDownloadPolicyQueryDto::default())
+            .expect("get_policy should read the low-clamped policy");
+        assert_eq!(low_clamped.concurrency_slots, 1);
+        assert_eq!(low_clamped.bandwidth_limit_bytes_per_sec, Some(128 * 1024));
+        assert!(!low_clamped.auto_resume);
+
+        facade
+            .update_policy(UpdateDownloadPolicyRequestDto {
+                concurrency_slots: 512,
+                bandwidth_limit_bytes_per_sec: None,
+                auto_resume: true,
+            })
+            .expect("update_policy should store a high-clamped policy");
+        let high_clamped = facade
+            .get_policy(GetDownloadPolicyQueryDto::default())
+            .expect("get_policy should read the high-clamped policy");
+        assert_eq!(high_clamped.concurrency_slots, 128);
+        assert_eq!(high_clamped.bandwidth_limit_bytes_per_sec, None);
+        assert!(high_clamped.auto_resume);
+    }
+
+    #[test]
     fn get_job_snapshot_projects_download_record_with_runtime_snapshot() {
         let facade = DownloadFacade::new(DownloadModuleDeps {
             job_repo: RecordingDownloadJobRepository::default(),
@@ -1538,6 +1724,7 @@ mod tests {
             staging_store: (),
             resume_scheduler: (),
             job_runtime: RecordingJobRuntime::default(),
+            policy_store: InMemoryDownloadPolicyStore::new(3),
         });
         let request = StartDownloadRequestDto {
             target_id: "asset-123".into(),
@@ -1592,6 +1779,7 @@ mod tests {
             staging_store: (),
             resume_scheduler: (),
             job_runtime: RecordingJobRuntime::default(),
+            policy_store: InMemoryDownloadPolicyStore::new(3),
         });
         let job_id = JobId::generate();
 
@@ -1621,6 +1809,7 @@ mod tests {
             staging_store: (),
             resume_scheduler: (),
             job_runtime: RecordingJobRuntime::missing_snapshot(),
+            policy_store: InMemoryDownloadPolicyStore::new(3),
         });
 
         let error = facade
@@ -1651,6 +1840,7 @@ mod tests {
             staging_store: (),
             resume_scheduler: (),
             job_runtime: RecordingJobRuntime::default(),
+            policy_store: InMemoryDownloadPolicyStore::new(3),
         });
         let job_id = JobId::generate();
 
@@ -1673,6 +1863,7 @@ mod tests {
             staging_store: (),
             resume_scheduler: (),
             job_runtime: RecordingJobRuntime::default(),
+            policy_store: InMemoryDownloadPolicyStore::new(3),
         });
 
         let result = facade.resume_download(ResumeDownloadRequestDto {
@@ -1698,6 +1889,7 @@ mod tests {
             staging_store: (),
             resume_scheduler: (),
             job_runtime: RecordingJobRuntime::default(),
+            policy_store: InMemoryDownloadPolicyStore::new(3),
         });
 
         let error = facade
@@ -1721,6 +1913,7 @@ mod tests {
             staging_store: (),
             resume_scheduler: (),
             job_runtime: RecordingJobRuntime::default(),
+            policy_store: InMemoryDownloadPolicyStore::new(3),
         });
         let job_id = JobId::generate();
 
@@ -1750,6 +1943,7 @@ mod tests {
             staging_store: RecordingStagingObjectStore::default(),
             resume_scheduler: (),
             job_runtime: RecordingJobRuntime::default(),
+            policy_store: InMemoryDownloadPolicyStore::new(3),
         });
 
         let result = facade.resume_download(ResumeDownloadRequestDto {
@@ -1777,6 +1971,7 @@ mod tests {
             staging_store: RecordingStagingObjectStore::default(),
             resume_scheduler: (),
             job_runtime: RecordingJobRuntime::default(),
+            policy_store: InMemoryDownloadPolicyStore::new(3),
         });
 
         let result = facade.resume_download(ResumeDownloadRequestDto {
@@ -1820,6 +2015,7 @@ mod tests {
             staging_store: RecordingStagingObjectStore::default(),
             resume_scheduler: (),
             job_runtime: RecordingJobRuntime::default(),
+            policy_store: InMemoryDownloadPolicyStore::new(3),
         });
 
         let accepted = facade
@@ -1903,6 +2099,7 @@ mod tests {
             staging_store: RecordingStagingObjectStore::default(),
             resume_scheduler: RecordingResumeWorkScheduler::with_events(events.clone()),
             job_runtime: RecordingJobRuntime::with_events(events.clone()),
+            policy_store: InMemoryDownloadPolicyStore::new(3),
         });
 
         let outcome = facade
@@ -1978,6 +2175,7 @@ mod tests {
             staging_store: RecordingStagingObjectStore::default(),
             resume_scheduler,
             job_runtime: runtime.clone(),
+            policy_store: InMemoryDownloadPolicyStore::new(3),
         });
 
         let outcome = facade
@@ -2106,6 +2304,7 @@ mod tests {
                 ),
             ),
             job_runtime: RecordingJobRuntime::with_events(events.clone()),
+            policy_store: InMemoryDownloadPolicyStore::new(3),
         });
 
         let error = facade
@@ -2157,6 +2356,7 @@ mod tests {
             staging_store: RecordingStagingObjectStore::default(),
             resume_scheduler: (),
             job_runtime: RecordingJobRuntime::default(),
+            policy_store: InMemoryDownloadPolicyStore::new(3),
         });
 
         let outcome = facade
@@ -2223,6 +2423,7 @@ mod tests {
                 ),
             ),
             job_runtime: RecordingJobRuntime::with_events(events.clone()),
+            policy_store: InMemoryDownloadPolicyStore::new(3),
         });
 
         let outcome = facade
@@ -2280,6 +2481,7 @@ mod tests {
             staging_store: RecordingStagingObjectStore::default(),
             resume_scheduler: (),
             job_runtime: RecordingJobRuntime::default(),
+            policy_store: InMemoryDownloadPolicyStore::new(3),
         });
 
         let error = facade
@@ -2596,6 +2798,7 @@ mod tests {
             staging_store: (),
             resume_scheduler: (),
             job_runtime: RecordingJobRuntime::default(),
+            policy_store: InMemoryDownloadPolicyStore::new(3),
         });
         let job_id = JobId::generate();
 
