@@ -1298,6 +1298,42 @@ Later slices:
 
 ---
 
+### 7.27 Downloads Live Runtime Policy Update Boundary
+
+After startup seeding, the next temptation is to make `DownloadsFacade::update_policy(...)` mutate `SharedJobRuntimeHost` directly. That would reintroduce module-to-runtime coupling and would hide a kernel-jobs lifecycle decision inside a downloads policy command. The safer sequence is to first give `kernel-jobs` an explicit runtime policy control surface, then connect downloads policy updates to that surface in a later slice.
+
+Current Rust reality:
+
+1. `SharedJobRuntimeHost` stores `RuntimeQueuePolicy` as a value and returns it through `policy()`.
+2. `SharedJobRuntimeHost` has no `update_policy(...)` or equivalent mutation method.
+3. `JobRuntime` does not expose queue-policy mutation.
+4. `DownloadsFacade::update_policy(...)` persists a normalized downloads policy snapshot only.
+5. No real scheduler loop reads the policy repeatedly yet; current tests can only assert the host policy snapshot.
+
+Boundary rules:
+
+1. The first live-update Rust slice belongs in `kernel-jobs`, not in `module-downloads`.
+2. `SharedJobRuntimeHost` may gain an explicit policy-control method that replaces its runtime policy snapshot atomically for future scheduling reads.
+3. `policy()` must continue returning a by-value snapshot so existing callers do not observe mutable internals.
+4. This first slice must not add downloads facade wiring, `DownloadPolicyStore` calls, host transport commands, frontend settings, scheduler loops, lease changes, snapshot migrations, active job rescheduling, pending resume work mutation, concrete IO, retry/backoff, or terminal completion behavior.
+5. The control surface should remain a runtime-level capability; downloads integration should later depend on a narrow application port rather than reaching into concrete runtime internals.
+
+First Rust slice:
+
+1. add focused `kernel-jobs` RED tests proving `SharedJobRuntimeHost` exposes an explicit policy update path and that `policy()` returns the updated snapshot;
+2. keep `RuntimeQueuePolicy::new(...)` and existing `policy()` read semantics compatible;
+3. implement the smallest internal synchronization needed for a cloned `SharedJobRuntimeHost` to observe the updated policy snapshot;
+4. do not modify `DownloadsFacade::update_policy(...)`, composition-root wiring, host transport, frontend, scheduler execution, active jobs, leases, snapshots, pending work, concrete IO, retry/backoff, or terminal completion;
+5. run focused kernel-jobs tests, affected composition checks if the runtime host shape changes, rustfmt check, scoped `git diff --check`, and path-limited status before commit.
+
+Later slices:
+
+1. Downloads can introduce a narrow runtime policy applier dependency that maps persisted `DownloadPolicyDto.concurrency_slots` to `RuntimeQueuePolicy`.
+2. Composition-root can wire that applier to `SharedJobRuntimeHost` after the kernel-jobs control surface is stable.
+3. Host transport tests can then prove `downloads_update_policy` persists policy and applies the runtime snapshot without adding frontend work.
+
+---
+
 ## 8. Error Semantics
 
 Downloads-domain errors use `DL_*` codes when they become stable public classifications.

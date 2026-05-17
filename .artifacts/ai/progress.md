@@ -8273,6 +8273,14 @@
   - `cargo fmt -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check`: passed.
 - Full composition-root integration tests were not run because existing tests still create/delete sqlite files under system temp/default package paths.
 
+## Agent Note: 2026-05-17 18:50
+
+- AT-2026-05-17-212 was committed and pushed as `ed27996 feat: seed runtime policy from downloads policy`.
+- Confirmed host transport already contains `downloads_get_policy` and `downloads_update_policy` handlers that call the downloads facade.
+- Started AT-2026-05-17-213 as a docs-only boundary task before live runtime policy update coding.
+- Added README_IMPL section 7.27 selecting a `kernel-jobs` runtime policy control surface as the first safe live-update slice, with downloads facade wiring and transport/frontend work deferred.
+- Scoped `git diff --check` passed with CRLF normalization warnings only; path-limited status shows only AT-213 files.
+
 ### Auto Record: 2026-05-17 15:38:00
 - Tool: apply_patch
 - Phase: Phase 83 - Downloads Policy Store Implementation
@@ -8466,6 +8474,27 @@
 - Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
 - Files:
   - `docs/modules/downloads/README_IMPL.md` (update)
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-17 16:10:37
+- Tool: apply_patch
+- Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
+- Files:
+  - `docs/modules/downloads/README_IMPL.md` (update)
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-17 16:11:12
+- Tool: apply_patch
+- Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
+- Files:
   - `.artifacts/ai/active-task.md` (update)
   - `.artifacts/ai/task-plan.md` (update)
   - `.artifacts/ai/findings.md` (update)

@@ -875,3 +875,11 @@
 - RED/GREEN confirmed persisted `DownloadPolicyDto.concurrency_slots` now seeds the initial `RuntimeQueuePolicy.max_concurrent_jobs`, while an empty policy table falls back to `DesktopBootstrapConfig.default_download_slots`.
 - The same `SqliteDownloadPolicyStore` object is constructed before runtime assembly and then moved into the downloads facade; live `update_policy(...)` runtime mutation remains absent.
 - Full composition-root integration tests were not run because existing integration tests still create/delete sqlite files under system temp/default package paths; focused lib tests used project-local `.artifacts/tmp` paths instead.
+
+## Phase 88 Downloads Live Runtime Policy Update Boundary Findings
+
+- AT-2026-05-17-212 final commit is `ed27996` and was pushed to `origin/main`.
+- Host transport already has `downloads_get_policy` and `downloads_update_policy` handlers that call the downloads facade, so the immediate missing boundary is not command existence.
+- Current `SharedJobRuntimeHost` exposes `policy()` but has no update method; current `DownloadsFacade::update_policy(...)` persists policy only.
+- The next safe design boundary is a `kernel-jobs` runtime policy control surface first, followed later by downloads facade/composition wiring.
+- README_IMPL 7.27 now pins the first Rust slice to focused kernel-jobs tests for `SharedJobRuntimeHost` policy update/readback, with downloads facade wiring and transport/frontend work deferred.

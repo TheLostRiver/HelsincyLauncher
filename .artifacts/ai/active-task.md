@@ -2,18 +2,17 @@
 
 ## Identity
 
-- task id: AT-2026-05-17-212
-- title: Seed runtime policy from persisted downloads policy at startup
+- task id: AT-2026-05-17-213
+- title: Define downloads live runtime policy update boundary
 - status: completed
 
 ## Goal
 
-Implement the documented startup-seeding slice so composition-root loads the persisted downloads policy before constructing the shared runtime and uses the loaded concurrency slots as the initial `RuntimeQueuePolicy` budget.
+Document the live runtime policy update boundary before Rust coding, keeping the first mutation surface in `kernel-jobs` and deferring downloads facade wiring, transport/frontend work, scheduler behavior, and active runtime mutation semantics.
 
 ## Scope
 
 - in scope:
-  - `crates/composition-root/src/bootstrap.rs`
   - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
@@ -21,6 +20,8 @@ Implement the documented startup-seeding slice so composition-root loads the per
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
+  - Rust production code
+  - Rust tests
   - runtime queue-policy mutation
   - live runtime policy update API
   - global settings/config-system implementation
@@ -31,13 +32,12 @@ Implement the documented startup-seeding slice so composition-root loads the per
 
 ## Allowed Files
 
-1. crates/composition-root/src/bootstrap.rs
-2. docs/modules/downloads/README_IMPL.md
-3. .artifacts/ai/active-task.md
-4. .artifacts/ai/task-plan.md
-5. .artifacts/ai/progress.md
-6. .artifacts/ai/findings.md
-7. .artifacts/ai/handoff.md
+1. docs/modules/downloads/README_IMPL.md
+2. .artifacts/ai/active-task.md
+3. .artifacts/ai/task-plan.md
+4. .artifacts/ai/progress.md
+5. .artifacts/ai/findings.md
+6. .artifacts/ai/handoff.md
 
 ## Required Context Read
 
@@ -48,44 +48,39 @@ Read this turn before writing:
 3. docs/TauriDownloadRuntimeDesign.md concurrency/policy sections
 4. docs/TauriKernelJobsRuntimeDesign.md queue-policy sections
 5. docs/TauriCompositionRootWiringDesign.md composition-root ownership sections
-6. README_IMPL 7.26 first Rust slice
+6. README_IMPL 7.26 completed state and 7.27 boundary target
 7. current `RuntimeQueuePolicy`, `SharedJobRuntimeHost`, composition bootstrap, and `DownloadPolicyStore` surfaces
 8. current PWF task plan and handoff tails
 
 ## Hypothesis
 
-- falsifiable local hypothesis: composition-root can construct/load one `SqliteDownloadPolicyStore` before runtime construction, use the loaded policy's concurrency slots for initial `RuntimeQueuePolicy`, and pass that same policy store into `DownloadFacade` without adding live runtime mutation.
+- falsifiable local hypothesis: README_IMPL can define a narrow live policy update boundary whose first Rust slice changes only `kernel-jobs::SharedJobRuntimeHost` policy-control behavior, leaving downloads facade, composition wiring, transport, frontend, scheduler, active jobs, leases, snapshots, and pending work unchanged.
 
 ## Cheap Check
 
-1. Add focused composition-root RED tests for persisted-policy startup seeding and empty-store fallback.
-2. Refactor composition-root startup order minimally to load policy before `build_job_runtime(...)`.
-3. Run focused composition-root tests, affected policy tests, rustfmt check, scoped `git diff --check`, and path-limited status.
+1. Add README_IMPL section 7.27 defining the live runtime policy update boundary.
+2. Update PWF records and note AT-212 final pushed commit `ed27996`.
+3. Run scoped `git diff --check` and path-limited status.
 
 ## Validation Gate
 
-1. Focused composition-root tests fail before implementation and pass after implementation.
-2. Persisted policy slots seed `SharedJobRuntimeHost::policy().max_concurrent_jobs`.
-3. Empty policy store falls back to `DesktopBootstrapConfig.default_download_slots`.
-4. `DownloadsFacade::update_policy(...)` remains persistence-only and does not add live runtime mutation.
-5. Scoped `git diff --check` passes.
-6. Commit only AT-212 files locally, then push `main` to `origin`.
+1. README_IMPL defines the first live policy update slice in `kernel-jobs`.
+2. README_IMPL explicitly defers downloads facade wiring, composition-root wiring, host transport, frontend, scheduler loop, active jobs/leases/snapshots, pending work, concrete IO, retry/backoff, and terminal completion.
+3. README_IMPL defines first Rust test expectations for `SharedJobRuntimeHost` policy update.
+4. Scoped `git diff --check` passes.
+5. Commit only AT-213 files locally, then push `main` to `origin`.
 
 ## Validation Result
 
-1. RED confirmed focused composition-root tests failed before implementation because `build_job_runtime(...)` did not accept a policy store.
-2. `build_job_runtime(...)` now loads `DownloadPolicyStore` and seeds `RuntimeQueuePolicy::new(...)` from the loaded downloads policy.
-3. `build_desktop_services(...)` now constructs one `SqliteDownloadPolicyStore` before runtime construction and passes it into the downloads facade.
-4. Focused composition-root startup-seeding tests passed: 2 passed / 0 failed.
-5. Existing shared downloads scheduler wiring test passed after moving its sqlite path under project-local `.artifacts/tmp`.
-6. `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
-7. `cargo test -p launcher-adapter-storage-sqlite --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml download_policy_store` passed: 2 passed / 0 failed.
-8. `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml policy` passed: 2 passed / 0 failed.
-9. `cargo fmt -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed.
+1. README_IMPL section 7.27 now defines the live runtime policy update boundary.
+2. README_IMPL selects a first Rust slice in `kernel-jobs` that updates `SharedJobRuntimeHost` policy-control behavior only.
+3. README_IMPL explicitly defers downloads facade wiring, composition-root wiring, host transport, frontend, scheduler loop, active jobs/leases/snapshots, pending work, concrete IO, retry/backoff, and terminal completion.
+4. Scoped `git diff --check` passed with CRLF normalization warnings only.
 
 ## Notes
 
 - AT-2026-05-17-209 final commit is `41f0b8c` and is already pushed to `origin/main`.
 - AT-2026-05-17-210 final commit is `2f9e828` and is already pushed to `origin/main`.
 - AT-2026-05-17-211 final commit is `1d31f56` and is already pushed to `origin/main`.
-- AT-2026-05-17-212 is ready to commit and push.
+- AT-2026-05-17-212 final commit is `ed27996` and is already pushed to `origin/main`.
+- AT-2026-05-17-213 is ready to commit and push.
