@@ -1024,3 +1024,12 @@
 - RED/GREEN confirmed accepted dispatch now projects the stored snapshot to `JobState::Running` and `JobUiState::Running`, while missing-driver deferred dispatch keeps the queued snapshot unchanged.
 - The runtime update is deliberately non-terminal: it does not acquire leases, start loops, create snapshot-writer/cancellation context, or project `Completed` / `Failed`.
 - Validation passed for focused dispatch tests, full `launcher-kernel-jobs` lib tests, `launcher-composition-root` check, and scoped rustfmt on `runtime.rs`.
+- AT-2026-05-17-228 final commit is `fb9fb57` and was pushed to `origin/main`.
+
+## Phase 104 One-shot Queued Execution Selection Boundary Findings
+
+- Required context was read in focused chunks: README_IMPL 7.32/current state, kernel-jobs queue policy and eligible-job selection notes, testing strategy kernel-jobs guidance, current `run_one_execution_turn(...)`, and current `JobSnapshotStore::list_resumable(...)` implementations.
+- `SqliteJobSnapshotStore::list_resumable(...)` currently returns all resumable states with no explicit `ORDER BY`, and the in-memory store is HashMap-backed; a one-shot selector must impose deterministic ordering itself or first document a store ordering contract.
+- The safest next Rust slice is a runtime-owned one-shot selector that filters `JobState::Queued`, orders selected candidates deterministically, and calls the existing `run_one_execution_turn(...)` for exactly one job.
+- Scheduler loops, active-slot accounting, per-module fairness, lease acquisition, cancellation/snapshot-writer context, terminal projection, downloads concrete IO, host transport, frontend, and SQLite schema remain later boundaries.
+- README_IMPL 7.33 now defines the next Rust slice and scoped validation; docs-only `git diff --check` passed with CRLF normalization warnings only.

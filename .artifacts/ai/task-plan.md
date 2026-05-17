@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 103 - Accepted Execution State Projection
+Phase 104 - One-shot Queued Execution Selection Boundary
 
 ## Current Focus
 
@@ -17,7 +17,8 @@ Phase 103 - Accepted Execution State Projection
 - AT-2026-05-17-225 was published as commit `c5b0695` after implementing the guarded downloads driver `run(...)` override.
 - AT-2026-05-17-226 was published as commit `d2d5405` after covering the remaining guarded `run(...)` deferred branches and fixing non-mutating checkpoint helper semantics.
 - AT-2026-05-17-227 was published as commit `fc615db` after defining the accepted execution state projection boundary.
-- AT-2026-05-17-228 is complete locally after implementing the accepted dispatch projection in `kernel-jobs`; commit/push pending.
+- AT-2026-05-17-228 was published as commit `fb9fb57` after implementing accepted dispatch projection in `kernel-jobs`.
+- AT-2026-05-17-229 is complete locally after defining a deterministic one-shot queued execution selection boundary; commit/push pending.
 - AT-2026-05-17-220 was published as commit `aa8d6e3` after documenting the shared runtime execution-turn boundary.
 - AT-2026-05-17-219 was published as commit `f618718` after adding host transport smoke coverage for downloads policy runtime application.
 - AT-2026-05-17-218 was published as commit `5aae7f1` after adding documentation-budget rules.
@@ -771,6 +772,12 @@ Phase 103 - Accepted Execution State Projection
 - Atomic tasks: AT-2026-05-17-228
 - **Status:** complete
 
+### Phase 104: One-shot Queued Execution Selection Boundary
+
+- Outcome: document the next `kernel-jobs` one-shot selector boundary for choosing a deterministic queued snapshot and dispatching exactly one execution turn without adding scheduler loops, durable leases, active-slot accounting, fairness, terminal projection, downloads IO, transport, frontend, or SQLite schema changes.
+- Atomic tasks: AT-2026-05-17-229
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -994,7 +1001,8 @@ Phase 103 - Accepted Execution State Projection
 219. AT-2026-05-17-225 - completed - added guarded downloads driver `run(...)` override with focused TDD; committed and pushed as `c5b0695`.
 220. AT-2026-05-17-226 - completed - covered guarded downloads driver `run(...)` deferred branches and fixed the non-mutating checkpoint helper gap; committed and pushed as `d2d5405`.
 221. AT-2026-05-17-227 - completed - defined the accepted execution state projection boundary before `kernel-jobs` Rust changes; committed and pushed as `fc615db`.
-222. AT-2026-05-17-228 - completed - implemented accepted dispatch projection in `kernel-jobs`; commit/push pending.
+222. AT-2026-05-17-228 - completed - implemented accepted dispatch projection in `kernel-jobs`; committed and pushed as `fb9fb57`.
+223. AT-2026-05-17-229 - completed - defined deterministic one-shot queued execution selection before Rust changes; commit/push pending.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

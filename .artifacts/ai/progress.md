@@ -9066,6 +9066,14 @@
   - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
   - `rustfmt --edition 2021 --check crates\kernel-jobs\src\runtime.rs` passed.
   - Scoped `git diff --check` passed with CRLF normalization warnings only.
+- Published AT-2026-05-17-228 as commit `fb9fb57` and pushed it to `origin/main`.
+
+## 2026-05-17 - AT-2026-05-17-229 started
+
+- Re-read README_IMPL 7.32/current state, kernel-jobs queue policy and eligible-job selection notes, testing strategy kernel-jobs guidance, current `run_one_execution_turn(...)`, and current `JobSnapshotStore::list_resumable(...)` implementations.
+- Selected a docs-first boundary for deterministic one-shot queued execution selection because current resumable snapshot listing does not provide a stable ordering contract.
+- Updated README_IMPL 7.33 with the deterministic one-shot queued selector boundary and validation plan.
+- Validation passed: scoped `git diff --check` for README_IMPL and PWF files passed with CRLF normalization warnings only.
 - Commit/push pending.
 
 ### Auto Record: 2026-05-17 20:44:38
@@ -9332,5 +9340,31 @@
 - Phase: Phase 103 - Accepted Execution State Projection
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 21:19:02
+- Tool: apply_patch
+- Phase: Phase 104 - One-shot Queued Execution Selection Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 21:19:21
+- Tool: apply_patch
+- Phase: Phase 104 - One-shot Queued Execution Selection Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 21:19:56
+- Tool: apply_patch
+- Phase: Phase 104 - One-shot Queued Execution Selection Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)

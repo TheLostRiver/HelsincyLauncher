@@ -1491,9 +1491,10 @@ The shared runtime can now dispatch one execution turn and downloads can honestl
 Current Rust reality:
 
 1. `SharedJobRuntimeHost::run_one_execution_turn(...)` loads a snapshot, resolves a driver, and calls `driver.run(...)`.
-2. The method currently returns the driver disposition without mutating the stored snapshot.
+2. The method projects `JobRunDisposition::Accepted` to `JobState::Running` and `JobUiState::Running`.
 3. `JobRunDisposition::Accepted` means the driver accepted a non-terminal execution turn; it does not mean completed, failed, or canceled.
 4. Production downloads wiring still registers a no-execution-port `DownloadJobDriver`, so downloads dispatch returns `Deferred` until a real execution strategy is wired.
+5. `Deferred` dispatch leaves snapshots unchanged.
 
 First Rust slice:
 
@@ -1509,6 +1510,31 @@ Validation should stay narrow:
 2. full `launcher-kernel-jobs` lib tests;
 3. `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`;
 4. scoped rustfmt/diff checks for touched Rust and PWF files.
+
+### 7.33 One-shot Queued Execution Selection Boundary
+
+After accepted dispatch can project one known job to `Running`, the next shared runtime capability should be selecting one queued job without the caller supplying a `JobId`. This is still a one-shot helper, not a scheduler loop.
+
+Current Rust reality:
+
+1. `SharedJobRuntimeHost::run_one_execution_turn(...)` requires a caller-provided `JobId`.
+2. `JobSnapshotStore::list_resumable(...)` exists, but current implementations include multiple resumable states and do not provide a durable ordering contract.
+3. `RuntimeQueuePolicy` currently only carries `max_concurrent_jobs`; there is no active-slot accounting, fairness, per-module caps, or lease ownership in Rust yet.
+
+First Rust slice:
+
+1. add a focused `SharedJobRuntimeHost` method, tentatively `run_next_execution_turn(...)`, that reads resumable snapshots, filters to `JobState::Queued`, picks one deterministic candidate, and delegates to `run_one_execution_turn(...)`;
+2. define deterministic candidate ordering in the runtime method, not by relying on `HashMap` or SQLite row order; the first simple order can be `(updated_at, job_id)` until richer priority/fairness exists;
+3. return an explicit `JobRunDisposition::Deferred` when no queued candidate exists;
+4. preserve existing `run_one_execution_turn(...)` behavior, including accepted-to-running projection and deferred non-mutation;
+5. keep scheduler loops/background tasks, durable leases, active-slot accounting, per-module fairness, cancellation/snapshot-writer context, downloads concrete IO, retry/backoff, terminal projection, host transport, frontend, and SQLite schema changes out of this slice.
+
+Validation should stay in `launcher-kernel-jobs` first:
+
+1. focused tests prove one queued candidate is selected and dispatched;
+2. running/restoring/non-queued resumable snapshots are ignored by the selector;
+3. no queued candidates returns explicit deferred;
+4. existing one-shot dispatch tests keep passing.
 
 ---
 

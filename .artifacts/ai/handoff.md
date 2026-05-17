@@ -40,11 +40,17 @@
 
 - task id: AT-2026-05-17-228
 - title: Project accepted execution dispatch to running state
+- status: completed; final commit `fb9fb57`, pushed to `origin/main`
+
+## Active Atomic Task
+
+- task id: AT-2026-05-17-229
+- title: Define one-shot queued execution selection boundary
 - status: completed locally; validation passed; commit/push pending
 
 ## Current Slice
 
-- `crates/kernel-jobs/src/runtime.rs`
+- `docs/modules/downloads/README_IMPL.md`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -53,8 +59,8 @@
 
 ## Next Resume Point
 
-1. Commit and push AT-2026-05-17-228.
-2. Re-read README_IMPL/current runtime state before selecting the next backend slice.
+1. Commit and push AT-2026-05-17-229.
+2. If continuing, implement the documented `kernel-jobs` selector as a RED/GREEN slice.
 
 ## Validation
 
@@ -101,6 +107,10 @@
 - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
 - `rustfmt --edition 2021 --check crates\kernel-jobs\src\runtime.rs` passed.
 - Scoped `git diff --check` passed for AT-228 files with CRLF normalization warnings only.
+- AT-228 final commit `fb9fb57` was pushed to `origin/main`.
+- AT-229 required context read in focused chunks: README_IMPL 7.32/current state, kernel-jobs queue policy and eligible-job selection notes, testing strategy kernel-jobs guidance, current `run_one_execution_turn(...)`, and current `JobSnapshotStore::list_resumable(...)` implementations.
+- AT-229 README_IMPL 7.33 defines the next Rust slice: a one-shot queued selector filters `JobState::Queued`, orders candidates deterministically by `(updated_at, job_id)`, and delegates to `run_one_execution_turn(...)`.
+- AT-229 scoped docs diff check passed with CRLF normalization warnings only.
 - Scoped `git diff --check` passed with CRLF normalization warnings only.
 - AT-224 found that downloads should not call `prepare_resume_execution_turn(...)` from `run(...)` unless an execution-port path is present, because that helper drains pending work after checkpoint reload.
 - README_IMPL 7.31 defines the next Rust slice: add an optional downloads-owned segment execution port or equivalent explicit strategy, keep the default constructor deferred/non-draining, and test fake completed execution through `run(...)`.
@@ -135,7 +145,7 @@
 
 - Do not modify files outside `D:\DEV\MyEpicLauncher`.
 - Do not run destructive commands.
-- Do not change downloads code, composition-root wiring, frontend, host transport, scheduler loop, concrete IO, retry/backoff, durable lease persistence, terminal completion, SQLite schema, hooks, `.codex`, Cargo.lock, or unrelated dirty files in AT-228.
+- Do not change Rust code, downloads code, composition-root wiring, frontend, host transport, scheduler loop, concrete IO, retry/backoff, durable lease persistence, terminal completion, SQLite schema, hooks, `.codex`, Cargo.lock, or unrelated dirty files in AT-229.
 - Push is authorized by the user-provided GitHub remote after each completed task commit.
 
 ## Dirty Worktree To Preserve
