@@ -88,6 +88,36 @@ pub trait DownloadCheckpointRepository: Send + Sync {
     fn save(&self, checkpoint: &DownloadCheckpointRecord) -> AppResult<()>;
 }
 
+/// Module-local classification for a future downloads driver execution turn.
+/// 后续 downloads driver 执行 turn 使用的模块本地分类结果。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum DownloadDriverExecutionTurn {
+    /// Durable checkpoint is missing, so pending in-memory work must stay untouched.
+    /// durable checkpoint 缺失，因此必须保留内存态 pending work 不被取走。
+    CheckpointMissing {
+        /// Downloads job id whose durable checkpoint could not be reloaded.
+        /// 无法重新读取 durable checkpoint 的 downloads 作业标识。
+        job_id: JobId,
+    },
+    /// Durable checkpoint exists, but no prepared pending work is available.
+    /// durable checkpoint 存在，但当前没有可消费的 pending work。
+    NoPendingWork {
+        /// Reloaded checkpoint that keeps this classification tied to durable state.
+        /// 重新读取的 checkpoint，用于把该分类绑定到 durable state。
+        checkpoint: DownloadCheckpointRecord,
+    },
+    /// Durable checkpoint exists and prepared pending work was accepted locally.
+    /// durable checkpoint 存在，且本地已接收准备好的 pending work。
+    PendingWorkAccepted {
+        /// Reloaded checkpoint used to guard the accepted in-memory work.
+        /// 用于保护已接收内存态 work 的重新读取 checkpoint。
+        checkpoint: DownloadCheckpointRecord,
+        /// Drained pending work for the requested job only.
+        /// 只为请求的 job 取走的 pending work。
+        pending_work: Vec<DownloadPendingResumeWork>,
+    },
+}
+
 /// `downloads/download` 任务种类的恢复驱动。
 ///
 /// 只有在持久化下载 checkpoint 仍然存在时，stage 2 restore 才允许把
@@ -124,6 +154,32 @@ impl DownloadJobDriver {
     ) -> AppResult<Vec<DownloadPendingResumeWork>> {
         self.pending_resume_work_source
             .drain_pending_resume_work(job_id)
+    }
+
+    /// Prepares a module-local resume execution turn without running download IO.
+    /// 准备模块本地 resume execution turn，但不执行下载 IO。
+    pub fn prepare_resume_execution_turn(
+        &self,
+        job_id: &JobId,
+    ) -> AppResult<DownloadDriverExecutionTurn> {
+        let Some(checkpoint) = self.checkpoint_repo.load(job_id)? else {
+            return Ok(DownloadDriverExecutionTurn::CheckpointMissing {
+                job_id: job_id.clone(),
+            });
+        };
+
+        // Durable facts are reloaded before draining transient work so stale in-memory
+        // plans never outrun the module-owned checkpoint boundary.
+        // 必须先重新读取 durable facts，再取走瞬时 work，避免陈旧内存计划越过模块自有 checkpoint 边界。
+        let pending_work = self.drain_pending_resume_work(job_id)?;
+        if pending_work.is_empty() {
+            return Ok(DownloadDriverExecutionTurn::NoPendingWork { checkpoint });
+        }
+
+        Ok(DownloadDriverExecutionTurn::PendingWorkAccepted {
+            checkpoint,
+            pending_work,
+        })
     }
 }
 
@@ -163,7 +219,10 @@ mod tests {
         DownloadResumeWorkPlan, DownloadResumeWorkScheduler, InMemoryDownloadResumeWorkScheduler,
     };
 
-    use super::{DownloadCheckpointRecord, DownloadCheckpointRepository, DownloadJobDriver};
+    use super::{
+        DownloadCheckpointRecord, DownloadCheckpointRepository, DownloadDriverExecutionTurn,
+        DownloadJobDriver,
+    };
 
     #[derive(Default)]
     struct InMemoryCheckpointRepository {
@@ -302,6 +361,92 @@ mod tests {
         assert!(
             drained.is_empty(),
             "default driver constructor should expose an empty pending-work source"
+        );
+    }
+
+    #[test]
+    fn download_job_driver_execution_turn_keeps_pending_work_when_checkpoint_missing() {
+        let repo = Arc::new(InMemoryCheckpointRepository::default());
+        let scheduler = InMemoryDownloadResumeWorkScheduler::new();
+        let job_id = JobId::generate();
+        let plan = make_resume_work_plan("segment-missing-checkpoint");
+        let driver =
+            DownloadJobDriver::with_pending_resume_work_source(repo, Arc::new(scheduler.clone()));
+
+        scheduler
+            .schedule_resume_work(&job_id, &plan)
+            .expect("scheduling pending work for the driver should succeed");
+
+        let turn = driver
+            .prepare_resume_execution_turn(&job_id)
+            .expect("missing checkpoint should classify without draining pending work");
+
+        assert_eq!(
+            turn,
+            DownloadDriverExecutionTurn::CheckpointMissing {
+                job_id: job_id.clone()
+            }
+        );
+        assert_eq!(
+            scheduler.pending_work(),
+            vec![DownloadPendingResumeWork { job_id, plan }],
+            "checkpoint-missing turn must preserve pending work for a later durable recovery path"
+        );
+    }
+
+    #[test]
+    fn download_job_driver_execution_turn_accepts_pending_work_after_checkpoint_reload() {
+        let repo = Arc::new(InMemoryCheckpointRepository::default());
+        let scheduler = InMemoryDownloadResumeWorkScheduler::new();
+        let job_id = JobId::generate();
+        let checkpoint = DownloadCheckpointRecord::empty(job_id.clone());
+        let plan = make_resume_work_plan("segment-execution-turn");
+        let driver = DownloadJobDriver::with_pending_resume_work_source(
+            repo.clone(),
+            Arc::new(scheduler.clone()),
+        );
+
+        repo.save(&checkpoint)
+            .expect("saving a synthetic checkpoint should succeed");
+        scheduler
+            .schedule_resume_work(&job_id, &plan)
+            .expect("scheduling pending work for the driver should succeed");
+
+        let turn = driver
+            .prepare_resume_execution_turn(&job_id)
+            .expect("checkpoint-present turn should drain pending work");
+
+        assert_eq!(
+            turn,
+            DownloadDriverExecutionTurn::PendingWorkAccepted {
+                checkpoint,
+                pending_work: vec![DownloadPendingResumeWork { job_id, plan }]
+            }
+        );
+        assert!(
+            scheduler.pending_work().is_empty(),
+            "checkpoint-present turn should consume pending work for the job"
+        );
+    }
+
+    #[test]
+    fn download_job_driver_execution_turn_classifies_empty_pending_work() {
+        let repo = Arc::new(InMemoryCheckpointRepository::default());
+        let driver = DownloadJobDriver::new(repo.clone());
+        let job_id = JobId::generate();
+        let checkpoint = DownloadCheckpointRecord::empty(job_id.clone());
+
+        repo.save(&checkpoint)
+            .expect("saving a synthetic checkpoint should succeed");
+
+        let turn = driver
+            .prepare_resume_execution_turn(&job_id)
+            .expect("checkpoint-present empty pending work should classify explicitly");
+
+        assert_eq!(
+            turn,
+            DownloadDriverExecutionTurn::NoPendingWork { checkpoint },
+            "empty pending work must not be confused with runtime completion"
         );
     }
 }

@@ -6083,6 +6083,25 @@
 - Path-limited status showed only the AT-189 docs/PWF files in the intended commit set.
 - AT-189 was committed locally with only the docs/PWF file set; verify the final amended hash with `git log --oneline -1`.
 
+## 2026-05-17 - AT-190 Started
+
+- Confirmed AT-189 final commit as `3117914 docs: define downloads driver execution`.
+- Skipped push because an earlier direct push was rejected by safety review and the user said to continue when push cannot be done.
+- Read required project, collaboration, docs-map, downloads module, runtime, download runtime, testing, AI protocol, and comment-standard documents in scoped snippets.
+- Read current downloads driver/facade/lib code plus composition shared scheduler/driver construction.
+- Selected the module-local execution-turn classification option from README_IMPL 7.13 as the next Rust slice.
+- Wrote AT-190 active task records and will proceed with TDD: first a failing driver test, then minimal local driver implementation.
+- RED focused test added in `crates/module-downloads/src/driver.rs`.
+- RED command failed for the intended reason: `DownloadDriverExecutionTurn` and `prepare_resume_execution_turn` do not exist yet.
+- GREEN implementation added a local `DownloadDriverExecutionTurn` enum and `DownloadJobDriver::prepare_resume_execution_turn(&JobId)`.
+- Focused `download_job_driver_execution_turn` test filter passed: 3 tests passed, 26 filtered out.
+- Full `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed: 29 tests passed and doc tests had 0 tests.
+- Initial rustfmt check failed only on `crates/module-downloads/src/lib.rs` export wrapping; `cargo fmt` fixed it.
+- Final `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed.
+- Scoped `git diff --check` passed for AT-190 files with CRLF warnings only.
+- Path-limited status showed only the AT-190 code/PWF files in the intended commit set.
+- AT-190 was committed locally with only the code/PWF file set; verify the final amended hash with `git log --oneline -1`.
+
 ### Auto Record: 2026-05-17 00:12:03
 - Tool: apply_patch
 - Phase: Phase 64 - Downloads Driver Execution Boundary
@@ -6148,3 +6167,117 @@
 - Phase: Phase 64 - Downloads Driver Execution Boundary
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 12:53:05
+- Tool: apply_patch
+- Phase: Phase 64 - Downloads Driver Execution Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-17 12:53:18
+- Tool: apply_patch
+- Phase: Phase 65 - Downloads Driver Local Execution-Turn Classification
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 12:53:29
+- Tool: apply_patch
+- Phase: Phase 65 - Downloads Driver Local Execution-Turn Classification
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 12:53:38
+- Tool: apply_patch
+- Phase: Phase 65 - Downloads Driver Local Execution-Turn Classification
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 12:53:54
+- Tool: apply_patch
+- Phase: Phase 65 - Downloads Driver Local Execution-Turn Classification
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (delete)
+
+### Auto Record: 2026-05-17 12:54:24
+- Tool: apply_patch
+- Phase: Phase 65 - Downloads Driver Local Execution-Turn Classification
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-17 12:54:45
+- Tool: apply_patch
+- Phase: Phase 65 - Downloads Driver Local Execution-Turn Classification
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 12:55:04
+- Tool: apply_patch
+- Phase: Phase 65 - Downloads Driver Local Execution-Turn Classification
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-17 12:55:10
+- Tool: apply_patch
+- Phase: Phase 65 - Downloads Driver Local Execution-Turn Classification
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\lib.rs` (update)
+
+### Auto Record: 2026-05-17 12:55:27
+- Tool: apply_patch
+- Phase: Phase 65 - Downloads Driver Local Execution-Turn Classification
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 12:56:28
+- Tool: apply_patch
+- Phase: Phase 65 - Downloads Driver Local Execution-Turn Classification
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 12:57:02
+- Tool: apply_patch
+- Phase: Phase 65 - Downloads Driver Local Execution-Turn Classification
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 12:57:11
+- Tool: apply_patch
+- Phase: Phase 65 - Downloads Driver Local Execution-Turn Classification
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 12:57:20
+- Tool: apply_patch
+- Phase: Phase 65 - Downloads Driver Local Execution-Turn Classification
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 12:57:31
+- Tool: apply_patch
+- Phase: Phase 65 - Downloads Driver Local Execution-Turn Classification
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 12:58:40
+- Tool: apply_patch
+- Phase: Phase 65 - Downloads Driver Local Execution-Turn Classification
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 12:58:45
+- Tool: apply_patch
+- Phase: Phase 65 - Downloads Driver Local Execution-Turn Classification
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 12:58:52
+- Tool: apply_patch
+- Phase: Phase 65 - Downloads Driver Local Execution-Turn Classification
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 12:59:01
+- Tool: apply_patch
+- Phase: Phase 65 - Downloads Driver Local Execution-Turn Classification
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)

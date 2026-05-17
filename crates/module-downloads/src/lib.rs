@@ -9,8 +9,8 @@ pub mod driver;
 pub mod facade;
 
 pub use driver::{
-    DownloadCheckpointRecord, DownloadCheckpointRepository, DownloadJobDriver,
-    DownloadSegmentCheckpointRecord, DownloadSegmentCheckpointStatus,
+    DownloadCheckpointRecord, DownloadCheckpointRepository, DownloadDriverExecutionTurn,
+    DownloadJobDriver, DownloadSegmentCheckpointRecord, DownloadSegmentCheckpointStatus,
 };
 pub use facade::{
     build_resume_segment_decisions, build_resume_work_plan, DownloadFacade, DownloadJobRecord,

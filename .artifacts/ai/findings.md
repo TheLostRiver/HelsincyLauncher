@@ -668,3 +668,12 @@
 - Current Rust `kernel-jobs::JobDriver` still exposes only `module()`, `kind()`, and `restore()`; the broader design's `run()` callback is not implemented yet.
 - Downloads now has all prerequisites for a future same-process execution handoff: pending work source/drain, composition-shared scheduler/source wiring, and durable segment checkpoint facts.
 - The next safe Rust slice should still avoid concrete HTTP/disk/hash work; it should either introduce a local downloads driver execution-turn method or define a `kernel-jobs` runtime `run()` boundary first.
+
+## Phase 65 Downloads Driver Local Execution-Turn Classification Findings
+
+- AT-2026-05-17-189 committed locally as `3117914`; push remains skipped because an earlier push was rejected by safety review.
+- Required docs were reread in scoped snippets before coding: README, CONTRIBUTING, docs map, downloads ARCH/API/FLOW/README_IMPL 7.12 and 7.13, kernel-jobs runtime design, download runtime design, testing strategy, AI transaction protocol, and code comment standard.
+- Current `DownloadJobDriver` already owns both `DownloadCheckpointRepository` and `DownloadPendingResumeWorkSource`, and already exposes `drain_pending_resume_work(&JobId)`.
+- Current `kernel-jobs::JobDriver` still has no `run()` in Rust, so the new behavior must stay a local downloads method and must not mutate runtime snapshots or shared job completion state.
+- `README_IMPL.md` 7.13 makes the smaller next slice explicit: add a downloads-owned execution classification such as pending work accepted, no pending work, checkpoint missing, or checkpoint present.
+- The RED test should prove ordering, especially that checkpoint-missing execution does not drain the in-memory pending-work source.
