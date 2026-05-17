@@ -82,11 +82,19 @@
 
 - task id: AT-2026-05-17-235
 - title: Define host runtime execution command boundary
+- status: completed; final commit `18ea7d7`, pushed to `origin/main`
+
+## Active Atomic Task
+
+- task id: AT-2026-05-17-236
+- title: Add host runtime execution command
 - status: completed; validation passed; publication will be recorded from Git history after commit/push
 
 ## Current Slice
 
-- `docs/TauriIPCAndStateContractsDesign.md`
+- `src-tauri/src/commands/mod.rs`
+- `src-tauri/src/commands/jobs.rs`
+- `src-tauri/tests/transport_wiring_smoke.rs`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -95,8 +103,8 @@
 
 ## Next Resume Point
 
-1. Commit and push AT-2026-05-17-235 if not already published.
-2. Start the next TDD code slice for the documented `jobs_run_next_execution_turn` host command without touching frontend or unrelated dirty files.
+1. Commit and push AT-2026-05-17-236 if not already published.
+2. Next backend slice should be chosen from the runtime execution path after reading the relevant docs again.
 
 ## Validation
 
@@ -172,6 +180,10 @@
 - AT-235 required context read in focused chunks: README/docs routing, composition helper docs and Tauri integration rules, IPC command/query envelopes and implementation guidance, startup ownership rules, downloads runtime execution sections, current host command modules, bootstrap/state wrappers, and transport smoke patterns.
 - AT-235 documented `jobs_run_next_execution_turn` as a command returning a stable `RuntimeExecutionTurnDto`; `Deferred` and `Failed` dispositions remain successful command envelopes unless the composition helper returns `AppError`.
 - AT-235 scoped docs/PWF `git diff --check` passed with CRLF normalization warnings only.
+- AT-235 final commit `18ea7d7` was pushed to `origin/main`.
+- AT-236 required context read in focused chunks: IPC section 7.4, composition/startup docs, downloads runtime execution sections, current host command registry/jobs handler, desktop bootstrap/state wrappers, and transport smoke patterns.
+- AT-236 RED/GREEN validation passed for the documented host command. The final implementation adds `RuntimeExecutionTurnDto`, `RuntimeExecutionTurnDispositionDto`, `map_runtime_execution_turn_result(...)`, the `jobs_run_next_execution_turn` registry entry, and a thin jobs command handler.
+- AT-236 validation passed: focused transport smoke, focused DTO mapper test, full desktop package tests, desktop compile gate, scoped rustfmt with `skip_children=true`, and scoped diff-check all passed.
 - AT-224 found that downloads should not call `prepare_resume_execution_turn(...)` from `run(...)` unless an execution-port path is present, because that helper drains pending work after checkpoint reload.
 - README_IMPL 7.31 defines the next Rust slice: add an optional downloads-owned segment execution port or equivalent explicit strategy, keep the default constructor deferred/non-draining, and test fake completed execution through `run(...)`.
 - AT-224 scoped `git diff --check` passed with CRLF normalization warnings only.

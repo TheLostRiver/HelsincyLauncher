@@ -1,7 +1,9 @@
 use std::future::Future;
+use std::path::{Path, PathBuf};
 use std::pin::pin;
 use std::task::{Context, Poll, RawWaker, RawWakerVTable, Waker};
 
+use launcher_composition_root::{build_desktop_services, DesktopBootstrapConfig};
 use launcher_kernel_foundation::PageRequest;
 use launcher_kernel_jobs::JobPriority;
 use launcher_module_downloads::contracts::{
@@ -10,7 +12,7 @@ use launcher_module_downloads::contracts::{
 };
 use launcher_module_engines::contracts::RunEngineVerificationRequestDto;
 use launcher_module_fab::contracts::FabInventoryListQueryDto;
-use my_epic_launcher_desktop::{build_desktop_host_bootstrap, commands};
+use my_epic_launcher_desktop::{build_desktop_host_bootstrap, commands, DesktopAppServicesHandle};
 
 #[test]
 fn transport_wiring_smoke() {
@@ -19,6 +21,39 @@ fn transport_wiring_smoke() {
 
     assert!(bootstrap.services.is_wired_to_composition_root());
     assert_eq!(bootstrap.registered_commands, commands::REGISTERED_COMMANDS);
+    assert!(bootstrap
+        .registered_commands
+        .contains(&"jobs_run_next_execution_turn"));
+
+    // Use an isolated host graph so the no-queued expectation is not polluted by the default smoke database.
+    // 使用隔离的 host 服务图，避免默认 smoke 数据库污染 no-queued 断言。
+    let (runtime_services, runtime_sqlite_path) =
+        isolated_desktop_services("at236_runtime_execution_command.sqlite3");
+    let runtime_turn = block_on_ready(commands::jobs::jobs_run_next_execution_turn(
+        runtime_services.services(),
+    ));
+
+    match runtime_turn {
+        commands::CommandResultDto::Success { data } => {
+            assert_eq!(
+                data.disposition,
+                commands::RuntimeExecutionTurnDispositionDto::Deferred
+            );
+            assert!(data
+                .reason
+                .as_deref()
+                .expect("deferred execution turn should include a reason")
+                .contains("no queued job"));
+        }
+        commands::CommandResultDto::Failure { error } => {
+            panic!(
+                "runtime execution command should return a disposition DTO, got {}",
+                error.code
+            );
+        }
+    }
+    drop(runtime_services);
+    cleanup_sqlite_path(&runtime_sqlite_path);
 
     let result = block_on_ready(commands::fab::fab_list_inventory(
         bootstrap.services.services(),
@@ -163,6 +198,42 @@ fn transport_wiring_smoke() {
                 error.code
             );
         }
+    }
+}
+
+fn isolated_desktop_services(name: &str) -> (DesktopAppServicesHandle, PathBuf) {
+    let sqlite_path = project_local_sqlite_path(name);
+    let services = build_desktop_services(DesktopBootstrapConfig::new(
+        "app-data",
+        "cache",
+        "logs",
+        sqlite_path.clone(),
+    ))
+    .expect("isolated host services should wire with a project-local sqlite path");
+
+    (
+        DesktopAppServicesHandle::from_services(services),
+        sqlite_path,
+    )
+}
+
+fn project_local_sqlite_path(name: &str) -> PathBuf {
+    let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let workspace_root = manifest_dir
+        .parent()
+        .expect("src-tauri manifest should live under the workspace root");
+    let tmp_dir = workspace_root.join(".artifacts").join("tmp");
+    std::fs::create_dir_all(&tmp_dir).expect("project-local temp directory should be creatable");
+    let sqlite_path = tmp_dir.join(name);
+    cleanup_sqlite_path(&sqlite_path);
+    sqlite_path
+}
+
+fn cleanup_sqlite_path(path: &Path) {
+    let _ = std::fs::remove_file(path);
+    if let Some(file_name) = path.file_name().and_then(|name| name.to_str()) {
+        let _ = std::fs::remove_file(path.with_file_name(format!("{file_name}-wal")));
+        let _ = std::fs::remove_file(path.with_file_name(format!("{file_name}-shm")));
     }
 }
 

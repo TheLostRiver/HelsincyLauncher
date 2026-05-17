@@ -10,7 +10,7 @@
 
 use launcher_composition_root::DesktopAppServices;
 use launcher_kernel_foundation::{AppError, AppResult, IsoDateTime, JobId};
-use launcher_kernel_jobs::AcceptedJob;
+use launcher_kernel_jobs::{AcceptedJob, JobRunDisposition};
 use launcher_module_downloads::facade::DownloadResumeOutcome;
 
 pub mod downloads;
@@ -35,6 +35,7 @@ pub const REGISTERED_COMMANDS: &[&str] = &[
     "downloads_get_policy",
     "downloads_update_policy",
     "jobs_list_active",
+    "jobs_run_next_execution_turn",
 ];
 
 /// Stable error envelope projected from backend `AppError` values into IPC-safe fields.
@@ -175,6 +176,53 @@ impl From<DownloadResumeOutcome> for DownloadResumeOutcomeDto {
     }
 }
 
+/// Coarse execution-turn disposition exposed through the host command boundary.
+/// 暴露在 host command 边界的粗粒度执行轮次结果。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum RuntimeExecutionTurnDispositionDto {
+    /// A driver accepted one non-terminal execution turn.
+    /// driver 接受了一个非终态执行轮次。
+    Accepted,
+    /// No work was run because the runtime or driver chose to defer.
+    /// runtime 或 driver 选择暂缓，因此没有推进执行。
+    Deferred,
+    /// The execution turn failed without projecting terminal runtime state.
+    /// 执行轮次失败，但尚未投影终态 runtime 状态。
+    Failed,
+}
+
+/// Stable command DTO returned after asking the runtime to run one execution turn.
+/// 请求 runtime 推进一个执行轮次后返回的稳定 command DTO。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RuntimeExecutionTurnDto {
+    /// Coarse result category for the execution turn.
+    /// 执行轮次的粗粒度结果分类。
+    pub disposition: RuntimeExecutionTurnDispositionDto,
+
+    /// Optional backend-owned reason for deferred or failed turns.
+    /// 暂缓或失败轮次携带的可选后端原因。
+    pub reason: Option<String>,
+}
+
+impl From<JobRunDisposition> for RuntimeExecutionTurnDto {
+    fn from(disposition: JobRunDisposition) -> Self {
+        match disposition {
+            JobRunDisposition::Accepted => Self {
+                disposition: RuntimeExecutionTurnDispositionDto::Accepted,
+                reason: None,
+            },
+            JobRunDisposition::Deferred { reason } => Self {
+                disposition: RuntimeExecutionTurnDispositionDto::Deferred,
+                reason: Some(reason),
+            },
+            JobRunDisposition::Failed { reason } => Self {
+                disposition: RuntimeExecutionTurnDispositionDto::Failed,
+                reason: Some(reason),
+            },
+        }
+    }
+}
+
 /// Shared desktop service aggregation exposed to concrete command handlers.
 /// 暴露给具体 command handler 的共享桌面服务聚合。
 pub type DesktopServices = DesktopAppServices;
@@ -246,10 +294,25 @@ pub fn map_download_resume_outcome_result(
     }
 }
 
+/// Maps one runtime execution-turn result into a stable host command DTO.
+/// 将单次 runtime 执行轮次结果映射为稳定的 host command DTO。
+pub fn map_runtime_execution_turn_result(
+    result: AppResult<JobRunDisposition>,
+) -> CommandResultDto<RuntimeExecutionTurnDto> {
+    match result {
+        Ok(disposition) => CommandResultDto::Success {
+            data: disposition.into(),
+        },
+        Err(error) => CommandResultDto::Failure {
+            error: error.into(),
+        },
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use launcher_kernel_foundation::{IsoDateTime, JobId};
-    use launcher_kernel_jobs::AcceptedJob;
+    use launcher_kernel_jobs::{AcceptedJob, JobRunDisposition};
     use launcher_module_downloads::facade::DownloadResumeOutcome;
 
     use super::*;
@@ -304,5 +367,45 @@ mod tests {
             }
             other => panic!("runtime-accepted resume should project accepted job, got {other:?}"),
         }
+    }
+
+    #[test]
+    fn maps_runtime_execution_turn_dispositions_without_error_envelope() {
+        let accepted = map_runtime_execution_turn_result(Ok(JobRunDisposition::Accepted));
+        assert_eq!(
+            accepted,
+            CommandResultDto::Success {
+                data: RuntimeExecutionTurnDto {
+                    disposition: RuntimeExecutionTurnDispositionDto::Accepted,
+                    reason: None,
+                },
+            }
+        );
+
+        let deferred = map_runtime_execution_turn_result(Ok(JobRunDisposition::Deferred {
+            reason: "no queued job".into(),
+        }));
+        assert_eq!(
+            deferred,
+            CommandResultDto::Success {
+                data: RuntimeExecutionTurnDto {
+                    disposition: RuntimeExecutionTurnDispositionDto::Deferred,
+                    reason: Some("no queued job".into()),
+                },
+            }
+        );
+
+        let failed = map_runtime_execution_turn_result(Ok(JobRunDisposition::Failed {
+            reason: "driver rejected turn".into(),
+        }));
+        assert_eq!(
+            failed,
+            CommandResultDto::Success {
+                data: RuntimeExecutionTurnDto {
+                    disposition: RuntimeExecutionTurnDispositionDto::Failed,
+                    reason: Some("driver rejected turn".into()),
+                },
+            }
+        );
     }
 }

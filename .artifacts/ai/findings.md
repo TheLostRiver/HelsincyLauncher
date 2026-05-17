@@ -1093,3 +1093,15 @@
 - The host DTO should expose only a coarse runtime turn disposition (`accepted`, `deferred`, `failed`) and optional reason text; downloads segment checkpoint/work details must stay module-local.
 - Deferred or failed execution-turn dispositions are non-terminal runtime outcomes for this first host command and should remain successful command envelopes unless the composition helper itself returns `AppError`.
 - AT-235 validation passed with scoped docs/PWF diff-check; warnings were CRLF normalization only.
+- AT-2026-05-17-235 final commit `18ea7d7` was pushed to `origin/main`.
+
+## Phase 111 Host Runtime Execution Command Findings
+
+- Required context was read in focused chunks: IPC section 7.4, composition helper docs, startup ownership rules, downloads execution sections, current command registry, jobs command module, desktop bootstrap/state wrappers, and transport smoke test.
+- `DesktopAppServices.startup` is public and exposes the already-wired `StartupPipelineFacade`, so the host command can remain a thin transport call without taking `SharedJobRuntimeHost` or repositories directly.
+- Current `src-tauri` command tests call handler functions directly through `bootstrap.services.services()` and use `REGISTERED_COMMANDS` for the registration surface; the RED test should follow that pattern.
+- Existing command DTOs are Rust-side `Debug/Clone/PartialEq/Eq` projections rather than serde-enabled public TS generation, so the first DTO can follow the local enum/struct style and leave TS generation out of scope.
+- RED/GREEN confirmed the host command boundary: the initial transport smoke failed on the missing DTO/handler, then passed after adding `RuntimeExecutionTurnDto`, `RuntimeExecutionTurnDispositionDto`, `map_runtime_execution_turn_result(...)`, command registration, and `jobs_run_next_execution_turn(...)`.
+- The command calls only `services.startup.run_one_runtime_execution_turn()` and maps the resulting disposition; no runtime/composition/downloads internals changed.
+- `Deferred` and `Failed` execution-turn dispositions are mapped into successful command DTOs, while `AppError` remains the only path into `CommandResultDto::Failure`.
+- Full desktop package tests and compile gate passed; scoped rustfmt used `--config skip_children=true` to avoid pre-existing out-of-scope `fab.rs` formatting churn.

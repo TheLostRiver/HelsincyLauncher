@@ -9719,6 +9719,34 @@
 - Validation: scoped `git diff --check` for the docs/PWF file set passed with CRLF normalization warnings only.
 - Next action after commit/push: implement the documented host command with a RED transport smoke assertion first.
 
+## Agent Note: 2026-05-17 22:33 CST - Opened AT-2026-05-17-236
+
+- AT-235 was committed and pushed as `18ea7d7`.
+- Opened AT-236 to implement `jobs_run_next_execution_turn` as a thin host command over `DesktopAppServices.startup.run_one_runtime_execution_turn()`.
+- Required code context confirms the command can live in `src-tauri/src/commands/jobs.rs`, DTO/mapping in `src-tauri/src/commands/mod.rs`, and coverage in `src-tauri/tests/transport_wiring_smoke.rs`.
+- Next action: add a RED transport smoke assertion before writing production command/DTO code.
+
+## Agent Note: 2026-05-17 22:39 CST - AT-236 RED confirmed
+
+- Added the RED transport smoke assertion for `jobs_run_next_execution_turn` with an isolated project-local sqlite path.
+- RED command: `cargo test -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml transport_wiring_smoke`.
+- Expected failure observed: `commands::RuntimeExecutionTurnDispositionDto` and `commands::jobs::jobs_run_next_execution_turn` are missing.
+- Next action: add the minimal DTO, mapper, command registry entry, and jobs command handler.
+
+## Agent Note: 2026-05-17 22:49 CST - Completed AT-2026-05-17-236
+
+- Implemented `jobs_run_next_execution_turn` as a thin host command over `DesktopAppServices.startup.run_one_runtime_execution_turn()`.
+- Added stable transport DTOs and mapper for `JobRunDisposition::{Accepted, Deferred, Failed}` without converting non-terminal dispositions into `AppErrorDto`.
+- Validation passed:
+  - RED transport smoke failed first on missing DTO/handler.
+  - GREEN transport smoke passed with 1 test passed / 0 failed.
+  - Focused mapper test passed with 1 test passed / 0 failed.
+  - Full desktop package tests passed with 3 unit tests and 1 integration smoke test.
+  - Desktop compile gate passed.
+  - Scoped rustfmt passed using `--config skip_children=true` to avoid pre-existing unrelated `fab.rs` formatting churn.
+  - Scoped `git diff --check` passed with CRLF normalization warnings only.
+- The isolated sqlite smoke path now drops services before cleanup and leaves `.artifacts/tmp` empty after the test run.
+
 ### Auto Record: 2026-05-17 22:09:13
 - Tool: apply_patch
 - Phase: Phase 109 - Composition One-shot Runtime Execution Helper
@@ -9788,5 +9816,113 @@
 ### Auto Record: 2026-05-17 22:13:29
 - Tool: apply_patch
 - Phase: Phase 110 - Host Runtime Execution Command Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 22:15:08
+- Tool: apply_patch
+- Phase: Phase 110 - Host Runtime Execution Command Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-17 22:15:20
+- Tool: apply_patch
+- Phase: Phase 111 - Host Runtime Execution Command
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 22:15:33
+- Tool: apply_patch
+- Phase: Phase 111 - Host Runtime Execution Command
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 22:15:45
+- Tool: apply_patch
+- Phase: Phase 111 - Host Runtime Execution Command
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 22:15:56
+- Tool: apply_patch
+- Phase: Phase 111 - Host Runtime Execution Command
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 22:17:07
+- Tool: apply_patch
+- Phase: Phase 111 - Host Runtime Execution Command
+- Files:
+  - `D:\DEV\MyEpicLauncher\src-tauri\tests\transport_wiring_smoke.rs` (update)
+
+### Auto Record: 2026-05-17 22:17:23
+- Tool: apply_patch
+- Phase: Phase 111 - Host Runtime Execution Command
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 22:18:20
+- Tool: apply_patch
+- Phase: Phase 111 - Host Runtime Execution Command
+- Files:
+  - `D:\DEV\MyEpicLauncher\src-tauri\src\commands\mod.rs` (update)
+
+### Auto Record: 2026-05-17 22:18:47
+- Tool: apply_patch
+- Phase: Phase 111 - Host Runtime Execution Command
+- Files:
+  - `D:\DEV\MyEpicLauncher\src-tauri\src\commands\mod.rs` (update)
+
+### Auto Record: 2026-05-17 22:19:00
+- Tool: apply_patch
+- Phase: Phase 111 - Host Runtime Execution Command
+- Files:
+  - `D:\DEV\MyEpicLauncher\src-tauri\src\commands\mod.rs` (update)
+
+### Auto Record: 2026-05-17 22:19:10
+- Tool: apply_patch
+- Phase: Phase 111 - Host Runtime Execution Command
+- Files:
+  - `D:\DEV\MyEpicLauncher\src-tauri\src\commands\mod.rs` (update)
+
+### Auto Record: 2026-05-17 22:19:18
+- Tool: apply_patch
+- Phase: Phase 111 - Host Runtime Execution Command
+- Files:
+  - `D:\DEV\MyEpicLauncher\src-tauri\src\commands\jobs.rs` (update)
+
+### Auto Record: 2026-05-17 22:20:08
+- Tool: apply_patch
+- Phase: Phase 111 - Host Runtime Execution Command
+- Files:
+  - `D:\DEV\MyEpicLauncher\src-tauri\tests\transport_wiring_smoke.rs` (update)
+
+### Auto Record: 2026-05-17 22:21:50
+- Tool: apply_patch
+- Phase: Phase 111 - Host Runtime Execution Command
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 22:22:00
+- Tool: apply_patch
+- Phase: Phase 111 - Host Runtime Execution Command
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 22:22:10
+- Tool: apply_patch
+- Phase: Phase 111 - Host Runtime Execution Command
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 22:22:22
+- Tool: apply_patch
+- Phase: Phase 111 - Host Runtime Execution Command
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 22:22:37
+- Tool: apply_patch
+- Phase: Phase 111 - Host Runtime Execution Command
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)

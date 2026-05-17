@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 110 - Host Runtime Execution Command Boundary
+Phase 111 - Host Runtime Execution Command
 
 ## Current Focus
 
@@ -24,7 +24,8 @@ Phase 110 - Host Runtime Execution Command Boundary
 - AT-2026-05-17-232 was published as commit `d2fa1d9` after implementing the one-shot queue policy slot gate in `kernel-jobs`.
 - AT-2026-05-17-233 was published as commit `01c206d` after defining the composition-root one-shot runtime execution helper boundary.
 - AT-2026-05-17-234 was published as commit `256f89b` after implementing the composition-root one-shot runtime execution helper.
-- AT-2026-05-17-235 completed the host transport command boundary for invoking one runtime execution turn; publication will be recorded from Git history after commit/push.
+- AT-2026-05-17-235 was published as commit `18ea7d7` after defining the host runtime execution command boundary.
+- AT-2026-05-17-236 completed the documented host command with focused TDD; publication will be recorded from Git history after commit/push.
 - AT-2026-05-17-220 was published as commit `aa8d6e3` after documenting the shared runtime execution-turn boundary.
 - AT-2026-05-17-219 was published as commit `f618718` after adding host transport smoke coverage for downloads policy runtime application.
 - AT-2026-05-17-218 was published as commit `5aae7f1` after adding documentation-budget rules.
@@ -820,6 +821,12 @@ Phase 110 - Host Runtime Execution Command Boundary
 - Atomic tasks: AT-2026-05-17-235
 - **Status:** complete
 
+### Phase 111: Host Runtime Execution Command
+
+- Outcome: implement the documented `jobs_run_next_execution_turn` host command and stable runtime execution-turn DTO with a RED/GREEN transport smoke path, without touching frontend, runtime internals, composition helper behavior, downloads business logic, scheduler loops, or schema.
+- Atomic tasks: AT-2026-05-17-236
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -1050,7 +1057,8 @@ Phase 110 - Host Runtime Execution Command Boundary
 226. AT-2026-05-17-232 - completed - implemented one-shot queue policy slot gate in `kernel-jobs`; committed and pushed as `d2fa1d9`.
 227. AT-2026-05-17-233 - completed - defined composition-root one-shot runtime execution helper boundary before Rust changes; committed and pushed as `01c206d`.
 228. AT-2026-05-17-234 - completed - implemented composition-root one-shot runtime execution helper; committed and pushed as `256f89b`.
-229. AT-2026-05-17-235 - completed - defined the host runtime execution command boundary before Rust transport changes; publication will be recorded from Git history after commit/push.
+229. AT-2026-05-17-235 - completed - defined the host runtime execution command boundary before Rust transport changes; committed and pushed as `18ea7d7`.
+230. AT-2026-05-17-236 - completed - added the documented host runtime execution command with focused transport smoke TDD; publication will be recorded from Git history after commit/push.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
