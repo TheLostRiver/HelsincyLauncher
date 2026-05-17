@@ -7,14 +7,14 @@
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
-use launcher_kernel_foundation::{AppResult, AssetId, IsoDateTime, JobId, PageSlice};
+use launcher_kernel_foundation::{AppResult, AssetId, IsoDateTime, JobId, PageCursor, PageSlice};
 use launcher_kernel_jobs::{
     JobPriority, JobProgress, JobSnapshot, JobSnapshotStore, JobState, JobUiState,
 };
 use launcher_module_downloads::{
-    DownloadCheckpointRecord, DownloadCheckpointRepository, DownloadJobRecord,
-    DownloadJobRecordState, DownloadJobRepository, DownloadSegmentCheckpointRecord,
-    DownloadSegmentCheckpointStatus,
+    contracts::ListDownloadJobsQueryDto, DownloadCheckpointRecord, DownloadCheckpointRepository,
+    DownloadJobRecord, DownloadJobRecordState, DownloadJobRepository,
+    DownloadSegmentCheckpointRecord, DownloadSegmentCheckpointStatus,
 };
 use launcher_module_fab::{
     contracts::{FabAssetDetailDto, FabInventoryListQueryDto},
@@ -264,6 +264,81 @@ impl SqliteDownloadJobRepository {
             state: decode_download_job_state(&state_raw)?,
         }))
     }
+
+    /// Lists module-owned download job records with repository-local offset cursors.
+    /// 使用仓储本地 offset 游标列出 downloads 模块拥有的任务记录。
+    pub fn list_jobs(
+        &self,
+        query: &ListDownloadJobsQueryDto,
+    ) -> AppResult<PageSlice<DownloadJobRecord>> {
+        let limit = query.page.limit as usize;
+        if limit == 0 {
+            return Ok(PageSlice::new(Vec::new(), None));
+        }
+
+        let offset = decode_page_offset(query.page.cursor.as_ref())?;
+        let fetch_limit = limit + 1;
+        let conn = self.open_connection()?;
+        let mut jobs = Vec::new();
+
+        if let Some(ui_state) = query.ui_state {
+            let Some(record_state) = download_record_state_for_ui_state(ui_state) else {
+                return Ok(PageSlice::new(Vec::new(), None));
+            };
+            let mut stmt = conn
+                .prepare(
+                    "SELECT job_id, target_id, kind, install_intent, priority, state
+                     FROM download_jobs
+                     WHERE state = ?1
+                     ORDER BY job_id
+                     LIMIT ?2 OFFSET ?3",
+                )
+                .map_err(|e| {
+                    sqlite_read_error(format!("failed to prepare download job list: {e}"))
+                })?;
+            let mut rows = stmt
+                .query(rusqlite::params![
+                    encode_download_job_state(record_state),
+                    fetch_limit as i64,
+                    offset as i64
+                ])
+                .map_err(|e| sqlite_read_error(format!("download job list query failed: {e}")))?;
+            while let Some(row) = rows
+                .next()
+                .map_err(|e| sqlite_read_error(format!("download job list row read failed: {e}")))?
+            {
+                jobs.push(read_download_job_record_row(row)?);
+            }
+        } else {
+            let mut stmt = conn
+                .prepare(
+                    "SELECT job_id, target_id, kind, install_intent, priority, state
+                     FROM download_jobs
+                     ORDER BY job_id
+                     LIMIT ?1 OFFSET ?2",
+                )
+                .map_err(|e| {
+                    sqlite_read_error(format!("failed to prepare download job list: {e}"))
+                })?;
+            let mut rows = stmt
+                .query(rusqlite::params![fetch_limit as i64, offset as i64])
+                .map_err(|e| sqlite_read_error(format!("download job list query failed: {e}")))?;
+            while let Some(row) = rows
+                .next()
+                .map_err(|e| sqlite_read_error(format!("download job list row read failed: {e}")))?
+            {
+                jobs.push(read_download_job_record_row(row)?);
+            }
+        }
+
+        let has_more = jobs.len() > limit;
+        if has_more {
+            jobs.truncate(limit);
+        }
+        let next_cursor = has_more.then(|| PageCursor::new((offset + limit).to_string()));
+
+        Ok(PageSlice::new(jobs, next_cursor))
+    }
 }
 
 impl DownloadJobRepository for SqliteDownloadJobRepository {
@@ -298,6 +373,13 @@ impl DownloadJobRepository for SqliteDownloadJobRepository {
         self.get_job(job_id)
     }
 
+    fn list_jobs(
+        &self,
+        query: &ListDownloadJobsQueryDto,
+    ) -> AppResult<PageSlice<DownloadJobRecord>> {
+        self.list_jobs(query)
+    }
+
     fn update_state(&self, job_id: &JobId, state: DownloadJobRecordState) -> AppResult<()> {
         let conn = self.open_connection()?;
         conn.execute(
@@ -323,6 +405,58 @@ fn encode_job_priority(priority: JobPriority) -> &'static str {
         JobPriority::Normal => "normal",
         JobPriority::High => "high",
     }
+}
+
+fn decode_page_offset(cursor: Option<&PageCursor>) -> AppResult<usize> {
+    match cursor {
+        Some(cursor) => cursor
+            .as_str()
+            .parse::<usize>()
+            .map_err(|e| sqlite_read_error(format!("download job list cursor decode failed: {e}"))),
+        None => Ok(0),
+    }
+}
+
+fn download_record_state_for_ui_state(ui_state: JobUiState) -> Option<DownloadJobRecordState> {
+    match ui_state {
+        JobUiState::Queued => Some(DownloadJobRecordState::Queued),
+        JobUiState::Running => Some(DownloadJobRecordState::Running),
+        JobUiState::Paused => Some(DownloadJobRecordState::Paused),
+        JobUiState::Completed => Some(DownloadJobRecordState::Completed),
+        JobUiState::Failed => Some(DownloadJobRecordState::Failed),
+        JobUiState::Canceled => Some(DownloadJobRecordState::Canceled),
+        JobUiState::AwaitingUser => None,
+    }
+}
+
+fn read_download_job_record_row(row: &rusqlite::Row<'_>) -> AppResult<DownloadJobRecord> {
+    let job_id_raw: String = row
+        .get(0)
+        .map_err(|e| sqlite_read_error(format!("download job id decode failed: {e}")))?;
+    let target_id: String = row
+        .get(1)
+        .map_err(|e| sqlite_read_error(format!("download job target_id decode failed: {e}")))?;
+    let kind: String = row
+        .get(2)
+        .map_err(|e| sqlite_read_error(format!("download job kind decode failed: {e}")))?;
+    let install_intent: Option<String> = row.get(3).map_err(|e| {
+        sqlite_read_error(format!("download job install_intent decode failed: {e}"))
+    })?;
+    let priority_raw: String = row
+        .get(4)
+        .map_err(|e| sqlite_read_error(format!("download job priority decode failed: {e}")))?;
+    let state_raw: String = row
+        .get(5)
+        .map_err(|e| sqlite_read_error(format!("download job state decode failed: {e}")))?;
+
+    Ok(DownloadJobRecord {
+        job_id: JobId::new(job_id_raw),
+        target_id,
+        kind,
+        install_intent,
+        priority: decode_job_priority(&priority_raw)?,
+        state: decode_download_job_state(&state_raw)?,
+    })
 }
 
 fn decode_job_priority(priority: &str) -> AppResult<JobPriority> {

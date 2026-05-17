@@ -7,14 +7,18 @@
 
 use std::sync::{Arc, Mutex};
 
-use launcher_kernel_foundation::{AppError, AppErrorSeverity, AppResult, CorrelationId, JobId};
-use launcher_kernel_jobs::{AcceptedJob, EnqueueJobRequest, JobPriority, JobRuntime, JobSnapshot};
+use launcher_kernel_foundation::{
+    AppError, AppErrorSeverity, AppResult, CorrelationId, JobId, PageSlice,
+};
+use launcher_kernel_jobs::{
+    AcceptedJob, EnqueueJobRequest, JobPriority, JobRuntime, JobSnapshot, JobUiState,
+};
 
 use crate::contracts::{
-    CancelDownloadRequestDto, DownloadJobExtensionDto, DownloadJobListDto, DownloadJobSnapshotDto,
-    DownloadPolicyDto, GetDownloadJobQueryDto, GetDownloadPolicyQueryDto, ListDownloadJobsQueryDto,
-    PauseDownloadRequestDto, ResumeDownloadRequestDto, StartDownloadRequestDto,
-    UpdateDownloadPolicyRequestDto,
+    CancelDownloadRequestDto, DownloadJobExtensionDto, DownloadJobListDto, DownloadJobListItemDto,
+    DownloadJobSnapshotDto, DownloadPolicyDto, GetDownloadJobQueryDto, GetDownloadPolicyQueryDto,
+    ListDownloadJobsQueryDto, PauseDownloadRequestDto, ResumeDownloadRequestDto,
+    StartDownloadRequestDto, UpdateDownloadPolicyRequestDto,
 };
 use crate::driver::{
     DownloadCheckpointRepository, DownloadSegmentCheckpointRecord, DownloadSegmentCheckpointStatus,
@@ -63,6 +67,12 @@ pub trait DownloadJobRepository: Send + Sync {
     fn create_job(&self, job: &DownloadJobRecord) -> AppResult<()>;
     /// 按 job 标识读取模块自己的最小下载记录。
     fn get_job(&self, job_id: &JobId) -> AppResult<Option<DownloadJobRecord>>;
+    /// Lists module-owned download job records for conservative query projection.
+    /// 列出 downloads 模块拥有的任务记录，供保守的查询投影使用。
+    fn list_jobs(
+        &self,
+        query: &ListDownloadJobsQueryDto,
+    ) -> AppResult<PageSlice<DownloadJobRecord>>;
     /// 同步 downloads 模块拥有的粗粒度状态迁移结果。
     fn update_state(&self, job_id: &JobId, state: DownloadJobRecordState) -> AppResult<()>;
 }
@@ -585,8 +595,14 @@ impl<J: DownloadJobRepository, C, M, S, W, R: JobRuntime<Extension = ()>>
 
     /// 预留任务列表查询；当前仍由模块边界返回未接线错误。
     pub fn list_jobs(&self, query: ListDownloadJobsQueryDto) -> AppResult<DownloadJobListDto> {
-        let _ = query;
-        Err(not_wired("list_jobs"))
+        let page = self.deps.job_repo.list_jobs(&query)?;
+        Ok(PageSlice::new(
+            page.items
+                .iter()
+                .map(project_download_job_list_item)
+                .collect(),
+            page.next_cursor,
+        ))
     }
 
     /// 预留单任务快照查询；当前仍由模块边界返回未接线错误。
@@ -759,6 +775,31 @@ fn project_download_job_snapshot(
     }
 }
 
+// Projects a module job record into the conservative public list-row read model.
+// 将模块任务记录投影成保守的公开列表行读模型。
+fn project_download_job_list_item(job: &DownloadJobRecord) -> DownloadJobListItemDto {
+    DownloadJobListItemDto {
+        job_id: job.job_id.clone(),
+        title: job.target_id.clone(),
+        ui_state: download_job_record_ui_state(job.state),
+        progress_label: None,
+        throughput_bytes_per_sec: None,
+    }
+}
+
+// Maps module-owned coarse state to the current public UI state filter/projection.
+// 将 downloads 模块自有的粗粒度状态映射为当前公开 UI 状态筛选与投影值。
+fn download_job_record_ui_state(state: DownloadJobRecordState) -> JobUiState {
+    match state {
+        DownloadJobRecordState::Queued => JobUiState::Queued,
+        DownloadJobRecordState::Running => JobUiState::Running,
+        DownloadJobRecordState::Paused => JobUiState::Paused,
+        DownloadJobRecordState::Completed => JobUiState::Completed,
+        DownloadJobRecordState::Failed => JobUiState::Failed,
+        DownloadJobRecordState::Canceled => JobUiState::Canceled,
+    }
+}
+
 // Projects unsafe segment checkpoint facts as a downloads-domain resume failure.
 // 将不安全的 segment checkpoint 事实投影为 downloads 域恢复失败。
 fn resume_segment_mismatch(job_id: &JobId) -> AppError {
@@ -813,7 +854,8 @@ mod tests {
     use std::sync::{Arc, Mutex};
 
     use launcher_kernel_foundation::{
-        AppError, AppErrorSeverity, AppResult, CorrelationId, IsoDateTime, JobId,
+        AppError, AppErrorSeverity, AppResult, CorrelationId, IsoDateTime, JobId, PageRequest,
+        PageSlice,
     };
     use launcher_kernel_jobs::{JobPriority, JobProgress, JobSnapshot, JobState, JobUiState};
 
@@ -829,8 +871,8 @@ mod tests {
         DownloadStagingRoot, InMemoryDownloadResumeWorkScheduler,
     };
     use crate::contracts::{
-        CancelDownloadRequestDto, GetDownloadJobQueryDto, PauseDownloadRequestDto,
-        ResumeDownloadRequestDto, StartDownloadRequestDto,
+        CancelDownloadRequestDto, GetDownloadJobQueryDto, ListDownloadJobsQueryDto,
+        PauseDownloadRequestDto, ResumeDownloadRequestDto, StartDownloadRequestDto,
     };
     use crate::driver::{DownloadSegmentCheckpointRecord, DownloadSegmentCheckpointStatus};
 
@@ -844,6 +886,13 @@ mod tests {
         fn with_job(job: DownloadJobRecord) -> Self {
             Self {
                 created_jobs: Mutex::new(vec![job]),
+                looked_up_job_ids: Mutex::new(Vec::new()),
+            }
+        }
+
+        fn with_jobs(jobs: Vec<DownloadJobRecord>) -> Self {
+            Self {
+                created_jobs: Mutex::new(jobs),
                 looked_up_job_ids: Mutex::new(Vec::new()),
             }
         }
@@ -885,6 +934,28 @@ mod tests {
                 .iter()
                 .find(|job| &job.job_id == job_id)
                 .cloned())
+        }
+
+        fn list_jobs(
+            &self,
+            query: &ListDownloadJobsQueryDto,
+        ) -> AppResult<PageSlice<DownloadJobRecord>> {
+            let limit = query.page.limit as usize;
+            let jobs = self
+                .created_jobs
+                .lock()
+                .expect("created jobs mutex should not be poisoned");
+            let items = jobs
+                .iter()
+                .filter(|job| match query.ui_state {
+                    Some(ui_state) => super::download_job_record_ui_state(job.state) == ui_state,
+                    None => true,
+                })
+                .take(limit)
+                .cloned()
+                .collect();
+
+            Ok(PageSlice::new(items, None))
         }
 
         fn update_state(&self, job_id: &JobId, state: DownloadJobRecordState) -> AppResult<()> {
@@ -1372,6 +1443,90 @@ mod tests {
         assert_eq!(enqueued_request.job_id, accepted.job_id);
         assert_eq!(enqueued_request.priority, request.priority);
         assert_eq!(enqueued_request.kind, "download");
+    }
+
+    #[test]
+    fn list_jobs_projects_download_records_from_repository_page() {
+        let facade = DownloadFacade::new(DownloadModuleDeps {
+            job_repo: RecordingDownloadJobRepository::default(),
+            checkpoint_repo: (),
+            manifest_provider: (),
+            staging_store: (),
+            resume_scheduler: (),
+            job_runtime: RecordingJobRuntime::default(),
+        });
+        let first = StartDownloadRequestDto {
+            target_id: "asset-a".into(),
+            kind: "engine".into(),
+            install_intent: Some("install".into()),
+            priority: JobPriority::High,
+        };
+        let second = StartDownloadRequestDto {
+            target_id: "asset-b".into(),
+            kind: "asset".into(),
+            install_intent: None,
+            priority: JobPriority::Normal,
+        };
+        let first_job = facade
+            .start_download(first.clone())
+            .expect("first download should be accepted");
+        let second_job = facade
+            .start_download(second.clone())
+            .expect("second download should be accepted");
+
+        let page = facade
+            .list_jobs(ListDownloadJobsQueryDto {
+                page: PageRequest::new(10, None),
+                ui_state: None,
+            })
+            .expect("list_jobs should return module-owned download records");
+
+        assert_eq!(page.items.len(), 2);
+        assert_eq!(page.next_cursor, None);
+        assert_eq!(page.items[0].job_id, first_job.job_id);
+        assert_eq!(page.items[0].title, first.target_id);
+        assert_eq!(page.items[0].ui_state, JobUiState::Queued);
+        assert_eq!(page.items[0].progress_label, None);
+        assert_eq!(page.items[0].throughput_bytes_per_sec, None);
+        assert_eq!(page.items[1].job_id, second_job.job_id);
+        assert_eq!(page.items[1].title, second.target_id);
+        assert_eq!(page.items[1].ui_state, JobUiState::Queued);
+    }
+
+    #[test]
+    fn list_jobs_filters_by_requested_ui_state() {
+        let mut queued_job = make_download_job(JobId::generate());
+        queued_job.state = DownloadJobRecordState::Queued;
+        let mut paused_job = make_download_job(JobId::generate());
+        paused_job.target_id = "paused-asset".into();
+        paused_job.state = DownloadJobRecordState::Paused;
+        let mut completed_job = make_download_job(JobId::generate());
+        completed_job.target_id = "completed-asset".into();
+        completed_job.state = DownloadJobRecordState::Completed;
+        let facade = DownloadFacade::new(DownloadModuleDeps {
+            job_repo: RecordingDownloadJobRepository::with_jobs(vec![
+                queued_job,
+                paused_job.clone(),
+                completed_job,
+            ]),
+            checkpoint_repo: (),
+            manifest_provider: (),
+            staging_store: (),
+            resume_scheduler: (),
+            job_runtime: RecordingJobRuntime::default(),
+        });
+
+        let page = facade
+            .list_jobs(ListDownloadJobsQueryDto {
+                page: PageRequest::new(10, None),
+                ui_state: Some(JobUiState::Paused),
+            })
+            .expect("list_jobs should filter module records by requested UI state");
+
+        assert_eq!(page.items.len(), 1);
+        assert_eq!(page.items[0].job_id, paused_job.job_id);
+        assert_eq!(page.items[0].title, "paused-asset");
+        assert_eq!(page.items[0].ui_state, JobUiState::Paused);
     }
 
     #[test]

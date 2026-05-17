@@ -811,3 +811,11 @@
 - Current Rust `JobRuntime` exposes `snapshot(job_id)` but no list method, even though broader design docs mention a future `list_active(...)`.
 - `SqliteDownloadJobRepository` already stores the module job record fields needed for a conservative list row and can add a read method without schema changes.
 - The safest first `list_jobs(...)` slice is a repository-backed module record page, with live runtime joins and policy data left for later boundaries.
+
+## Phase 81 Downloads List-jobs Query Implementation Findings
+
+- AT-2026-05-17-205 final commit is `17e0bb4` and was pushed to `origin/main`.
+- `PageRequest` exposes `limit` and optional string cursor; the first facade tests can ignore cursor behavior and prove page projection/filtering.
+- The module test repository already stores `created_jobs`, so it can implement a simple in-memory repository page for RED/GREEN tests.
+- Because `DownloadJobRepository` is implemented by `SqliteDownloadJobRepository`, the Rust slice must also add SQLite adapter compile support even if runtime list/live snapshot joins remain out of scope.
+- RED/GREEN confirmed `list_jobs(...)` now projects module repository records to conservative list DTO rows and applies optional `ui_state` filtering without adding runtime list APIs, live snapshot joins, policy storage, transport, frontend, or concrete IO.

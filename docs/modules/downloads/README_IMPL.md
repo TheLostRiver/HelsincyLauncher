@@ -93,7 +93,7 @@ Implementation truth should move through module facade and ports first. Do not p
 | fake segment failure result contract | `DownloadSegmentExecutionResult::Failed` carries request facts, downloaded bytes known at failure time, a local reason string, and a retryable hint without public `DL_*` execution projection, checkpoint mutation, retry policy, runtime completion, concrete IO, transport, or frontend behavior | driver unit tests |
 | fake failed-result checkpoint mutation | `DownloadJobDriver::record_failed_segment_checkpoints(...)` reloads checkpoint facts, applies same-job failed fake results as `Failed` segment status/progress, and saves through `DownloadCheckpointRepository` while deferring retry/backoff, public error projection, terminal runtime state, concrete IO, SQLite adapter/schema, transport, composition-root, and frontend behavior | driver unit tests |
 | fake local mixed-result checkpoint orchestration | `execute_local_resume_turn(...)` records both completed and failed fake results through existing checkpoint mutation helpers while deferring retry/backoff, public error projection, terminal runtime state, concrete IO, SQLite adapter/schema, transport, composition-root, and frontend behavior | driver unit tests |
-| list/get/policy surfaces | `get_job_snapshot` composes module job records with shared runtime snapshots; `list_jobs` and policy persistence remain later | module facade tests |
+| list/get/policy surfaces | `get_job_snapshot` composes module job records with shared runtime snapshots; `list_jobs` projects module repository pages; policy persistence remains later | module facade tests + adapter check |
 
 ---
 
@@ -1141,6 +1141,15 @@ Later slices:
 1. Live runtime list or snapshot-join behavior needs a separate `JobRuntime` list/read-source design.
 2. Rich display titles, aggregate progress, throughput, ETA, and policy budget projection need separate data sources.
 3. Policy read/write surfaces remain separate from `list_jobs(...)`.
+
+Completed by AT-206:
+
+1. `DownloadJobRepository` now exposes a module-owned job page for conservative list projection.
+2. `DownloadsFacade::list_jobs(...)` maps repository records to `DownloadJobListItemDto` rows.
+3. The first projection uses `target_id` as `title`, maps `DownloadJobRecordState` to `JobUiState`, and leaves `progress_label` / `throughput_bytes_per_sec` as `None`.
+4. Optional `ui_state` filtering is covered by focused facade tests.
+5. `SqliteDownloadJobRepository` implements the new repository method without schema changes.
+6. Runtime list APIs, live snapshot joins, policy storage, host transport, frontend behavior, concrete IO, retry/backoff, and terminal runtime completion remain unchanged.
 
 ---
 

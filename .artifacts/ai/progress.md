@@ -7879,6 +7879,19 @@
 - Scoped `git diff --check` over AT-205 files passed with CRLF normalization warnings only.
 - Initial AT-205 local commit before PWF hash backfill amend: `c66d3bb`.
 
+## 2026-05-17 - AT-206 implementation slice started
+
+- AT-205 final commit `17e0bb4` was pushed to `origin/main`.
+- Re-read README_IMPL 7.23, downloads DTOs, facade test helpers, SQLite job repository, backend use-case table, repository ports docs, and kernel runtime list gap before coding.
+- The next action is RED tests for repository-backed `DownloadsFacade::list_jobs(...)` projection and optional `ui_state` filtering.
+- RED validation: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml list_jobs` failed with 0 passed and 2 failed because `list_jobs(...)` still returned `DOWNLOADS_NOT_WIRED`.
+- GREEN focused validation passed with 2 passed, 0 failed after implementing the repository page method and conservative list projection.
+- Full downloads module validation passed with 43 passed, 0 failed.
+- SQLite adapter compile validation passed with `cargo check -p launcher-adapter-storage-sqlite --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`.
+- Formatting validation passed with `cargo fmt -p launcher-module-downloads -p launcher-adapter-storage-sqlite --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check`.
+- Scoped diff validation passed with CRLF normalization warnings only for the AT-206 file set.
+- Initial AT-206 local commit before PWF hash backfill amend: `87b09ab`.
+
 ### Auto Record: 2026-05-17 15:02:21
 - Tool: apply_patch
 - Phase: Phase 78 - Downloads Get-job Snapshot Query Boundary
@@ -8015,6 +8028,121 @@
 ### Auto Record: 2026-05-17 15:17:29
 - Tool: apply_patch
 - Phase: Phase 80 - Downloads List-jobs Query Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 15:19:02
+- Tool: apply_patch
+- Phase: Phase 80 - Downloads List-jobs Query Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-17 15:19:36
+- Tool: apply_patch
+- Phase: Phase 81 - Downloads List-jobs Query Implementation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 15:20:12
+- Tool: apply_patch
+- Phase: Phase 81 - Downloads List-jobs Query Implementation
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-17 15:21:39
+- Tool: apply_patch
+- Phase: Phase 81 - Downloads List-jobs Query Implementation
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-17 15:22:49
+- Tool: apply_patch
+- Phase: Phase 81 - Downloads List-jobs Query Implementation
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-17 15:23:01
+- Tool: apply_patch
+- Phase: Phase 81 - Downloads List-jobs Query Implementation
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-17 15:23:12
+- Tool: apply_patch
+- Phase: Phase 81 - Downloads List-jobs Query Implementation
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-17 15:23:24
+- Tool: apply_patch
+- Phase: Phase 81 - Downloads List-jobs Query Implementation
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-17 15:23:31
+- Tool: apply_patch
+- Phase: Phase 81 - Downloads List-jobs Query Implementation
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\adapter-storage-sqlite\src\lib.rs` (update)
+
+### Auto Record: 2026-05-17 15:23:51
+- Tool: apply_patch
+- Phase: Phase 81 - Downloads List-jobs Query Implementation
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\adapter-storage-sqlite\src\lib.rs` (update)
+
+### Auto Record: 2026-05-17 15:24:09
+- Tool: apply_patch
+- Phase: Phase 81 - Downloads List-jobs Query Implementation
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\adapter-storage-sqlite\src\lib.rs` (update)
+
+### Auto Record: 2026-05-17 15:24:25
+- Tool: apply_patch
+- Phase: Phase 81 - Downloads List-jobs Query Implementation
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-17 15:24:42
+- Tool: apply_patch
+- Phase: Phase 81 - Downloads List-jobs Query Implementation
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-17 15:25:11
+- Tool: apply_patch
+- Phase: Phase 81 - Downloads List-jobs Query Implementation
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\adapter-storage-sqlite\src\lib.rs` (update)
+
+### Auto Record: 2026-05-17 15:26:09
+- Tool: apply_patch
+- Phase: Phase 81 - Downloads List-jobs Query Implementation
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 15:26:29
+- Tool: apply_patch
+- Phase: Phase 81 - Downloads List-jobs Query Implementation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 15:27:17
+- Tool: apply_patch
+- Phase: Phase 81 - Downloads List-jobs Query Implementation
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)

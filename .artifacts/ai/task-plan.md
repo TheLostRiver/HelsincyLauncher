@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 80 - Downloads List-jobs Query Boundary
+Phase 81 - Downloads List-jobs Query Implementation
 
 ## Current Focus
 
@@ -622,6 +622,12 @@ Phase 80 - Downloads List-jobs Query Boundary
 - Atomic tasks: AT-2026-05-17-205
 - **Status:** complete
 
+### Phase 81: Downloads List-jobs Query Implementation
+
+- Outcome: implement `DownloadsFacade::list_jobs(...)` with focused TDD using a downloads-owned repository page and conservative list-item projection, while keeping policy surfaces, runtime list APIs, live snapshot joins, transport, frontend, concrete IO, retry/backoff, and terminal completion out of scope.
+- Atomic tasks: AT-2026-05-17-206
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -823,6 +829,7 @@ Phase 80 - Downloads List-jobs Query Boundary
 197. AT-2026-05-17-203 - completed - documented the downloads get-job snapshot query boundary before Rust coding, after confirming `list_jobs` and policy surfaces need separate future design; then committed locally, with initial hash `98c491b` before PWF backfill amend.
 198. AT-2026-05-17-204 - completed - implemented the downloads get-job snapshot query with focused TDD while keeping list/policy/runtime-list/adapter/transport/frontend surfaces out of scope; then committed locally, with initial hash `d1de743` before PWF backfill amend.
 199. AT-2026-05-17-205 - completed - documented the downloads list-jobs query boundary before Rust coding, selecting the downloads-owned job repository page as the first read source; then committed locally, with initial hash `c66d3bb` before PWF backfill amend.
+200. AT-2026-05-17-206 - completed - implemented the downloads list-jobs query with focused TDD and SQLite adapter compile support while keeping policy/runtime-list/live-join/transport/frontend surfaces out of scope; then committed locally, with initial hash `87b09ab` before PWF backfill amend.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
