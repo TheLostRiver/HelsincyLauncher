@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 63 - Downloads SQLite Segment Checkpoint Persistence
+Phase 64 - Downloads Driver Execution Boundary
 
 ## Current Focus
 
@@ -520,6 +520,12 @@ Phase 63 - Downloads SQLite Segment Checkpoint Persistence
 - Atomic tasks: AT-2026-05-16-188
 - **Status:** complete
 
+### Phase 64: Downloads Driver Execution Boundary
+
+- Outcome: define the next downloads driver execution boundary after durable segment checkpoint persistence, without changing `kernel-jobs`, implementing concrete IO, or claiming runtime `run()` exists in current Rust.
+- Atomic tasks: AT-2026-05-17-189
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -704,6 +710,7 @@ Phase 63 - Downloads SQLite Segment Checkpoint Persistence
 180. AT-2026-05-16-186 - completed - wired the shared downloads resume scheduler/source through composition-root with focused TDD and committed locally.
 181. AT-2026-05-16-187 - completed - documented the downloads checkpoint mutation boundary and next segment-checkpoint persistence slice, then committed locally.
 182. AT-2026-05-16-188 - completed - persisted downloads segment checkpoint facts through `SqliteDownloadCheckpointRepository` with focused TDD, then committed locally.
+183. AT-2026-05-17-189 - completed - documented the downloads driver execution boundary after durable segment checkpoint persistence; scoped readback/status and `git diff --check` passed with CRLF warnings only, then committed locally.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

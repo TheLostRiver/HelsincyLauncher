@@ -660,3 +660,11 @@
 - The implementation stores segment records in a job-scoped `download_segment_checkpoints` table and replaces one job's segment rows in the same transaction as the job checkpoint upsert.
 - Offset, length, and downloaded byte counts are stored as text for now to preserve the Rust `u64` contract without forcing signed SQLite narrowing.
 - This slice remains persistence-only; no driver execution, runtime completion, transport, frontend, composition public API, fetch/write/verify, or DTO shape changed.
+
+## Phase 64 Downloads Driver Execution Boundary Findings
+
+- AT-2026-05-16-188 committed locally as `4e3e5ac`.
+- Required docs were reread in scoped snippets before editing: README, CONTRIBUTING, docs map, downloads ARCH/API/FLOW/README_IMPL 7.12, kernel-jobs runtime design, download runtime design, and testing strategy.
+- Current Rust `kernel-jobs::JobDriver` still exposes only `module()`, `kind()`, and `restore()`; the broader design's `run()` callback is not implemented yet.
+- Downloads now has all prerequisites for a future same-process execution handoff: pending work source/drain, composition-shared scheduler/source wiring, and durable segment checkpoint facts.
+- The next safe Rust slice should still avoid concrete HTTP/disk/hash work; it should either introduce a local downloads driver execution-turn method or define a `kernel-jobs` runtime `run()` boundary first.

@@ -5901,6 +5901,13 @@
 - Path-limited `git status --short` showed only AT-188 files; broad status still contains unrelated dirty files, which remain excluded from the commit.
 - AT-188 was committed locally after validation. The exact commit hash should be read from `git log` after the final amend.
 
+## 2026-05-17 - AT-189 Driver Execution Boundary Docs
+
+- Confirmed AT-188 final commit is `4e3e5ac`.
+- Broad status still contains unrelated dirty files; AT-189 remains docs/PWF only.
+- Read README, CONTRIBUTING, docs map, downloads ARCH/API/FLOW/README_IMPL, kernel-jobs runtime design, download runtime design, and testing strategy snippets before editing.
+- Key conclusion: current Rust has no `JobDriver::run()` yet, so the next code slice must not jump into concrete fetch/write/verify. It needs a clearly documented execution-turn seam first.
+
 ### Auto Record: 2026-05-16 23:38:38
 - Tool: apply_patch
 - Phase: Phase 60 - Downloads Composition Shared Scheduler Source Wiring Boundary
@@ -6044,3 +6051,100 @@
   - `.artifacts/ai/task-plan.md` (update)
   - `.artifacts/ai/progress.md` (update)
   - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-17 00:09:02
+- Tool: apply_patch
+- Phase: Phase 64 - Downloads Driver Execution Boundary
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (delete)
+  - `docs/modules/downloads/README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 00:11:56
+- Tool: apply_patch
+- Phase: Phase 64 - Downloads Driver Execution Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+## 2026-05-17 - AT-189 Validation Blocked
+
+- Continued from the restored context and confirmed `.artifacts/ai/active-task.md` is on AT-2026-05-17-189.
+- Read back the new `docs/modules/downloads/README_IMPL.md` section 7.13 and confirmed it documents the current `JobDriver::run()` gap, execution-turn ownership rules, and the smaller module-local next Rust slice.
+- Attempted scoped `git diff --check` for AT-189, but sandbox escalation was rejected by the automatic reviewer/usage limit before the command could run.
+- AT-189 is therefore blocked pending scoped validation and local commit. Do not start AT-190 coding until the AT-189 validation/commit gate is complete.
+
+## 2026-05-17 - AT-189 Validation Resumed
+
+- The user asked to continue after the blocker was recorded.
+- Re-ran the AT-189 readback for `docs/modules/downloads/README_IMPL.md` section 7.13.
+- Scoped `git diff --check` passed for the AT-189 file set with CRLF warnings only.
+- Path-limited status showed only the AT-189 docs/PWF files in the intended commit set.
+- AT-189 was committed locally with only the docs/PWF file set; verify the final amended hash with `git log --oneline -1`.
+
+### Auto Record: 2026-05-17 00:12:03
+- Tool: apply_patch
+- Phase: Phase 64 - Downloads Driver Execution Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 00:12:17
+- Tool: apply_patch
+- Phase: Phase 64 - Downloads Driver Execution Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 00:12:25
+- Tool: apply_patch
+- Phase: Phase 64 - Downloads Driver Execution Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 12:46:33
+- Tool: apply_patch
+- Phase: Phase 64 - Downloads Driver Execution Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 12:46:42
+- Tool: apply_patch
+- Phase: Phase 64 - Downloads Driver Execution Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 12:46:55
+- Tool: apply_patch
+- Phase: Phase 64 - Downloads Driver Execution Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 12:47:00
+- Tool: apply_patch
+- Phase: Phase 64 - Downloads Driver Execution Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 12:47:48
+- Tool: apply_patch
+- Phase: Phase 64 - Downloads Driver Execution Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 12:47:57
+- Tool: apply_patch
+- Phase: Phase 64 - Downloads Driver Execution Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 12:48:06
+- Tool: apply_patch
+- Phase: Phase 64 - Downloads Driver Execution Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 12:48:12
+- Tool: apply_patch
+- Phase: Phase 64 - Downloads Driver Execution Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)

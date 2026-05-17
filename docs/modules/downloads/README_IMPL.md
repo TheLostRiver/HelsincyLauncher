@@ -659,6 +659,60 @@ Current Rust slice:
 
 Only after segment checkpoint facts are durable should a later slice start consuming pending work to perform concrete fetch/write/verify behavior.
 
+### 7.13 Driver Execution Boundary
+
+The downloads backend now has the three prerequisites for a future same-process execution turn:
+
+1. `DownloadPendingResumeWorkSource` can drain prepared work by job id;
+2. composition-root shares the same scheduler/source instance between facade preparation and driver construction;
+3. `SqliteDownloadCheckpointRepository` can persist and reload segment checkpoint facts.
+
+That still does not mean real download execution exists in current Rust. The broader runtime design describes `JobDriver::run(...)`, but the current `kernel-jobs` crate only exposes `module()`, `kind()`, and `restore()`. Until a `run()` callback or equivalent execution turn exists, downloads code must not pretend that shared runtime can fetch, write, verify, or complete segment work.
+
+Current Rust reality:
+
+1. `resume_download_outcome()` reconstructs resume decisions, schedules pending work, then enqueues a job-level runtime request.
+2. `DownloadJobDriver::restore()` only checks whether durable checkpoint facts exist.
+3. `DownloadJobDriver::drain_pending_resume_work(&JobId)` is a local helper, not a shared runtime callback.
+4. `JobDriverRegistry::resolve(...)` returns trait objects that only support current `JobDriver` trait methods.
+5. There is no runtime-owned lease/execution loop that calls downloads-specific segment execution.
+
+Execution-turn ownership rules:
+
+1. A future downloads execution turn may drain prepared pending work for one accepted job id.
+2. It must reload or validate the current durable checkpoint before treating in-memory work as executable.
+3. It may map each `DownloadResumeWorkItem` into later fetch/write/verify operations, but those operations need their own ports and tests.
+4. It must write checkpoint facts before reporting runtime-visible completion or terminal progress.
+5. It must report progress and terminal state through the future runtime execution context, not by directly editing `JobSnapshotStore`.
+6. Empty pending work is not success. It must become an explicit execution classification such as reconstruct-from-durable-facts, no-op/already-complete, or module execution failure.
+
+Next Rust slice options:
+
+1. module-local option: add a local `DownloadJobDriver` execution-turn method that drains pending work, reloads checkpoint facts, and returns a module-owned execution classification without performing fetch/write/verify;
+2. runtime-first option: document and then implement the minimal `kernel-jobs` `run()` boundary before adding downloads execution behavior;
+3. do not combine both options in one atomic task.
+
+The module-local option is the smaller next slice if the goal is to keep momentum inside downloads:
+
+1. define a downloads-owned execution outcome such as pending work accepted, no pending work, checkpoint missing, or checkpoint present;
+2. add focused driver tests around `DownloadJobDriver` using injected pending-work source and checkpoint repository;
+3. keep the method local to `module-downloads`; do not modify `kernel-jobs::JobDriver`;
+4. do not call fetcher, writer, verifier, snapshot writer, host transport, frontend, or completion APIs.
+
+The runtime-first option is the better next slice if the goal is to make shared scheduling honest before more module-local driver methods:
+
+1. document the current `kernel-jobs` gap against the broader runtime design;
+2. define the minimal `run()`/execution context API and how it preserves module-owned business checkpoints;
+3. add kernel-jobs tests before any downloads behavior depends on it.
+
+Out of scope until one of those execution boundaries lands:
+
+1. HTTP range requests or provider object fetches;
+2. staging file writes, sparse range writes, temp fragments, or final artifact moves;
+3. hash/length verification;
+4. runtime snapshot completion or terminal events for downloads;
+5. host transport or frontend projection of segment execution details.
+
 ---
 
 ## 8. Error Semantics
