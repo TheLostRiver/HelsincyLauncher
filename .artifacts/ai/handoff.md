@@ -100,11 +100,18 @@
 
 - task id: AT-2026-05-17-238
 - title: Define downloads concrete segment execution boundary
-- status: completed; validation passed; publication will be recorded from Git history after commit/push
+- status: completed; final commit `d5af454`, pushed to `origin/main`
+
+## Active Atomic Task
+
+- task id: AT-2026-05-17-239
+- title: Add downloads segment executor adapter shell
+- status: in_progress
 
 ## Current Slice
 
-- `docs/modules/downloads/README_IMPL.md`
+- `crates/module-downloads/src/driver.rs`
+- `crates/module-downloads/src/lib.rs`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -113,8 +120,8 @@
 
 ## Next Resume Point
 
-1. Commit and push AT-2026-05-17-238 if not already published.
-2. Next Rust slice can use README_IMPL 7.35 to add a module-owned executor adapter shell behind `DownloadSegmentExecutionPort`.
+1. Add RED driver test for a fake/in-memory segment executor adapter shell.
+2. Implement the minimal adapter/sub-port contracts, validate, then commit and push AT-239 if clean.
 
 ## Validation
 
@@ -202,6 +209,8 @@
 - AT-238 required context read in focused chunks: downloads module docs, README_IMPL runtime sections, Tauri download runtime fetch/write/verify/staging references, kernel-jobs runtime context references, and current segment execution request/result/port shape.
 - AT-238 README_IMPL 7.35 defines the next safe Rust slice: a module-owned executor adapter shell behind the existing `DownloadSegmentExecutionPort`, starting with fake/in-memory sub-ports or adapter-shell tests and no real IO.
 - AT-238 scoped docs/PWF diff-check passed with CRLF normalization warnings only.
+- AT-238 final commit `d5af454` was pushed to `origin/main`.
+- AT-239 required context read in focused chunks: downloads module docs, README_IMPL 7.35, Tauri download runtime fetch/write/verify/staging references, kernel-jobs driver/runtime references, and current driver request/result/port tests.
 - AT-224 found that downloads should not call `prepare_resume_execution_turn(...)` from `run(...)` unless an execution-port path is present, because that helper drains pending work after checkpoint reload.
 - README_IMPL 7.31 defines the next Rust slice: add an optional downloads-owned segment execution port or equivalent explicit strategy, keep the default constructor deferred/non-draining, and test fake completed execution through `run(...)`.
 - AT-224 scoped `git diff --check` passed with CRLF normalization warnings only.
@@ -237,6 +246,25 @@
 - Do not run destructive commands.
 - Do not change Rust code, downloads code, composition-root wiring, frontend, host transport, scheduler loop, concrete IO, retry/backoff, durable lease persistence, terminal completion, SQLite schema, hooks, `.codex`, Cargo.lock, or unrelated dirty files in AT-229.
 - Push is authorized by the user-provided GitHub remote after each completed task commit.
+
+## Latest Handoff - AT-2026-05-17-239
+
+- Status: implementation validated; commit/push pending at the time of this note.
+- Scope completed:
+  - Added `DownloadSegmentExecutor` behind the existing `DownloadSegmentExecutionPort`.
+  - Added module-owned fetch/write/verify sub-port traits plus fake/in-memory result DTOs.
+  - Re-exported the new adapter shell and contracts from `launcher-module-downloads`.
+  - Added focused TDD coverage proving request facts pass through fake sub-ports and successful output becomes the existing `Completed` result shape.
+- Preserved boundaries:
+  - No production composition-root wiring.
+  - No real HTTP range requests, provider object fetches, disk/staging writes, artifact moves, or hash verification.
+  - No retry/backoff, terminal runtime projection, leases, host transport, frontend, or SQLite schema work.
+- Validation passed:
+  - focused adapter test
+  - `driver_run` regression tests
+  - full `launcher-module-downloads --lib`
+  - `launcher-composition-root` check
+  - scoped rustfmt check
 
 ## Dirty Worktree To Preserve
 

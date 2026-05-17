@@ -1126,3 +1126,14 @@
 - Real execution must not be introduced in the same slice as retry/backoff, terminal snapshot projection, scheduler loops, leases, or frontend state.
 - README_IMPL 7.35 now defines the next safe Rust slice as a module-owned executor adapter shell behind `DownloadSegmentExecutionPort`, starting with fake/in-memory sub-ports or adapter-shell tests rather than real IO.
 - AT-238 scoped docs/PWF diff-check passed with CRLF normalization warnings only.
+- AT-2026-05-17-238 final commit `d5af454` was pushed to `origin/main`.
+
+## Phase 114 Downloads Segment Executor Adapter Shell Findings
+
+- Required context was read in focused chunks: downloads module ARCH/API/FLOW snippets, README_IMPL 7.35, Tauri download runtime fetch/write/verify/staging references, kernel-jobs driver/runtime references, current driver request/result/port code, and existing driver tests.
+- Existing `DownloadSegmentExecutionRequest` has enough facts for an adapter-shell test: source locator, staging target, expected hash, length/range, resume mode, and checkpoint reference.
+- The first code slice should not wire composition-root production execution. It should prove only that an adapter behind `DownloadSegmentExecutionPort` can pass request facts through fake fetch/write/verify sub-ports and return the existing `Completed` result shape.
+- Public exports in `crates/module-downloads/src/lib.rs` should include the new adapter shell and sub-port contracts if they are intended as module-owned extension points.
+- RED/GREEN confirmed `DownloadSegmentExecutor` composes fake in-memory `DownloadSegmentFetchPort`, `DownloadSegmentWritePort`, and `DownloadSegmentVerifyPort` implementations behind the existing driver-facing `DownloadSegmentExecutionPort`.
+- The adapter returns the existing `DownloadSegmentExecutionResult::Completed` shape from sub-port facts and does not change driver request/result shape, checkpoint mutation helpers, `kernel-jobs`, composition-root production wiring, host transport, frontend, SQLite schema, retry/backoff, or real HTTP/disk/hash IO.
+- Validation passed for the focused adapter test, existing `driver_run` tests, full `launcher-module-downloads` lib tests, `launcher-composition-root` compile gate, and scoped rustfmt.

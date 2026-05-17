@@ -206,6 +206,69 @@ pub enum DownloadSegmentExecutionResult {
     },
 }
 
+/// Bytes fetched for a segment by a module-owned fetch sub-port.
+/// 由模块自有 fetch 子端口取得的 segment 字节结果。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DownloadSegmentFetchResult {
+    /// In-memory bytes for the first adapter-shell boundary; real streaming is a later slice.
+    /// 首个 adapter shell 边界使用的内存字节；真实流式传输属于后续切片。
+    pub bytes: Vec<u8>,
+    /// Optional provider validator token observed while fetching.
+    /// 拉取阶段观测到的可选 provider 校验 token。
+    pub etag: Option<String>,
+}
+
+/// Staging write facts produced by a module-owned write sub-port.
+/// 由模块自有 write 子端口产生的 staging 写入事实。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DownloadSegmentWriteResult {
+    /// Bytes written for this segment.
+    /// 本次 segment 写入的字节数。
+    pub downloaded_bytes: u64,
+    /// Optional staging-relative partial path produced by the writer.
+    /// writer 产生的可选 staging 相对 partial 路径。
+    pub partial_path: Option<String>,
+    /// Optional hash-state reference retained for later checkpoint/verifier slices.
+    /// 为后续 checkpoint/verifier 切片保留的可选 hash 状态引用。
+    pub hash_state_ref: Option<String>,
+}
+
+/// Module-owned fetch boundary used behind `DownloadSegmentExecutionPort`.
+/// 位于 `DownloadSegmentExecutionPort` 背后的模块自有 fetch 边界。
+pub trait DownloadSegmentFetchPort: Send + Sync {
+    /// Fetches bytes for the prepared segment request without exposing provider details upward.
+    /// 为准备好的 segment 请求拉取字节，不向上层暴露 provider 细节。
+    fn fetch_segment(
+        &self,
+        request: &DownloadSegmentExecutionRequest,
+    ) -> AppResult<DownloadSegmentFetchResult>;
+}
+
+/// Module-owned staging writer boundary used behind `DownloadSegmentExecutionPort`.
+/// 位于 `DownloadSegmentExecutionPort` 背后的模块自有 staging writer 边界。
+pub trait DownloadSegmentWritePort: Send + Sync {
+    /// Writes fetched segment bytes to the staging-relative target described by the request.
+    /// 将已拉取的 segment 字节写入请求描述的 staging 相对目标。
+    fn write_segment(
+        &self,
+        request: &DownloadSegmentExecutionRequest,
+        fetched: &DownloadSegmentFetchResult,
+    ) -> AppResult<DownloadSegmentWriteResult>;
+}
+
+/// Module-owned verifier boundary used behind `DownloadSegmentExecutionPort`.
+/// 位于 `DownloadSegmentExecutionPort` 背后的模块自有 verifier 边界。
+pub trait DownloadSegmentVerifyPort: Send + Sync {
+    /// Verifies fetched/written facts for the request; concrete hash logic is a later slice.
+    /// 校验该请求的 fetch/write 事实；具体 hash 逻辑属于后续切片。
+    fn verify_segment(
+        &self,
+        request: &DownloadSegmentExecutionRequest,
+        fetched: &DownloadSegmentFetchResult,
+        written: &DownloadSegmentWriteResult,
+    ) -> AppResult<()>;
+}
+
 /// Port shell for handing segment requests to later fetch/write/verify code.
 /// 将 segment 请求交给后续 fetch/write/verify 代码的端口壳。
 pub trait DownloadSegmentExecutionPort: Send + Sync {
@@ -215,6 +278,50 @@ pub trait DownloadSegmentExecutionPort: Send + Sync {
         &self,
         request: &DownloadSegmentExecutionRequest,
     ) -> AppResult<DownloadSegmentExecutionResult>;
+}
+
+/// Thin adapter that composes fetch/write/verify sub-ports behind the driver-facing port.
+/// 薄 adapter：在 driver 面向的端口背后组合 fetch/write/verify 子端口。
+#[derive(Clone)]
+pub struct DownloadSegmentExecutor {
+    fetcher: Arc<dyn DownloadSegmentFetchPort>,
+    writer: Arc<dyn DownloadSegmentWritePort>,
+    verifier: Arc<dyn DownloadSegmentVerifyPort>,
+}
+
+impl DownloadSegmentExecutor {
+    /// Creates a segment executor from explicit module-owned sub-ports.
+    /// 使用显式的模块自有子端口创建 segment executor。
+    pub fn new(
+        fetcher: Arc<dyn DownloadSegmentFetchPort>,
+        writer: Arc<dyn DownloadSegmentWritePort>,
+        verifier: Arc<dyn DownloadSegmentVerifyPort>,
+    ) -> Self {
+        Self {
+            fetcher,
+            writer,
+            verifier,
+        }
+    }
+}
+
+impl DownloadSegmentExecutionPort for DownloadSegmentExecutor {
+    fn accept_segment_execution(
+        &self,
+        request: &DownloadSegmentExecutionRequest,
+    ) -> AppResult<DownloadSegmentExecutionResult> {
+        let fetched = self.fetcher.fetch_segment(request)?;
+        let written = self.writer.write_segment(request, &fetched)?;
+        self.verifier.verify_segment(request, &fetched, &written)?;
+
+        Ok(DownloadSegmentExecutionResult::Completed {
+            request: request.clone(),
+            downloaded_bytes: written.downloaded_bytes,
+            partial_path: written.partial_path,
+            etag: fetched.etag,
+            hash_state_ref: written.hash_state_ref,
+        })
+    }
 }
 
 /// `downloads/download` 任务种类的恢复驱动。
@@ -558,7 +665,9 @@ mod tests {
         DownloadCheckpointRecord, DownloadCheckpointRepository, DownloadDriverExecutionTurn,
         DownloadJobDriver, DownloadSegmentCheckpointRecord, DownloadSegmentCheckpointStatus,
         DownloadSegmentExecutionPort, DownloadSegmentExecutionRequest,
-        DownloadSegmentExecutionResult,
+        DownloadSegmentExecutionResult, DownloadSegmentExecutor, DownloadSegmentFetchPort,
+        DownloadSegmentFetchResult, DownloadSegmentVerifyPort, DownloadSegmentWritePort,
+        DownloadSegmentWriteResult,
     };
 
     #[derive(Default)]
@@ -685,6 +794,104 @@ mod tests {
                 etag: Some(format!("etag-{}", request.segment_id)),
                 hash_state_ref: Some(format!("hash-{}", request.segment_id)),
             })
+        }
+    }
+
+    #[derive(Default)]
+    struct RecordingFetchPort {
+        requests: Mutex<Vec<DownloadSegmentExecutionRequest>>,
+    }
+
+    impl RecordingFetchPort {
+        fn requests(&self) -> Vec<DownloadSegmentExecutionRequest> {
+            self.requests
+                .lock()
+                .expect("recording fetch port mutex should not be poisoned")
+                .clone()
+        }
+    }
+
+    impl DownloadSegmentFetchPort for RecordingFetchPort {
+        fn fetch_segment(
+            &self,
+            request: &DownloadSegmentExecutionRequest,
+        ) -> launcher_kernel_foundation::AppResult<DownloadSegmentFetchResult> {
+            self.requests
+                .lock()
+                .expect("recording fetch port mutex should not be poisoned")
+                .push(request.clone());
+
+            Ok(DownloadSegmentFetchResult {
+                bytes: vec![1, 2, 3, 4],
+                etag: Some(format!("etag-{}", request.segment_id)),
+            })
+        }
+    }
+
+    #[derive(Default)]
+    struct RecordingWritePort {
+        writes: Mutex<Vec<(DownloadSegmentExecutionRequest, Vec<u8>)>>,
+    }
+
+    impl RecordingWritePort {
+        fn writes(&self) -> Vec<(DownloadSegmentExecutionRequest, Vec<u8>)> {
+            self.writes
+                .lock()
+                .expect("recording write port mutex should not be poisoned")
+                .clone()
+        }
+    }
+
+    impl DownloadSegmentWritePort for RecordingWritePort {
+        fn write_segment(
+            &self,
+            request: &DownloadSegmentExecutionRequest,
+            fetched: &DownloadSegmentFetchResult,
+        ) -> launcher_kernel_foundation::AppResult<DownloadSegmentWriteResult> {
+            self.writes
+                .lock()
+                .expect("recording write port mutex should not be poisoned")
+                .push((request.clone(), fetched.bytes.clone()));
+
+            Ok(DownloadSegmentWriteResult {
+                downloaded_bytes: fetched.bytes.len() as u64,
+                partial_path: Some(request.write_target.clone()),
+                hash_state_ref: Some(format!("hash-{}", request.segment_id)),
+            })
+        }
+    }
+
+    #[derive(Default)]
+    struct RecordingVerifyPort {
+        verifications: Mutex<Vec<(DownloadSegmentExecutionRequest, Option<String>, u64)>>,
+    }
+
+    impl RecordingVerifyPort {
+        fn verifications(&self) -> Vec<(DownloadSegmentExecutionRequest, Option<String>, u64)> {
+            self.verifications
+                .lock()
+                .expect("recording verify port mutex should not be poisoned")
+                .clone()
+        }
+    }
+
+    impl DownloadSegmentVerifyPort for RecordingVerifyPort {
+        fn verify_segment(
+            &self,
+            request: &DownloadSegmentExecutionRequest,
+            _fetched: &DownloadSegmentFetchResult,
+            written: &DownloadSegmentWriteResult,
+        ) -> launcher_kernel_foundation::AppResult<()> {
+            self.verifications
+                .lock()
+                .expect("recording verify port mutex should not be poisoned")
+                .push((
+                    request.clone(),
+                    request.expected_hash.clone(),
+                    written.downloaded_bytes,
+                ));
+
+            Ok(())
         }
     }
 
@@ -1296,6 +1503,54 @@ mod tests {
                 retryable: true,
             }],
             "fake failure must preserve local metadata for a later checkpoint or retry slice"
+        );
+    }
+
+    #[test]
+    fn download_segment_executor_adapter_passes_request_through_sub_ports_and_completes() {
+        let job_id = JobId::generate();
+        let mut request = make_segment_execution_request(&job_id, "segment-executor");
+        request.expected_hash = Some("hash-segment-executor".into());
+        request.start_offset = 128;
+        request.length = 4;
+        request.resume_mode = DownloadResumeWorkMode::Partial;
+        request.checkpoint_ref = Some("segment-executor".into());
+
+        let fetcher = Arc::new(RecordingFetchPort::default());
+        let writer = Arc::new(RecordingWritePort::default());
+        let verifier = Arc::new(RecordingVerifyPort::default());
+        let executor =
+            DownloadSegmentExecutor::new(fetcher.clone(), writer.clone(), verifier.clone());
+
+        let result = executor
+            .accept_segment_execution(&request)
+            .expect("executor adapter should complete through fake sub-ports");
+
+        assert_eq!(
+            result,
+            DownloadSegmentExecutionResult::Completed {
+                request: request.clone(),
+                downloaded_bytes: 4,
+                partial_path: Some("segment-executor.part".into()),
+                etag: Some("etag-segment-executor".into()),
+                hash_state_ref: Some("hash-segment-executor".into()),
+            },
+            "executor adapter should project fake sub-port output into the existing completed result"
+        );
+        assert_eq!(
+            fetcher.requests(),
+            vec![request.clone()],
+            "fetch port should receive the original request facts"
+        );
+        assert_eq!(
+            writer.writes(),
+            vec![(request.clone(), vec![1, 2, 3, 4])],
+            "write port should receive the same request and fetched bytes"
+        );
+        assert_eq!(
+            verifier.verifications(),
+            vec![(request, Some("hash-segment-executor".into()), 4)],
+            "verify port should receive the request hash expectation and written byte count"
         );
     }
 

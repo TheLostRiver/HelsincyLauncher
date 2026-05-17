@@ -9787,6 +9787,13 @@
 - The boundary explicitly starts with fake/in-memory sub-ports or adapter-shell tests and keeps real HTTP/disk/hash IO, retry/backoff, terminal projection, scheduler loops, host transport, frontend, schema, and public `DL_*` execution errors out of scope.
 - Validation: scoped docs/PWF `git diff --check` passed with CRLF normalization warnings only.
 
+## Agent Note: 2026-05-17 23:39 CST - Opened AT-2026-05-17-239
+
+- AT-238 was committed and pushed as `d5af454`.
+- Opened AT-239 to implement the README_IMPL 7.35 first Rust slice in `module-downloads`.
+- Required context confirms the adapter should sit behind `DownloadSegmentExecutionPort`, call fake/in-memory fetch/write/verify sub-ports, return existing `DownloadSegmentExecutionResult` values, and avoid real IO plus composition production wiring.
+- Next action: write a RED driver test before adding the adapter/sub-port contracts.
+
 ### Auto Record: 2026-05-17 22:09:13
 - Tool: apply_patch
 - Phase: Phase 109 - Composition One-shot Runtime Execution Helper
@@ -10122,3 +10129,117 @@
 - Phase: Phase 113 - Downloads Concrete Segment Execution Boundary
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 22:33:56
+- Tool: apply_patch
+- Phase: Phase 113 - Downloads Concrete Segment Execution Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-17 22:34:09
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 22:34:23
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 22:34:40
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 22:34:52
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 22:51:33
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+## 2026-05-17 22:52 - AT-239 RED checkpoint
+
+- Read the active task boundary and focused downloads/runtime docs before coding.
+- Added the first adapter-shell test in `crates/module-downloads/src/driver.rs` with fake in-memory fetch/write/verify sub-ports only.
+- RED command:
+  - `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml download_segment_executor_adapter_passes_request_through_sub_ports_and_completes`
+- RED result:
+  - failed as expected with unresolved imports for `DownloadSegmentExecutor`, `DownloadSegmentFetchPort`, `DownloadSegmentFetchResult`, `DownloadSegmentVerifyPort`, `DownloadSegmentWritePort`, and `DownloadSegmentWriteResult`.
+- Next:
+  - add the minimal module-owned executor adapter shell and sub-port contracts, then rerun the focused test.
+
+## 2026-05-17 22:58 - AT-239 implementation and validation
+
+- Added `DownloadSegmentFetchResult`, `DownloadSegmentWriteResult`, `DownloadSegmentFetchPort`, `DownloadSegmentWritePort`, `DownloadSegmentVerifyPort`, and `DownloadSegmentExecutor`.
+- Re-exported the new downloads-owned adapter shell and sub-port contracts from `crates/module-downloads/src/lib.rs`.
+- The adapter only composes injected sub-ports and projects their successful fake/in-memory output into the existing `DownloadSegmentExecutionResult::Completed` shape.
+- Out of scope preserved: no production composition-root wiring, no real HTTP/disk/hash IO, no retry/backoff, no host/frontend/schema/runtime terminal projection.
+- Validation:
+  - `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml download_segment_executor_adapter_passes_request_through_sub_ports_and_completes` passed after implementation.
+  - `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml driver_run` passed with 5 tests.
+  - `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed with 53 tests.
+  - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
+  - `rustfmt --edition 2021 --check crates\module-downloads\src\driver.rs crates\module-downloads\src\lib.rs` passed.
+
+### Auto Record: 2026-05-17 22:51:54
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 22:52:56
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-17 22:53:11
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-17 22:53:17
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\lib.rs` (update)
+
+### Auto Record: 2026-05-17 22:54:46
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 22:54:52
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 22:55:03
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 22:55:17
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 22:55:29
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)

@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 113 - Downloads Concrete Segment Execution Boundary
+Phase 114 - Downloads Segment Executor Adapter Shell
 
 ## Current Focus
 
@@ -27,7 +27,8 @@ Phase 113 - Downloads Concrete Segment Execution Boundary
 - AT-2026-05-17-235 was published as commit `18ea7d7` after defining the host runtime execution command boundary.
 - AT-2026-05-17-236 was published as commit `f720d9c` after adding the documented host runtime execution command.
 - AT-2026-05-17-237 was published as commit `a8e3492` after covering the production downloads deferred path through the host command.
-- AT-2026-05-17-238 completed the next downloads concrete segment execution boundary before Rust IO work; publication will be recorded from Git history after commit/push.
+- AT-2026-05-17-238 was published as commit `d5af454` after defining the downloads concrete segment execution boundary.
+- AT-2026-05-17-239 is in progress to add the module-owned segment executor adapter shell behind `DownloadSegmentExecutionPort`.
 - AT-2026-05-17-220 was published as commit `aa8d6e3` after documenting the shared runtime execution-turn boundary.
 - AT-2026-05-17-219 was published as commit `f618718` after adding host transport smoke coverage for downloads policy runtime application.
 - AT-2026-05-17-218 was published as commit `5aae7f1` after adding documentation-budget rules.
@@ -841,6 +842,12 @@ Phase 113 - Downloads Concrete Segment Execution Boundary
 - Atomic tasks: AT-2026-05-17-238
 - **Status:** complete
 
+### Phase 114: Downloads Segment Executor Adapter Shell
+
+- Outcome: add a module-owned segment executor adapter shell behind `DownloadSegmentExecutionPort`, validated with fake/in-memory fetch/write/verify sub-ports and without real IO or production wiring.
+- Atomic tasks: AT-2026-05-17-239
+- **Status:** in_progress
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -1074,7 +1081,8 @@ Phase 113 - Downloads Concrete Segment Execution Boundary
 229. AT-2026-05-17-235 - completed - defined the host runtime execution command boundary before Rust transport changes; committed and pushed as `18ea7d7`.
 230. AT-2026-05-17-236 - completed - added the documented host runtime execution command with focused transport smoke TDD; committed and pushed as `f720d9c`.
 231. AT-2026-05-17-237 - completed - covered the host runtime command production downloads deferred path without production code changes; committed and pushed as `a8e3492`.
-232. AT-2026-05-17-238 - completed - defined the downloads concrete segment execution boundary before Rust IO work; publication will be recorded from Git history after commit/push.
+232. AT-2026-05-17-238 - completed - defined the downloads concrete segment execution boundary before Rust IO work; committed and pushed as `d5af454`.
+233. AT-2026-05-17-239 - completed - added the downloads segment executor adapter shell behind `DownloadSegmentExecutionPort`, with fake in-memory fetch/write/verify sub-port TDD and no production wiring or real IO.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
