@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 69 - Downloads Fake Segment Completion Result Contract
+Phase 70 - Downloads Fake Completed-result Checkpoint Mutation
 
 ## Current Focus
 
@@ -556,6 +556,12 @@ Phase 69 - Downloads Fake Segment Completion Result Contract
 - Atomic tasks: AT-2026-05-17-194
 - **Status:** complete
 
+### Phase 70: Downloads Fake Completed-result Checkpoint Mutation
+
+- Outcome: document and add a local driver helper that reloads downloads checkpoint facts, applies fake completed segment execution results, and saves the updated checkpoint through the existing repository port without concrete IO, SQLite schema changes, runtime completion, transport, or frontend work.
+- Atomic tasks: AT-2026-05-17-195
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -746,6 +752,7 @@ Phase 69 - Downloads Fake Segment Completion Result Contract
 186. AT-2026-05-17-192 - completed - added downloads segment execution request handoff shell with focused TDD, keeping concrete IO/runtime completion out of scope; then committed locally.
 187. AT-2026-05-17-193 - completed - documented and added fake segment execution port acceptance with focused TDD, keeping concrete IO/runtime completion out of scope; then committed locally, with initial hash `0655ac2` before PWF backfill amend.
 188. AT-2026-05-17-194 - completed - documented and added fake segment completion result contract with focused TDD, keeping checkpoint mutation and concrete IO out of scope; then committed locally, with initial hash `0f8a1a2` before PWF backfill amend.
+189. AT-2026-05-17-195 - completed - documented and added fake completed-result checkpoint mutation with focused TDD, keeping SQLite adapter changes, concrete IO, runtime completion, transport, and frontend out of scope; then committed locally, with initial hash `182a34b` before PWF backfill amend.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

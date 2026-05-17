@@ -6605,6 +6605,29 @@
 - Path-limited status contains only AT-194 files; unrelated dirty files remain preserved and uncommitted.
 - Initial local commit created as `0f8a1a2`; PWF commit metadata backfill pending amend into the same task commit.
 
+## 2026-05-17 - AT-2026-05-17-195 Started
+
+- AT-2026-05-17-194 is now committed locally as final hash `218e70c`.
+- Re-read README, CONTRIBUTING, docs map, downloads module ARCH/FLOW/README_IMPL, TauriDownloadRuntimeDesign checkpoint snippets, repository ports snippets, storage/database snippets, and current downloads driver/facade checkpoint code in scoped batches.
+- Selected the next safe backend slice as fake completed-result checkpoint mutation inside `DownloadJobDriver`.
+- This slice may reload checkpoint facts and save through `DownloadCheckpointRepository`, but must not touch SQLite adapter/schema, concrete IO, verifier/hash logic, runtime snapshots, host transport, or frontend.
+- Planned RED filter: `completed_result_checkpoint`.
+
+## 2026-05-17 - AT-2026-05-17-195 Validation
+
+- Updated README_IMPL with the fake completed-result checkpoint mutation boundary before coding.
+- Added the RED test `download_job_driver_completed_result_checkpoint_mutation_replaces_and_saves_segment`.
+- RED command: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml completed_result_checkpoint`.
+- RED result: failed with expected missing `record_completed_segment_checkpoints` method.
+- GREEN implementation: added `DownloadJobDriver::record_completed_segment_checkpoints(...)`, preserving existing segment order, preserving replacement offsets, ignoring non-completed results, and saving through `DownloadCheckpointRepository` only after applying same-job completed results.
+- Focused validation passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml completed_result_checkpoint` reported 1 passed, 0 failed.
+- Full module validation passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` reported 34 passed, 0 failed.
+- First format check reported a mechanical import wrapping diff; `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` was run.
+- Final formatting validation passed: `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check`.
+- Scoped diff validation passed: `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- ...` returned exit 0 with CRLF normalization warnings only.
+- Path-limited status contains only AT-195 files; unrelated dirty files remain preserved and uncommitted.
+- Initial local commit created as `182a34b`; PWF commit metadata backfill pending amend into the same task commit.
+
 ### Auto Record: 2026-05-17 13:41:11
 - Tool: apply_patch
 - Phase: Phase 68 - Downloads Fake Segment Execution Acceptance
@@ -6806,5 +6829,113 @@
 ### Auto Record: 2026-05-17 13:51:10
 - Tool: apply_patch
 - Phase: Phase 69 - Downloads Fake Segment Completion Result Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 13:59:39
+- Tool: apply_patch
+- Phase: Phase 69 - Downloads Fake Segment Completion Result Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-17 13:59:52
+- Tool: apply_patch
+- Phase: Phase 70 - Downloads Fake Completed-result Checkpoint Mutation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 14:00:05
+- Tool: apply_patch
+- Phase: Phase 70 - Downloads Fake Completed-result Checkpoint Mutation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 14:00:14
+- Tool: apply_patch
+- Phase: Phase 70 - Downloads Fake Completed-result Checkpoint Mutation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:00:28
+- Tool: apply_patch
+- Phase: Phase 70 - Downloads Fake Completed-result Checkpoint Mutation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (delete)
+
+### Auto Record: 2026-05-17 14:00:52
+- Tool: apply_patch
+- Phase: Phase 70 - Downloads Fake Completed-result Checkpoint Mutation
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 14:01:40
+- Tool: apply_patch
+- Phase: Phase 70 - Downloads Fake Completed-result Checkpoint Mutation
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-17 14:02:15
+- Tool: apply_patch
+- Phase: Phase 70 - Downloads Fake Completed-result Checkpoint Mutation
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-17 14:03:13
+- Tool: apply_patch
+- Phase: Phase 70 - Downloads Fake Completed-result Checkpoint Mutation
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 14:03:38
+- Tool: apply_patch
+- Phase: Phase 70 - Downloads Fake Completed-result Checkpoint Mutation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 14:03:48
+- Tool: apply_patch
+- Phase: Phase 70 - Downloads Fake Completed-result Checkpoint Mutation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 14:04:02
+- Tool: apply_patch
+- Phase: Phase 70 - Downloads Fake Completed-result Checkpoint Mutation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:04:11
+- Tool: apply_patch
+- Phase: Phase 70 - Downloads Fake Completed-result Checkpoint Mutation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 14:04:25
+- Tool: apply_patch
+- Phase: Phase 70 - Downloads Fake Completed-result Checkpoint Mutation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 14:05:05
+- Tool: apply_patch
+- Phase: Phase 70 - Downloads Fake Completed-result Checkpoint Mutation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 14:05:11
+- Tool: apply_patch
+- Phase: Phase 70 - Downloads Fake Completed-result Checkpoint Mutation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 14:05:17
+- Tool: apply_patch
+- Phase: Phase 70 - Downloads Fake Completed-result Checkpoint Mutation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:05:24
+- Tool: apply_patch
+- Phase: Phase 70 - Downloads Fake Completed-result Checkpoint Mutation
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)

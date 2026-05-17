@@ -2,9 +2,9 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-17-194
-- title: Add downloads fake segment completion result contract
-- status: completed; initial local commit `0f8a1a2` before PWF backfill amend
+- task id: AT-2026-05-17-195
+- title: Add downloads fake completed-result checkpoint mutation
+- status: completed; initial local commit `182a34b` before PWF backfill amend
 
 ## Current In-progress Atomic Task
 
@@ -22,27 +22,27 @@
 
 ## Next Resume Point
 
-1. Reassess README_IMPL 7.16 and choose whether the next safe slice is fake completed-result checkpoint mutation.
-2. Do not persist checkpoints or touch SQLite/runtime/transport/frontend until that next boundary is documented.
+1. Reassess README_IMPL 7.17 and choose the next safe downloads backend slice.
+2. Do not start concrete HTTP fetch/write/verify, runtime completion, transport, or frontend work without documenting that next boundary first.
 
 ## Validation
 
-- RED: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml segment_completion_result` failed for the expected missing `DownloadSegmentExecutionResult::Completed` variant.
+- RED: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml completed_result_checkpoint` failed for the expected missing `record_completed_segment_checkpoints` method.
 - Focused GREEN: same command passed with 1 passed, 0 failed.
-- Full module: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 33 passed, 0 failed.
-- Format: `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed.
+- Full module: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 34 passed, 0 failed.
+- Format: `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed after a mechanical `cargo fmt`.
 - Scoped diff check passed with CRLF normalization warnings only.
 
 ## Boundaries
 
 - Do not modify files outside `D:\DEV\MyEpicLauncher`.
 - Do not run destructive commands.
-- Do not implement concrete HTTP fetch, staging writes, hash verification, checkpoint mutation, runtime completion, transport, frontend, SQLite schema, composition-root changes, or `kernel-jobs` changes.
+- Do not implement concrete HTTP fetch, staging writes, hash verification, SQLite schema or adapter changes, runtime completion, transport, frontend, composition-root changes, or `kernel-jobs` changes.
 - Skip push unless a safe push path is explicitly authorized later.
 
 ## Dirty Worktree To Preserve
 
-- Unrelated unstaged/unknown work remains present and must not be committed with AT-194:
+- Unrelated unstaged/unknown work remains present and must not be committed with AT-195:
   - `Cargo.lock`
   - `MyEpicLauncher.pen`
   - frontend files under `app/` and `components/`

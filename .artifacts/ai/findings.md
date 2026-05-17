@@ -709,3 +709,14 @@
 - The smaller next slice is therefore a fake completed result contract on `DownloadSegmentExecutionResult`, collected through the existing port helper.
 - The result may carry request facts plus optional fake persistence tokens, but it must not perform HTTP fetch, staging writes, hash verification, checkpoint save, runtime completion, transport, or frontend projection.
 - RED/GREEN confirmed that the existing port helper can carry a fake completed result payload unchanged, so a later checkpoint-mutation slice can consume a typed result instead of inventing payload semantics inline.
+
+## Phase 70 Downloads Fake Completed-result Checkpoint Mutation Findings
+
+- AT-2026-05-17-194 committed locally as `218e70c`; the AT-194 file set is clean.
+- README_IMPL 7.12 says driver/execution turns must reload or validate durable checkpoint facts before mutating them.
+- `TauriDownloadRuntimeDesign.md` requires checkpoint persistence after segment completion, but verifier/hash and concrete writer behavior remain separate responsibilities.
+- `TauriRepositoryPortsAndAdapterDesign.md` keeps `DownloadCheckpointRepository` as the downloads-owned repository port; adapters own SQL/transactions, not business decisions.
+- `TauriStorageAndDatabaseDesign.md` classifies `download_job_checkpoint` and `download_segment_checkpoint` as SQLite facts, but this slice can stay inside the existing repository port and should not change schema.
+- Current Rust has `DownloadSegmentExecutionResult::Completed`, but no driver helper consumes it into `DownloadSegmentCheckpointRecord`.
+- The next RED test should prove completed results replace or append segment checkpoint facts and save through `DownloadCheckpointRepository`, while non-completed results and concrete IO remain out of scope.
+- RED/GREEN confirmed the driver can reload checkpoint facts, replace a matching completed segment in place, preserve unrelated segment order, and save through the repository port without touching concrete IO, SQLite adapter/schema, runtime completion, transport, or frontend code.

@@ -88,6 +88,7 @@ Implementation truth should move through module facade and ports first. Do not p
 | segment execution request handoff | `DownloadSegmentExecutionRequest` / `DownloadSegmentExecutionPort` exist and `DownloadJobDriver::prepare_segment_execution_requests(...)` converts accepted pending work into ordered job-scoped requests; still no real execution | driver unit tests |
 | fake segment execution acceptance | `DownloadJobDriver::accept_segment_execution_requests(...)` hands prepared requests to an injected `DownloadSegmentExecutionPort` and collects module-local results in stable order; still no checkpoint mutation, real IO, runtime completion, transport, or frontend projection | driver unit tests |
 | fake segment completion result contract | `DownloadSegmentExecutionResult::Completed` carries the original request, completed byte count, and optional fake persistence tokens for later checkpoint mutation; still no checkpoint save, real IO, runtime completion, transport, or frontend projection | driver unit tests |
+| fake completed-result checkpoint mutation | `DownloadJobDriver::record_completed_segment_checkpoints(...)` reloads checkpoint facts, applies same-job completed fake results into `DownloadSegmentCheckpointRecord` values, and saves via `DownloadCheckpointRepository`; still no SQLite adapter/schema, concrete IO, runtime completion, transport, or frontend changes | driver unit tests |
 | list/get/policy surfaces | not wired yet | future slices |
 
 ---
@@ -844,6 +845,47 @@ Completed by AT-194:
 2. The variant carries the original request, `downloaded_bytes`, optional `partial_path`, optional `etag`, and optional `hash_state_ref`.
 3. Driver tests prove the existing acceptance helper preserves a fake completed result payload.
 4. Checkpoint mutation, SQLite persistence, concrete IO, runtime completion, transport, and frontend projection remain unchanged.
+
+---
+
+### 7.17 Fake Completed-result Checkpoint Mutation Boundary
+
+The next safe code slice is local checkpoint mutation after fake completed segment results. This is still not concrete download execution. It only proves that `DownloadJobDriver` can turn `DownloadSegmentExecutionResult::Completed` values into downloads-owned checkpoint facts and persist those facts through the existing `DownloadCheckpointRepository` port.
+
+Current Rust reality:
+
+1. `DownloadCheckpointRepository` already exposes `load(&JobId)` and `save(&DownloadCheckpointRecord)`.
+2. `DownloadCheckpointRecord` already owns segment-level `DownloadSegmentCheckpointRecord` values.
+3. `DownloadSegmentExecutionResult::Completed` now carries request facts plus completion payload fields.
+4. `DownloadJobDriver::record_completed_segment_checkpoints(...)` consumes completed results into checkpoint facts and saves the updated checkpoint through the existing repository port.
+
+Boundary rules:
+
+1. The driver helper must reload the current checkpoint before saving mutations.
+2. It may apply only `DownloadSegmentExecutionResult::Completed` values for the requested job id.
+3. It should replace an existing segment checkpoint with the same `segment_id` or append a new segment checkpoint when none exists.
+4. Existing checkpoint order should be preserved for replacements; appended completed segments should follow existing facts.
+5. Existing segment `offset` should be preserved when replacing a checkpoint, because current fake execution requests do not yet carry separate manifest offset and resume offset fields for partial resume.
+6. New completed facts may use the request's current `start_offset` as the first available offset fact until a later manifest-backed execution slice carries both offsets explicitly.
+7. The completed fact should set `status = Completed` and copy `downloaded_bytes`, `partial_path`, `etag`, and `hash_state_ref` from the result.
+8. The helper must not perform HTTP range requests, file writes, hash verification, SQLite schema changes, runtime snapshot updates, job completion, event publication, transport projection, or frontend changes.
+9. The helper must not introduce public `DL_*` execution errors in this slice; missing checkpoint behavior can remain a local optional result until the concrete execution failure surface is designed.
+
+First Rust slice:
+
+1. add a focused RED test proving a completed result updates and saves checkpoint facts through a recording repository;
+2. keep fake or non-completed execution results out of mutation behavior;
+3. add only the local `DownloadJobDriver` helper and test repository improvements required for the test;
+4. run focused module tests, full module tests, rustfmt check, scoped `git diff --check`, and path-limited status before commit.
+
+Completed by AT-195:
+
+1. `DownloadJobDriver::record_completed_segment_checkpoints(...)` reloads the current checkpoint before mutation.
+2. The helper applies only same-job `DownloadSegmentExecutionResult::Completed` values.
+3. Matching `segment_id` facts are replaced in place, while new completed segment facts append after existing facts.
+4. Existing checkpoint `offset` is preserved on replacement; appended facts use the request's current `start_offset` until a later manifest-backed execution slice carries separate manifest/resume offsets.
+5. The helper saves through `DownloadCheckpointRepository` only when at least one completed result is applied.
+6. Concrete HTTP fetch, staging writes, hash verification, SQLite adapter/schema changes, runtime completion, transport, and frontend projection remain unchanged.
 
 ---
 

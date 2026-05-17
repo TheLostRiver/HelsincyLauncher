@@ -307,6 +307,68 @@ impl DownloadJobDriver {
             .map(|request| execution_port.accept_segment_execution(request))
             .collect()
     }
+
+    /// Records fake completed segment results into the downloads checkpoint.
+    /// 将 fake completed segment 结果记录进 downloads checkpoint。
+    pub fn record_completed_segment_checkpoints(
+        &self,
+        job_id: &JobId,
+        results: &[DownloadSegmentExecutionResult],
+    ) -> AppResult<Option<DownloadCheckpointRecord>> {
+        let Some(mut checkpoint) = self.checkpoint_repo.load(job_id)? else {
+            return Ok(None);
+        };
+        let mut has_completed_result = false;
+
+        for result in results {
+            let DownloadSegmentExecutionResult::Completed {
+                request,
+                downloaded_bytes,
+                partial_path,
+                etag,
+                hash_state_ref,
+            } = result
+            else {
+                continue;
+            };
+            if &request.job_id != job_id {
+                continue;
+            }
+
+            has_completed_result = true;
+            let existing_index = checkpoint
+                .segments
+                .iter()
+                .position(|segment| segment.segment_id == request.segment_id);
+            let offset = existing_index
+                .and_then(|index| checkpoint.segments.get(index).map(|segment| segment.offset))
+                .unwrap_or(request.start_offset);
+            let completed_segment = DownloadSegmentCheckpointRecord {
+                job_id: checkpoint.job_id.clone(),
+                segment_id: request.segment_id.clone(),
+                file_id: request.file_id.clone(),
+                offset,
+                length: request.length,
+                downloaded_bytes: *downloaded_bytes,
+                status: DownloadSegmentCheckpointStatus::Completed,
+                partial_path: partial_path.clone(),
+                etag: etag.clone(),
+                hash_state_ref: hash_state_ref.clone(),
+            };
+
+            if let Some(index) = existing_index {
+                checkpoint.segments[index] = completed_segment;
+            } else {
+                checkpoint.segments.push(completed_segment);
+            }
+        }
+
+        if has_completed_result {
+            self.checkpoint_repo.save(&checkpoint)?;
+        }
+
+        Ok(Some(checkpoint))
+    }
 }
 
 impl JobDriver<()> for DownloadJobDriver {
@@ -334,7 +396,7 @@ impl JobDriver<()> for DownloadJobDriver {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashSet;
+    use std::collections::HashMap;
     use std::sync::{Arc, Mutex};
 
     use launcher_kernel_foundation::{IsoDateTime, JobId};
@@ -347,13 +409,14 @@ mod tests {
 
     use super::{
         DownloadCheckpointRecord, DownloadCheckpointRepository, DownloadDriverExecutionTurn,
-        DownloadJobDriver, DownloadSegmentExecutionPort, DownloadSegmentExecutionRequest,
+        DownloadJobDriver, DownloadSegmentCheckpointRecord, DownloadSegmentCheckpointStatus,
+        DownloadSegmentExecutionPort, DownloadSegmentExecutionRequest,
         DownloadSegmentExecutionResult,
     };
 
     #[derive(Default)]
     struct InMemoryCheckpointRepository {
-        job_ids: Mutex<HashSet<JobId>>,
+        records: Mutex<HashMap<JobId, DownloadCheckpointRecord>>,
     }
 
     impl DownloadCheckpointRepository for InMemoryCheckpointRepository {
@@ -361,23 +424,22 @@ mod tests {
             &self,
             job_id: &JobId,
         ) -> launcher_kernel_foundation::AppResult<Option<DownloadCheckpointRecord>> {
-            let has_checkpoint = self
-                .job_ids
+            Ok(self
+                .records
                 .lock()
                 .expect("checkpoint mutex should not be poisoned")
-                .contains(job_id);
-
-            Ok(has_checkpoint.then(|| DownloadCheckpointRecord::empty(job_id.clone())))
+                .get(job_id)
+                .cloned())
         }
 
         fn save(
             &self,
             checkpoint: &DownloadCheckpointRecord,
         ) -> launcher_kernel_foundation::AppResult<()> {
-            self.job_ids
+            self.records
                 .lock()
                 .expect("checkpoint mutex should not be poisoned")
-                .insert(checkpoint.job_id.clone());
+                .insert(checkpoint.job_id.clone(), checkpoint.clone());
             Ok(())
         }
     }
@@ -493,6 +555,25 @@ mod tests {
             length: 1024,
             resume_mode: DownloadResumeWorkMode::FromStart,
             checkpoint_ref: None,
+        }
+    }
+
+    fn make_segment_checkpoint_record(
+        job_id: &JobId,
+        segment_id: &str,
+        status: DownloadSegmentCheckpointStatus,
+    ) -> DownloadSegmentCheckpointRecord {
+        DownloadSegmentCheckpointRecord {
+            job_id: job_id.clone(),
+            segment_id: segment_id.into(),
+            file_id: "file-1".into(),
+            offset: 0,
+            length: 1024,
+            downloaded_bytes: 0,
+            status,
+            partial_path: None,
+            etag: None,
+            hash_state_ref: None,
         }
     }
 
@@ -786,6 +867,86 @@ mod tests {
                 hash_state_ref: Some("hash-segment-completed".into()),
             }],
             "fake completion must preserve payload facts for a later checkpoint mutation slice"
+        );
+    }
+
+    #[test]
+    fn download_job_driver_completed_result_checkpoint_mutation_replaces_and_saves_segment() {
+        let repo = Arc::new(InMemoryCheckpointRepository::default());
+        let driver = DownloadJobDriver::new(repo.clone());
+        let job_id = JobId::generate();
+        let unrelated_segment = make_segment_checkpoint_record(
+            &job_id,
+            "segment-unrelated",
+            DownloadSegmentCheckpointStatus::Pending,
+        );
+        let mut existing_segment = make_segment_checkpoint_record(
+            &job_id,
+            "segment-completed",
+            DownloadSegmentCheckpointStatus::InProgress,
+        );
+        existing_segment.offset = 256;
+        existing_segment.downloaded_bytes = 128;
+        existing_segment.partial_path = Some("old-segment-completed.part".into());
+        existing_segment.etag = Some("old-etag".into());
+        existing_segment.hash_state_ref = Some("old-hash".into());
+        repo.save(&DownloadCheckpointRecord {
+            job_id: job_id.clone(),
+            segments: vec![unrelated_segment.clone(), existing_segment],
+        })
+        .expect("saving a checkpoint before mutation should succeed");
+
+        let accepted_request = make_segment_execution_request(&job_id, "segment-accepted");
+        let mut completed_request = make_segment_execution_request(&job_id, "segment-completed");
+        completed_request.start_offset = 512;
+        completed_request.resume_mode = DownloadResumeWorkMode::Partial;
+        completed_request.checkpoint_ref = Some("segment-completed".into());
+        let completed_result = DownloadSegmentExecutionResult::Completed {
+            request: completed_request,
+            downloaded_bytes: 1024,
+            partial_path: Some("segment-completed.part".into()),
+            etag: Some("etag-segment-completed".into()),
+            hash_state_ref: Some("hash-segment-completed".into()),
+        };
+
+        let saved_checkpoint = driver
+            .record_completed_segment_checkpoints(
+                &job_id,
+                &[
+                    DownloadSegmentExecutionResult::Accepted {
+                        request: accepted_request,
+                    },
+                    completed_result,
+                ],
+            )
+            .expect("completed results should be saved through the checkpoint repository")
+            .expect("existing checkpoint should be reloaded before mutation");
+
+        let expected_completed_segment = DownloadSegmentCheckpointRecord {
+            job_id: job_id.clone(),
+            segment_id: "segment-completed".into(),
+            file_id: "file-1".into(),
+            offset: 256,
+            length: 1024,
+            downloaded_bytes: 1024,
+            status: DownloadSegmentCheckpointStatus::Completed,
+            partial_path: Some("segment-completed.part".into()),
+            etag: Some("etag-segment-completed".into()),
+            hash_state_ref: Some("hash-segment-completed".into()),
+        };
+        let expected_segments = vec![unrelated_segment, expected_completed_segment];
+
+        assert_eq!(
+            saved_checkpoint.segments, expected_segments,
+            "completed result mutation should replace matching segment facts without reordering unrelated facts"
+        );
+        assert_eq!(
+            repo.load(&job_id)
+                .expect("loading saved checkpoint should succeed")
+                .expect("saved checkpoint should exist")
+                .segments,
+            expected_segments,
+            "driver helper must persist the mutated checkpoint through the repository port"
         );
     }
 }
