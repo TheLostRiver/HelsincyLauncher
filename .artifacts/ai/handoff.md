@@ -88,12 +88,16 @@
 
 - task id: AT-2026-05-17-236
 - title: Add host runtime execution command
+- status: completed; final commit `f720d9c`, pushed to `origin/main`
+
+## Active Atomic Task
+
+- task id: AT-2026-05-17-237
+- title: Cover host runtime command downloads deferred path
 - status: completed; validation passed; publication will be recorded from Git history after commit/push
 
 ## Current Slice
 
-- `src-tauri/src/commands/mod.rs`
-- `src-tauri/src/commands/jobs.rs`
 - `src-tauri/tests/transport_wiring_smoke.rs`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
@@ -103,8 +107,8 @@
 
 ## Next Resume Point
 
-1. Commit and push AT-2026-05-17-236 if not already published.
-2. Next backend slice should be chosen from the runtime execution path after reading the relevant docs again.
+1. Commit and push AT-2026-05-17-237 if not already published.
+2. Next backend slice should be selected from the runtime/downloads execution path after reading the relevant docs again.
 
 ## Validation
 
@@ -184,6 +188,10 @@
 - AT-236 required context read in focused chunks: IPC section 7.4, composition/startup docs, downloads runtime execution sections, current host command registry/jobs handler, desktop bootstrap/state wrappers, and transport smoke patterns.
 - AT-236 RED/GREEN validation passed for the documented host command. The final implementation adds `RuntimeExecutionTurnDto`, `RuntimeExecutionTurnDispositionDto`, `map_runtime_execution_turn_result(...)`, the `jobs_run_next_execution_turn` registry entry, and a thin jobs command handler.
 - AT-236 validation passed: focused transport smoke, focused DTO mapper test, full desktop package tests, desktop compile gate, scoped rustfmt with `skip_children=true`, and scoped diff-check all passed.
+- AT-236 final commit `f720d9c` was pushed to `origin/main`.
+- AT-237 required context read in focused chunks: IPC command section, downloads deferred run docs, current downloads driver run reason, shared runtime deferred non-mutation, and current transport smoke helper.
+- AT-237 validation passed: host transport smoke now proves a queued production downloads job returns `Deferred` through `jobs_run_next_execution_turn`, reason contains `execution port not wired`, and the snapshot remains `Queued` / `Queued`.
+- Full desktop package tests, desktop compile gate, scoped rustfmt, and scoped diff-check passed.
 - AT-224 found that downloads should not call `prepare_resume_execution_turn(...)` from `run(...)` unless an execution-port path is present, because that helper drains pending work after checkpoint reload.
 - README_IMPL 7.31 defines the next Rust slice: add an optional downloads-owned segment execution port or equivalent explicit strategy, keep the default constructor deferred/non-draining, and test fake completed execution through `run(...)`.
 - AT-224 scoped `git diff --check` passed with CRLF normalization warnings only.

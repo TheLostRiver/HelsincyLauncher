@@ -1105,3 +1105,14 @@
 - The command calls only `services.startup.run_one_runtime_execution_turn()` and maps the resulting disposition; no runtime/composition/downloads internals changed.
 - `Deferred` and `Failed` execution-turn dispositions are mapped into successful command DTOs, while `AppError` remains the only path into `CommandResultDto::Failure`.
 - Full desktop package tests and compile gate passed; scoped rustfmt used `--config skip_children=true` to avoid pre-existing out-of-scope `fab.rs` formatting churn.
+- AT-2026-05-17-236 final commit `f720d9c` was pushed to `origin/main`.
+
+## Phase 112 Host Runtime Command Downloads Deferred Coverage Findings
+
+- Required context was read in focused chunks: IPC 7.4, downloads README_IMPL 7.31-7.34, `DownloadJobDriver::run(...)`, `SharedJobRuntimeHost::run_next_execution_turn(...)`, and the current transport smoke helper.
+- Production composition-root still wires `DownloadJobDriver` without a segment execution port, so dispatching a queued downloads job should return a deferred disposition mentioning the missing execution port.
+- `run_one_execution_turn(...)` keeps deferred dispatch non-mutating, so the host smoke can assert the downloads job snapshot remains `Queued` / `Queued`.
+- The existing isolated sqlite helper in `transport_wiring_smoke` is the right place to avoid default smoke database pollution.
+- Validation confirmed the host command reaches the queued production downloads job and returns `Deferred` with `execution port not wired`.
+- The snapshot remains `Queued` / `Queued`, preserving the documented deferred non-mutation rule.
+- AT-237 touched only the transport smoke test plus PWF records; no production Rust behavior changed.

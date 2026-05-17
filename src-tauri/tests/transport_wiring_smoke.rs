@@ -5,7 +5,7 @@ use std::task::{Context, Poll, RawWaker, RawWakerVTable, Waker};
 
 use launcher_composition_root::{build_desktop_services, DesktopBootstrapConfig};
 use launcher_kernel_foundation::PageRequest;
-use launcher_kernel_jobs::JobPriority;
+use launcher_kernel_jobs::{JobPriority, JobState, JobUiState};
 use launcher_module_downloads::contracts::{
     CancelDownloadRequestDto, GetDownloadPolicyQueryDto, PauseDownloadRequestDto,
     StartDownloadRequestDto, UpdateDownloadPolicyRequestDto,
@@ -54,6 +54,62 @@ fn transport_wiring_smoke() {
     }
     drop(runtime_services);
     cleanup_sqlite_path(&runtime_sqlite_path);
+
+    // Production downloads execution is intentionally deferred until a real segment execution port exists.
+    // 在真实 segment execution port 接入前，生产 downloads 执行应明确保持 deferred。
+    let (download_runtime_services, download_runtime_sqlite_path) =
+        isolated_desktop_services("at237_downloads_runtime_deferred.sqlite3");
+    let queued_download = block_on_ready(commands::downloads::downloads_start(
+        download_runtime_services.services(),
+        StartDownloadRequestDto {
+            target_id: "ue-5.5".into(),
+            kind: "engine".into(),
+            install_intent: None,
+            priority: JobPriority::Normal,
+        },
+    ));
+    let queued_download_job_id = match queued_download {
+        commands::CommandResultDto::Success { data } => data.job_id,
+        commands::CommandResultDto::Failure { error } => {
+            panic!(
+                "isolated downloads start should queue runtime work, got {}",
+                error.code
+            );
+        }
+    };
+    let download_turn = block_on_ready(commands::jobs::jobs_run_next_execution_turn(
+        download_runtime_services.services(),
+    ));
+
+    match download_turn {
+        commands::CommandResultDto::Success { data } => {
+            assert_eq!(
+                data.disposition,
+                commands::RuntimeExecutionTurnDispositionDto::Deferred
+            );
+            assert!(data
+                .reason
+                .as_deref()
+                .expect("downloads deferred turn should include a reason")
+                .contains("execution port not wired"));
+        }
+        commands::CommandResultDto::Failure { error } => {
+            panic!(
+                "downloads deferred execution should remain a successful command DTO, got {}",
+                error.code
+            );
+        }
+    }
+    let queued_snapshot = download_runtime_services
+        .services()
+        .snapshot_store
+        .get(&queued_download_job_id)
+        .expect("queued download snapshot should remain readable")
+        .expect("queued download snapshot should still exist");
+    assert_eq!(queued_snapshot.state, JobState::Queued);
+    assert_eq!(queued_snapshot.ui_state, JobUiState::Queued);
+    drop(download_runtime_services);
+    cleanup_sqlite_path(&download_runtime_sqlite_path);
 
     let result = block_on_ready(commands::fab::fab_list_inventory(
         bootstrap.services.services(),

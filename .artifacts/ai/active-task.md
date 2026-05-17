@@ -2,19 +2,17 @@
 
 ## Identity
 
-- task id: AT-2026-05-17-236
-- title: Add host runtime execution command
+- task id: AT-2026-05-17-237
+- title: Cover host runtime command downloads deferred path
 - status: completed
 
 ## Goal
 
-Implement the documented `jobs_run_next_execution_turn` host command as a thin transport boundary over `DesktopAppServices.startup.run_one_runtime_execution_turn()`, returning a stable runtime execution-turn DTO while avoiding frontend UI, scheduler loops, automatic startup invocation, terminal projection, downloads concrete IO, retry/backoff, and schema changes.
+Add focused host transport smoke coverage proving that `jobs_run_next_execution_turn` can see a queued production downloads job, returns a successful deferred DTO while the production downloads driver has no execution port, and leaves the job snapshot queued.
 
 ## Scope
 
 - in scope:
-  - `src-tauri/src/commands/mod.rs`
-  - `src-tauri/src/commands/jobs.rs`
   - `src-tauri/tests/transport_wiring_smoke.rs`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
@@ -22,9 +20,9 @@ Implement the documented `jobs_run_next_execution_turn` host command as a thin t
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
-  - docs updates beyond PWF records
+  - production Rust changes
   - frontend code
-  - downloads module behavior
+  - downloads module behavior changes
   - composition-root helper changes
   - kernel-jobs runtime behavior changes
   - scheduler loops/background tasks/timers
@@ -37,49 +35,46 @@ Implement the documented `jobs_run_next_execution_turn` host command as a thin t
 
 ## Allowed Files
 
-1. src-tauri/src/commands/mod.rs
-2. src-tauri/src/commands/jobs.rs
-3. src-tauri/tests/transport_wiring_smoke.rs
-4. .artifacts/ai/active-task.md
-5. .artifacts/ai/task-plan.md
-6. .artifacts/ai/progress.md
-7. .artifacts/ai/findings.md
-8. .artifacts/ai/handoff.md
+1. src-tauri/tests/transport_wiring_smoke.rs
+2. .artifacts/ai/active-task.md
+3. .artifacts/ai/task-plan.md
+4. .artifacts/ai/progress.md
+5. .artifacts/ai/findings.md
+6. .artifacts/ai/handoff.md
 
 ## Required Context Read
 
 Read before writing:
 
-1. README.md and docs/README.md routing.
-2. docs/TauriIPCAndStateContractsDesign.md 7.4.
-3. docs/TauriCompositionRootWiringDesign.md 9.4 and Tauri integration boundary.
-4. docs/TauriStartupPipelineDesign.md restore/warmup ownership rules.
-5. docs/modules/downloads/README_IMPL.md runtime execution sections 7.29-7.34.
-6. Current `src-tauri/src/commands/mod.rs`, `src-tauri/src/commands/jobs.rs`, `src-tauri/tests/transport_wiring_smoke.rs`, `src-tauri/src/bootstrap.rs`, and `src-tauri/src/state.rs`.
+1. docs/TauriIPCAndStateContractsDesign.md 7.4.
+2. docs/modules/downloads/README_IMPL.md 7.31-7.34.
+3. Current `DownloadJobDriver::run(...)` deferred reason.
+4. Current `SharedJobRuntimeHost::run_next_execution_turn(...)` deferred non-mutation behavior.
+5. Current `src-tauri/tests/transport_wiring_smoke.rs` isolated host helper.
 
 ## Hypothesis
 
-- falsifiable implementation hypothesis: adding a DTO mapper plus `jobs_run_next_execution_turn(...)` in the host command layer will make a fresh bootstrap return a successful deferred DTO with a no-queued reason, without touching runtime/composition/downloads internals.
+- falsifiable coverage hypothesis: with an isolated host graph, `downloads_start` queues a production downloads job, then `jobs_run_next_execution_turn` returns a successful `Deferred` DTO whose reason mentions the missing downloads execution port, and the stored snapshot remains `Queued`.
 
 ## Cheap Check
 
-1. Add RED transport smoke assertion expecting the new registered command and fresh no-queued deferred DTO.
-2. Add the minimal DTO, mapper, command registration, and command handler.
-3. Run focused desktop transport smoke, scoped rustfmt, and scoped diff-check.
+1. Add a transport smoke assertion after queueing one isolated downloads job.
+2. Reuse the project-local sqlite helper and clean up after dropping the service handle.
+3. Run focused transport smoke, scoped rustfmt, desktop package tests, desktop check, and scoped diff-check.
 
 ## Validation Gate
 
-1. RED test fails before production code because the command/DTO is missing.
-2. GREEN test passes after implementation.
-3. `cargo test -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml transport_wiring_smoke` passes.
-4. `cargo check -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passes.
-5. Scoped `rustfmt --edition 2021 --check` and scoped `git diff --check` pass before commit/push.
+1. The new smoke assertion passes without production code changes.
+2. The deferred reason proves production downloads execution is not wired yet.
+3. Snapshot state and UI state remain queued after deferred dispatch.
+4. Focused and package-level desktop validation pass before commit/push.
 
 ## Validation Result
 
-1. RED: `cargo test -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml transport_wiring_smoke` failed as expected because `RuntimeExecutionTurnDispositionDto` and `jobs_run_next_execution_turn(...)` did not exist yet.
-2. GREEN focused: the same transport smoke command passed with 1 test passed / 0 failed.
-3. DTO mapper focused test passed: `maps_runtime_execution_turn_dispositions_without_error_envelope` passed with 1 test passed / 0 failed.
-4. Full desktop package tests passed: `cargo test -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 3 unit tests and 1 integration smoke test.
-5. Compile gate passed: `cargo check -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`.
-6. Scoped format/diff checks passed: `rustfmt --edition 2021 --check --config skip_children=true src-tauri\src\commands\mod.rs src-tauri\src\commands\jobs.rs src-tauri\tests\transport_wiring_smoke.rs`; scoped `git diff --check` passed with CRLF normalization warnings only.
+1. Added isolated transport smoke coverage for a queued production downloads job dispatched through `jobs_run_next_execution_turn`.
+2. The command returned a successful `Deferred` DTO whose reason contains `execution port not wired`.
+3. The stored job snapshot remained `JobState::Queued` and `JobUiState::Queued`.
+4. Focused smoke passed: `cargo test -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml transport_wiring_smoke` passed with 1 integration test.
+5. Full desktop package tests passed with 3 unit tests and 1 integration smoke test.
+6. Compile gate passed: `cargo check -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`.
+7. Scoped `rustfmt --edition 2021 --check src-tauri\tests\transport_wiring_smoke.rs` passed; scoped `git diff --check` passed with CRLF normalization warnings only.

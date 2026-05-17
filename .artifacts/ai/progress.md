@@ -9747,6 +9747,32 @@
   - Scoped `git diff --check` passed with CRLF normalization warnings only.
 - The isolated sqlite smoke path now drops services before cleanup and leaves `.artifacts/tmp` empty after the test run.
 
+## Agent Note: 2026-05-17 23:00 CST - Opened AT-2026-05-17-237
+
+- AT-236 was committed and pushed as `f720d9c`.
+- Opened AT-237 as a test-only backend coverage slice for the production downloads deferred path through `jobs_run_next_execution_turn`.
+- Required context confirms production downloads driver remains intentionally no-execution-port, so a queued downloads job should return a successful deferred DTO and keep the snapshot queued.
+- Next action: add an isolated transport smoke assertion without changing production Rust code.
+
+## Agent Note: 2026-05-17 23:05 CST - AT-237 test compile correction
+
+- Added the isolated queued-download deferred smoke assertion.
+- First focused run failed at compile time because the test used `snapshot_store.snapshot(...)` without importing the `JobSnapshotStore` trait.
+- Follow-up correction: `JobSnapshotStore` exposes `get(...)`, while `snapshot(...)` belongs to the `JobRuntime` port, so the test now reads via `snapshot_store.get(...)`.
+
+## Agent Note: 2026-05-17 23:11 CST - Completed AT-2026-05-17-237
+
+- Added transport smoke coverage for a queued production downloads job through `jobs_run_next_execution_turn`.
+- The host command returned a successful `Deferred` DTO with an `execution port not wired` reason.
+- The queued downloads snapshot remained `Queued` / `Queued`, confirming deferred dispatch is non-mutating through the host path.
+- Validation passed:
+  - focused `transport_wiring_smoke`;
+  - full `my-epic-launcher-desktop` package tests;
+  - desktop compile gate;
+  - scoped rustfmt on `src-tauri\tests\transport_wiring_smoke.rs`;
+  - scoped `git diff --check` with CRLF normalization warnings only.
+- `.artifacts/tmp` remained empty after the test run.
+
 ### Auto Record: 2026-05-17 22:09:13
 - Tool: apply_patch
 - Phase: Phase 109 - Composition One-shot Runtime Execution Helper
@@ -9924,5 +9950,95 @@
 ### Auto Record: 2026-05-17 22:22:37
 - Tool: apply_patch
 - Phase: Phase 111 - Host Runtime Execution Command
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 22:24:41
+- Tool: apply_patch
+- Phase: Phase 111 - Host Runtime Execution Command
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-17 22:24:54
+- Tool: apply_patch
+- Phase: Phase 112 - Host Runtime Command Downloads Deferred Coverage
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 22:25:04
+- Tool: apply_patch
+- Phase: Phase 112 - Host Runtime Command Downloads Deferred Coverage
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 22:25:21
+- Tool: apply_patch
+- Phase: Phase 112 - Host Runtime Command Downloads Deferred Coverage
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 22:25:31
+- Tool: apply_patch
+- Phase: Phase 112 - Host Runtime Command Downloads Deferred Coverage
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 22:25:48
+- Tool: apply_patch
+- Phase: Phase 112 - Host Runtime Command Downloads Deferred Coverage
+- Files:
+  - `D:\DEV\MyEpicLauncher\src-tauri\tests\transport_wiring_smoke.rs` (update)
+
+### Auto Record: 2026-05-17 22:26:07
+- Tool: apply_patch
+- Phase: Phase 112 - Host Runtime Command Downloads Deferred Coverage
+- Files:
+  - `D:\DEV\MyEpicLauncher\src-tauri\tests\transport_wiring_smoke.rs` (update)
+
+### Auto Record: 2026-05-17 22:26:18
+- Tool: apply_patch
+- Phase: Phase 112 - Host Runtime Command Downloads Deferred Coverage
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 22:26:37
+- Tool: apply_patch
+- Phase: Phase 112 - Host Runtime Command Downloads Deferred Coverage
+- Files:
+  - `D:\DEV\MyEpicLauncher\src-tauri\tests\transport_wiring_smoke.rs` (update)
+
+### Auto Record: 2026-05-17 22:26:44
+- Tool: apply_patch
+- Phase: Phase 112 - Host Runtime Command Downloads Deferred Coverage
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 22:27:33
+- Tool: apply_patch
+- Phase: Phase 112 - Host Runtime Command Downloads Deferred Coverage
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 22:27:43
+- Tool: apply_patch
+- Phase: Phase 112 - Host Runtime Command Downloads Deferred Coverage
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 22:27:50
+- Tool: apply_patch
+- Phase: Phase 112 - Host Runtime Command Downloads Deferred Coverage
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 22:27:59
+- Tool: apply_patch
+- Phase: Phase 112 - Host Runtime Command Downloads Deferred Coverage
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 22:28:11
+- Tool: apply_patch
+- Phase: Phase 112 - Host Runtime Command Downloads Deferred Coverage
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
