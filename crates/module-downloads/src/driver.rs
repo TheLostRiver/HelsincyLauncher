@@ -386,6 +386,74 @@ impl DownloadJobDriver {
         Ok(Some(checkpoint))
     }
 
+    /// Records fake failed segment results into the downloads checkpoint.
+    /// 将 fake failed segment 结果记录进 downloads checkpoint。
+    pub fn record_failed_segment_checkpoints(
+        &self,
+        job_id: &JobId,
+        results: &[DownloadSegmentExecutionResult],
+    ) -> AppResult<Option<DownloadCheckpointRecord>> {
+        let Some(mut checkpoint) = self.checkpoint_repo.load(job_id)? else {
+            return Ok(None);
+        };
+        let mut has_failed_result = false;
+
+        for result in results {
+            let DownloadSegmentExecutionResult::Failed {
+                request,
+                downloaded_bytes,
+                ..
+            } = result
+            else {
+                continue;
+            };
+            if &request.job_id != job_id {
+                continue;
+            }
+
+            has_failed_result = true;
+            let existing_index = checkpoint
+                .segments
+                .iter()
+                .position(|segment| segment.segment_id == request.segment_id);
+            let (offset, partial_path, etag, hash_state_ref) = existing_index
+                .and_then(|index| checkpoint.segments.get(index))
+                .map(|segment| {
+                    (
+                        segment.offset,
+                        segment.partial_path.clone(),
+                        segment.etag.clone(),
+                        segment.hash_state_ref.clone(),
+                    )
+                })
+                .unwrap_or((request.start_offset, None, None, None));
+            let failed_segment = DownloadSegmentCheckpointRecord {
+                job_id: checkpoint.job_id.clone(),
+                segment_id: request.segment_id.clone(),
+                file_id: request.file_id.clone(),
+                offset,
+                length: request.length,
+                downloaded_bytes: *downloaded_bytes,
+                status: DownloadSegmentCheckpointStatus::Failed,
+                partial_path,
+                etag,
+                hash_state_ref,
+            };
+
+            if let Some(index) = existing_index {
+                checkpoint.segments[index] = failed_segment;
+            } else {
+                checkpoint.segments.push(failed_segment);
+            }
+        }
+
+        if has_failed_result {
+            self.checkpoint_repo.save(&checkpoint)?;
+        }
+
+        Ok(Some(checkpoint))
+    }
+
     /// Executes one fake/local resume turn by chaining downloads-owned helpers.
     /// 通过串联 downloads 自有 helper 执行一次 fake/local resume turn。
     pub fn execute_local_resume_turn(
@@ -1050,6 +1118,93 @@ mod tests {
                 .segments,
             expected_segments,
             "driver helper must persist the mutated checkpoint through the repository port"
+        );
+    }
+
+    #[test]
+    fn download_job_driver_failed_result_checkpoint_mutation_replaces_and_saves_segment() {
+        let repo = Arc::new(InMemoryCheckpointRepository::default());
+        let driver = DownloadJobDriver::new(repo.clone());
+        let job_id = JobId::generate();
+        let unrelated_segment = make_segment_checkpoint_record(
+            &job_id,
+            "segment-unrelated",
+            DownloadSegmentCheckpointStatus::Pending,
+        );
+        let mut existing_segment = make_segment_checkpoint_record(
+            &job_id,
+            "segment-failed",
+            DownloadSegmentCheckpointStatus::InProgress,
+        );
+        existing_segment.offset = 384;
+        existing_segment.downloaded_bytes = 64;
+        existing_segment.partial_path = Some("old-segment-failed.part".into());
+        existing_segment.etag = Some("old-failed-etag".into());
+        existing_segment.hash_state_ref = Some("old-failed-hash".into());
+        repo.save(&DownloadCheckpointRecord {
+            job_id: job_id.clone(),
+            segments: vec![unrelated_segment.clone(), existing_segment],
+        })
+        .expect("saving a checkpoint before failed mutation should succeed");
+
+        let accepted_request = make_segment_execution_request(&job_id, "segment-accepted");
+        let completed_request = make_segment_execution_request(&job_id, "segment-completed");
+        let mut failed_request = make_segment_execution_request(&job_id, "segment-failed");
+        failed_request.start_offset = 768;
+        failed_request.resume_mode = DownloadResumeWorkMode::Partial;
+        failed_request.checkpoint_ref = Some("segment-failed".into());
+        let failed_result = DownloadSegmentExecutionResult::Failed {
+            request: failed_request,
+            downloaded_bytes: 128,
+            reason: "network timeout while reading segment".into(),
+            retryable: true,
+        };
+
+        let saved_checkpoint = driver
+            .record_failed_segment_checkpoints(
+                &job_id,
+                &[
+                    DownloadSegmentExecutionResult::Accepted {
+                        request: accepted_request,
+                    },
+                    DownloadSegmentExecutionResult::Completed {
+                        request: completed_request,
+                        downloaded_bytes: 1024,
+                        partial_path: Some("segment-completed.part".into()),
+                        etag: Some("etag-segment-completed".into()),
+                        hash_state_ref: Some("hash-segment-completed".into()),
+                    },
+                    failed_result,
+                ],
+            )
+            .expect("failed results should be saved through the checkpoint repository")
+            .expect("existing checkpoint should be reloaded before failed mutation");
+
+        let expected_failed_segment = DownloadSegmentCheckpointRecord {
+            job_id: job_id.clone(),
+            segment_id: "segment-failed".into(),
+            file_id: "file-1".into(),
+            offset: 384,
+            length: 1024,
+            downloaded_bytes: 128,
+            status: DownloadSegmentCheckpointStatus::Failed,
+            partial_path: Some("old-segment-failed.part".into()),
+            etag: Some("old-failed-etag".into()),
+            hash_state_ref: Some("old-failed-hash".into()),
+        };
+        let expected_segments = vec![unrelated_segment, expected_failed_segment];
+
+        assert_eq!(
+            saved_checkpoint.segments, expected_segments,
+            "failed result mutation should replace matching segment facts without reordering unrelated facts"
+        );
+        assert_eq!(
+            repo.load(&job_id)
+                .expect("loading saved checkpoint should succeed")
+                .expect("saved checkpoint should exist")
+                .segments,
+            expected_segments,
+            "driver helper must persist failed checkpoint facts through the repository port"
         );
     }
 

@@ -91,7 +91,7 @@ Implementation truth should move through module facade and ports first. Do not p
 | fake completed-result checkpoint mutation | `DownloadJobDriver::record_completed_segment_checkpoints(...)` reloads checkpoint facts, applies same-job completed fake results into `DownloadSegmentCheckpointRecord` values, and saves via `DownloadCheckpointRepository`; still no SQLite adapter/schema, concrete IO, runtime completion, transport, or frontend changes | driver unit tests |
 | fake local resume execution orchestration | `DownloadJobDriver::execute_local_resume_turn(...)` chains the local execution-turn, request handoff, fake execution port, and checkpoint mutation helpers without runtime `run()`, concrete IO, SQLite adapter/schema changes, transport, or frontend behavior | driver unit tests |
 | fake segment failure result contract | `DownloadSegmentExecutionResult::Failed` carries request facts, downloaded bytes known at failure time, a local reason string, and a retryable hint without public `DL_*` execution projection, checkpoint mutation, retry policy, runtime completion, concrete IO, transport, or frontend behavior | driver unit tests |
-| fake failed-result checkpoint mutation | not wired yet; next Rust slice may persist same-job failed result status/progress through `DownloadCheckpointRepository` while deferring retry/backoff, public error projection, terminal runtime state, concrete IO, SQLite adapter/schema, transport, composition-root, and frontend behavior | future driver unit tests |
+| fake failed-result checkpoint mutation | `DownloadJobDriver::record_failed_segment_checkpoints(...)` reloads checkpoint facts, applies same-job failed fake results as `Failed` segment status/progress, and saves through `DownloadCheckpointRepository` while deferring retry/backoff, public error projection, terminal runtime state, concrete IO, SQLite adapter/schema, transport, composition-root, and frontend behavior | driver unit tests |
 | list/get/policy surfaces | not wired yet | future slices |
 
 ---
@@ -976,7 +976,7 @@ Current Rust reality:
 2. `DownloadSegmentCheckpointStatus::Failed` already exists.
 3. `DownloadSegmentExecutionResult::Failed` carries request facts, downloaded bytes known at failure time, a local reason string, and a retryable hint.
 4. `record_completed_segment_checkpoints(...)` mutates only completed results and intentionally ignores non-completed values.
-5. No helper currently records failed result facts into `DownloadSegmentCheckpointRecord`.
+5. `record_failed_segment_checkpoints(...)` now records failed result facts into `DownloadSegmentCheckpointRecord`.
 
 Boundary rules:
 
@@ -998,6 +998,15 @@ First Rust slice:
 2. keep completed and accepted results out of failed mutation behavior;
 3. add only the local `DownloadJobDriver` helper and test fixtures required for the test;
 4. run focused module tests, full module tests, rustfmt check, scoped `git diff --check`, and path-limited status before commit.
+
+Completed by AT-200:
+
+1. `DownloadJobDriver::record_failed_segment_checkpoints(...)` reloads checkpoint facts before mutation.
+2. The helper applies only same-job `DownloadSegmentExecutionResult::Failed` values.
+3. Matching `segment_id` facts are replaced in place, while new failed segment facts append after existing facts.
+4. Existing `offset`, `partial_path`, `etag`, and `hash_state_ref` are preserved on replacement; appended facts use the request's current `start_offset` and `None` optional persistence tokens.
+5. The helper saves through `DownloadCheckpointRepository` only when at least one failed result is applied.
+6. Retry/backoff, public `DL_*` projection, terminal runtime state, concrete IO, SQLite adapter/schema, transport, composition-root, and frontend behavior remain unchanged.
 
 ---
 
