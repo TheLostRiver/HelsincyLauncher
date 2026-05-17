@@ -9407,6 +9407,29 @@
 - Out of scope remains scheduler loops, durable leases, precise active-slot accounting, per-module fairness, terminal projection, downloads IO, transport, frontend, and SQLite schema changes.
 - Scoped command passed: `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- docs/modules/downloads/README_IMPL.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md` with CRLF normalization warnings only.
 
+## Session Note: 2026-05-17 AT-231 Publication / AT-232 Start
+
+- AT-2026-05-17-231 was committed and pushed to `origin/main` as `6f5bd32`.
+- Opened AT-2026-05-17-232 to implement the documented one-shot queue policy slot gate in `kernel-jobs`.
+- Required context read in focused chunks: README_IMPL 7.34, kernel-jobs queue-policy notes, downloads concurrency/budget notes, current `run_next_execution_turn(...)`, and current selector tests.
+- Working hypothesis: reuse the `list_resumable()` result, count `Running` snapshots, defer queued dispatch when `running_count >= max_concurrent_jobs`, and keep deterministic selection unchanged when capacity remains.
+
+## Session Note: 2026-05-17 AT-232 RED
+
+- Added focused capacity tests in `crates/kernel-jobs/src/runtime.rs`.
+- RED command: `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml policy_capacity`.
+- RED result: 1 capacity-remains test passed, while capacity-exhausted and zero-capacity tests failed with `Accepted`, proving the current selector still ignores `RuntimeQueuePolicy::max_concurrent_jobs`.
+
+## Session Note: 2026-05-17 AT-232 GREEN/Validation
+
+- Implemented the minimal policy gate in `SharedJobRuntimeHost::run_next_execution_turn(...)`.
+- Behavior: reuse `list_resumable()`, count `JobState::Running` snapshots, return `Deferred` with a capacity reason when `running_count >= max_concurrent_jobs`, and otherwise preserve deterministic queued selection.
+- Adjusted the older deterministic-selector test from capacity 1 to capacity 2 because that fixture intentionally includes one `Running` snapshot to prove non-queued snapshots are ignored; under AT-232, capacity 1 now correctly means no remaining slot.
+- GREEN focused command passed: `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml policy_capacity` => 3 passed / 0 failed.
+- Full package command passed: `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` => 12 passed / 0 failed.
+- Compile gate passed: `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`.
+- Scoped formatting/checks passed: `rustfmt --edition 2021 --check crates\kernel-jobs\src\runtime.rs`; scoped `git diff --check` for runtime plus PWF files passed with CRLF normalization warnings only.
+
 ### Auto Record: 2026-05-17 21:25:04
 - Tool: apply_patch
 - Phase: Phase 105 - One-shot Queued Execution Selector
@@ -9503,3 +9526,47 @@
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 21:36:03
+- Tool: apply_patch
+- Phase: Phase 107 - One-shot Queue Policy Slot Gate
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 21:36:53
+- Tool: apply_patch
+- Phase: Phase 107 - One-shot Queue Policy Slot Gate
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\kernel-jobs\src\runtime.rs` (update)
+
+### Auto Record: 2026-05-17 21:37:10
+- Tool: apply_patch
+- Phase: Phase 107 - One-shot Queue Policy Slot Gate
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 21:37:49
+- Tool: apply_patch
+- Phase: Phase 107 - One-shot Queue Policy Slot Gate
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\kernel-jobs\src\runtime.rs` (update)
+
+### Auto Record: 2026-05-17 21:38:18
+- Tool: apply_patch
+- Phase: Phase 107 - One-shot Queue Policy Slot Gate
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\kernel-jobs\src\runtime.rs` (update)
+
+### Auto Record: 2026-05-17 21:39:14
+- Tool: apply_patch
+- Phase: Phase 107 - One-shot Queue Policy Slot Gate
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)

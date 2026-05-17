@@ -280,9 +280,21 @@ impl SharedJobRuntimeHost {
         &self,
         registry: &JobDriverRegistry<()>,
     ) -> AppResult<JobRunDisposition> {
-        let mut queued_snapshots = self
-            .snapshot_store
-            .list_resumable()?
+        let resumable_snapshots = self.snapshot_store.list_resumable()?;
+        let running_count = resumable_snapshots
+            .iter()
+            .filter(|snapshot| snapshot.state == JobState::Running)
+            .count();
+        let max_concurrent_jobs = self.policy().max_concurrent_jobs;
+        if running_count >= max_concurrent_jobs {
+            return Ok(JobRunDisposition::Deferred {
+                reason: format!(
+                    "queue capacity exhausted: {running_count}/{max_concurrent_jobs} running jobs"
+                ),
+            });
+        }
+
+        let mut queued_snapshots = resumable_snapshots
             .into_iter()
             .filter(|snapshot| snapshot.state == JobState::Queued)
             .collect::<Vec<_>>();
@@ -298,6 +310,8 @@ impl SharedJobRuntimeHost {
             });
         };
 
+        // The one-shot gate uses snapshot-observed Running jobs; durable leases stay separate.
+        // 单次门控只读取快照中的 Running 作业；持久 lease 留给后续边界。
         // Selection remains one-shot and deterministic; richer scheduler policy stays separate.
         // 选择逻辑保持单次且确定；更完整的调度策略保留给后续 scheduler 边界。
         self.run_one_execution_turn(&snapshot.job_id, registry)
@@ -652,7 +666,7 @@ mod tests {
 
     #[test]
     fn next_execution_turn_selects_queued_snapshot_deterministically() {
-        let runtime = SharedJobRuntimeHost::new(RuntimeQueuePolicy::new(1));
+        let runtime = SharedJobRuntimeHost::new(RuntimeQueuePolicy::new(2));
         let timestamp = launcher_kernel_foundation::IsoDateTime::now();
         let ignored_running = test_snapshot_with_id_state(
             "job-0",
@@ -725,7 +739,7 @@ mod tests {
 
     #[test]
     fn next_execution_turn_defers_when_no_queued_snapshot_exists() {
-        let runtime = SharedJobRuntimeHost::new(RuntimeQueuePolicy::new(1));
+        let runtime = SharedJobRuntimeHost::new(RuntimeQueuePolicy::new(2));
         let timestamp = launcher_kernel_foundation::IsoDateTime::now();
         let running_snapshot = test_snapshot_with_id_state(
             "job-running",
@@ -763,6 +777,184 @@ mod tests {
             }
             other => panic!("no queued work should defer dispatch, got {other:?}"),
         }
+    }
+
+    #[test]
+    fn next_execution_turn_defers_when_policy_capacity_is_exhausted() {
+        let runtime = SharedJobRuntimeHost::new(RuntimeQueuePolicy::new(1));
+        let timestamp = launcher_kernel_foundation::IsoDateTime::now();
+        let running_snapshot = test_snapshot_with_id_state(
+            "job-running",
+            "test",
+            "run",
+            JobState::Running,
+            JobUiState::Running,
+            timestamp.clone(),
+        );
+        let queued_snapshot = test_snapshot_with_id_state(
+            "job-a",
+            "test",
+            "run",
+            JobState::Queued,
+            JobUiState::Queued,
+            timestamp,
+        );
+        let queued_job_id = queued_snapshot.job_id.clone();
+        runtime
+            .snapshot_store
+            .create(&running_snapshot)
+            .expect("fixture should store a running snapshot");
+        runtime
+            .snapshot_store
+            .create(&queued_snapshot)
+            .expect("fixture should store a queued snapshot");
+
+        let driver = Arc::new(RecordingRunDriver::default());
+        let seen_job_ids = driver.seen_job_ids();
+        let mut registry = super::JobDriverRegistry::new();
+        registry.register(driver);
+
+        let disposition = runtime
+            .run_next_execution_turn(&registry)
+            .expect("capacity exhaustion should be a non-terminal dispatch result");
+
+        match disposition {
+            JobRunDisposition::Deferred { reason } => {
+                assert!(reason.contains("capacity"));
+            }
+            other => panic!("capacity exhaustion should defer dispatch, got {other:?}"),
+        }
+        assert!(
+            seen_job_ids
+                .lock()
+                .expect("recording driver mutex should not be poisoned")
+                .is_empty(),
+            "capacity exhaustion must not call the driver"
+        );
+        let queued_after = runtime
+            .snapshot(&queued_job_id)
+            .expect("queued snapshot query should succeed")
+            .expect("queued snapshot should still exist");
+        assert_eq!(queued_after.state, JobState::Queued);
+    }
+
+    #[test]
+    fn next_execution_turn_defers_when_policy_capacity_is_zero() {
+        let runtime = SharedJobRuntimeHost::new(RuntimeQueuePolicy::new(0));
+        let timestamp = launcher_kernel_foundation::IsoDateTime::now();
+        let queued_snapshot = test_snapshot_with_id_state(
+            "job-a",
+            "test",
+            "run",
+            JobState::Queued,
+            JobUiState::Queued,
+            timestamp,
+        );
+        let queued_job_id = queued_snapshot.job_id.clone();
+        runtime
+            .snapshot_store
+            .create(&queued_snapshot)
+            .expect("fixture should store a queued snapshot");
+
+        let driver = Arc::new(RecordingRunDriver::default());
+        let seen_job_ids = driver.seen_job_ids();
+        let mut registry = super::JobDriverRegistry::new();
+        registry.register(driver);
+
+        let disposition = runtime
+            .run_next_execution_turn(&registry)
+            .expect("zero capacity should be a non-terminal dispatch result");
+
+        match disposition {
+            JobRunDisposition::Deferred { reason } => {
+                assert!(reason.contains("capacity"));
+            }
+            other => panic!("zero capacity should defer dispatch, got {other:?}"),
+        }
+        assert!(
+            seen_job_ids
+                .lock()
+                .expect("recording driver mutex should not be poisoned")
+                .is_empty(),
+            "zero capacity must not call the driver"
+        );
+        let queued_after = runtime
+            .snapshot(&queued_job_id)
+            .expect("queued snapshot query should succeed")
+            .expect("queued snapshot should still exist");
+        assert_eq!(queued_after.state, JobState::Queued);
+    }
+
+    #[test]
+    fn next_execution_turn_dispatches_when_policy_capacity_remains() {
+        let runtime = SharedJobRuntimeHost::new(RuntimeQueuePolicy::new(2));
+        let timestamp = launcher_kernel_foundation::IsoDateTime::now();
+        let running_snapshot = test_snapshot_with_id_state(
+            "job-running",
+            "test",
+            "run",
+            JobState::Running,
+            JobUiState::Running,
+            timestamp.clone(),
+        );
+        let queued_later_by_id = test_snapshot_with_id_state(
+            "job-b",
+            "test",
+            "run",
+            JobState::Queued,
+            JobUiState::Queued,
+            timestamp.clone(),
+        );
+        let queued_first_by_id = test_snapshot_with_id_state(
+            "job-a",
+            "test",
+            "run",
+            JobState::Queued,
+            JobUiState::Queued,
+            timestamp,
+        );
+        let expected_job_id = queued_first_by_id.job_id.clone();
+        let skipped_job_id = queued_later_by_id.job_id.clone();
+        runtime
+            .snapshot_store
+            .create(&running_snapshot)
+            .expect("fixture should store a running snapshot");
+        runtime
+            .snapshot_store
+            .create(&queued_later_by_id)
+            .expect("fixture should store the later queued snapshot");
+        runtime
+            .snapshot_store
+            .create(&queued_first_by_id)
+            .expect("fixture should store the first queued snapshot");
+
+        let driver = Arc::new(RecordingRunDriver::default());
+        let seen_job_ids = driver.seen_job_ids();
+        let mut registry = super::JobDriverRegistry::new();
+        registry.register(driver);
+
+        let disposition = runtime
+            .run_next_execution_turn(&registry)
+            .expect("remaining capacity should dispatch one queued snapshot");
+
+        assert_eq!(disposition, JobRunDisposition::Accepted);
+        assert_eq!(
+            seen_job_ids
+                .lock()
+                .expect("recording driver mutex should not be poisoned")
+                .as_slice(),
+            &[expected_job_id.clone()]
+        );
+        let selected_snapshot = runtime
+            .snapshot(&expected_job_id)
+            .expect("selected snapshot query should succeed")
+            .expect("selected snapshot should still exist");
+        assert_eq!(selected_snapshot.state, JobState::Running);
+        let skipped_snapshot = runtime
+            .snapshot(&skipped_job_id)
+            .expect("skipped snapshot query should succeed")
+            .expect("skipped snapshot should still exist");
+        assert_eq!(skipped_snapshot.state, JobState::Queued);
     }
 
     fn test_snapshot(module: &str, kind: &str) -> JobSnapshot<()> {

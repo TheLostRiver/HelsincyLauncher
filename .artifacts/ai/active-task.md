@@ -2,25 +2,25 @@
 
 ## Identity
 
-- task id: AT-2026-05-17-231
-- title: Define one-shot queue policy slot gate boundary
+- task id: AT-2026-05-17-232
+- title: Add one-shot queue policy slot gate
 - status: completed
 
 ## Goal
 
-Define the next `kernel-jobs` boundary after one-shot queued selection: `run_next_execution_turn(...)` should start respecting `RuntimeQueuePolicy::max_concurrent_jobs` through a minimal snapshot-observed running-count gate, while scheduler loops, durable leases, precise active-slot accounting, fairness, terminal projection, and downloads IO remain out of scope.
+Implement the documented `kernel-jobs` one-shot selector policy gate: `run_next_execution_turn(...)` should count current `Running` snapshots and defer queued dispatch when `RuntimeQueuePolicy::max_concurrent_jobs` has no remaining capacity, while scheduler loops, durable leases, precise active-slot accounting, fairness, terminal projection, and downloads IO remain out of scope.
 
 ## Scope
 
 - in scope:
-  - `docs/modules/downloads/README_IMPL.md`
+  - `crates/kernel-jobs/src/runtime.rs`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
   - `.artifacts/ai/progress.md`
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
-  - Rust code changes
+  - durable docs updates beyond PWF records
   - downloads driver/concrete execution changes
   - composition-root wiring
   - durable leases
@@ -32,7 +32,7 @@ Define the next `kernel-jobs` boundary after one-shot queued selection: `run_nex
 
 ## Allowed Files
 
-1. docs/modules/downloads/README_IMPL.md
+1. crates/kernel-jobs/src/runtime.rs
 2. .artifacts/ai/active-task.md
 3. .artifacts/ai/task-plan.md
 4. .artifacts/ai/progress.md
@@ -44,31 +44,33 @@ Define the next `kernel-jobs` boundary after one-shot queued selection: `run_nex
 Read before writing:
 
 1. README.md and docs/README.md routing.
-2. Module documentation budget and README_IMPL 7.33/current Rust state after AT-230.
+2. README_IMPL 7.34.
 3. docs/TauriKernelJobsRuntimeDesign.md queue policy and eligible-job selection notes.
 4. docs/TauriTestingStrategyAndQualityGateDesign.md kernel-jobs test guidance.
 5. docs/TauriDownloadRuntimeDesign.md concurrency budget notes.
-6. current `JobSnapshotStore::list_resumable(...)` implementations.
+6. current `SharedJobRuntimeHost::run_next_execution_turn(...)` and selector tests.
 
 ## Hypothesis
 
-- falsifiable documentation hypothesis: the next safe Rust slice is a minimal policy gate inside `run_next_execution_turn(...)` that counts current `Running` snapshots from the same resumable read and returns `Deferred` when that count is greater than or equal to `RuntimeQueuePolicy::max_concurrent_jobs`.
+- falsifiable implementation hypothesis: `run_next_execution_turn(...)` can reuse the same `list_resumable()` read, count `Running` snapshots, defer when `running_count >= policy.max_concurrent_jobs`, and otherwise preserve current deterministic queued selection.
 
 ## Cheap Check
 
-1. Update README_IMPL with a concise one-shot policy slot-gate boundary.
-2. Keep task-log detail in `.artifacts/ai`.
-3. Run scoped `git diff --check` for README_IMPL and PWF files.
+1. Add RED tests for capacity-exhausted deferral and remaining-capacity dispatch.
+2. Implement the minimal running-count gate.
+3. Run focused tests, full `launcher-kernel-jobs` lib tests, composition-root check, scoped rustfmt, and scoped diff check.
 
 ## Validation Gate
 
-1. README_IMPL states current AT-230 Rust reality.
-2. README_IMPL defines the minimal running-count gate and no-capacity deferral semantics.
-3. README_IMPL keeps scheduler loops, durable leases, precise active-slot accounting, fairness, terminal projection, downloads IO, transport, frontend, and SQLite schema out of scope.
-4. Scoped `git diff --check` passes before commit.
+1. Focused capacity tests fail before implementation and pass after implementation.
+2. Existing deterministic/no-queued selector tests keep passing.
+3. Existing accepted/deferred dispatch behavior remains unchanged.
+4. Verification commands pass before commit/push.
 
 ## Validation Result
 
-1. README_IMPL 7.34 now documents the one-shot queue policy slot gate boundary.
-2. The section states current AT-230 Rust reality, defines the minimal `Running` snapshot count vs `max_concurrent_jobs` gate, and keeps scheduler loops, durable leases, precise active-slot accounting, fairness, terminal projection, downloads IO, transport, frontend, and SQLite schema out of scope.
-3. Scoped `git diff --check` passed for README_IMPL and PWF files with CRLF normalization warnings only.
+1. RED: `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml policy_capacity` failed as expected because capacity-exhausted and zero-capacity cases still returned `Accepted`.
+2. GREEN focused: the same command passed with 3 tests passed / 0 failed.
+3. Full package: `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed with 12 tests passed / 0 failed.
+4. Integration compile gate: `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
+5. Scoped format/checks: `rustfmt --edition 2021 --check crates\kernel-jobs\src\runtime.rs` passed; scoped `git diff --check` passed with CRLF normalization warnings only.

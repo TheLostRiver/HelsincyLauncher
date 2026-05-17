@@ -1052,3 +1052,13 @@
 - The safe next boundary is not a scheduler loop or lease model; it is a minimal snapshot-observed gate that counts current `JobState::Running` snapshots from `list_resumable()` and defers selection when that count is greater than or equal to `max_concurrent_jobs`.
 - `max_concurrent_jobs == 0` should mean no runtime capacity for this selector, even though downloads user-facing policy is normally clamped before it reaches `RuntimeQueuePolicy`.
 - README_IMPL 7.34 now defines the next Rust slice and validation expectations; scoped docs/PWF `git diff --check` passed with CRLF normalization warnings only.
+- AT-2026-05-17-231 final commit `6f5bd32` was pushed to `origin/main`.
+
+## Phase 107 One-shot Queue Policy Slot Gate Findings
+
+- Required context was read in focused chunks: README_IMPL 7.34, kernel-jobs queue policy notes, downloads concurrency/budget notes, current `run_next_execution_turn(...)`, current selector tests, and AT-231 pushed state.
+- Current `run_next_execution_turn(...)` performs one `list_resumable()` read already, so the policy gate can reuse that snapshot list rather than adding a new store API or relying on adapter ordering.
+- The implementation should check capacity before queued candidate selection; if capacity is exhausted, the queued snapshot should remain `Queued` and the driver must not be called.
+- Existing no-queued coverage should avoid mixing with capacity exhaustion by using a policy that has room for the running fixture or by using no running fixture.
+- RED/GREEN confirmed `run_next_execution_turn(...)` now defers when `running_count >= max_concurrent_jobs`, treats zero capacity as exhausted, and still dispatches the deterministic queued candidate when capacity remains.
+- Full `launcher-kernel-jobs` lib tests, `launcher-composition-root` check, scoped rustfmt, and scoped diff-check passed.
