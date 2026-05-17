@@ -2,27 +2,29 @@
 
 ## Identity
 
-- task id: AT-2026-05-17-197
-- title: Define downloads fake segment failure result boundary
+- task id: AT-2026-05-17-198
+- title: Add downloads fake segment failure result contract
 - status: completed
 
 ## Goal
 
-After AT-196 proved one fake/local resume turn can flow end to end through the downloads driver helpers, define the next implementation boundary before coding: a module-local fake segment failure result contract.
+After AT-197 documented the fake segment failure result boundary, add the narrow Rust contract that lets a fake or future segment executor return an in-band failed segment result through `DownloadSegmentExecutionResult`.
 
-This is a planning/documentation slice. It prepares the next Rust task without adding a public `DL_*` execution error surface, runtime `run()`, concrete HTTP, staging writes, verification, SQLite adapter work, transport, composition-root, or frontend behavior.
+This is a module-local result shape only. It must not introduce public `DL_*` execution errors, checkpoint mutation, retry/backoff, runtime completion, concrete HTTP/write/verify behavior, SQLite adapter/schema work, composition-root, transport, or frontend changes.
 
 ## Scope
 
 - in scope:
   - `docs/modules/downloads/README_IMPL.md`
+  - `crates/module-downloads/src/driver.rs`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
   - `.artifacts/ai/progress.md`
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
-  - Rust production code
+  - checkpoint mutation for failed results
+  - retry/backoff policy
   - concrete HTTP range requests or provider object fetch
   - staging file writes, artifact moves, or hash/length verification
   - SQLite schema or adapter changes
@@ -34,15 +36,16 @@ This is a planning/documentation slice. It prepares the next Rust task without a
 ## Allowed Files
 
 1. docs/modules/downloads/README_IMPL.md
-2. .artifacts/ai/active-task.md
-3. .artifacts/ai/task-plan.md
-4. .artifacts/ai/progress.md
-5. .artifacts/ai/findings.md
-6. .artifacts/ai/handoff.md
+2. crates/module-downloads/src/driver.rs
+3. .artifacts/ai/active-task.md
+4. .artifacts/ai/task-plan.md
+5. .artifacts/ai/progress.md
+6. .artifacts/ai/findings.md
+7. .artifacts/ai/handoff.md
 
 ## Required Context Read
 
-Read this turn before editing:
+Read this turn before coding:
 
 1. README.md
 2. CONTRIBUTING.md
@@ -50,37 +53,46 @@ Read this turn before editing:
 4. docs/modules/downloads/README_ARCH.md
 5. docs/modules/downloads/README_API.md
 6. docs/modules/downloads/README_FLOW.md
-7. docs/modules/downloads/README_IMPL.md sections 7.18 through 9
+7. docs/modules/downloads/README_IMPL.md section 7.19 and validation section
 8. docs/TauriDownloadRuntimeDesign.md failure/retry/checkpoint snippets
 9. docs/TauriKernelJobsRuntimeDesign.md runtime ownership snippets
 10. docs/TauriErrorHandlingAndProjectionDesign.md retryable/severity/public-error snippets
-11. docs/TauriTestingStrategyAndQualityGateDesign.md module test snippets
+11. current `crates/module-downloads/src/driver.rs`
+12. superpowers TDD skill
 
 ## Hypothesis
 
-- falsifiable documentation hypothesis: README_IMPL can define a narrow fake/local failed segment result contract that is useful for the next TDD slice while preserving the boundary that public `DL_*` execution errors and runtime failure projection remain future work.
+- falsifiable local hypothesis: a focused driver test can prove `DownloadSegmentExecutionPort` can return a local failed segment result value through the existing collection helper without changing port signatures, checkpoint mutation, runtime behavior, concrete IO, transport, or frontend behavior.
 
 ## Cheap Check
 
-1. Update README_IMPL with a new fake segment failure result boundary section.
-2. Mark current implementation table so the next Rust slice is explicit and constrained.
-3. Run scoped `git diff --check` on touched files.
-4. Commit and push only AT-197 files.
+1. Add a focused RED test in `crates/module-downloads/src/driver.rs` for `segment_failure_result`.
+2. Run focused `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml segment_failure_result`.
+3. Add the minimal `DownloadSegmentExecutionResult::Failed` variant and fields required by the test.
+4. Update README_IMPL to mark the failure result contract implemented.
+5. Run focused test, full module test, rustfmt check, scoped `git diff --check`, and path-limited status.
 
 ## Validation Gate
 
-1. README_IMPL explains why the next code slice should add a local failed result contract before checkpoint mutation or concrete IO.
-2. README_IMPL explicitly forbids public `DL_*` execution errors, runtime completion, concrete IO, SQLite adapter/schema, transport, and frontend work for this slice.
-3. Scoped `git diff --check` passes.
-4. Commit only AT-197 files locally, then push `main` to `origin`.
+1. RED fails because the failed result variant does not exist.
+2. GREEN preserves failed result payload through the existing execution port helper.
+3. No checkpoint mutation, retry/backoff, runtime completion, public error projection, concrete IO, SQLite adapter/schema, transport, composition-root, or frontend work is added.
+4. Public comments are bilingual and existing English comments are preserved.
+5. Focused and full module tests pass.
+6. Formatting and scoped diff checks pass.
+7. Commit only AT-198 files locally, then push `main` to `origin`.
 
 ## Validation Result
 
-1. README_IMPL section 7.19 now defines a module-local fake failed segment result boundary and first Rust slice.
-2. The boundary keeps public `DL_*` execution codes, `AppErrorDto`, retry/backoff, checkpoint mutation, runtime snapshots, concrete IO, SQLite adapter/schema, transport, composition-root, and frontend behavior out of AT-197.
-3. Scoped `git diff --check` passed with CRLF normalization warnings only.
+1. RED command `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml segment_failure_result` failed because `DownloadSegmentExecutionResult::Failed` did not exist.
+2. GREEN added `DownloadSegmentExecutionResult::Failed` with request facts, downloaded bytes, local reason, and retryable hint.
+3. Focused validation passed: 1 passed, 0 failed.
+4. Full downloads module validation passed: 36 passed, 0 failed.
+5. `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed.
+6. Scoped `git diff --check` passed with CRLF normalization warnings only.
+7. No checkpoint mutation, retry/backoff, public error projection, runtime completion, concrete IO, SQLite adapter/schema, transport, composition-root, or frontend work was added.
 
 ## Notes
 
-- AT-2026-05-17-196 final local commit is `9294f9d` and was pushed to `origin/main`.
-- AT-2026-05-17-197 initial local commit created as `83315bf`; PWF backfill is amended into the same task commit.
+- AT-2026-05-17-197 final local commit is `af6ca27` and was pushed to `origin/main`.
+- AT-2026-05-17-198 initial local commit created as `c4156bb`; PWF backfill is amended into the same task commit.

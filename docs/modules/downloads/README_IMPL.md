@@ -90,7 +90,7 @@ Implementation truth should move through module facade and ports first. Do not p
 | fake segment completion result contract | `DownloadSegmentExecutionResult::Completed` carries the original request, completed byte count, and optional fake persistence tokens for later checkpoint mutation; still no checkpoint save, real IO, runtime completion, transport, or frontend projection | driver unit tests |
 | fake completed-result checkpoint mutation | `DownloadJobDriver::record_completed_segment_checkpoints(...)` reloads checkpoint facts, applies same-job completed fake results into `DownloadSegmentCheckpointRecord` values, and saves via `DownloadCheckpointRepository`; still no SQLite adapter/schema, concrete IO, runtime completion, transport, or frontend changes | driver unit tests |
 | fake local resume execution orchestration | `DownloadJobDriver::execute_local_resume_turn(...)` chains the local execution-turn, request handoff, fake execution port, and checkpoint mutation helpers without runtime `run()`, concrete IO, SQLite adapter/schema changes, transport, or frontend behavior | driver unit tests |
-| fake segment failure result contract | not wired yet; next Rust slice may add a module-local failed segment result value that carries request facts plus local failure metadata, without public `DL_*` execution projection, checkpoint mutation, retry policy, runtime completion, concrete IO, transport, or frontend behavior | future driver unit tests |
+| fake segment failure result contract | `DownloadSegmentExecutionResult::Failed` carries request facts, downloaded bytes known at failure time, a local reason string, and a retryable hint without public `DL_*` execution projection, checkpoint mutation, retry policy, runtime completion, concrete IO, transport, or frontend behavior | driver unit tests |
 | list/get/policy surfaces | not wired yet | future slices |
 
 ---
@@ -937,7 +937,7 @@ Current Rust reality:
 2. `DownloadSegmentExecutionResult::Accepted` proves a request crossed the local port boundary.
 3. `DownloadSegmentExecutionResult::Completed` proves a fake executor can carry completion facts without performing concrete IO.
 4. `accept_segment_execution_requests(...)` currently propagates the first `AppResult` error returned by the port.
-5. There is no result value for a handled fake segment failure, so a fake executor cannot yet return local failure metadata in-band for later checkpoint or retry decisions.
+5. `DownloadSegmentExecutionResult::Failed` now lets a fake executor return local failure metadata in-band for later checkpoint or retry decisions.
 
 Boundary rules:
 
@@ -956,6 +956,12 @@ First Rust slice:
 3. add the minimal failed result variant and fields required by the test;
 4. keep `DownloadSegmentExecutionPort` and `DownloadJobDriver::accept_segment_execution_requests(...)` behavior otherwise unchanged;
 5. run focused module tests, full module tests, rustfmt check, scoped `git diff --check`, and path-limited status before commit.
+
+Completed by AT-198:
+
+1. `DownloadSegmentExecutionResult::Failed` carries the original request, downloaded bytes known at failure time, a module-local reason string, and a retryable hint.
+2. The focused driver test proves a fake port can return the failed value through `accept_segment_execution_requests(...)` without changing the port signature.
+3. Checkpoint mutation, retry/backoff, public `DL_*` execution projection, concrete IO, runtime completion, transport, composition-root, SQLite adapter/schema, and frontend behavior remain unchanged.
 
 ---
 

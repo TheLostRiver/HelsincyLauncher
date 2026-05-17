@@ -6977,6 +6977,21 @@
 - Validation: scoped `git diff --check` over AT-197 files passed with CRLF normalization warnings only.
 - Initial local commit created as `83315bf`; PWF backfill is being amended into the same task commit before push.
 
+## 2026-05-17 - AT-198 Started
+
+- AT-197 final commit is `af6ca27` and `git push origin main` succeeded.
+- Re-read README_IMPL 7.19, current `driver.rs` result enum/helper/test surfaces, current status, and recent commit log before coding.
+- Required docs for this Rust slice were already read in this turn: README, CONTRIBUTING, docs map, downloads ARCH/API/FLOW/README_IMPL, TauriDownloadRuntimeDesign failure/retry/checkpoint snippets, TauriKernelJobsRuntimeDesign runtime ownership snippets, TauriErrorHandlingAndProjectionDesign retryable/severity/public-error snippets, and TDD skill.
+- Scope is a TDD code slice for an in-band fake failed segment result only; no checkpoint mutation, retry/backoff, public error projection, runtime completion, concrete IO, SQLite adapter/schema, transport, composition-root, or frontend work.
+- RED: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml segment_failure_result` failed as expected because `DownloadSegmentExecutionResult::Failed` does not exist.
+- GREEN: added `DownloadSegmentExecutionResult::Failed` with request facts, downloaded bytes, local reason, and retryable hint. Focused `segment_failure_result` passed with 1 passed, 0 failed.
+- Updated README_IMPL 7.19 to mark the fake segment failure result contract implemented while keeping checkpoint mutation, retry policy, public error projection, runtime completion, concrete IO, transport, composition-root, SQLite adapter/schema, and frontend work deferred.
+- Final focused validation: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml segment_failure_result` passed with 1 passed, 0 failed.
+- Full downloads validation: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 36 passed, 0 failed.
+- Format validation: `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed.
+- Scoped diff validation passed with CRLF normalization warnings only.
+- Initial local commit created as `c4156bb`; PWF backfill is being amended into the same task commit before push.
+
 ### Auto Record: 2026-05-17 14:13:18
 - Tool: apply_patch
 - Phase: Phase 71 - Downloads Fake Local Resume Execution Orchestration
@@ -7178,5 +7193,143 @@
 ### Auto Record: 2026-05-17 14:26:55
 - Tool: apply_patch
 - Phase: Phase 72 - Downloads Fake Segment Failure Result Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:27:57
+- Tool: apply_patch
+- Phase: Phase 72 - Downloads Fake Segment Failure Result Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-17 14:28:11
+- Tool: apply_patch
+- Phase: Phase 73 - Downloads Fake Segment Failure Result Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 14:28:20
+- Tool: apply_patch
+- Phase: Phase 73 - Downloads Fake Segment Failure Result Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:28:29
+- Tool: apply_patch
+- Phase: Phase 73 - Downloads Fake Segment Failure Result Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 14:29:01
+- Tool: apply_patch
+- Phase: Phase 73 - Downloads Fake Segment Failure Result Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 14:29:38
+- Tool: apply_patch
+- Phase: Phase 73 - Downloads Fake Segment Failure Result Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-17 14:29:48
+- Tool: apply_patch
+- Phase: Phase 73 - Downloads Fake Segment Failure Result Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-17 14:30:02
+- Tool: apply_patch
+- Phase: Phase 73 - Downloads Fake Segment Failure Result Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:30:34
+- Tool: apply_patch
+- Phase: Phase 73 - Downloads Fake Segment Failure Result Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-17 14:30:53
+- Tool: apply_patch
+- Phase: Phase 73 - Downloads Fake Segment Failure Result Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 14:31:01
+- Tool: apply_patch
+- Phase: Phase 73 - Downloads Fake Segment Failure Result Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:31:08
+- Tool: apply_patch
+- Phase: Phase 73 - Downloads Fake Segment Failure Result Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 14:31:36
+- Tool: apply_patch
+- Phase: Phase 73 - Downloads Fake Segment Failure Result Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 14:31:45
+- Tool: apply_patch
+- Phase: Phase 73 - Downloads Fake Segment Failure Result Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 14:31:54
+- Tool: apply_patch
+- Phase: Phase 73 - Downloads Fake Segment Failure Result Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:32:01
+- Tool: apply_patch
+- Phase: Phase 73 - Downloads Fake Segment Failure Result Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 14:32:13
+- Tool: apply_patch
+- Phase: Phase 73 - Downloads Fake Segment Failure Result Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 14:32:30
+- Tool: apply_patch
+- Phase: Phase 73 - Downloads Fake Segment Failure Result Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 14:32:35
+- Tool: apply_patch
+- Phase: Phase 73 - Downloads Fake Segment Failure Result Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:33:08
+- Tool: apply_patch
+- Phase: Phase 73 - Downloads Fake Segment Failure Result Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 14:33:16
+- Tool: apply_patch
+- Phase: Phase 73 - Downloads Fake Segment Failure Result Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 14:33:21
+- Tool: apply_patch
+- Phase: Phase 73 - Downloads Fake Segment Failure Result Contract
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 14:33:26
+- Tool: apply_patch
+- Phase: Phase 73 - Downloads Fake Segment Failure Result Contract
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)

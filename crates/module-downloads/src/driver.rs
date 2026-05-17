@@ -186,6 +186,22 @@ pub enum DownloadSegmentExecutionResult {
         /// 为后续 verifier/checkpoint 切片保留的可选 hash 状态引用。
         hash_state_ref: Option<String>,
     },
+    /// A fake or future executor reports a handled local segment failure.
+    /// fake 或后续 executor 报告一次已处理的本地 segment 失败。
+    Failed {
+        /// Segment request that produced the failure result.
+        /// 产生失败结果的 segment 请求。
+        request: DownloadSegmentExecutionRequest,
+        /// Bytes completed before the failure was observed.
+        /// 观察到失败前已完成的字节数。
+        downloaded_bytes: u64,
+        /// Module-local diagnostic reason, not a public `DL_*` error code.
+        /// 模块本地诊断原因，不是公开的 `DL_*` 错误码。
+        reason: String,
+        /// Retry hint for later policy slices; this does not trigger retry here.
+        /// 供后续策略切片使用的重试提示；这里不会触发重试。
+        retryable: bool,
+    },
 }
 
 /// Port shell for handing segment requests to later fetch/write/verify code.
@@ -500,6 +516,22 @@ mod tests {
                 partial_path: Some(request.write_target.clone()),
                 etag: Some(format!("etag-{}", request.segment_id)),
                 hash_state_ref: Some(format!("hash-{}", request.segment_id)),
+            })
+        }
+    }
+
+    struct FailedSegmentExecutionPort;
+
+    impl DownloadSegmentExecutionPort for FailedSegmentExecutionPort {
+        fn accept_segment_execution(
+            &self,
+            request: &DownloadSegmentExecutionRequest,
+        ) -> launcher_kernel_foundation::AppResult<DownloadSegmentExecutionResult> {
+            Ok(DownloadSegmentExecutionResult::Failed {
+                request: request.clone(),
+                downloaded_bytes: 128,
+                reason: "network timeout while reading segment".into(),
+                retryable: true,
             })
         }
     }
@@ -914,6 +946,30 @@ mod tests {
                 hash_state_ref: Some("hash-segment-completed".into()),
             }],
             "fake completion must preserve payload facts for a later checkpoint mutation slice"
+        );
+    }
+
+    #[test]
+    fn download_job_driver_segment_failure_result_preserves_fake_failure_payload() {
+        let repo = Arc::new(InMemoryCheckpointRepository::default());
+        let driver = DownloadJobDriver::new(repo);
+        let execution_port = FailedSegmentExecutionPort;
+        let job_id = JobId::generate();
+        let request = make_segment_execution_request(&job_id, "segment-failed");
+
+        let results = driver
+            .accept_segment_execution_requests(&execution_port, std::slice::from_ref(&request))
+            .expect("fake segment failure result should stay in the local result channel");
+
+        assert_eq!(
+            results,
+            vec![DownloadSegmentExecutionResult::Failed {
+                request,
+                downloaded_bytes: 128,
+                reason: "network timeout while reading segment".into(),
+                retryable: true,
+            }],
+            "fake failure must preserve local metadata for a later checkpoint or retry slice"
         );
     }
 

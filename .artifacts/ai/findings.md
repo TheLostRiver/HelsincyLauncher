@@ -743,3 +743,11 @@
 - Current Rust has `DownloadSegmentExecutionResult::Accepted` and `Completed`; it can propagate an `AppResult` from the execution port, but it has no module-local result value for a fake executor to report a handled segment failure.
 - The next safe boundary should define a local failed segment result contract for the next TDD slice, not public `DL_*` codes, checkpoint mutation, runtime completion, concrete fetch/write/verify, transport, frontend, or composition wiring.
 - README_IMPL 7.19 now pins the first Rust slice: add a focused test whose fake port returns `DownloadSegmentExecutionResult::Failed`, carrying request facts, a local failure reason string, a retryable hint, and downloaded bytes known at failure time.
+
+## Phase 73 Downloads Fake Segment Failure Result Contract Findings
+
+- AT-2026-05-17-197 final commit is `af6ca27` and was pushed to `origin/main`.
+- Current `DownloadSegmentExecutionResult` has only `Accepted` and `Completed`, while `DownloadSegmentExecutionPort` already returns `AppResult<DownloadSegmentExecutionResult>` and `accept_segment_execution_requests(...)` preserves collected result values.
+- README_IMPL 7.19 makes the next RED target precise: a fake port should return a local failed result value in-band without changing the port signature or adding checkpoint mutation, retry/backoff, public `DL_*` projection, concrete IO, runtime completion, transport, frontend, or composition wiring.
+- RED/GREEN confirmed `DownloadSegmentExecutionResult::Failed` can carry request facts, downloaded bytes known at failure time, a local reason string, and a retryable hint through the existing execution port helper without changing the helper or widening scope.
+- Full downloads module tests passed with 36 tests after adding the failed result contract.
