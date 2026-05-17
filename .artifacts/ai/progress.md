@@ -8810,6 +8810,18 @@
 - Validation: `rustfmt --check src-tauri\tests\transport_wiring_smoke.rs` passed after formatting only the touched smoke test file.
 - The new assertion passed without production code changes, confirming AT-217 wiring already reaches the host transport path.
 
+### Agent Note: 2026-05-17 20:06:03 +08:00
+- Phase: Phase 95 - Shared Runtime Execution-Turn Boundary
+- Started AT-2026-05-17-220 after AT-219 was pushed as `f618718`.
+- Focused context read: README_IMPL 7.13 and 7.28, kernel-jobs runtime design driver/lease/recovery/runtime-context sections, download scheduler/budget sections, and current `kernel-jobs` runtime/lib/model surfaces.
+- User requested stopping after one more completed task, so AT-220 will be completed and pushed, then work will stop.
+
+### Agent Note: 2026-05-17 20:07:50 +08:00
+- Phase: Phase 95 - Shared Runtime Execution-Turn Boundary
+- Added README_IMPL 7.29 to define the minimal shared runtime execution-turn boundary before Rust coding.
+- Validation: `rg` confirmed the new section exists; scoped `git diff --check` passed for the AT-220 file set with CRLF normalization warnings only.
+- No code files changed in AT-220.
+
 ### Auto Record: 2026-05-17 19:55:06
 - Tool: apply_patch
 - Phase: Phase 93 - Documentation Budget Rules
@@ -8851,3 +8863,35 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 20:07:11
+- Tool: apply_patch
+- Phase: Phase 95 - Shared Runtime Execution-Turn Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 20:07:29
+- Tool: apply_patch
+- Phase: Phase 95 - Shared Runtime Execution-Turn Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 20:08:22
+- Tool: apply_patch
+- Phase: Phase 95 - Shared Runtime Execution-Turn Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 20:08:42
+- Tool: apply_patch
+- Phase: Phase 95 - Shared Runtime Execution-Turn Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)

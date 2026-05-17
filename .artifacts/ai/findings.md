@@ -939,3 +939,12 @@
 - Current `DesktopAppServices.downloads.deps().job_runtime` is visible to the transport smoke test, so the smallest proof can assert `policy().max_concurrent_jobs` after the command succeeds without adding public host APIs.
 - The slice should not update README_IMPL because it validates an already-documented durable boundary rather than changing one.
 - The new host smoke assertion passed immediately, confirming no production code change was needed after AT-217; this task adds regression coverage for the existing host/composition path.
+
+## Phase 95 Shared Runtime Execution-Turn Boundary Findings
+
+- AT-2026-05-17-219 final commit is `f618718` and was pushed to `origin/main`.
+- README_IMPL 7.13 says `JobDriver::run(...)` is a future boundary and current `kernel-jobs::JobDriver` only exposes `module()`, `kind()`, and `restore()`.
+- `TauriKernelJobsRuntimeDesign.md` defines the desired future driver shape with `restore(...)`, `run(...)`, a runtime context, queue policy, lease ownership, and snapshot writer boundaries.
+- Current `kernel-jobs` Rust has `JobDriverRegistry::resolve(...)`, `SharedJobRuntimeHost` enqueue/snapshot/pause/resume/cancel/policy methods, and no runtime-owned execution turn or lease API.
+- The next code task needs a narrow `kernel-jobs` contract first; concrete downloads fetch/write/verify, retry/backoff, terminal completion, host transport, and frontend work must remain deferred.
+- README_IMPL 7.29 now pins that next durable boundary: add a module-neutral execution-turn contract in `kernel-jobs` first, validated with fake-driver tests, before downloads integrates concrete execution.

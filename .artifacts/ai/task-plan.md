@@ -6,12 +6,13 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 94 - Downloads Policy Host Transport Smoke
+Phase 95 - Shared Runtime Execution-Turn Boundary
 
 ## Current Focus
 
+- AT-2026-05-17-219 was published as commit `f618718` after adding host transport smoke coverage for downloads policy runtime application.
+- AT-2026-05-17-220 completed the shared runtime execution-turn boundary documentation locally; commit and push are pending.
 - AT-2026-05-17-218 was published as commit `5aae7f1` after adding documentation-budget rules.
-- AT-2026-05-17-219 is in progress to prove the `downloads_update_policy` host transport path applies the runtime policy through existing composition-root wiring.
 - AT-2026-05-06-082 has been published as commit `bfdbf9a` after documenting the crate-entry boundary in `crates/module-engines/src/lib.rs`.
 - AT-2026-05-06-083 has been published as commit `92696c0` after documenting the crate-entry boundary in `crates/module-downloads/src/lib.rs`.
 - AT-2026-05-06-084 has been published as commit `ec0f940` after documenting the crate-entry boundary in `crates/module-fab/src/lib.rs`.
@@ -708,6 +709,12 @@ Phase 94 - Downloads Policy Host Transport Smoke
 - Atomic tasks: AT-2026-05-17-219
 - **Status:** complete
 
+### Phase 95: Shared Runtime Execution-Turn Boundary
+
+- Outcome: define the next durable backend implementation boundary for a minimal `kernel-jobs` execution-turn contract before coding runtime-owned driver execution.
+- Atomic tasks: AT-2026-05-17-220
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -922,7 +929,8 @@ Phase 94 - Downloads Policy Host Transport Smoke
 210. AT-2026-05-17-216 - completed - added the downloads-owned runtime policy applier port with focused TDD while keeping composition-root concrete wiring, direct shared-runtime mutation from downloads code, transport, frontend, scheduler work, active runtime mutation, concrete IO, retry/backoff, and terminal completion out of scope; committed and pushed as `1094c10`.
 211. AT-2026-05-17-217 - completed - wired the concrete downloads runtime policy applier in composition-root with focused TDD while keeping host transport, frontend, scheduler work, active runtime mutation, concrete IO, retry/backoff, and terminal completion out of scope; committed and pushed as `37765ef`.
 212. AT-2026-05-17-218 - completed - added documentation-budget rules to keep task logs in `.artifacts/ai` and reserve `docs/` updates for durable boundaries, contracts, models, error semantics, wiring, and validation rules; committed and pushed as `5aae7f1`.
-213. AT-2026-05-17-219 - completed - added a host transport smoke assertion proving `downloads_update_policy` persists the policy and applies the shared runtime policy snapshot through existing composition-root wiring; commit and push pending.
+213. AT-2026-05-17-219 - completed - added a host transport smoke assertion proving `downloads_update_policy` persists the policy and applies the shared runtime policy snapshot through existing composition-root wiring; committed and pushed as `f618718`.
+214. AT-2026-05-17-220 - completed - documented the shared runtime execution-turn boundary before coding a minimal `kernel-jobs` run contract; commit and push pending.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

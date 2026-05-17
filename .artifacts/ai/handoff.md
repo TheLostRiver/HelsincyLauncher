@@ -2,19 +2,19 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-17-218
-- title: Add documentation budget rules
-- status: completed; final local commit `5aae7f1`, pushed to `origin/main`
+- task id: AT-2026-05-17-219
+- title: Prove downloads policy host transport runtime application
+- status: completed; final local commit `f618718`, pushed to `origin/main`
 
 ## Current Atomic Task
 
-- task id: AT-2026-05-17-219
-- title: Prove downloads policy host transport runtime application
+- task id: AT-2026-05-17-220
+- title: Document shared runtime execution-turn boundary
 - status: completed locally; validation passed, commit and push pending
 
 ## Current Slice
 
-- `src-tauri/tests/transport_wiring_smoke.rs`
+- `docs/modules/downloads/README_IMPL.md`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -23,9 +23,9 @@
 
 ## Next Resume Point
 
-1. Commit only AT-219 files.
-2. Push `main` to `origin`.
-3. Reassess the next backend slice under the documentation-budget rule.
+1. Commit only AT-220 files and push `main` to `origin`.
+2. Stop, per user request.
+3. Future resume point: code the minimal `kernel-jobs` execution-turn contract described in README_IMPL 7.29, after re-reading the relevant docs.
 
 ## Validation
 
@@ -57,13 +57,16 @@
 - AT-219 host transport smoke validation passed: `downloads_update_policy` returned success, `downloads_get_policy` read back the persisted policy, and the shared runtime policy snapshot reflected the updated concurrency slot count.
 - `cargo test -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml transport_wiring_smoke` passed with 1 test passed / 0 failed.
 - `rustfmt --check src-tauri\tests\transport_wiring_smoke.rs` passed after formatting only the touched smoke test.
+- AT-220 required context read in focused chunks: README_IMPL 7.13 and 7.28, kernel-jobs runtime design driver/lease/recovery/runtime-context sections, download scheduler/budget sections, and current `kernel-jobs` runtime/lib/model surfaces.
+- AT-220 docs-only validation passed: README_IMPL 7.29 now defines current Rust reality, first Rust slice, and non-goals for the shared runtime execution-turn boundary; scoped `git diff --check` passed with CRLF normalization warnings only.
 
 ## Boundaries
 
 - Do not modify files outside `D:\DEV\MyEpicLauncher`.
 - Do not run destructive commands.
-- Do not change frontend, scheduler execution, concrete IO, retry/backoff, terminal completion, SQLite schema, hooks, `.codex`, Cargo.lock, or unrelated dirty files in AT-219.
+- Do not change Rust code, frontend, host transport, scheduler execution, concrete IO, retry/backoff, terminal completion, SQLite schema, hooks, `.codex`, Cargo.lock, or unrelated dirty files in AT-220.
 - Push is authorized by the user-provided GitHub remote after each completed task commit.
+- Stop after completing and pushing AT-220 because the user said quota is low.
 
 ## Dirty Worktree To Preserve
 

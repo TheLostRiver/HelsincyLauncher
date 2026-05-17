@@ -1393,6 +1393,28 @@ Completed by AT-217:
 
 ---
 
+### 7.29 Shared Runtime Execution-Turn Boundary
+
+The next backend slice should make the shared runtime honest about execution turns before downloads pretends it can run segment work from the queue. This is a `kernel-jobs` boundary first, not a downloads concrete IO slice.
+
+Current Rust reality:
+
+1. `JobDriver` exposes `module()`, `kind()`, and `restore()` only.
+2. `JobDriverRegistry::resolve(...)` can find a driver by `module + kind`, but cannot ask it to execute queued work.
+3. `SharedJobRuntimeHost` can enqueue and mutate generic snapshots, but it does not own an execution-turn API, lease acquisition API, cancellation token, or snapshot-writer context.
+4. `DownloadJobDriver::execute_local_resume_turn(...)` remains a module-local helper for fake/local execution. The shared runtime never calls it.
+
+First Rust slice:
+
+1. introduce a minimal module-neutral execution-turn contract in `kernel-jobs`, with focused tests around a fake driver;
+2. keep the first contract result explicit, for example accepted/running work versus module failure, without claiming real terminal completion;
+3. keep runtime context narrow enough that drivers can later report progress through runtime-owned ports instead of editing shared snapshot storage directly;
+4. keep downloads driver integration, concrete fetch/write/verify, retry/backoff, durable lease persistence, terminal snapshot updates, host transport, frontend, and SQLite schema changes out of this slice.
+
+Validation for that later code slice should stay in `launcher-kernel-jobs` first. Downloads-specific execution should wait until the shared execution-turn contract exists and has its own tests.
+
+---
+
 ## 8. Error Semantics
 
 Downloads-domain errors use `DL_*` codes when they become stable public classifications.
