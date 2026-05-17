@@ -1082,3 +1082,14 @@
 - RED/GREEN confirmed `StartupPipelineFacade::run_one_runtime_execution_turn(...)` defers when runtime wiring is absent and delegates exactly one queued fake-driver job when runtime plus registry are wired.
 - Bootstrap wiring now clones the shared runtime into the startup surface and proves a fresh project-local store returns the runtime's no-queued deferred result.
 - Existing startup restore/prewarm tests remained green; no execution helper is invoked automatically by stage 2 or stage 3.
+- AT-2026-05-17-234 final commit `256f89b` was pushed to `origin/main`.
+
+## Phase 110 Host Runtime Execution Command Boundary Findings
+
+- Required context was read in focused chunks: README/docs routing, composition-root helper docs 9.4, composition Tauri integration rules, IPC command/query envelopes and implementation guidance, startup stage ownership rules, downloads runtime execution sections 7.29-7.34, current host command modules, bootstrap/state wrappers, and transport smoke tests.
+- The next boundary should be a command, not a query, because one runtime execution turn can mutate backend-owned job snapshot state from `Queued` to `Running`.
+- Tauri command handlers are allowed to depend on `DesktopAppServices` and IPC DTOs only; they must not take `SharedJobRuntimeHost`, repositories, or driver registries directly.
+- `StartupPipelineFacade::run_one_runtime_execution_turn(...)` is now the right composition-owned entry point because it already composes the shared runtime with the driver registry and preserves explicit invocation.
+- The host DTO should expose only a coarse runtime turn disposition (`accepted`, `deferred`, `failed`) and optional reason text; downloads segment checkpoint/work details must stay module-local.
+- Deferred or failed execution-turn dispositions are non-terminal runtime outcomes for this first host command and should remain successful command envelopes unless the composition helper itself returns `AppError`.
+- AT-235 validation passed with scoped docs/PWF diff-check; warnings were CRLF normalization only.

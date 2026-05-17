@@ -9698,3 +9698,95 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+## Agent Note: 2026-05-17 22:10 CST - Recovery for next backend slice
+
+- Resumed after context reset and ran the PWF catch-up script; no unsynced catch-up output was reported.
+- Confirmed AT-2026-05-17-234 is completed and the final Git commit from the previous slice is `256f89b`, pushed to `origin/main`.
+- Current dirty worktree still contains unrelated frontend, sqlite, `.codex`, `src/`, and `Cargo.lock` changes that must be preserved and excluded from the next atomic task.
+- Next action: read only the required README/docs/module/transport context to decide whether AT-2026-05-17-235 should document the host transport boundary for invoking the one-shot runtime execution helper.
+
+## Agent Note: 2026-05-17 22:18 CST - Opened AT-2026-05-17-235
+
+- Read focused context for the next host boundary: README/docs routing, composition one-shot helper docs, IPC command/query envelope rules, startup ownership rules, downloads runtime execution sections, current host command modules, bootstrap/state wrappers, and transport smoke patterns.
+- Opened AT-2026-05-17-235 as a docs-only boundary task. The intended command is a host-side command, not a query, because it can advance queued runtime state.
+- The planned contract should call only `DesktopAppServices.startup.run_one_runtime_execution_turn()` from transport code and should project `JobRunDisposition` into a stable command DTO without exposing downloads segment internals.
+
+## Agent Note: 2026-05-17 22:24 CST - Completed AT-2026-05-17-235 docs boundary
+
+- Added `docs/TauriIPCAndStateContractsDesign.md` section 7.4 for the one-shot runtime execution command boundary.
+- The documented first host slice is `jobs_run_next_execution_turn`, returning a stable `RuntimeExecutionTurnDto` with `accepted`, `deferred`, or `failed` disposition.
+- Validation: scoped `git diff --check` for the docs/PWF file set passed with CRLF normalization warnings only.
+- Next action after commit/push: implement the documented host command with a RED transport smoke assertion first.
+
+### Auto Record: 2026-05-17 22:09:13
+- Tool: apply_patch
+- Phase: Phase 109 - Composition One-shot Runtime Execution Helper
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 22:10:51
+- Tool: apply_patch
+- Phase: Phase 109 - Composition One-shot Runtime Execution Helper
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-17 22:11:06
+- Tool: apply_patch
+- Phase: Phase 110 - Host Runtime Execution Command Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 22:11:21
+- Tool: apply_patch
+- Phase: Phase 110 - Host Runtime Execution Command Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 22:11:31
+- Tool: apply_patch
+- Phase: Phase 110 - Host Runtime Execution Command Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 22:11:41
+- Tool: apply_patch
+- Phase: Phase 110 - Host Runtime Execution Command Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 22:12:26
+- Tool: apply_patch
+- Phase: Phase 110 - Host Runtime Execution Command Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\TauriIPCAndStateContractsDesign.md` (update)
+
+### Auto Record: 2026-05-17 22:12:51
+- Tool: apply_patch
+- Phase: Phase 110 - Host Runtime Execution Command Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 22:12:59
+- Tool: apply_patch
+- Phase: Phase 110 - Host Runtime Execution Command Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 22:13:06
+- Tool: apply_patch
+- Phase: Phase 110 - Host Runtime Execution Command Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 22:13:19
+- Tool: apply_patch
+- Phase: Phase 110 - Host Runtime Execution Command Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 22:13:29
+- Tool: apply_patch
+- Phase: Phase 110 - Host Runtime Execution Command Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)

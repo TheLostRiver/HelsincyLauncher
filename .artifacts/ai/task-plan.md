@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 109 - Composition One-shot Runtime Execution Helper
+Phase 110 - Host Runtime Execution Command Boundary
 
 ## Current Focus
 
@@ -23,7 +23,8 @@ Phase 109 - Composition One-shot Runtime Execution Helper
 - AT-2026-05-17-231 was published as commit `6f5bd32` after defining the next one-shot queue policy slot gate boundary.
 - AT-2026-05-17-232 was published as commit `d2fa1d9` after implementing the one-shot queue policy slot gate in `kernel-jobs`.
 - AT-2026-05-17-233 was published as commit `01c206d` after defining the composition-root one-shot runtime execution helper boundary.
-- AT-2026-05-17-234 completed the composition-root one-shot runtime execution helper.
+- AT-2026-05-17-234 was published as commit `256f89b` after implementing the composition-root one-shot runtime execution helper.
+- AT-2026-05-17-235 completed the host transport command boundary for invoking one runtime execution turn; publication will be recorded from Git history after commit/push.
 - AT-2026-05-17-220 was published as commit `aa8d6e3` after documenting the shared runtime execution-turn boundary.
 - AT-2026-05-17-219 was published as commit `f618718` after adding host transport smoke coverage for downloads policy runtime application.
 - AT-2026-05-17-218 was published as commit `5aae7f1` after adding documentation-budget rules.
@@ -813,6 +814,12 @@ Phase 109 - Composition One-shot Runtime Execution Helper
 - Atomic tasks: AT-2026-05-17-234
 - **Status:** complete
 
+### Phase 110: Host Runtime Execution Command Boundary
+
+- Outcome: document the narrow host command boundary that invokes the composition-owned one-shot runtime execution helper and returns a stable disposition DTO without adding scheduler loops, frontend UI, terminal projection, downloads concrete IO, retry/backoff, or schema changes.
+- Atomic tasks: AT-2026-05-17-235
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -1042,7 +1049,8 @@ Phase 109 - Composition One-shot Runtime Execution Helper
 225. AT-2026-05-17-231 - completed - defined one-shot queue policy slot gate boundary before Rust changes; committed and pushed as `6f5bd32`.
 226. AT-2026-05-17-232 - completed - implemented one-shot queue policy slot gate in `kernel-jobs`; committed and pushed as `d2fa1d9`.
 227. AT-2026-05-17-233 - completed - defined composition-root one-shot runtime execution helper boundary before Rust changes; committed and pushed as `01c206d`.
-228. AT-2026-05-17-234 - completed - implemented composition-root one-shot runtime execution helper; publication handled in Git history.
+228. AT-2026-05-17-234 - completed - implemented composition-root one-shot runtime execution helper; committed and pushed as `256f89b`.
+229. AT-2026-05-17-235 - completed - defined the host runtime execution command boundary before Rust transport changes; publication will be recorded from Git history after commit/push.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

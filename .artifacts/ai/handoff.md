@@ -76,12 +76,17 @@
 
 - task id: AT-2026-05-17-234
 - title: Add composition one-shot runtime execution helper
-- status: completed; validation passed; publication handled in Git history
+- status: completed; final commit `256f89b`, pushed to `origin/main`
+
+## Active Atomic Task
+
+- task id: AT-2026-05-17-235
+- title: Define host runtime execution command boundary
+- status: completed; validation passed; publication will be recorded from Git history after commit/push
 
 ## Current Slice
 
-- `crates/composition-root/src/startup.rs`
-- `crates/composition-root/src/bootstrap.rs`
+- `docs/TauriIPCAndStateContractsDesign.md`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -90,7 +95,8 @@
 
 ## Next Resume Point
 
-1. If continuing, choose the next backend slice from the documented runtime/downloads execution path before coding.
+1. Commit and push AT-2026-05-17-235 if not already published.
+2. Start the next TDD code slice for the documented `jobs_run_next_execution_turn` host command without touching frontend or unrelated dirty files.
 
 ## Validation
 
@@ -163,6 +169,9 @@
 - AT-234 RED/GREEN validation passed for absent wiring, wired fake-driver execution, and build-time helper wiring.
 - AT-234 full validation passed: composition-root lib 12 passed / 0 failed, composition-root check passed, scoped rustfmt passed, and scoped diff-check passed with CRLF warnings only.
 - Scoped `git diff --check` passed with CRLF normalization warnings only.
+- AT-235 required context read in focused chunks: README/docs routing, composition helper docs and Tauri integration rules, IPC command/query envelopes and implementation guidance, startup ownership rules, downloads runtime execution sections, current host command modules, bootstrap/state wrappers, and transport smoke patterns.
+- AT-235 documented `jobs_run_next_execution_turn` as a command returning a stable `RuntimeExecutionTurnDto`; `Deferred` and `Failed` dispositions remain successful command envelopes unless the composition helper returns `AppError`.
+- AT-235 scoped docs/PWF `git diff --check` passed with CRLF normalization warnings only.
 - AT-224 found that downloads should not call `prepare_resume_execution_turn(...)` from `run(...)` unless an execution-port path is present, because that helper drains pending work after checkpoint reload.
 - README_IMPL 7.31 defines the next Rust slice: add an optional downloads-owned segment execution port or equivalent explicit strategy, keep the default constructor deferred/non-draining, and test fake completed execution through `run(...)`.
 - AT-224 scoped `git diff --check` passed with CRLF normalization warnings only.

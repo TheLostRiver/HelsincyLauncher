@@ -2,76 +2,75 @@
 
 ## Identity
 
-- task id: AT-2026-05-17-234
-- title: Add composition one-shot runtime execution helper
+- task id: AT-2026-05-17-235
+- title: Define host runtime execution command boundary
 - status: completed
 
 ## Goal
 
-Implement the documented composition-root helper that explicitly composes `SharedJobRuntimeHost` and `JobDriverRegistry<()>` for exactly one runtime execution turn, while avoiding automatic scheduler loops, startup hidden side effects, durable leases, terminal projection, downloads IO, transport, frontend, and SQLite schema changes.
+Document the smallest durable host transport boundary for invoking exactly one shared runtime execution turn through the composition-root helper, without adding frontend UI, scheduler loops, background tasks, durable leases, terminal projection, downloads concrete IO, retry/backoff, or SQLite schema changes.
 
 ## Scope
 
 - in scope:
-  - `crates/composition-root/src/startup.rs`
-  - `crates/composition-root/src/bootstrap.rs`
+  - `docs/TauriIPCAndStateContractsDesign.md`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
   - `.artifacts/ai/progress.md`
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
-  - durable docs updates beyond PWF records
-  - downloads driver/concrete execution changes
-  - composition-root wiring
-  - durable leases
+  - Rust production or test code
+  - frontend code
+  - downloads module behavior
+  - composition-root helper implementation changes
   - scheduler loops/background tasks
-  - snapshot-writer/cancellation context
-  - precise active-slot accounting or queue fairness beyond existing runtime policy gate
+  - durable leases or precise active-slot accounting
   - terminal completion/failure projection
-  - host transport, frontend, SQLite schema, and unrelated dirty files
+  - concrete HTTP/file/hash execution
+  - retry/backoff policy
+  - SQLite schema or adapter changes
+  - unrelated dirty files
 
 ## Allowed Files
 
-1. crates/composition-root/src/startup.rs
-2. crates/composition-root/src/bootstrap.rs
-3. .artifacts/ai/active-task.md
-4. .artifacts/ai/task-plan.md
-5. .artifacts/ai/progress.md
-6. .artifacts/ai/findings.md
-7. .artifacts/ai/handoff.md
+1. docs/TauriIPCAndStateContractsDesign.md
+2. .artifacts/ai/active-task.md
+3. .artifacts/ai/task-plan.md
+4. .artifacts/ai/progress.md
+5. .artifacts/ai/findings.md
+6. .artifacts/ai/handoff.md
 
 ## Required Context Read
 
 Read before writing:
 
 1. README.md and docs/README.md routing.
-2. docs/TauriCompositionRootWiringDesign.md 9.4.
-3. docs/TauriStartupPipelineDesign.md restore/warmup rules.
-4. current `StartupPipelineFacade` and bootstrap runtime/driver registry wiring.
-5. current composition-root startup/bootstrap tests.
+2. docs/TauriCompositionRootWiringDesign.md 9.4 and Tauri integration boundary.
+3. docs/TauriIPCAndStateContractsDesign.md command/query envelope and implementation guidance.
+4. docs/TauriStartupPipelineDesign.md restore/warmup ownership rules.
+5. docs/modules/downloads/README_IMPL.md runtime execution sections 7.29-7.34.
+6. Current `src-tauri/src/commands/*`, `src-tauri/src/bootstrap.rs`, `src-tauri/src/state.rs`, and transport smoke patterns.
 
 ## Hypothesis
 
-- falsifiable implementation hypothesis: `StartupPipelineFacade` can expose an explicit one-shot helper that returns deferred when runtime or registry wiring is absent and delegates once to `SharedJobRuntimeHost::run_next_execution_turn(...)` when both are wired.
+- falsifiable design hypothesis: the next safe host boundary is a command, not a query, tentatively `jobs_run_next_execution_turn`, that calls only `DesktopAppServices.startup.run_one_runtime_execution_turn()` and returns a stable disposition DTO without exposing segment-level downloads details.
 
 ## Cheap Check
 
-1. Add RED tests for absent wiring and bootstrap-wired no-queued behavior.
-2. Implement the helper and build-time wiring.
-3. Run focused composition tests, composition-root check, scoped rustfmt, and scoped diff check.
+1. Add a focused IPC design section for the command name, DTO shape, mapping rules, validation gate, and non-goals.
+2. Update PWF records with AT-234 final commit and AT-235 scope.
+3. Run scoped docs/PWF `git diff --check`.
 
 ## Validation Gate
 
-1. Focused helper tests fail before implementation and pass after implementation.
-2. Existing startup restore/prewarm behavior remains unchanged.
-3. No helper is invoked automatically by construction or startup stages.
-4. Verification commands pass before commit/push.
+1. IPC design clearly distinguishes command side effects from read-model queries.
+2. DTO mapping covers `Accepted`, `Deferred`, and `Failed` without converting non-terminal deferred/failed dispositions into `AppErrorDto`.
+3. Design keeps automatic startup invocation, scheduler loops, durable leases, terminal projection, downloads segment internals, frontend, and schema changes out of scope.
+4. Scoped diff check passes before commit/push.
 
 ## Validation Result
 
-1. RED: `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml runtime_execution` failed as expected because `run_one_runtime_execution_turn(...)` and `with_runtime_execution(...)` did not exist yet.
-2. GREEN focused: the same command passed with 3 tests passed / 0 failed.
-3. Full package lib: `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed with 12 tests passed / 0 failed.
-4. Compile gate: `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
-5. Scoped format/checks: `rustfmt --edition 2021 --check crates\composition-root\src\startup.rs crates\composition-root\src\bootstrap.rs` passed; scoped `git diff --check` passed with CRLF normalization warnings only.
+1. Added the IPC boundary section for `jobs_run_next_execution_turn`, including command-vs-query rationale, DTO shape, mapping rules, non-goals, and host-boundary validation.
+2. Updated PWF records with AT-234 commit `256f89b` and AT-235 scope.
+3. Scoped `git diff --check -- docs/TauriIPCAndStateContractsDesign.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/findings.md .artifacts/ai/handoff.md .artifacts/ai/progress.md` passed with CRLF normalization warnings only.

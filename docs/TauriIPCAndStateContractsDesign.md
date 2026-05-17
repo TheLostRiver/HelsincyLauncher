@@ -297,6 +297,50 @@ type QueryResult<T> =
   | { ok: false; error: AppErrorDto };
 ```
 
+### 7.4 One-shot Runtime Execution Command
+
+Current backend reality:
+
+1. `SharedJobRuntimeHost::run_next_execution_turn(...)` can select one queued job, respect the coarse runtime capacity policy, dispatch the registered driver once, and project accepted work to the non-terminal `Running` state.
+2. `StartupPipelineFacade::run_one_runtime_execution_turn(...)` is the composition-owned helper that combines the shared runtime host with `JobDriverRegistry<()>`.
+3. The helper is explicit and is not called by `build_desktop_services(...)`, startup restore, or startup warmup.
+4. No host transport command currently exposes this helper.
+
+First host transport slice:
+
+1. add a command, tentatively `jobs_run_next_execution_turn`, under the host command surface;
+2. implement the command as a thin transport handler that calls `DesktopAppServices.startup.run_one_runtime_execution_turn()`;
+3. return a stable command DTO instead of exposing `kernel-jobs` internals directly:
+
+```ts
+type RuntimeExecutionTurnDto =
+  | { disposition: "accepted"; reason?: null }
+  | { disposition: "deferred"; reason: string }
+  | { disposition: "failed"; reason: string };
+```
+
+Mapping rules:
+
+1. `JobRunDisposition::Accepted` maps to `disposition: "accepted"`.
+2. `JobRunDisposition::Deferred { reason }` maps to `disposition: "deferred"` and remains a successful command envelope because no terminal failure occurred.
+3. `JobRunDisposition::Failed { reason }` maps to `disposition: "failed"` and remains a successful command envelope for this first slice because terminal runtime failure projection is not defined yet.
+4. Only an `AppError` returned by the composition helper maps to `CommandResultDto::Failure`.
+
+Non-goals for this slice:
+
+1. no scheduler loop, background task, timer, or automatic startup invocation;
+2. no durable lease acquisition, precise active-slot table, fairness model, retry/backoff, or cancellation context;
+3. no terminal completed/failed snapshot projection;
+4. no downloads segment payloads, checkpoint details, concrete HTTP/file/hash execution, or module-local work items in the DTO;
+5. no frontend UI, generated TypeScript surface, event bridge, SQLite schema, or adapter changes.
+
+Validation should stay at the host boundary:
+
+1. command registration includes the new command name;
+2. a fresh bootstrap with no queued jobs returns a successful `deferred` DTO with a no-queued reason;
+3. a host smoke or focused command test can seed one queued fake/non-download runtime job only if it stays inside existing composition/runtime test helpers;
+4. `cargo test -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml transport_wiring_smoke` and scoped rustfmt/diff checks pass when the Rust slice lands.
+
 ---
 
 ## 8. Unified Error Model
