@@ -383,6 +383,31 @@ impl StartupPipelineFacade {
 1. 只有 capability enabled 且会话可用时才执行。
 2. 通过 facade 明确调用，不允许模块构造器里自己启动。
 
+### 9.4 One-shot Runtime Execution Helper
+
+Current Rust reality:
+
+1. `SharedJobRuntimeHost::run_next_execution_turn(...)` can select and dispatch one queued job while respecting the coarse runtime capacity policy.
+2. `build_desktop_services(...)` already assembles both the shared runtime host and `JobDriverRegistry<()>`.
+3. `StartupPipelineFacade` already owns staged restore/prewarm entry points and receives the driver registry for stage 2 restore, but it does not yet hold the shared runtime host.
+4. No composition-owned public helper currently combines runtime plus registry to run exactly one queued execution turn.
+
+First Rust slice:
+
+1. add an explicit one-shot helper on the composition-owned startup/runtime surface, tentatively `StartupPipelineFacade::run_one_runtime_execution_turn(...)`;
+2. wire a cloned `SharedJobRuntimeHost` into that surface from `build_startup_pipeline(...)` without exposing concrete repositories or changing module facade constructors;
+3. when runtime or registry wiring is absent, return an explicit non-terminal deferred execution result rather than silently succeeding;
+4. when both are present, delegate exactly once to `SharedJobRuntimeHost::run_next_execution_turn(&registry)`;
+5. do not call this helper automatically from `build_desktop_services(...)`, `run_stage2_restore_runtime_state(...)`, or `run_stage3_background_prewarm(...)`;
+6. keep scheduler loops/background tasks, durable leases, precise active-slot accounting, terminal completion/failure projection, downloads concrete IO, host transport, frontend, and SQLite schema changes out of this slice.
+
+Validation should stay narrow:
+
+1. focused composition-root tests prove the helper defers when runtime execution wiring is absent;
+2. focused composition-root tests prove the helper dispatches one queued fake-driver snapshot when runtime and registry are wired;
+3. existing startup restore and prewarm tests keep passing and do not accidentally invoke execution;
+4. affected `launcher-composition-root` tests, `launcher-composition-root` check, scoped rustfmt, and scoped diff checks pass.
+
 ---
 
 ## 10. Startup Flow End-to-End

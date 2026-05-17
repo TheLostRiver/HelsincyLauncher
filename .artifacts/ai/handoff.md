@@ -64,11 +64,17 @@
 
 - task id: AT-2026-05-17-232
 - title: Add one-shot queue policy slot gate
+- status: completed; final commit `d2fa1d9`, pushed to `origin/main`
+
+## Active Atomic Task
+
+- task id: AT-2026-05-17-233
+- title: Define composition one-shot runtime execution helper boundary
 - status: completed; validation passed; publication handled in Git history
 
 ## Current Slice
 
-- `crates/kernel-jobs/src/runtime.rs`
+- `docs/TauriCompositionRootWiringDesign.md`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -77,7 +83,7 @@
 
 ## Next Resume Point
 
-1. If continuing, choose the next backend slice from the documented runtime/downloads execution path before coding.
+1. If continuing after commit/push, implement the documented helper with focused composition-root TDD.
 
 ## Validation
 
@@ -142,6 +148,9 @@
 - AT-232 required context read in focused chunks: README_IMPL 7.34, kernel-jobs queue-policy notes, downloads concurrency/budget notes, current runtime selector code/tests, and current PWF state.
 - AT-232 RED/GREEN validation passed for capacity-exhausted, zero-capacity, and remaining-capacity selector behavior.
 - AT-232 full validation passed: `launcher-kernel-jobs --lib` 12 passed / 0 failed, `launcher-composition-root` check passed, scoped rustfmt passed, and scoped diff-check passed with CRLF warnings only.
+- AT-232 final commit `d2fa1d9` was pushed to `origin/main`.
+- AT-233 required context read in focused chunks: composition-root wiring docs, startup pipeline restore/warmup rules, README_IMPL 7.34, current composition runtime/registry wiring, and startup facade registry usage.
+- AT-233 `docs/TauriCompositionRootWiringDesign.md` 9.4 defines `StartupPipelineFacade::run_one_runtime_execution_turn(...)` as the next one-shot helper boundary; scoped docs/PWF diff-check passed with CRLF normalization warnings only.
 - Scoped `git diff --check` passed with CRLF normalization warnings only.
 - AT-224 found that downloads should not call `prepare_resume_execution_turn(...)` from `run(...)` unless an execution-port path is present, because that helper drains pending work after checkpoint reload.
 - README_IMPL 7.31 defines the next Rust slice: add an optional downloads-owned segment execution port or equivalent explicit strategy, keep the default constructor deferred/non-draining, and test fake completed execution through `run(...)`.

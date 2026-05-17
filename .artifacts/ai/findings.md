@@ -1062,3 +1062,12 @@
 - Existing no-queued coverage should avoid mixing with capacity exhaustion by using a policy that has room for the running fixture or by using no running fixture.
 - RED/GREEN confirmed `run_next_execution_turn(...)` now defers when `running_count >= max_concurrent_jobs`, treats zero capacity as exhausted, and still dispatches the deterministic queued candidate when capacity remains.
 - Full `launcher-kernel-jobs` lib tests, `launcher-composition-root` check, scoped rustfmt, and scoped diff-check passed.
+- AT-2026-05-17-232 final commit `d2fa1d9` was pushed to `origin/main`.
+
+## Phase 108 Composition One-shot Runtime Execution Helper Boundary Findings
+
+- Required context was read in focused chunks: composition-root wiring docs, startup pipeline restore/warmup rules, README_IMPL 7.34, current bootstrap runtime/registry assembly, current startup facade registry usage, and AT-232 pushed state.
+- Composition-root already builds one `SharedJobRuntimeHost` and one `JobDriverRegistry<()>`, but no public composition-owned helper currently combines them to call `run_next_execution_turn(...)`.
+- `StartupPipelineFacade` already owns staged restore/prewarm entry points and has driver registry context; any execution helper must stay explicit and must not be automatically invoked by `build_desktop_services()`, stage 2 restore, or stage 3 prewarm.
+- The next Rust slice should remain one-shot and testable; scheduler loops, background tasks, leases, terminal projection, downloads concrete IO, transport, frontend, and schema changes remain separate.
+- `docs/TauriCompositionRootWiringDesign.md` 9.4 now defines the helper boundary and validation expectations; scoped docs/PWF diff-check passed with CRLF normalization warnings only.

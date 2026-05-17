@@ -9430,6 +9430,20 @@
 - Compile gate passed: `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`.
 - Scoped formatting/checks passed: `rustfmt --edition 2021 --check crates\kernel-jobs\src\runtime.rs`; scoped `git diff --check` for runtime plus PWF files passed with CRLF normalization warnings only.
 
+## Session Note: 2026-05-17 AT-232 Publication / AT-233 Start
+
+- AT-2026-05-17-232 was committed and pushed to `origin/main` as `d2fa1d9`.
+- Read composition-root wiring and startup pipeline docs plus current bootstrap/startup code to determine the next backend boundary.
+- Opened AT-2026-05-17-233 as a docs-first boundary task for a composition-owned one-shot runtime execution helper.
+- Working hypothesis: composition-root should expose an explicit one-shot helper that combines the shared runtime and driver registry, but it must not be called automatically by service construction or startup stages.
+
+## Session Note: 2026-05-17 AT-233 Validation
+
+- Updated `docs/TauriCompositionRootWiringDesign.md` with section 9.4 for the one-shot runtime execution helper boundary.
+- Boundary: add an explicit `StartupPipelineFacade::run_one_runtime_execution_turn(...)` helper that delegates once to `SharedJobRuntimeHost::run_next_execution_turn(&registry)` when runtime and registry are wired.
+- The helper must not be invoked automatically by service construction, stage 2 restore, or stage 3 prewarm.
+- Scoped command passed: `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- docs/TauriCompositionRootWiringDesign.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md` with CRLF normalization warnings only.
+
 ### Auto Record: 2026-05-17 21:25:04
 - Tool: apply_patch
 - Phase: Phase 105 - One-shot Queued Execution Selector
@@ -9564,6 +9578,37 @@
 ### Auto Record: 2026-05-17 21:39:14
 - Tool: apply_patch
 - Phase: Phase 107 - One-shot Queue Policy Slot Gate
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 21:42:52
+- Tool: apply_patch
+- Phase: Phase 107 - One-shot Queue Policy Slot Gate
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 21:43:33
+- Tool: apply_patch
+- Phase: Phase 108 - Composition One-shot Runtime Execution Helper Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 21:44:11
+- Tool: apply_patch
+- Phase: Phase 108 - Composition One-shot Runtime Execution Helper Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\TauriCompositionRootWiringDesign.md` (update)
+
+### Auto Record: 2026-05-17 21:44:57
+- Tool: apply_patch
+- Phase: Phase 108 - Composition One-shot Runtime Execution Helper Boundary
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
