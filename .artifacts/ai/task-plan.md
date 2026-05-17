@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 102 - Accepted Execution State Projection Boundary
+Phase 103 - Accepted Execution State Projection
 
 ## Current Focus
 
@@ -16,7 +16,8 @@ Phase 102 - Accepted Execution State Projection Boundary
 - AT-2026-05-17-224 was published as commit `597c0e5` after documenting the safe downloads driver `run(...)` override boundary.
 - AT-2026-05-17-225 was published as commit `c5b0695` after implementing the guarded downloads driver `run(...)` override.
 - AT-2026-05-17-226 was published as commit `d2d5405` after covering the remaining guarded `run(...)` deferred branches and fixing non-mutating checkpoint helper semantics.
-- AT-2026-05-17-227 is complete locally after defining the accepted execution state projection boundary; commit/push pending.
+- AT-2026-05-17-227 was published as commit `fc615db` after defining the accepted execution state projection boundary.
+- AT-2026-05-17-228 is complete locally after implementing the accepted dispatch projection in `kernel-jobs`; commit/push pending.
 - AT-2026-05-17-220 was published as commit `aa8d6e3` after documenting the shared runtime execution-turn boundary.
 - AT-2026-05-17-219 was published as commit `f618718` after adding host transport smoke coverage for downloads policy runtime application.
 - AT-2026-05-17-218 was published as commit `5aae7f1` after adding documentation-budget rules.
@@ -764,6 +765,12 @@ Phase 102 - Accepted Execution State Projection Boundary
 - Atomic tasks: AT-2026-05-17-227
 - **Status:** complete
 
+### Phase 103: Accepted Execution State Projection
+
+- Outcome: implement the documented `kernel-jobs` accepted dispatch projection so an accepted execution turn moves the runtime snapshot to non-terminal `Running`, while deferred dispatch remains non-mutating and leases, terminal state, scheduler loops, downloads IO, transport, frontend, and SQLite schema remain out of scope.
+- Atomic tasks: AT-2026-05-17-228
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -986,7 +993,8 @@ Phase 102 - Accepted Execution State Projection Boundary
 218. AT-2026-05-17-224 - completed - documented the downloads driver runtime-run override boundary; committed and pushed as `597c0e5`.
 219. AT-2026-05-17-225 - completed - added guarded downloads driver `run(...)` override with focused TDD; committed and pushed as `c5b0695`.
 220. AT-2026-05-17-226 - completed - covered guarded downloads driver `run(...)` deferred branches and fixed the non-mutating checkpoint helper gap; committed and pushed as `d2d5405`.
-221. AT-2026-05-17-227 - completed - defined the accepted execution state projection boundary before `kernel-jobs` Rust changes; commit/push pending.
+221. AT-2026-05-17-227 - completed - defined the accepted execution state projection boundary before `kernel-jobs` Rust changes; committed and pushed as `fc615db`.
+222. AT-2026-05-17-228 - completed - implemented accepted dispatch projection in `kernel-jobs`; commit/push pending.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

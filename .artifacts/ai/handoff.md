@@ -34,11 +34,17 @@
 
 - task id: AT-2026-05-17-227
 - title: Define accepted execution state projection boundary
+- status: completed; final commit `fc615db`, pushed to `origin/main`
+
+## Active Atomic Task
+
+- task id: AT-2026-05-17-228
+- title: Project accepted execution dispatch to running state
 - status: completed locally; validation passed; commit/push pending
 
 ## Current Slice
 
-- `docs/modules/downloads/README_IMPL.md`
+- `crates/kernel-jobs/src/runtime.rs`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -47,8 +53,8 @@
 
 ## Next Resume Point
 
-1. Commit and push AT-2026-05-17-227.
-2. If continuing, implement the documented `kernel-jobs` accepted-state projection as the next RED/GREEN slice.
+1. Commit and push AT-2026-05-17-228.
+2. Re-read README_IMPL/current runtime state before selecting the next backend slice.
 
 ## Validation
 
@@ -94,6 +100,7 @@
 - `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed with 7 tests passed / 0 failed.
 - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
 - `rustfmt --edition 2021 --check crates\kernel-jobs\src\runtime.rs` passed.
+- Scoped `git diff --check` passed for AT-228 files with CRLF normalization warnings only.
 - Scoped `git diff --check` passed with CRLF normalization warnings only.
 - AT-224 found that downloads should not call `prepare_resume_execution_turn(...)` from `run(...)` unless an execution-port path is present, because that helper drains pending work after checkpoint reload.
 - README_IMPL 7.31 defines the next Rust slice: add an optional downloads-owned segment execution port or equivalent explicit strategy, keep the default constructor deferred/non-draining, and test fake completed execution through `run(...)`.
@@ -108,6 +115,14 @@
 - AT-227 required context read in focused chunks: README/CONTRIBUTING routing, README_IMPL 7.29-7.31, kernel-jobs lifecycle/driver/context/snapshot sections, composition-root runtime/driver wiring, testing strategy backend test placement, current runtime dispatch code, current downloads driver run behavior, and composition-root driver registry wiring.
 - AT-227 README_IMPL 7.32 defines the next Rust slice: `Accepted` dispatch projects queued snapshots to non-terminal `Running`; `Deferred` remains non-mutating; `Failed`, terminal state, leases, scheduler loops, downloads IO, host transport, frontend, and SQLite schema remain out of scope.
 - AT-227 scoped docs diff check passed with CRLF normalization warnings only.
+- AT-227 final commit `fc615db` was pushed to `origin/main`.
+- AT-228 required context read in focused chunks: README_IMPL 7.32, kernel-jobs lifecycle/driver/context/snapshot rules, testing strategy kernel-jobs guidance, current runtime dispatch tests, and current `JobRunDisposition` / `JobSnapshotStore` contracts.
+- AT-228 RED/GREEN validation passed: accepted dispatch initially left snapshots `Queued`, then `SharedJobRuntimeHost::run_one_execution_turn(...)` projected accepted dispatch to `Running` / UI `Running`.
+- Missing-driver deferred dispatch keeps the queued snapshot unchanged.
+- `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml dispatch` passed with 3 tests passed / 0 failed.
+- `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed with 7 tests passed / 0 failed.
+- `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
+- `rustfmt --edition 2021 --check crates\kernel-jobs\src\runtime.rs` passed.
 - Scoped `git diff --check` passed with CRLF normalization warnings only.
 - AT-226 required context read in focused chunks: README_IMPL 7.31, current run implementation, and driver fake execution port tests.
 - AT-226 RED/GREEN validation passed: missing checkpoint deferred and preserved pending work; no-pending-work and Accepted-only/no-mutation initially misclassified as `Accepted` until checkpoint helpers returned `None` for non-mutating turns.
@@ -120,7 +135,7 @@
 
 - Do not modify files outside `D:\DEV\MyEpicLauncher`.
 - Do not run destructive commands.
-- Do not change Rust code, composition-root wiring, frontend, host transport, scheduler loop, concrete IO, retry/backoff, durable lease persistence, terminal completion, SQLite schema, hooks, `.codex`, Cargo.lock, or unrelated dirty files in AT-227.
+- Do not change downloads code, composition-root wiring, frontend, host transport, scheduler loop, concrete IO, retry/backoff, durable lease persistence, terminal completion, SQLite schema, hooks, `.codex`, Cargo.lock, or unrelated dirty files in AT-228.
 - Push is authorized by the user-provided GitHub remote after each completed task commit.
 
 ## Dirty Worktree To Preserve

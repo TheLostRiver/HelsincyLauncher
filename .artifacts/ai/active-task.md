@@ -3,33 +3,36 @@
 ## Identity
 
 - task id: AT-2026-05-17-227
-- title: Define accepted execution state projection boundary
+- task id: AT-2026-05-17-228
+- title: Project accepted execution dispatch to running state
 - status: completed
 
 ## Goal
 
-Define the next durable backend boundary after one-shot dispatch: when a registered driver returns `JobRunDisposition::Accepted`, the shared runtime may project the queued snapshot to non-terminal `Running` state, while `Deferred` remains non-mutating and terminal completion/failure stays out of scope.
+Implement README_IMPL 7.32 in `kernel-jobs`: when `SharedJobRuntimeHost::run_one_execution_turn(...)` receives `JobRunDisposition::Accepted`, update the stored snapshot to non-terminal `JobState::Running` and `JobUiState::Running`; keep deferred dispatch non-mutating.
 
 ## Scope
 
 - in scope:
-  - `docs/modules/downloads/README_IMPL.md`
+  - `crates/kernel-jobs/src/runtime.rs`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
   - `.artifacts/ai/progress.md`
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
-  - Rust code changes
-  - downloads concrete execution or composition-root execution-port wiring
+  - docs updates beyond PWF records
+  - downloads driver or concrete execution changes
+  - composition-root execution-port wiring
   - durable leases
   - scheduler loops/background tasks
+  - snapshot-writer/cancellation context
   - terminal completion/failure projection
   - host transport, frontend, SQLite schema, and unrelated dirty files
 
 ## Allowed Files
 
-1. docs/modules/downloads/README_IMPL.md
+1. crates/kernel-jobs/src/runtime.rs
 2. .artifacts/ai/active-task.md
 3. .artifacts/ai/task-plan.md
 4. .artifacts/ai/progress.md
@@ -40,32 +43,35 @@ Define the next durable backend boundary after one-shot dispatch: when a registe
 
 Read before writing:
 
-1. README.md and CONTRIBUTING.md routing/validation rules.
-2. docs/modules/downloads/README_IMPL.md sections 7.29-7.31.
-3. docs/TauriKernelJobsRuntimeDesign.md lifecycle, driver, context, and snapshot rules.
-4. docs/TauriCompositionRootWiringDesign.md runtime/driver wiring boundaries.
-5. docs/TauriTestingStrategyAndQualityGateDesign.md backend test placement rules.
-6. current `SharedJobRuntimeHost::run_one_execution_turn(...)` and `DownloadJobDriver::run(...)`.
+1. README_IMPL 7.32.
+2. docs/TauriKernelJobsRuntimeDesign.md lifecycle, driver, context, and snapshot rules.
+3. docs/TauriTestingStrategyAndQualityGateDesign.md kernel-jobs test guidance.
+4. current `SharedJobRuntimeHost::run_one_execution_turn(...)` dispatch tests.
+5. current `JobRunDisposition` and `JobSnapshotStore` contracts.
 
 ## Hypothesis
 
-- falsifiable documentation hypothesis: the next safe Rust slice is a `kernel-jobs` state projection step where `Accepted` maps to non-terminal `Running`, `Deferred` stays non-mutating, and terminal state/retry/lease/download IO remain later boundaries.
+- falsifiable RED/GREEN hypothesis: changing focused dispatch tests to expect accepted execution to project `Running` should fail first because dispatch currently leaves snapshots `Queued`; a minimal runtime update can make accepted dispatch mutate to `Running` while deferred paths stay unchanged.
 
 ## Cheap Check
 
-1. Add a concise README_IMPL section defining the accepted dispatch projection boundary.
-2. Run scoped `git diff --check` for README_IMPL and PWF files.
-3. Commit and push AT-227 before any Rust implementation.
+1. Update focused `kernel-jobs` dispatch tests for accepted and deferred projection behavior.
+2. Run `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml dispatch` and observe the RED failure.
+3. Implement the smallest runtime update.
+4. Run focused dispatch tests, full `launcher-kernel-jobs` lib tests, composition-root check, scoped rustfmt, and scoped diff check.
 
 ## Validation Gate
 
-1. The document states current Rust reality after AT-226.
-2. The document defines the first Rust slice and explicit non-goals.
-3. The document avoids task-log detail and keeps `.artifacts/ai` as the task record surface.
-4. Scoped `git diff --check` passes before commit.
+1. Accepted dispatch returns `Accepted` and updates the stored snapshot to `Running` / UI `Running`.
+2. Missing driver deferred dispatch keeps the queued snapshot unchanged.
+3. Missing snapshot deferred dispatch still returns deferred without mutation.
+4. Existing runtime policy/enqueue/default-run tests keep passing.
 
 ## Validation Result
 
-1. `docs/modules/downloads/README_IMPL.md` now includes section 7.32 for accepted execution state projection.
-2. The section defines `Accepted -> Running`, keeps `Deferred` non-mutating, and leaves terminal state, leases, scheduler loops, downloads IO, host transport, frontend, and SQLite schema out of scope.
-3. Scoped `git diff --check` passed with CRLF normalization warnings only.
+1. RED: `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml dispatch` failed because accepted dispatch left the snapshot `Queued`.
+2. GREEN: the same dispatch filter passed, 3 passed / 0 failed.
+3. `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed, 7 passed / 0 failed.
+4. `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
+5. `rustfmt --edition 2021 --check crates\kernel-jobs\src\runtime.rs` passed.
+6. Scoped `git diff --check` passed with CRLF normalization warnings only.

@@ -1014,3 +1014,13 @@
 - `Deferred` must remain non-mutating because downloads production wiring still uses a no-execution-port driver and should not consume pending work or claim execution.
 - Durable lease acquisition, background scheduler loops, cancellation/snapshot-writer context, downloads concrete IO, retry/backoff, terminal completion/failure, host transport, frontend, and SQLite schema remain later boundaries.
 - README_IMPL 7.32 now defines the next Rust slice and scoped validation; docs-only `git diff --check` passed with CRLF normalization warnings only.
+- AT-2026-05-17-227 final commit is `fc615db` and was pushed to `origin/main`.
+
+## Phase 103 Accepted Execution State Projection Findings
+
+- Required context was read in focused chunks: README_IMPL 7.32, kernel-jobs lifecycle/driver/context/snapshot rules, testing strategy kernel-jobs guidance, current runtime dispatch tests, and current `JobRunDisposition` / `JobSnapshotStore` contracts.
+- Current accepted dispatch test still expects the snapshot to remain `Queued`; that assertion should flip to `Running` and fail before implementation.
+- Deferred dispatch with a missing driver already returns `Deferred`; AT-228 should add/adjust coverage to assert the queued snapshot remains unchanged.
+- RED/GREEN confirmed accepted dispatch now projects the stored snapshot to `JobState::Running` and `JobUiState::Running`, while missing-driver deferred dispatch keeps the queued snapshot unchanged.
+- The runtime update is deliberately non-terminal: it does not acquire leases, start loops, create snapshot-writer/cancellation context, or project `Completed` / `Failed`.
+- Validation passed for focused dispatch tests, full `launcher-kernel-jobs` lib tests, `launcher-composition-root` check, and scoped rustfmt on `runtime.rs`.

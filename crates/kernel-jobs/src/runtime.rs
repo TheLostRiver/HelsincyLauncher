@@ -260,7 +260,18 @@ impl SharedJobRuntimeHost {
             });
         };
 
-        driver.run(JobExecutionContext::new(&snapshot))
+        let disposition = driver.run(JobExecutionContext::new(&snapshot))?;
+        if matches!(disposition, JobRunDisposition::Accepted) {
+            let mut running_snapshot = snapshot;
+            // Accepted is the first non-terminal execution projection; completion stays separate.
+            // Accepted 只是第一层非终态执行投影；完成语义保持在后续边界。
+            running_snapshot.state = JobState::Running;
+            running_snapshot.ui_state = JobUiState::Running;
+            running_snapshot.updated_at = IsoDateTime::now();
+            self.snapshot_store.update(&running_snapshot)?;
+        }
+
+        Ok(disposition)
     }
 }
 
@@ -503,7 +514,7 @@ mod tests {
     }
 
     #[test]
-    fn execution_dispatch_calls_registered_driver_once_for_enqueued_snapshot() {
+    fn execution_dispatch_projects_accepted_driver_to_running_snapshot() {
         let runtime = SharedJobRuntimeHost::new(RuntimeQueuePolicy::new(1));
         let job_id = JobId::generate();
         runtime
@@ -534,14 +545,19 @@ mod tests {
                 .as_slice(),
             &[job_id.clone()]
         );
+        let snapshot = runtime
+            .snapshot(&job_id)
+            .expect("snapshot query should succeed")
+            .expect("accepted snapshot should still exist");
         assert_eq!(
-            runtime
-                .snapshot(&job_id)
-                .expect("snapshot query should succeed")
-                .expect("queued snapshot should still exist")
-                .state,
-            JobState::Queued,
-            "one-shot dispatch must not mutate lifecycle state yet"
+            snapshot.state,
+            JobState::Running,
+            "accepted execution should project the runtime snapshot to running"
+        );
+        assert_eq!(
+            snapshot.ui_state,
+            JobUiState::Running,
+            "accepted execution should project the host/UI snapshot to running"
         );
     }
 
@@ -589,6 +605,20 @@ mod tests {
             }
             other => panic!("missing driver should defer dispatch, got {other:?}"),
         }
+        let snapshot = runtime
+            .snapshot(&job_id)
+            .expect("snapshot query should succeed")
+            .expect("missing-driver snapshot should still exist");
+        assert_eq!(
+            snapshot.state,
+            JobState::Queued,
+            "missing-driver deferred dispatch must not mutate lifecycle state"
+        );
+        assert_eq!(
+            snapshot.ui_state,
+            JobUiState::Queued,
+            "missing-driver deferred dispatch must not mutate UI state"
+        );
     }
 
     fn test_snapshot(module: &str, kind: &str) -> JobSnapshot<()> {

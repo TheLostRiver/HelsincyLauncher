@@ -9052,6 +9052,20 @@
 - Selected a docs-first boundary for accepted execution state projection: `JobRunDisposition::Accepted` may move a queued snapshot to non-terminal `Running`, while `Deferred` remains non-mutating and terminal completion remains out of scope.
 - Updated README_IMPL 7.32 with the accepted execution state projection boundary and validation plan.
 - Validation passed: scoped `git diff --check` for README_IMPL and PWF files passed with CRLF normalization warnings only.
+- Published AT-2026-05-17-227 as commit `fc615db` and pushed it to `origin/main`.
+
+## 2026-05-17 - AT-2026-05-17-228 started
+
+- Re-read README_IMPL 7.32, kernel-jobs lifecycle/driver/context/snapshot rules, testing strategy kernel-jobs guidance, current runtime dispatch tests, and current `JobRunDisposition` / `JobSnapshotStore` contracts.
+- Selected a TDD slice in `crates/kernel-jobs/src/runtime.rs`: first flip/add dispatch assertions so accepted execution expects `Running`, then update `SharedJobRuntimeHost::run_one_execution_turn(...)` minimally.
+- RED check: `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml dispatch` failed for `execution_dispatch_projects_accepted_driver_to_running_snapshot`; actual state remained `Queued` while the documented expectation is `Running`.
+- GREEN fix: `SharedJobRuntimeHost::run_one_execution_turn(...)` now projects `JobRunDisposition::Accepted` to `JobState::Running` and `JobUiState::Running`; deferred paths remain non-mutating.
+- Validation passed:
+  - `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml dispatch` passed, 3 passed / 0 failed.
+  - `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed, 7 passed / 0 failed.
+  - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
+  - `rustfmt --edition 2021 --check crates\kernel-jobs\src\runtime.rs` passed.
+  - Scoped `git diff --check` passed with CRLF normalization warnings only.
 - Commit/push pending.
 
 ### Auto Record: 2026-05-17 20:44:38
@@ -9272,5 +9286,51 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 21:13:59
+- Tool: apply_patch
+- Phase: Phase 103 - Accepted Execution State Projection
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 21:14:12
+- Tool: apply_patch
+- Phase: Phase 103 - Accepted Execution State Projection
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\kernel-jobs\src\runtime.rs` (update)
+
+### Auto Record: 2026-05-17 21:14:32
+- Tool: apply_patch
+- Phase: Phase 103 - Accepted Execution State Projection
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 21:14:41
+- Tool: apply_patch
+- Phase: Phase 103 - Accepted Execution State Projection
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\kernel-jobs\src\runtime.rs` (update)
+
+### Auto Record: 2026-05-17 21:15:26
+- Tool: apply_patch
+- Phase: Phase 103 - Accepted Execution State Projection
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 21:15:48
+- Tool: apply_patch
+- Phase: Phase 103 - Accepted Execution State Projection
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
