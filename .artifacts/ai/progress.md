@@ -8991,6 +8991,20 @@
   - scoped `git diff --check` passed with CRLF normalization warnings only.
 - Marked AT-2026-05-17-223 complete locally; remaining publication step is selective stage, commit, and push.
 
+## 2026-05-17 - AT-2026-05-17-224 started
+
+- Published AT-2026-05-17-223 as commit `f87df03` and pushed it to `origin/main`.
+- Reassessed README_IMPL after the shared runtime dispatch landed and found stale current-state wording around earlier execution-turn sections.
+- Read the current downloads driver helpers and confirmed `prepare_resume_execution_turn(...)` drains pending work after checkpoint reload, so a downloads `run(...)` override must not call it unless an execution-port path is available.
+- Started AT-2026-05-17-224 as a docs-only boundary task for the downloads driver `run(...)` override.
+
+## 2026-05-17 - AT-2026-05-17-224 completed
+
+- Updated README_IMPL stale execution-turn current-state wording to distinguish pre-slice reality from current Rust state.
+- Added README_IMPL 7.31 documenting the safe downloads `run(...)` override boundary: default driver run must defer without draining, and opt-in fake execution requires an explicit segment execution port path.
+- Scoped `git diff --check` passed for README_IMPL and PWF files with CRLF normalization warnings only.
+- Marked AT-2026-05-17-224 complete locally; remaining publication step is selective stage, commit, and push.
+
 ### Auto Record: 2026-05-17 20:44:38
 - Tool: apply_patch
 - Phase: Phase 97 - Shared Runtime Execution Dispatch Boundary
@@ -9044,6 +9058,50 @@
 ### Auto Record: 2026-05-17 20:50:11
 - Tool: apply_patch
 - Phase: Phase 98 - Kernel Jobs One-shot Execution Dispatch
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 20:52:51
+- Tool: apply_patch
+- Phase: Phase 99 - Downloads Driver Runtime-run Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 20:53:23
+- Tool: apply_patch
+- Phase: Phase 99 - Downloads Driver Runtime-run Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 20:53:48
+- Tool: apply_patch
+- Phase: Phase 99 - Downloads Driver Runtime-run Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 20:53:57
+- Tool: apply_patch
+- Phase: Phase 99 - Downloads Driver Runtime-run Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 20:54:15
+- Tool: apply_patch
+- Phase: Phase 99 - Downloads Driver Runtime-run Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 20:54:48
+- Tool: apply_patch
+- Phase: Phase 99 - Downloads Driver Runtime-run Boundary
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)

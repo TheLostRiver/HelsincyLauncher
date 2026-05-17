@@ -2,18 +2,17 @@
 
 ## Identity
 
-- task id: AT-2026-05-17-223
-- title: Add one-shot kernel-jobs execution dispatch
+- task id: AT-2026-05-17-224
+- title: Document downloads driver runtime-run override boundary
 - status: completed
 
 ## Goal
 
-Add the smallest host-owned `kernel-jobs` execution dispatch surface so `SharedJobRuntimeHost` can load one job snapshot, resolve its driver, and call one `JobDriver::run(...)` turn through `JobExecutionContext`, without scheduler loops, leases, terminal state, downloads IO, transport, frontend, or SQLite schema changes.
+Define the safe downloads-owned boundary for overriding `JobDriver::run(...)` now that `kernel-jobs` has one-shot dispatch, and repair stale README_IMPL current-state wording that still described `JobDriver::run(...)` and runtime dispatch as absent.
 
 ## Scope
 
 - in scope:
-  - `crates/kernel-jobs/src/runtime.rs`
   - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
@@ -21,62 +20,50 @@ Add the smallest host-owned `kernel-jobs` execution dispatch surface so `SharedJ
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
-  - downloads driver override/integration
+  - Rust production or test code
   - concrete HTTP/file/hash execution
   - retry/backoff
   - durable lease persistence
-  - snapshot writer/cancellation context
   - terminal snapshot completion or runtime loop scheduling
   - host transport, frontend, SQLite schema, and unrelated dirty files
 
 ## Allowed Files
 
-1. crates/kernel-jobs/src/runtime.rs
-2. docs/modules/downloads/README_IMPL.md
-3. .artifacts/ai/active-task.md
-4. .artifacts/ai/task-plan.md
-5. .artifacts/ai/progress.md
-6. .artifacts/ai/findings.md
-7. .artifacts/ai/handoff.md
+1. docs/modules/downloads/README_IMPL.md
+2. .artifacts/ai/active-task.md
+3. .artifacts/ai/task-plan.md
+4. .artifacts/ai/progress.md
+5. .artifacts/ai/findings.md
+6. .artifacts/ai/handoff.md
 
 ## Required Context Read
 
 Read before writing:
 
-1. README.md, CONTRIBUTING.md, and docs/README.md routing guidance.
-2. docs/modules/downloads/README_ARCH.md, README_API.md, README_FLOW.md, and README_IMPL.md sections 7.29-7.30.
-3. docs/TauriKernelJobsRuntimeDesign.md driver, runtime-host, runtime-context, lease, and first-slice sections.
-4. docs/TauriDownloadRuntimeDesign.md scheduler/budget/ownership notes.
-5. docs/TauriTestingStrategyAndQualityGateDesign.md job runtime test guidance.
-6. current `crates/kernel-jobs/src/runtime.rs`, `lib.rs`, `model.rs`, and composition-root driver-registry wiring.
+1. README/docs routing and collaboration guidance already refreshed this session.
+2. docs/modules/downloads/README_ARCH.md, README_API.md, README_FLOW.md, and README_IMPL.md sections 7.9-7.13 and 7.29-7.30.
+3. docs/TauriKernelJobsRuntimeDesign.md driver/runtime-host/runtime-context sections.
+4. docs/TauriDownloadRuntimeDesign.md ownership, scheduler, and checkpoint sections.
+5. current `DownloadJobDriver` local execution helpers and current `SharedJobRuntimeHost::run_one_execution_turn(...)`.
 
 ## Hypothesis
 
-- falsifiable local hypothesis: a focused `launcher-kernel-jobs` RED test can prove the missing host-owned dispatch method by enqueuing a snapshot, registering a fake driver, and expecting exactly one `run(...)` call; missing snapshot and missing driver branches should return explicit deferred dispositions.
+- falsifiable local hypothesis: downloads should not override `run(...)` by directly calling `prepare_resume_execution_turn(...)` alone, because that can drain pending work without an execution port. The next code slice needs a documented optional segment execution port boundary or equivalent guard before any downloads `run(...)` override.
 
 ## Cheap Check
 
-1. Add focused RED tests in `crates/kernel-jobs/src/runtime.rs`.
-2. Run `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib execution_dispatch`.
-3. Implement the minimal one-shot dispatch method.
-4. Run focused and full `launcher-kernel-jobs` lib tests, affected composition check, scoped rustfmt, and scoped `git diff --check`.
+1. Update stale README_IMPL current-state wording around the earlier execution-turn sections.
+2. Add a concise README_IMPL boundary section for the downloads driver `run(...)` override.
+3. Run scoped `git diff --check` for the allowed files.
 
 ## Validation Gate
 
-1. A fake driver registered in `JobDriverRegistry` is called exactly once for the queued snapshot.
-2. Missing job id and missing driver branches return `JobRunDisposition::Deferred` with diagnostic reasons.
-3. Existing enqueue/snapshot/policy tests keep passing.
-4. No downloads driver override, concrete IO, retry/backoff, leases, snapshot writer, terminal completion, transport, frontend, or SQLite schema changes.
-5. Commit and push only AT-223 files.
+1. README_IMPL no longer leaves the reader believing `kernel-jobs::JobDriver::run(...)` or host dispatch are absent in current Rust.
+2. The new boundary explicitly forbids draining pending work from `run(...)` unless an execution port path is present.
+3. The next Rust slice is named tightly enough for TDD.
 
 ## Validation Result
 
-- RED validation failed as expected because `SharedJobRuntimeHost::run_one_execution_turn(...)` did not exist.
-- Added `SharedJobRuntimeHost::run_one_execution_turn(...)` in `crates/kernel-jobs/src/runtime.rs`.
-- Added focused tests proving the registered driver is called once and missing snapshot/driver branches defer explicitly.
-- Updated README_IMPL 7.30 current Rust state.
-- `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib execution_dispatch` passed with 3 tests passed / 0 failed.
-- `cargo test -p launcher-kernel-jobs --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed with 7 tests passed / 0 failed.
-- `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
-- `rustfmt --edition 2021 --check crates\kernel-jobs\src\runtime.rs` passed.
-- Scoped `git diff --check` passed with CRLF normalization warnings only.
+- Updated stale README_IMPL execution-turn sections to distinguish pre-slice reality from current Rust state.
+- Added README_IMPL 7.31 defining the downloads driver `run(...)` override boundary.
+- Scoped `git diff --check` passed for the allowed file set with CRLF normalization warnings only.

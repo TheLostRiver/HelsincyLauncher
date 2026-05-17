@@ -8,19 +8,18 @@
 
 ## Current Atomic Task
 
-- task id: AT-2026-05-17-222
-- title: Document shared runtime execution dispatch boundary
-- status: completed; final commit `feddcfc`, pushed to `origin/main`
+- task id: AT-2026-05-17-223
+- title: Add one-shot kernel-jobs execution dispatch
+- status: completed; final commit `f87df03`, pushed to `origin/main`
 
 ## Active Atomic Task
 
-- task id: AT-2026-05-17-223
-- title: Add one-shot kernel-jobs execution dispatch
-- status: completed locally; validation passed, commit and push pending
+- task id: AT-2026-05-17-224
+- title: Document downloads driver runtime-run override boundary
+- status: completed locally; docs validation passed, commit and push pending
 
 ## Current Slice
 
-- `crates/kernel-jobs/src/runtime.rs`
 - `docs/modules/downloads/README_IMPL.md`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
@@ -30,8 +29,8 @@
 
 ## Next Resume Point
 
-1. Commit and push AT-223 files.
-2. If continuing, reassess README_IMPL 7.30 current state and choose the next backend slice without jumping into downloads concrete IO.
+1. Commit and push AT-224 files.
+2. If continuing, start the documented downloads driver `run(...)` override slice from README_IMPL 7.31.
 
 ## Validation
 
@@ -78,12 +77,15 @@
 - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
 - `rustfmt --edition 2021 --check crates\kernel-jobs\src\runtime.rs` passed.
 - Scoped `git diff --check` passed with CRLF normalization warnings only.
+- AT-224 found that downloads should not call `prepare_resume_execution_turn(...)` from `run(...)` unless an execution-port path is present, because that helper drains pending work after checkpoint reload.
+- README_IMPL 7.31 defines the next Rust slice: add an optional downloads-owned segment execution port or equivalent explicit strategy, keep the default constructor deferred/non-draining, and test fake completed execution through `run(...)`.
+- AT-224 scoped `git diff --check` passed with CRLF normalization warnings only.
 
 ## Boundaries
 
 - Do not modify files outside `D:\DEV\MyEpicLauncher`.
 - Do not run destructive commands.
-- Do not change downloads execution, frontend, host transport, scheduler loop, concrete IO, retry/backoff, durable lease persistence, terminal completion, SQLite schema, hooks, `.codex`, Cargo.lock, or unrelated dirty files in AT-223.
+- Do not change Rust code, downloads execution, frontend, host transport, scheduler loop, concrete IO, retry/backoff, durable lease persistence, terminal completion, SQLite schema, hooks, `.codex`, Cargo.lock, or unrelated dirty files in AT-224.
 - Push is authorized by the user-provided GitHub remote after each completed task commit.
 
 ## Dirty Worktree To Preserve

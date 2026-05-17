@@ -6,13 +6,14 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 98 - Kernel Jobs One-shot Execution Dispatch
+Phase 99 - Downloads Driver Runtime-run Boundary
 
 ## Current Focus
 
 - AT-2026-05-17-221 was published as commit `89d3a19` after adding the minimal `kernel-jobs` execution-turn contract with focused TDD.
 - AT-2026-05-17-222 was published as commit `feddcfc` after documenting the next one-shot shared runtime dispatch boundary.
-- AT-2026-05-17-223 is complete locally after adding the TDD-backed one-shot `kernel-jobs` dispatch method; commit/push pending.
+- AT-2026-05-17-223 was published as commit `f87df03` after adding the TDD-backed one-shot `kernel-jobs` dispatch method.
+- AT-2026-05-17-224 is complete locally after documenting the safe downloads driver `run(...)` override boundary; commit/push pending.
 - AT-2026-05-17-220 was published as commit `aa8d6e3` after documenting the shared runtime execution-turn boundary.
 - AT-2026-05-17-219 was published as commit `f618718` after adding host transport smoke coverage for downloads policy runtime application.
 - AT-2026-05-17-218 was published as commit `5aae7f1` after adding documentation-budget rules.
@@ -736,6 +737,12 @@ Phase 98 - Kernel Jobs One-shot Execution Dispatch
 - Atomic tasks: AT-2026-05-17-223
 - **Status:** complete
 
+### Phase 99: Downloads Driver Runtime-run Boundary
+
+- Outcome: document how downloads may safely override `JobDriver::run(...)` after shared runtime dispatch exists, including the guard that pending work must not be drained unless an execution-port path is present, while keeping Rust code, concrete IO, retry/backoff, terminal state, transport, frontend, and SQLite schema unchanged.
+- Atomic tasks: AT-2026-05-17-224
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -954,7 +961,8 @@ Phase 98 - Kernel Jobs One-shot Execution Dispatch
 214. AT-2026-05-17-220 - completed - documented the shared runtime execution-turn boundary before coding a minimal `kernel-jobs` run contract; committed and pushed as `aa8d6e3`.
 215. AT-2026-05-17-221 - completed - added the minimal `kernel-jobs` execution-turn contract with focused fake-driver TDD while keeping downloads execution, IO, retry/backoff, leases, terminal completion, transport, frontend, and SQLite schema out of scope; committed and pushed as `89d3a19`.
 216. AT-2026-05-17-222 - completed - documented the one-shot shared runtime execution dispatch boundary before Rust coding; committed and pushed as `feddcfc`.
-217. AT-2026-05-17-223 - completed - added one-shot `SharedJobRuntimeHost` execution dispatch with focused TDD; commit and push pending.
+217. AT-2026-05-17-223 - completed - added one-shot `SharedJobRuntimeHost` execution dispatch with focused TDD; committed and pushed as `f87df03`.
+218. AT-2026-05-17-224 - completed - documented the downloads driver runtime-run override boundary; commit and push pending.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

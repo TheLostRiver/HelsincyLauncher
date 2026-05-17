@@ -976,3 +976,12 @@
 - RED/GREEN confirmed the one-shot dispatch boundary: the initial focused tests failed on missing `run_one_execution_turn(...)`; after implementation, focused dispatch tests passed.
 - Full `launcher-kernel-jobs` lib tests passed with 7 tests, and `cargo check -p launcher-composition-root` passed, confirming existing module drivers still compile through the default deferred run path.
 - `run_one_execution_turn(...)` leaves the queued snapshot lifecycle state unchanged, keeping scheduler loops, leases, terminal state mutation, and downloads concrete execution out of scope.
+
+## Phase 99 Downloads Driver Runtime-run Boundary Findings
+
+- AT-2026-05-17-223 final commit is `f87df03` and was pushed to `origin/main`.
+- Required context was read in focused chunks: downloads README_IMPL execution sections, current downloads driver helpers, kernel-jobs runtime design, and current one-shot runtime dispatch code.
+- A direct downloads `run(...) -> prepare_resume_execution_turn(...)` override would be unsafe because `prepare_resume_execution_turn(...)` drains pending work after checkpoint reload; if no segment execution port is available, the prepared work could be consumed without execution.
+- The next safe code slice should therefore make the downloads run override explicitly defer unless a driver-owned segment execution port (or equivalent execution strategy) is present.
+- README_IMPL 7.31 now pins the next Rust slice to an optional downloads-owned segment execution port/deferred default path before implementing `DownloadJobDriver::run(...)`.
+- Scoped docs-only validation passed with `git diff --check`; warnings were CRLF normalization only.
