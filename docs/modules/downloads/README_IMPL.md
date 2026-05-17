@@ -1342,6 +1342,42 @@ Completed by AT-214:
 
 ---
 
+### 7.28 Downloads Runtime Policy Applier Boundary
+
+Now that `kernel-jobs` has an explicit runtime policy update surface, downloads still should not reach into `SharedJobRuntimeHost` directly. The downloads module owns a user-facing `DownloadPolicyDto`, while composition-root owns concrete runtime wiring. The next safe step is therefore a narrow downloads-side policy applier port that receives the normalized downloads policy after persistence; composition-root can later map that port to `RuntimeQueuePolicy::new(policy.concurrency_slots as usize)` and call `SharedJobRuntimeHost::update_policy(...)`.
+
+Current Rust reality:
+
+1. `SharedJobRuntimeHost::update_policy(...)` exists and updates the shared runtime queue-policy snapshot.
+2. `DownloadsFacade::update_policy(...)` normalizes and persists `DownloadPolicyDto` through `DownloadPolicyStore`.
+3. `DownloadsFacade` currently has no dependency dedicated to applying a persisted downloads policy to the runtime.
+4. `DownloadPolicyStore` should remain a persistence port, not a runtime mutation side-effect boundary.
+5. Composition-root already constructs both the concrete `SqliteDownloadPolicyStore` and the concrete `SharedJobRuntimeHost`, so it remains the only owner that can connect those concrete implementations later.
+
+Boundary rules:
+
+1. The next Rust slice should introduce a downloads-owned runtime policy applier port in `module-downloads`.
+2. `DownloadsFacade::update_policy(...)` may call the applier only after it has produced the normalized `DownloadPolicyDto` and saved it through `DownloadPolicyStore`.
+3. The downloads module should pass the normalized `DownloadPolicyDto` to the applier; it should not construct `RuntimeQueuePolicy` or depend on `SharedJobRuntimeHost`.
+4. The first module slice should keep a no-op/default applier path so existing tests and non-runtime callers remain stable.
+5. This slice must not wire composition-root, mutate `SharedJobRuntimeHost` directly from downloads code, change host transport/frontend behavior, add scheduler execution, change active jobs/leases/snapshots/pending resume work, implement concrete IO, retry/backoff, or terminal runtime completion.
+
+First Rust slice:
+
+1. add focused RED tests proving `DownloadsFacade::update_policy(...)` passes the normalized/clamped policy snapshot to a dedicated runtime policy applier after persistence;
+2. add focused coverage proving the default/no-op applier path keeps existing policy-store behavior intact;
+3. introduce the smallest `DownloadRuntimePolicyApplier` port and facade storage needed by those tests;
+4. keep composition-root wiring and concrete `SharedJobRuntimeHost::update_policy(...)` calls out of this slice;
+5. run focused downloads module policy tests, full downloads module tests if feasible, affected composition check if public facade construction changes, rustfmt check scoped to touched Rust files, scoped `git diff --check`, and path-limited status before commit.
+
+Later slices:
+
+1. Composition-root can add a concrete applier that maps `DownloadPolicyDto.concurrency_slots` to `RuntimeQueuePolicy::new(...)` and calls the cloned `SharedJobRuntimeHost`.
+2. Host transport tests can then prove `downloads_update_policy` persists the policy and applies the runtime snapshot without adding frontend work.
+3. Scheduler execution, active-job rescheduling, lease changes, snapshot migration, per-module caps, per-host caps, writer backpressure, concrete IO, retry/backoff, and terminal completion remain separate runtime-design slices.
+
+---
+
 ## 8. Error Semantics
 
 Downloads-domain errors use `DL_*` codes when they become stable public classifications.

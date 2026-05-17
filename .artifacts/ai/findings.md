@@ -892,3 +892,14 @@
 - RED/GREEN confirmed `SharedJobRuntimeHost::update_policy(...)` replaces a shared runtime policy snapshot while `policy()` keeps returning by-value `RuntimeQueuePolicy` copies.
 - The implementation stores policy behind `Arc<Mutex<RuntimeQueuePolicy>>`; cloned hosts now observe the same updated snapshot without changing the public `JobRuntime` trait or downloads facade behavior.
 - Package-level `cargo fmt -p launcher-kernel-jobs --check` is still blocked by pre-existing out-of-scope formatting diffs in `crates/kernel-jobs/src/lib.rs` and `crates/kernel-jobs/src/model.rs`; AT-214 formatted and checked only `crates/kernel-jobs/src/runtime.rs`.
+
+## Phase 90 Downloads Runtime Policy Applier Boundary Findings
+
+- AT-2026-05-17-214 final commit is `c92be25` and was pushed to `origin/main`.
+- README/docs routing confirms concrete module work must read module docs plus related architecture, testing, composition, and collaboration documents before coding.
+- `TauriDownloadRuntimeDesign.md` defines the user-facing concurrency setting as `downloadConcurrencySlots: 1..128` and maps it to a clamped backend global slot budget.
+- `TauriKernelJobsRuntimeDesign.md` keeps runtime queue policy in `kernel-jobs`, while module business checkpoints and policy snapshots remain module-owned.
+- `TauriCompositionRootWiringDesign.md` keeps concrete dependency assembly in `launcher-composition-root`; host/transport layers should not see concrete adapter/runtime details.
+- Current `DownloadsFacade::update_policy(...)` normalizes and persists `DownloadPolicyDto` through `DownloadPolicyStore`, but has no dedicated runtime policy applier dependency.
+- The next safe Rust slice should introduce a downloads-owned policy applier port that receives the normalized persisted `DownloadPolicyDto`; composition-root concrete wiring to `SharedJobRuntimeHost::update_policy(...)` should remain a later slice.
+- README_IMPL 7.28 now pins the first Rust slice to `module-downloads`: add a narrow runtime policy applier port, call it with normalized `DownloadPolicyDto` after persistence, and keep concrete runtime wiring in composition-root for a later task.

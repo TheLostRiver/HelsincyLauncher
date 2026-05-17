@@ -2,19 +2,18 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-17-213
-- title: Define live runtime policy update boundary
-- status: completed; final local commit `38c32b2`, pushed to `origin/main`
+- task id: AT-2026-05-17-214
+- title: Add kernel-jobs runtime policy control surface
+- status: completed; final local commit `c92be25`, pushed to `origin/main`
 
 ## Current Atomic Task
 
-- task id: AT-2026-05-17-214
-- title: Add kernel-jobs runtime policy control surface
-- status: completed locally; final scoped diff check, commit, and push pending
+- task id: AT-2026-05-17-215
+- title: Define downloads runtime policy applier boundary
+- status: completed locally; scoped diff check passed, commit/push pending
 
 ## Current Slice
 
-- `crates/kernel-jobs/src/runtime.rs`
 - `docs/modules/downloads/README_IMPL.md`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
@@ -24,9 +23,9 @@
 
 ## Next Resume Point
 
-1. Run final scoped `git diff --check` for AT-214 files.
-2. Commit only AT-214 files.
-3. Push `main` to `origin`, then choose the next downloads runtime policy applier slice if continuing.
+1. Commit only AT-215 files.
+2. Push `main` to `origin`.
+3. If continuing, implement the documented downloads runtime policy applier port in `module-downloads` with focused TDD.
 
 ## Validation
 
@@ -38,17 +37,21 @@
 - `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib build_job_runtime_` passed, 2 passed / 0 failed.
 - `rustfmt --check crates\kernel-jobs\src\runtime.rs` passed after formatting only the AT-214 Rust file.
 - Package-level `cargo fmt -p launcher-kernel-jobs --check` still reports pre-existing out-of-scope formatting diffs in `crates/kernel-jobs/src/lib.rs` and `crates/kernel-jobs/src/model.rs`; do not stage those files for AT-214.
+- AT-215 required docs were read in focused chunks: README/docs routing, downloads module docs, `TauriDownloadRuntimeDesign.md`, `TauriKernelJobsRuntimeDesign.md`, `TauriCompositionRootWiringDesign.md`, current downloads facade policy code, current composition-root wiring, and PWF tails.
+- AT-215 README_IMPL 7.28 defines the downloads runtime policy applier boundary and first Rust slice.
+- AT-215 scoped `git diff --check` passed with CRLF normalization warnings only.
 
 ## Boundaries
 
 - Do not modify files outside `D:\DEV\MyEpicLauncher`.
 - Do not run destructive commands.
-- Do not add downloads facade wiring, composition-root wiring, global settings, transport, frontend, concrete IO, retry/backoff, pending resume work mutation, active runtime job mutation, runtime lease mutation, runtime snapshot migration, or scheduler execution in AT-214.
+- Do not write Rust code during AT-215.
+- Do not add downloads facade wiring, composition-root wiring, global settings, transport, frontend, concrete IO, retry/backoff, pending resume work mutation, active runtime job mutation, runtime lease mutation, runtime snapshot migration, or scheduler execution in AT-215.
 - Push is authorized by the user-provided GitHub remote after each completed task commit.
 
 ## Dirty Worktree To Preserve
 
-- Unrelated unstaged/unknown work remains present and must not be committed with AT-214:
+- Unrelated unstaged/unknown work remains present and must not be committed with AT-215:
   - `Cargo.lock`
   - `MyEpicLauncher.pen`
   - frontend files under `app/` and `components/`

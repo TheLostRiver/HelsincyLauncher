@@ -8532,6 +8532,14 @@
 - Formatting evidence: `rustfmt --check crates\kernel-jobs\src\runtime.rs` passed after formatting the AT-214 file. Package-level `cargo fmt -p launcher-kernel-jobs --check` still reports pre-existing out-of-scope formatting diffs in `crates/kernel-jobs/src/lib.rs` and `crates/kernel-jobs/src/model.rs`; those files remain untouched for AT-214.
 - Final scoped diff check, commit, and push are next.
 
+### Agent Note: 2026-05-17 19:32:28
+- Phase: Phase 90 - Downloads Runtime Policy Applier Boundary
+- AT-2026-05-17-214 was committed and pushed as `c92be25`.
+- Started AT-2026-05-17-215 as a docs-only boundary task before Rust coding.
+- Read the relevant docs in focused chunks: README/docs routing, downloads module docs, `TauriDownloadRuntimeDesign.md` concurrency/policy sections, `TauriKernelJobsRuntimeDesign.md` queue-policy sections, `TauriCompositionRootWiringDesign.md` ownership/wiring sections, current downloads facade policy code, current composition-root runtime/downloads wiring, and PWF tails.
+- Drafted README_IMPL 7.28 to define a downloads-owned runtime policy applier port as the next Rust slice, with composition-root concrete wiring and direct `SharedJobRuntimeHost` calls deferred.
+- Scoped `git diff --check` passed with CRLF normalization warnings only. Commit/push are next.
+
 ### Auto Record: 2026-05-17 19:24:27
 - Tool: apply_patch
 - Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
@@ -8547,6 +8555,39 @@
 ### Auto Record: 2026-05-17 19:27:25
 - Tool: apply_patch
 - Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 19:30:31
+- Tool: apply_patch
+- Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 19:31:57
+- Tool: apply_patch
+- Phase: Phase 90 - Downloads Runtime Policy Applier Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 19:32:14
+- Tool: apply_patch
+- Phase: Phase 90 - Downloads Runtime Policy Applier Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 19:32:57
+- Tool: apply_patch
+- Phase: Phase 90 - Downloads Runtime Policy Applier Boundary
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
