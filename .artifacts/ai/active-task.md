@@ -2,17 +2,18 @@
 
 ## Identity
 
-- task id: AT-2026-05-17-224
-- title: Document downloads driver runtime-run override boundary
+- task id: AT-2026-05-17-225
+- title: Add guarded downloads driver run override
 - status: completed
 
 ## Goal
 
-Define the safe downloads-owned boundary for overriding `JobDriver::run(...)` now that `kernel-jobs` has one-shot dispatch, and repair stale README_IMPL current-state wording that still described `JobDriver::run(...)` and runtime dispatch as absent.
+Implement the README_IMPL 7.31 downloads driver `run(...)` boundary: default drivers must defer without draining pending work, while an opt-in fake segment execution port path may execute the existing local fake turn, mutate checkpoint facts, and return `JobRunDisposition::Accepted`.
 
 ## Scope
 
 - in scope:
+  - `crates/module-downloads/src/driver.rs`
   - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
@@ -20,7 +21,7 @@ Define the safe downloads-owned boundary for overriding `JobDriver::run(...)` no
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
-  - Rust production or test code
+  - composition-root wiring
   - concrete HTTP/file/hash execution
   - retry/backoff
   - durable lease persistence
@@ -29,41 +30,52 @@ Define the safe downloads-owned boundary for overriding `JobDriver::run(...)` no
 
 ## Allowed Files
 
-1. docs/modules/downloads/README_IMPL.md
-2. .artifacts/ai/active-task.md
-3. .artifacts/ai/task-plan.md
-4. .artifacts/ai/progress.md
-5. .artifacts/ai/findings.md
-6. .artifacts/ai/handoff.md
+1. crates/module-downloads/src/driver.rs
+2. docs/modules/downloads/README_IMPL.md
+3. .artifacts/ai/active-task.md
+4. .artifacts/ai/task-plan.md
+5. .artifacts/ai/progress.md
+6. .artifacts/ai/findings.md
+7. .artifacts/ai/handoff.md
 
 ## Required Context Read
 
 Read before writing:
 
-1. README/docs routing and collaboration guidance already refreshed this session.
-2. docs/modules/downloads/README_ARCH.md, README_API.md, README_FLOW.md, and README_IMPL.md sections 7.9-7.13 and 7.29-7.30.
-3. docs/TauriKernelJobsRuntimeDesign.md driver/runtime-host/runtime-context sections.
+1. README/docs routing and collaboration guidance refreshed this session.
+2. docs/modules/downloads/README_ARCH.md, README_API.md, README_FLOW.md, and README_IMPL.md section 7.31.
+3. docs/TauriKernelJobsRuntimeDesign.md driver/runtime-context sections.
 4. docs/TauriDownloadRuntimeDesign.md ownership, scheduler, and checkpoint sections.
-5. current `DownloadJobDriver` local execution helpers and current `SharedJobRuntimeHost::run_one_execution_turn(...)`.
+5. current `DownloadJobDriver` helpers: pending-work source, `prepare_resume_execution_turn(...)`, `execute_local_resume_turn(...)`, checkpoint mutation helpers, and tests.
 
 ## Hypothesis
 
-- falsifiable local hypothesis: downloads should not override `run(...)` by directly calling `prepare_resume_execution_turn(...)` alone, because that can drain pending work without an execution port. The next code slice needs a documented optional segment execution port boundary or equivalent guard before any downloads `run(...)` override.
+- falsifiable local hypothesis: focused module-downloads RED tests can prove the guarded override boundary by showing that `with_pending_resume_work_source(...)` defers without draining, while an opt-in constructor with a fake completed segment execution port returns `Accepted` and persists checkpoint mutation.
 
 ## Cheap Check
 
-1. Update stale README_IMPL current-state wording around the earlier execution-turn sections.
-2. Add a concise README_IMPL boundary section for the downloads driver `run(...)` override.
-3. Run scoped `git diff --check` for the allowed files.
+1. Add focused RED tests in `crates/module-downloads/src/driver.rs`.
+2. Run `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml driver_run`.
+3. Implement the minimal optional execution-port dependency and `JobDriver::run(...)` override.
+4. Run focused and full module-downloads tests, affected composition check, scoped rustfmt, and scoped `git diff --check`.
 
 ## Validation Gate
 
-1. README_IMPL no longer leaves the reader believing `kernel-jobs::JobDriver::run(...)` or host dispatch are absent in current Rust.
-2. The new boundary explicitly forbids draining pending work from `run(...)` unless an execution port path is present.
-3. The next Rust slice is named tightly enough for TDD.
+1. Default/injected-source-only driver run defers without draining pending work.
+2. Opt-in fake completed execution port path consumes pending work, persists checkpoint mutation, and returns `JobRunDisposition::Accepted`.
+3. Missing checkpoint/no pending/no mutation paths defer rather than pretending completion.
+4. Existing restore/local helper tests keep passing.
+5. No composition-root, concrete IO, retry/backoff, terminal runtime completion, transport, frontend, or SQLite schema changes.
 
 ## Validation Result
 
-- Updated stale README_IMPL execution-turn sections to distinguish pre-slice reality from current Rust state.
-- Added README_IMPL 7.31 defining the downloads driver `run(...)` override boundary.
-- Scoped `git diff --check` passed for the allowed file set with CRLF normalization warnings only.
+- RED validation failed first on missing `with_pending_resume_work_source_and_execution_port(...)` after fixing a test fixture import.
+- Added optional `DownloadSegmentExecutionPort` dependency to `DownloadJobDriver`.
+- Added `DownloadJobDriver::with_pending_resume_work_source_and_execution_port(...)`.
+- Added guarded `JobDriver::run(...)` override that defers without an execution port and accepts checkpoint-mutating fake/local execution.
+- Updated README_IMPL 7.31 current Rust state.
+- `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml driver_run` passed with 2 tests passed / 0 failed.
+- `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed with 49 tests passed / 0 failed.
+- `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
+- `rustfmt --edition 2021 --check crates\module-downloads\src\driver.rs` passed.
+- Scoped `git diff --check` passed with CRLF normalization warnings only.

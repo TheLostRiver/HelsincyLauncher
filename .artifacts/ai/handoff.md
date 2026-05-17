@@ -16,10 +16,17 @@
 
 - task id: AT-2026-05-17-224
 - title: Document downloads driver runtime-run override boundary
-- status: completed locally; docs validation passed, commit and push pending
+- status: completed; final commit `597c0e5`, pushed to `origin/main`
+
+## Active Atomic Task
+
+- task id: AT-2026-05-17-225
+- title: Add guarded downloads driver run override
+- status: completed locally; validation passed, commit and push pending
 
 ## Current Slice
 
+- `crates/module-downloads/src/driver.rs`
 - `docs/modules/downloads/README_IMPL.md`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
@@ -29,8 +36,8 @@
 
 ## Next Resume Point
 
-1. Commit and push AT-224 files.
-2. If continuing, start the documented downloads driver `run(...)` override slice from README_IMPL 7.31.
+1. Commit and push AT-225 files.
+2. If continuing, reassess README_IMPL 7.31 current state for the next safe downloads/runtime slice.
 
 ## Validation
 
@@ -80,12 +87,18 @@
 - AT-224 found that downloads should not call `prepare_resume_execution_turn(...)` from `run(...)` unless an execution-port path is present, because that helper drains pending work after checkpoint reload.
 - README_IMPL 7.31 defines the next Rust slice: add an optional downloads-owned segment execution port or equivalent explicit strategy, keep the default constructor deferred/non-draining, and test fake completed execution through `run(...)`.
 - AT-224 scoped `git diff --check` passed with CRLF normalization warnings only.
+- AT-225 required context read in focused chunks: README_IMPL 7.31, current downloads driver helpers/tests, kernel-jobs runtime driver/context sections, and download runtime ownership/checkpoint notes.
+- AT-225 RED/GREEN validation passed: focused driver_run tests first failed on missing opt-in execution-port constructor, then passed after implementation.
+- `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed with 49 tests passed / 0 failed.
+- `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
+- `rustfmt --edition 2021 --check crates\module-downloads\src\driver.rs` passed.
+- Scoped `git diff --check` passed with CRLF normalization warnings only.
 
 ## Boundaries
 
 - Do not modify files outside `D:\DEV\MyEpicLauncher`.
 - Do not run destructive commands.
-- Do not change Rust code, downloads execution, frontend, host transport, scheduler loop, concrete IO, retry/backoff, durable lease persistence, terminal completion, SQLite schema, hooks, `.codex`, Cargo.lock, or unrelated dirty files in AT-224.
+- Do not change composition-root wiring, frontend, host transport, scheduler loop, concrete IO, retry/backoff, durable lease persistence, terminal completion, SQLite schema, hooks, `.codex`, Cargo.lock, or unrelated dirty files in AT-225.
 - Push is authorized by the user-provided GitHub remote after each completed task commit.
 
 ## Dirty Worktree To Preserve

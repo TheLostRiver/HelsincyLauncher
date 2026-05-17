@@ -6,14 +6,15 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 99 - Downloads Driver Runtime-run Boundary
+Phase 100 - Downloads Driver Guarded Run Override
 
 ## Current Focus
 
 - AT-2026-05-17-221 was published as commit `89d3a19` after adding the minimal `kernel-jobs` execution-turn contract with focused TDD.
 - AT-2026-05-17-222 was published as commit `feddcfc` after documenting the next one-shot shared runtime dispatch boundary.
 - AT-2026-05-17-223 was published as commit `f87df03` after adding the TDD-backed one-shot `kernel-jobs` dispatch method.
-- AT-2026-05-17-224 is complete locally after documenting the safe downloads driver `run(...)` override boundary; commit/push pending.
+- AT-2026-05-17-224 was published as commit `597c0e5` after documenting the safe downloads driver `run(...)` override boundary.
+- AT-2026-05-17-225 is complete locally after implementing the guarded downloads driver `run(...)` override with focused TDD; commit/push pending.
 - AT-2026-05-17-220 was published as commit `aa8d6e3` after documenting the shared runtime execution-turn boundary.
 - AT-2026-05-17-219 was published as commit `f618718` after adding host transport smoke coverage for downloads policy runtime application.
 - AT-2026-05-17-218 was published as commit `5aae7f1` after adding documentation-budget rules.
@@ -743,6 +744,12 @@ Phase 99 - Downloads Driver Runtime-run Boundary
 - Atomic tasks: AT-2026-05-17-224
 - **Status:** complete
 
+### Phase 100: Downloads Driver Guarded Run Override
+
+- Outcome: add a guarded `DownloadJobDriver::run(...)` override that defers without draining when no execution port is wired, and accepts a fake/local completed execution turn only through an opt-in segment execution port path, while keeping composition-root wiring, concrete IO, retry/backoff, terminal runtime completion, transport, frontend, and SQLite schema unchanged.
+- Atomic tasks: AT-2026-05-17-225
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -962,7 +969,8 @@ Phase 99 - Downloads Driver Runtime-run Boundary
 215. AT-2026-05-17-221 - completed - added the minimal `kernel-jobs` execution-turn contract with focused fake-driver TDD while keeping downloads execution, IO, retry/backoff, leases, terminal completion, transport, frontend, and SQLite schema out of scope; committed and pushed as `89d3a19`.
 216. AT-2026-05-17-222 - completed - documented the one-shot shared runtime execution dispatch boundary before Rust coding; committed and pushed as `feddcfc`.
 217. AT-2026-05-17-223 - completed - added one-shot `SharedJobRuntimeHost` execution dispatch with focused TDD; committed and pushed as `f87df03`.
-218. AT-2026-05-17-224 - completed - documented the downloads driver runtime-run override boundary; commit and push pending.
+218. AT-2026-05-17-224 - completed - documented the downloads driver runtime-run override boundary; committed and pushed as `597c0e5`.
+219. AT-2026-05-17-225 - completed - added guarded downloads driver `run(...)` override with focused TDD; commit and push pending.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

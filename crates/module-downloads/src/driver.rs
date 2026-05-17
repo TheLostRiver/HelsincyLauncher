@@ -1,7 +1,9 @@
 use std::sync::Arc;
 
 use launcher_kernel_foundation::{AppResult, JobId};
-use launcher_kernel_jobs::{JobDriver, JobSnapshot, RestoreDisposition};
+use launcher_kernel_jobs::{
+    JobDriver, JobExecutionContext, JobRunDisposition, JobSnapshot, RestoreDisposition,
+};
 
 use crate::facade::{
     DownloadPendingResumeWork, DownloadPendingResumeWorkSource, DownloadResumeWorkMode,
@@ -223,6 +225,7 @@ pub trait DownloadSegmentExecutionPort: Send + Sync {
 pub struct DownloadJobDriver {
     checkpoint_repo: Arc<dyn DownloadCheckpointRepository>,
     pending_resume_work_source: Arc<dyn DownloadPendingResumeWorkSource>,
+    segment_execution_port: Option<Arc<dyn DownloadSegmentExecutionPort>>,
 }
 
 impl DownloadJobDriver {
@@ -240,6 +243,21 @@ impl DownloadJobDriver {
         Self {
             checkpoint_repo,
             pending_resume_work_source,
+            segment_execution_port: None,
+        }
+    }
+
+    /// Creates a download driver with pending-work and fake/future segment execution ports.
+    /// 使用 pending-work source 与 fake/后续 segment 执行端口创建下载 driver。
+    pub fn with_pending_resume_work_source_and_execution_port(
+        checkpoint_repo: Arc<dyn DownloadCheckpointRepository>,
+        pending_resume_work_source: Arc<dyn DownloadPendingResumeWorkSource>,
+        segment_execution_port: Arc<dyn DownloadSegmentExecutionPort>,
+    ) -> Self {
+        Self {
+            checkpoint_repo,
+            pending_resume_work_source,
+            segment_execution_port: Some(segment_execution_port),
         }
     }
 
@@ -491,6 +509,27 @@ impl JobDriver<()> for DownloadJobDriver {
             ),
         })
     }
+
+    fn run(&self, context: JobExecutionContext<'_, ()>) -> AppResult<JobRunDisposition> {
+        let Some(segment_execution_port) = self.segment_execution_port.as_deref() else {
+            return Ok(JobRunDisposition::Deferred {
+                reason: format!(
+                    "downloads execution port not wired for job {}",
+                    context.job_id()
+                ),
+            });
+        };
+
+        match self.execute_local_resume_turn(context.job_id(), segment_execution_port)? {
+            Some(_) => Ok(JobRunDisposition::Accepted),
+            None => Ok(JobRunDisposition::Deferred {
+                reason: format!(
+                    "downloads execution produced no checkpoint mutation for job {}",
+                    context.job_id()
+                ),
+            }),
+        }
+    }
 }
 
 #[cfg(test)]
@@ -499,11 +538,14 @@ mod tests {
     use std::sync::{Arc, Mutex};
 
     use launcher_kernel_foundation::{IsoDateTime, JobId};
-    use launcher_kernel_jobs::{JobDriver, JobProgress, JobState, JobUiState};
+    use launcher_kernel_jobs::{
+        JobDriver, JobExecutionContext, JobProgress, JobRunDisposition, JobState, JobUiState,
+    };
 
     use crate::facade::{
-        DownloadPendingResumeWork, DownloadResumeWorkItem, DownloadResumeWorkMode,
-        DownloadResumeWorkPlan, DownloadResumeWorkScheduler, InMemoryDownloadResumeWorkScheduler,
+        DownloadPendingResumeWork, DownloadPendingResumeWorkSource, DownloadResumeWorkItem,
+        DownloadResumeWorkMode, DownloadResumeWorkPlan, DownloadResumeWorkScheduler,
+        InMemoryDownloadResumeWorkScheduler,
     };
 
     use super::{
@@ -762,6 +804,89 @@ mod tests {
             disposition,
             launcher_kernel_jobs::RestoreDisposition::Resumed,
             "persisted checkpoint should keep the queued download resumable"
+        );
+    }
+
+    #[test]
+    fn driver_run_defers_without_execution_port_and_keeps_pending_work() {
+        let repo = Arc::new(InMemoryCheckpointRepository::default());
+        let scheduler = InMemoryDownloadResumeWorkScheduler::new();
+        let job_id = JobId::generate();
+        let plan = make_resume_work_plan("segment-run-deferred");
+        let driver =
+            DownloadJobDriver::with_pending_resume_work_source(repo, Arc::new(scheduler.clone()));
+
+        scheduler
+            .schedule_resume_work(&job_id, &plan)
+            .expect("scheduling pending work for the driver should succeed");
+        let snapshot = make_snapshot(job_id.clone());
+
+        let disposition = driver
+            .run(JobExecutionContext::new(&snapshot))
+            .expect("missing execution port should be a non-terminal run result");
+
+        match disposition {
+            JobRunDisposition::Deferred { reason } => {
+                assert!(reason.contains("execution port not wired"));
+            }
+            other => panic!("missing execution port should defer run, got {other:?}"),
+        }
+        assert_eq!(
+            scheduler
+                .drain_pending_resume_work(&job_id)
+                .expect("pending work should still be available after deferred run"),
+            vec![DownloadPendingResumeWork { job_id, plan }],
+            "default run must not drain pending work without an execution port"
+        );
+    }
+
+    #[test]
+    fn driver_run_with_execution_port_records_completed_checkpoint_and_accepts() {
+        let repo = Arc::new(InMemoryCheckpointRepository::default());
+        let scheduler = InMemoryDownloadResumeWorkScheduler::new();
+        let job_id = JobId::generate();
+        let checkpoint = DownloadCheckpointRecord::empty(job_id.clone());
+        let plan = make_resume_work_plan("segment-run-completed");
+        let driver = DownloadJobDriver::with_pending_resume_work_source_and_execution_port(
+            repo.clone(),
+            Arc::new(scheduler.clone()),
+            Arc::new(CompletedSegmentExecutionPort),
+        );
+
+        repo.save(&checkpoint)
+            .expect("saving a synthetic checkpoint should succeed");
+        scheduler
+            .schedule_resume_work(&job_id, &plan)
+            .expect("scheduling pending work for the driver should succeed");
+        let snapshot = make_snapshot(job_id.clone());
+
+        let disposition = driver
+            .run(JobExecutionContext::new(&snapshot))
+            .expect("fake completed execution should produce a run disposition");
+
+        assert_eq!(disposition, JobRunDisposition::Accepted);
+        assert!(
+            scheduler.pending_work().is_empty(),
+            "accepted run should consume the pending work it executed"
+        );
+        assert_eq!(
+            repo.load(&job_id)
+                .expect("loading saved checkpoint should succeed")
+                .expect("saved checkpoint should exist")
+                .segments,
+            vec![DownloadSegmentCheckpointRecord {
+                job_id,
+                segment_id: "segment-run-completed".into(),
+                file_id: "file-1".into(),
+                offset: 0,
+                length: 1024,
+                downloaded_bytes: 1024,
+                status: DownloadSegmentCheckpointStatus::Completed,
+                partial_path: Some("segment-run-completed.part".into()),
+                etag: Some("etag-segment-run-completed".into()),
+                hash_state_ref: Some("hash-segment-run-completed".into()),
+            }],
+            "fake completed run should persist checkpoint mutation"
         );
     }
 

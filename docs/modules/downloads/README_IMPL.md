@@ -1476,6 +1476,13 @@ Validation should stay in `launcher-module-downloads` first:
 3. missing checkpoint or no pending work returns a deferred disposition without pretending completion;
 4. existing restore and local helper tests keep passing.
 
+Current Rust state:
+
+1. `DownloadJobDriver` owns an optional `DownloadSegmentExecutionPort`.
+2. `DownloadJobDriver::new(...)` and `with_pending_resume_work_source(...)` keep the no-execution path and return `JobRunDisposition::Deferred` from `run(...)` without draining pending work.
+3. `with_pending_resume_work_source_and_execution_port(...)` wires the opt-in fake/future segment execution path for tests and later composition work.
+4. `DownloadJobDriver::run(...)` calls `execute_local_resume_turn(...)` only when the execution port exists, returns `Accepted` when checkpoint mutation occurs, and otherwise returns an explicit deferred disposition.
+
 ---
 
 ## 8. Error Semantics

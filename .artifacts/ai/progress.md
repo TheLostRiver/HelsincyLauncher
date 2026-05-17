@@ -9005,6 +9005,30 @@
 - Scoped `git diff --check` passed for README_IMPL and PWF files with CRLF normalization warnings only.
 - Marked AT-2026-05-17-224 complete locally; remaining publication step is selective stage, commit, and push.
 
+## 2026-05-17 - AT-2026-05-17-225 started
+
+- Published AT-2026-05-17-224 as commit `597c0e5` and pushed it to `origin/main`.
+- Started AT-2026-05-17-225 from README_IMPL 7.31.
+- Required context read in focused chunks: downloads module docs and README_IMPL 7.31, current `DownloadJobDriver` local helpers/tests, kernel-jobs runtime driver/context sections, and download runtime ownership/checkpoint notes.
+- Planned RED tests: prove `run(...)` currently cannot be used for guarded downloads execution, then add a default non-draining deferred path and an opt-in fake completed segment execution path.
+
+## 2026-05-17 - AT-2026-05-17-225 RED/GREEN
+
+- Initial focused test run exposed a test fixture import gap for `DownloadPendingResumeWorkSource`; fixed the import and re-ran RED.
+- RED validation then failed as expected because `DownloadJobDriver::with_pending_resume_work_source_and_execution_port(...)` did not exist.
+- Implemented an optional `DownloadSegmentExecutionPort` dependency and guarded `DownloadJobDriver::run(...)` override.
+- GREEN focused validation passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml driver_run` ran 2 tests, all passed.
+
+## 2026-05-17 - AT-2026-05-17-225 completed
+
+- Updated README_IMPL 7.31 current Rust state after adding the guarded downloads driver `run(...)` override.
+- Full validation passed:
+  - `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` ran 49 tests, all passed.
+  - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
+  - `rustfmt --edition 2021 --check crates\module-downloads\src\driver.rs` passed.
+  - scoped `git diff --check` passed with CRLF normalization warnings only.
+- Marked AT-2026-05-17-225 complete locally; remaining publication step is selective stage, commit, and push.
+
 ### Auto Record: 2026-05-17 20:44:38
 - Tool: apply_patch
 - Phase: Phase 97 - Shared Runtime Execution Dispatch Boundary
@@ -9102,6 +9126,51 @@
 ### Auto Record: 2026-05-17 20:54:48
 - Tool: apply_patch
 - Phase: Phase 99 - Downloads Driver Runtime-run Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 20:56:58
+- Tool: apply_patch
+- Phase: Phase 100 - Downloads Driver Guarded Run Override
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 20:57:31
+- Tool: apply_patch
+- Phase: Phase 100 - Downloads Driver Guarded Run Override
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-17 20:57:45
+- Tool: apply_patch
+- Phase: Phase 100 - Downloads Driver Guarded Run Override
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-17 20:58:19
+- Tool: apply_patch
+- Phase: Phase 100 - Downloads Driver Guarded Run Override
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-17 20:58:47
+- Tool: apply_patch
+- Phase: Phase 100 - Downloads Driver Guarded Run Override
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 21:00:34
+- Tool: apply_patch
+- Phase: Phase 100 - Downloads Driver Guarded Run Override
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)

@@ -985,3 +985,12 @@
 - The next safe code slice should therefore make the downloads run override explicitly defer unless a driver-owned segment execution port (or equivalent execution strategy) is present.
 - README_IMPL 7.31 now pins the next Rust slice to an optional downloads-owned segment execution port/deferred default path before implementing `DownloadJobDriver::run(...)`.
 - Scoped docs-only validation passed with `git diff --check`; warnings were CRLF normalization only.
+
+## Phase 100 Downloads Driver Guarded Run Override Findings
+
+- AT-2026-05-17-224 final commit is `597c0e5` and was pushed to `origin/main`.
+- Required context was read in focused chunks: README_IMPL 7.31, current downloads driver helpers/tests, kernel-jobs runtime driver/context design, and download runtime ownership/checkpoint sections.
+- The default `DownloadJobDriver::new(...)` and `with_pending_resume_work_source(...)` paths must not drain pending work from `run(...)` because no execution port is present.
+- The opt-in fake execution path can reuse existing `execute_local_resume_turn(...)` with `CompletedSegmentExecutionPort` test coverage to prove checkpoint mutation without concrete IO.
+- RED/GREEN confirmed the guarded run boundary: source-only drivers defer before draining, while opt-in fake completed execution persists checkpoint mutation and returns `JobRunDisposition::Accepted`.
+- Full `launcher-module-downloads` lib tests passed with 49 tests, and `cargo check -p launcher-composition-root` passed.
