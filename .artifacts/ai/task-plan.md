@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 100 - Downloads Driver Guarded Run Override
+Phase 101 - Downloads Driver Run Deferred Branch Coverage
 
 ## Current Focus
 
@@ -14,7 +14,8 @@ Phase 100 - Downloads Driver Guarded Run Override
 - AT-2026-05-17-222 was published as commit `feddcfc` after documenting the next one-shot shared runtime dispatch boundary.
 - AT-2026-05-17-223 was published as commit `f87df03` after adding the TDD-backed one-shot `kernel-jobs` dispatch method.
 - AT-2026-05-17-224 was published as commit `597c0e5` after documenting the safe downloads driver `run(...)` override boundary.
-- AT-2026-05-17-225 is complete locally after implementing the guarded downloads driver `run(...)` override with focused TDD; commit/push pending.
+- AT-2026-05-17-225 was published as commit `c5b0695` after implementing the guarded downloads driver `run(...)` override.
+- AT-2026-05-17-226 is complete locally after covering the remaining guarded `run(...)` deferred branches; commit/push pending.
 - AT-2026-05-17-220 was published as commit `aa8d6e3` after documenting the shared runtime execution-turn boundary.
 - AT-2026-05-17-219 was published as commit `f618718` after adding host transport smoke coverage for downloads policy runtime application.
 - AT-2026-05-17-218 was published as commit `5aae7f1` after adding documentation-budget rules.
@@ -750,6 +751,12 @@ Phase 100 - Downloads Driver Guarded Run Override
 - Atomic tasks: AT-2026-05-17-225
 - **Status:** complete
 
+### Phase 101: Downloads Driver Run Deferred Branch Coverage
+
+- Outcome: add focused tests for missing checkpoint, no pending work, and Accepted-only/no checkpoint mutation `DownloadJobDriver::run(...)` branches, while keeping production behavior unchanged unless a branch test exposes a gap.
+- Atomic tasks: AT-2026-05-17-226
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -970,7 +977,8 @@ Phase 100 - Downloads Driver Guarded Run Override
 216. AT-2026-05-17-222 - completed - documented the one-shot shared runtime execution dispatch boundary before Rust coding; committed and pushed as `feddcfc`.
 217. AT-2026-05-17-223 - completed - added one-shot `SharedJobRuntimeHost` execution dispatch with focused TDD; committed and pushed as `f87df03`.
 218. AT-2026-05-17-224 - completed - documented the downloads driver runtime-run override boundary; committed and pushed as `597c0e5`.
-219. AT-2026-05-17-225 - completed - added guarded downloads driver `run(...)` override with focused TDD; commit and push pending.
+219. AT-2026-05-17-225 - completed - added guarded downloads driver `run(...)` override with focused TDD; committed and pushed as `c5b0695`.
+220. AT-2026-05-17-226 - completed - covered guarded downloads driver `run(...)` deferred branches and fixed the non-mutating checkpoint helper gap; commit/push pending.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

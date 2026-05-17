@@ -397,10 +397,13 @@ impl DownloadJobDriver {
             }
         }
 
-        if has_completed_result {
-            self.checkpoint_repo.save(&checkpoint)?;
+        if !has_completed_result {
+            // Accepted-only or empty result turns must not masquerade as checkpoint mutations.
+            // Accepted-only 或空结果 turn 不能伪装成 checkpoint 变更。
+            return Ok(None);
         }
 
+        self.checkpoint_repo.save(&checkpoint)?;
         Ok(Some(checkpoint))
     }
 
@@ -465,10 +468,13 @@ impl DownloadJobDriver {
             }
         }
 
-        if has_failed_result {
-            self.checkpoint_repo.save(&checkpoint)?;
+        if !has_failed_result {
+            // Accepted-only or empty result turns must not masquerade as checkpoint mutations.
+            // Accepted-only 或空结果 turn 不能伪装成 checkpoint 变更。
+            return Ok(None);
         }
 
+        self.checkpoint_repo.save(&checkpoint)?;
         Ok(Some(checkpoint))
     }
 
@@ -887,6 +893,131 @@ mod tests {
                 hash_state_ref: Some("hash-segment-run-completed".into()),
             }],
             "fake completed run should persist checkpoint mutation"
+        );
+    }
+
+    #[test]
+    fn driver_run_with_execution_port_defers_and_keeps_pending_work_when_checkpoint_missing() {
+        let repo = Arc::new(InMemoryCheckpointRepository::default());
+        let scheduler = InMemoryDownloadResumeWorkScheduler::new();
+        let job_id = JobId::generate();
+        let plan = make_resume_work_plan("segment-run-missing-checkpoint");
+        let driver = DownloadJobDriver::with_pending_resume_work_source_and_execution_port(
+            repo,
+            Arc::new(scheduler.clone()),
+            Arc::new(CompletedSegmentExecutionPort),
+        );
+
+        scheduler
+            .schedule_resume_work(&job_id, &plan)
+            .expect("scheduling pending work for the driver should succeed");
+        let snapshot = make_snapshot(job_id.clone());
+
+        let disposition = driver
+            .run(JobExecutionContext::new(&snapshot))
+            .expect("missing checkpoint should be a non-terminal run result");
+
+        match disposition {
+            JobRunDisposition::Deferred { reason } => {
+                assert!(reason.contains("no checkpoint mutation"));
+            }
+            other => panic!("missing checkpoint should defer run, got {other:?}"),
+        }
+        assert_eq!(
+            scheduler
+                .drain_pending_resume_work(&job_id)
+                .expect("pending work should remain when checkpoint is missing"),
+            vec![DownloadPendingResumeWork { job_id, plan }],
+            "missing checkpoint must not drain pending work"
+        );
+    }
+
+    #[test]
+    fn driver_run_with_execution_port_defers_when_no_pending_work_exists() {
+        let repo = Arc::new(InMemoryCheckpointRepository::default());
+        let scheduler = InMemoryDownloadResumeWorkScheduler::new();
+        let job_id = JobId::generate();
+        let driver = DownloadJobDriver::with_pending_resume_work_source_and_execution_port(
+            repo.clone(),
+            Arc::new(scheduler.clone()),
+            Arc::new(CompletedSegmentExecutionPort),
+        );
+
+        repo.save(&DownloadCheckpointRecord::empty(job_id.clone()))
+            .expect("saving a synthetic checkpoint should succeed");
+        let snapshot = make_snapshot(job_id.clone());
+
+        let disposition = driver
+            .run(JobExecutionContext::new(&snapshot))
+            .expect("empty pending work should be a non-terminal run result");
+
+        match disposition {
+            JobRunDisposition::Deferred { reason } => {
+                assert!(reason.contains("no checkpoint mutation"));
+            }
+            other => panic!("no pending work should defer run, got {other:?}"),
+        }
+        assert!(
+            scheduler.pending_work().is_empty(),
+            "no pending work branch should not create scheduler work"
+        );
+        assert!(
+            repo.load(&job_id)
+                .expect("loading saved checkpoint should succeed")
+                .expect("saved checkpoint should exist")
+                .segments
+                .is_empty(),
+            "no pending work must not mutate checkpoint segments"
+        );
+    }
+
+    #[test]
+    fn driver_run_with_accepted_only_port_defers_when_checkpoint_is_not_mutated() {
+        let repo = Arc::new(InMemoryCheckpointRepository::default());
+        let scheduler = InMemoryDownloadResumeWorkScheduler::new();
+        let job_id = JobId::generate();
+        let checkpoint = DownloadCheckpointRecord::empty(job_id.clone());
+        let plan = make_resume_work_plan("segment-run-accepted-only");
+        let execution_port = Arc::new(RecordingSegmentExecutionPort::default());
+        let driver = DownloadJobDriver::with_pending_resume_work_source_and_execution_port(
+            repo.clone(),
+            Arc::new(scheduler.clone()),
+            execution_port.clone(),
+        );
+
+        repo.save(&checkpoint)
+            .expect("saving a synthetic checkpoint should succeed");
+        scheduler
+            .schedule_resume_work(&job_id, &plan)
+            .expect("scheduling pending work for the driver should succeed");
+        let snapshot = make_snapshot(job_id.clone());
+
+        let disposition = driver
+            .run(JobExecutionContext::new(&snapshot))
+            .expect("accepted-only execution should be a non-terminal run result");
+
+        match disposition {
+            JobRunDisposition::Deferred { reason } => {
+                assert!(reason.contains("no checkpoint mutation"));
+            }
+            other => panic!("accepted-only execution should defer run, got {other:?}"),
+        }
+        assert_eq!(
+            execution_port.accepted_requests().len(),
+            1,
+            "accepted-only port should still receive the prepared request"
+        );
+        assert!(
+            scheduler.pending_work().is_empty(),
+            "accepted-only execution consumes the work it accepted"
+        );
+        assert!(
+            repo.load(&job_id)
+                .expect("loading saved checkpoint should succeed")
+                .expect("saved checkpoint should exist")
+                .segments
+                .is_empty(),
+            "accepted-only execution must not invent checkpoint mutation"
         );
     }
 

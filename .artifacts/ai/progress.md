@@ -9029,6 +9029,22 @@
   - scoped `git diff --check` passed with CRLF normalization warnings only.
 - Marked AT-2026-05-17-225 complete locally; remaining publication step is selective stage, commit, and push.
 
+## 2026-05-17 - AT-2026-05-17-226 started
+
+- Published AT-2026-05-17-225 as commit `c5b0695` and pushed it to `origin/main`.
+- Re-read README_IMPL 7.31 and current `DownloadJobDriver::run(...)` branch behavior.
+- Selected a focused test-only slice for missing checkpoint, no pending work, and no checkpoint mutation deferred branches.
+- RED check: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml driver_run` failed as expected for `driver_run_with_execution_port_defers_when_no_pending_work_exists` and `driver_run_with_accepted_only_port_defers_when_checkpoint_is_not_mutated`.
+- Root cause: `record_completed_segment_checkpoints(...)` and `record_failed_segment_checkpoints(...)` returned `Some(checkpoint)` even when no matching result was recorded, so `DownloadJobDriver::run(...)` could misclassify a non-mutating turn as `Accepted`.
+- GREEN fix: `record_completed_segment_checkpoints(...)` and `record_failed_segment_checkpoints(...)` now return `None` when they do not record a matching completed/failed result; this preserves `Accepted` only for checkpoint-mutating execution.
+- Validation passed:
+  - `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml driver_run` passed, 5 passed / 0 failed.
+  - `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib` passed, 52 passed / 0 failed.
+  - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
+  - `rustfmt --edition 2021 --check crates\module-downloads\src\driver.rs` passed.
+  - Scoped `git diff --check` passed with CRLF normalization warnings only.
+- Commit/push pending.
+
 ### Auto Record: 2026-05-17 20:44:38
 - Tool: apply_patch
 - Phase: Phase 97 - Shared Runtime Execution Dispatch Boundary
@@ -9175,5 +9191,51 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 21:02:21
+- Tool: apply_patch
+- Phase: Phase 101 - Downloads Driver Run Deferred Branch Coverage
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 21:02:55
+- Tool: apply_patch
+- Phase: Phase 101 - Downloads Driver Run Deferred Branch Coverage
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-17 21:05:54
+- Tool: apply_patch
+- Phase: Phase 101 - Downloads Driver Run Deferred Branch Coverage
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 21:06:01
+- Tool: apply_patch
+- Phase: Phase 101 - Downloads Driver Run Deferred Branch Coverage
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-17 21:07:10
+- Tool: apply_patch
+- Phase: Phase 101 - Downloads Driver Run Deferred Branch Coverage
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 21:07:35
+- Tool: apply_patch
+- Phase: Phase 101 - Downloads Driver Run Deferred Branch Coverage
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)

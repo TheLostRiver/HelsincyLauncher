@@ -994,3 +994,13 @@
 - The opt-in fake execution path can reuse existing `execute_local_resume_turn(...)` with `CompletedSegmentExecutionPort` test coverage to prove checkpoint mutation without concrete IO.
 - RED/GREEN confirmed the guarded run boundary: source-only drivers defer before draining, while opt-in fake completed execution persists checkpoint mutation and returns `JobRunDisposition::Accepted`.
 - Full `launcher-module-downloads` lib tests passed with 49 tests, and `cargo check -p launcher-composition-root` passed.
+
+## Phase 101 Downloads Driver Run Deferred Branch Coverage Findings
+
+- AT-2026-05-17-225 final commit is `c5b0695` and was pushed to `origin/main`.
+- README_IMPL 7.31 requires missing checkpoint, no pending work, and no checkpoint mutation to return deferred rather than pretend completion.
+- The implementation already returns `Deferred` when `execute_local_resume_turn(...)` returns `None`; focused branch tests should confirm the missing-checkpoint path also keeps pending work intact.
+- RED/GREEN showed the missing-checkpoint branch already deferred and preserved pending work, but no-pending-work and Accepted-only/no-mutation initially returned `Accepted`.
+- Root cause: `record_completed_segment_checkpoints(...)` and `record_failed_segment_checkpoints(...)` returned `Some(checkpoint)` even when no completed/failed result was recorded, so `DownloadJobDriver::run(...)` misclassified a non-mutating local turn as accepted.
+- The minimal behavior fix is for those helpers to return `None` when they do not record a matching result; checkpoint-mutating completed/failed paths still return `Some(checkpoint)` after saving.
+- Validation passed for focused `driver_run` tests, full `launcher-module-downloads` lib tests, `launcher-composition-root` check, and scoped rustfmt on `driver.rs`.
