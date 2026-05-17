@@ -4,18 +4,23 @@
 
 - task id: AT-2026-05-17-216
 - title: Add downloads runtime policy applier port
-- status: completed; final local commit `1094c10`, pushed to `origin/main`
+- task id: AT-2026-05-17-217
+- title: Wire downloads runtime policy applier in composition-root
+- status: completed; final local commit `37765ef`, pushed to `origin/main`
 
 ## Current Atomic Task
 
-- task id: AT-2026-05-17-217
-- title: Wire downloads runtime policy applier in composition-root
-- status: completed locally; validation passed, final scoped diff check and commit/push pending
+- task id: AT-2026-05-17-218
+- title: Add documentation budget rules
+- status: completed locally; validation passed, commit and push pending
 
 ## Current Slice
 
-- `crates/composition-root/src/bootstrap.rs`
-- `docs/modules/downloads/README_IMPL.md`
+- `docs/ModuleDocumentationStandard.md`
+- `docs/README.md`
+- `.github/copilot-instructions.md`
+- `.github/skills/strict-doc-driven-development/SKILL.md`
+- `.windsurf/rules/repo-workflow.md`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -24,9 +29,9 @@
 
 ## Next Resume Point
 
-1. Run final scoped `git diff --check` for AT-217 files.
-2. Commit only AT-217 files.
-3. Push `main` to `origin`, then choose the next backend slice if continuing.
+1. Commit only AT-218 files.
+2. Push `main` to `origin`.
+3. Resume backend work under the new documentation-budget rule.
 
 ## Validation
 
@@ -52,17 +57,19 @@
 - `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml update_policy` passed, 3 passed / 0 failed.
 - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
 - `rustfmt --check crates\composition-root\src\bootstrap.rs` passed after formatting.
+- AT-218 changes are docs/rules only; no Rust behavior changes are in scope.
+- AT-218 scoped `git diff --check` passed for the allowed file set with CRLF normalization warnings only.
 
 ## Boundaries
 
 - Do not modify files outside `D:\DEV\MyEpicLauncher`.
 - Do not run destructive commands.
-- Do not add host transport, frontend, global settings, concrete IO, retry/backoff, pending resume work mutation, active runtime job mutation, runtime lease mutation, runtime snapshot migration, or scheduler execution in AT-217.
+- Do not change backend behavior, hooks, frontend, sqlite files, `.codex`, Cargo.lock, or `src/` in AT-218.
 - Push is authorized by the user-provided GitHub remote after each completed task commit.
 
 ## Dirty Worktree To Preserve
 
-- Unrelated unstaged/unknown work remains present and must not be committed with AT-217:
+- Unrelated unstaged/unknown work remains present and must not be committed with AT-218:
   - `Cargo.lock`
   - `MyEpicLauncher.pen`
   - frontend files under `app/` and `components/`

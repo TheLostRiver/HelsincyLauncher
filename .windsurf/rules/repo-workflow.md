@@ -29,6 +29,8 @@
    - `.github/copilot-instructions.md`
    - `.github/skills/strict-doc-driven-development/SKILL.md`
 5. 如果文档缺失、过期或彼此冲突，不要自行发明架构；先暴露缺口，或先更新文档。
+6. 文档有预算：任务过程、验证输出、提交号和 handoff 写入 `.artifacts/ai/`；只有长期边界、公开契约、数据模型、错误语义、wiring 规则或验证规则才写入 `docs/`。
+7. 不要把每个 AT 的完成流水、长排除清单和验证细节追加到 `README_IMPL.md`；需要更新模块实现文档时，优先写短表或 3-5 行长期状态。
 
 ## Single Source Of Truth
 

@@ -921,3 +921,11 @@
 - Focused composition-root tests already use project-local SQLite paths under `.artifacts/tmp`; AT-217 should keep that safety boundary.
 - RED/GREEN confirmed composition-root now wires downloads policy updates to the shared runtime policy snapshot: `downloads.update_policy(...)` changes the cloned `SharedJobRuntimeHost::policy().max_concurrent_jobs`.
 - The concrete mapping remains private to composition-root: `DownloadPolicyDto.concurrency_slots` becomes `RuntimeQueuePolicy::new(policy.concurrency_slots as usize)`.
+
+## Phase 93 Documentation Budget Rules Findings
+
+- AT-2026-05-17-217 final commit is `37765ef` and was pushed to `origin/main`.
+- The user confirmed the repository has started drifting toward documentation overload, especially when `README_IMPL.md` records every AT as long-form history.
+- The least disruptive rule change is not to delete existing docs immediately, but to add a forward rule: `.artifacts/ai` owns task logs/validation/commit facts; `docs/` owns durable boundaries and contracts.
+- Central rule surfaces to update are `docs/ModuleDocumentationStandard.md`, `docs/README.md`, `.github/copilot-instructions.md`, `.github/skills/strict-doc-driven-development/SKILL.md`, and `.windsurf/rules/repo-workflow.md`.
+- AT-218 validation passed for the intended rule surfaces: central docs now define a documentation budget, task execution records stay in `.artifacts/ai`, and long per-AT `README_IMPL.md` completion logs are discouraged.

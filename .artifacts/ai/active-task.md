@@ -2,84 +2,82 @@
 
 ## Identity
 
-- task id: AT-2026-05-17-217
-- title: Wire downloads runtime policy applier in composition-root
+- task id: AT-2026-05-17-218
+- title: Add documentation budget rules
 - status: completed
 
 ## Goal
 
-Wire the concrete downloads runtime policy applier inside composition-root so `downloads.update_policy(...)` maps the normalized persisted `DownloadPolicyDto.concurrency_slots` to `RuntimeQueuePolicy` and updates the shared `SharedJobRuntimeHost`, while keeping host transport/frontend behavior, scheduler execution, active jobs, leases, snapshots, pending work, concrete IO, retry/backoff, and terminal completion out of scope.
+Add concise repository rules that prevent module implementation documents from becoming per-task logs, while preserving strict doc-driven development and `.artifacts/ai` as the task execution record.
 
 ## Scope
 
 - in scope:
-  - `crates/composition-root/src/bootstrap.rs`
-  - `docs/modules/downloads/README_IMPL.md`
+  - `docs/ModuleDocumentationStandard.md`
+  - `docs/README.md`
+  - `.github/copilot-instructions.md`
+  - `.github/skills/strict-doc-driven-development/SKILL.md`
+  - `.windsurf/rules/repo-workflow.md`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
   - `.artifacts/ai/progress.md`
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
-  - global settings/config-system implementation
-  - host transport or frontend changes
-  - scheduler loop, per-module caps, per-host caps, writer backpressure, or fairness implementation
-  - concrete IO, retry/backoff, or terminal runtime completion
-  - active jobs, runtime leases, runtime snapshots, pending resume work, or segment scheduling behavior
+  - rewriting existing large module implementation history
+  - changing backend runtime behavior
+  - changing hooks or generated workflow scripts
+  - editing unrelated frontend, sqlite, `.codex`, Cargo.lock, or `src/` changes
 
 ## Allowed Files
 
-1. crates/composition-root/src/bootstrap.rs
-2. docs/modules/downloads/README_IMPL.md
-3. .artifacts/ai/active-task.md
-4. .artifacts/ai/task-plan.md
-5. .artifacts/ai/progress.md
-6. .artifacts/ai/findings.md
-7. .artifacts/ai/handoff.md
+1. docs/ModuleDocumentationStandard.md
+2. docs/README.md
+3. .github/copilot-instructions.md
+4. .github/skills/strict-doc-driven-development/SKILL.md
+5. .windsurf/rules/repo-workflow.md
+6. .artifacts/ai/active-task.md
+7. .artifacts/ai/task-plan.md
+8. .artifacts/ai/progress.md
+9. .artifacts/ai/findings.md
+10. .artifacts/ai/handoff.md
 
 ## Required Context Read
 
 Read this turn before writing:
 
-1. README.md and docs/README.md backend/documentation routing
-2. docs/modules/downloads/README_ARCH.md, README_API.md, README_FLOW.md, and README_IMPL.md policy sections
-3. docs/TauriDownloadRuntimeDesign.md concurrency/policy sections
-4. docs/TauriKernelJobsRuntimeDesign.md queue-policy sections
-5. docs/TauriCompositionRootWiringDesign.md composition-root ownership sections
-6. README_IMPL 7.28 completed state and composition-root later-slice note
-7. current `DownloadRuntimePolicyApplier`, `DownloadsFacade::update_policy(...)`, `SharedJobRuntimeHost::update_policy(...)`, and composition-root downloads/runtime wiring surfaces
-8. current PWF task plan and handoff tails
+1. docs/ModuleDocumentationStandard.md
+2. docs/README.md update routing section
+3. .github/copilot-instructions.md
+4. .github/skills/strict-doc-driven-development/SKILL.md
+5. .windsurf/rules/repo-workflow.md
+6. current PWF task plan and handoff tails
 
 ## Hypothesis
 
-- falsifiable local hypothesis: composition-root can provide a private `DownloadRuntimePolicyApplier` implementation backed by a cloned `SharedJobRuntimeHost` and wire it through `build_downloads_module(...)` without changing host transport, frontend, scheduler, or module-downloads code.
+- falsifiable local hypothesis: adding a small "documentation budget" rule to the central workflow/documentation entry points is enough to stop future README_IMPL overgrowth without weakening the requirement to read controlling docs before backend coding.
 
 ## Cheap Check
 
-1. Add a focused composition-root RED test proving `downloads.update_policy(...)` updates a cloned `SharedJobRuntimeHost` policy through composition wiring.
-2. Implement the minimal private composition-root applier and wire it through `build_downloads_module(...)`.
-3. Run focused composition-root test, affected downloads module policy tests if needed, composition-root check, rustfmt check scoped to touched Rust files, scoped `git diff --check`, and path-limited status.
+1. Add the concise documentation-budget rule to module docs, docs navigation, Copilot rules, strict-doc skill, and Windsurf projection.
+2. Update PWF records, including AT-217 final commit `37765ef`.
+3. Run scoped `git diff --check` and path-limited status.
 
 ## Validation Gate
 
-1. Focused composition-root test fails before implementation and passes after implementation.
-2. `downloads.update_policy(...)` updates the shared runtime policy snapshot through composition-root wiring.
-3. `DownloadPolicyDto.concurrency_slots` maps to `RuntimeQueuePolicy::new(...)`.
-4. Host transport/frontend behavior, scheduler execution, active jobs/leases/snapshots, pending work, concrete IO, retry/backoff, and terminal completion remain unchanged.
-5. Scoped `git diff --check` passes.
-6. Commit only AT-216 files locally, then push `main` to `origin`.
+1. Central docs clearly separate durable docs from task logs.
+2. Rules explicitly send task logs, validation output, handoff notes, and commit ids to `.artifacts/ai`.
+3. Rules explicitly discourage long per-AT `README_IMPL.md` completion logs.
+4. Scoped `git diff --check` passes.
+5. Commit only AT-218 files locally, then push `main` to `origin`.
 
 ## Validation Result
 
-Passed before commit/push.
-
-1. RED was observed before implementation: `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib downloads_policy_update_applies_runtime_policy_through_composition_wiring` failed with `left: 2` / `right: 17`.
-2. GREEN after implementation: the same focused composition-root test passed, 1 passed / 0 failed.
-3. Existing runtime startup policy tests passed: `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib build_job_runtime_`, 2 passed / 0 failed.
-4. Downloads module policy tests passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml update_policy`, 3 passed / 0 failed.
-5. Affected composition check passed: `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`.
-6. `rustfmt --check crates\composition-root\src\bootstrap.rs` passed after formatting the touched Rust file.
-7. Final scoped `git diff --check` and commit/push are pending.
+- Central workflow and documentation entry points now separate durable `docs/` content from per-task execution logs.
+- Task logs, validation output, handoff notes, and commit ids are explicitly routed to `.artifacts/ai/`.
+- Long per-AT `README_IMPL.md` completion logs are discouraged in favor of short durable current-state notes.
+- Scoped `git diff --check` passed for the AT-218 file set with CRLF normalization warnings only.
+- Commit and push are pending for the AT-218 file set.
 
 ## Notes
 
@@ -91,3 +89,4 @@ Passed before commit/push.
 - AT-2026-05-17-214 final commit is `c92be25` and is already pushed to `origin/main`.
 - AT-2026-05-17-215 final commit is `4ef3f10` and is already pushed to `origin/main`.
 - AT-2026-05-17-216 final commit is `1094c10` and is already pushed to `origin/main`.
+- AT-2026-05-17-217 final commit is `37765ef` and is already pushed to `origin/main`.

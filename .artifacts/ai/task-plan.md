@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 92 - Composition-root Downloads Runtime Policy Applier Wiring
+Phase 93 - Documentation Budget Rules
 
 ## Current Focus
 
@@ -694,6 +694,12 @@ Phase 92 - Composition-root Downloads Runtime Policy Applier Wiring
 - Atomic tasks: AT-2026-05-17-217
 - **Status:** complete
 
+### Phase 93: Documentation Budget Rules
+
+- Outcome: add concise repository rules that keep durable architecture/module docs separate from per-task logs, while preserving `.artifacts/ai` as the authoritative execution record.
+- Atomic tasks: AT-2026-05-17-218
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -906,7 +912,8 @@ Phase 92 - Composition-root Downloads Runtime Policy Applier Wiring
 208. AT-2026-05-17-214 - completed - added the kernel-jobs runtime policy control surface with focused TDD, keeping policy reads by-value while sharing updates across cloned runtime handles and deferring downloads facade wiring, composition-root wiring, host transport, frontend, scheduler work, active job/lease/snapshot changes, pending work, concrete IO, retry/backoff, and terminal completion; committed and pushed as `c92be25`.
 209. AT-2026-05-17-215 - completed - documented the downloads runtime policy applier boundary before Rust coding, selecting a downloads-owned facade applier port as the next safe slice while deferring composition-root concrete wiring, host transport, frontend, scheduler work, active runtime mutation, concrete IO, retry/backoff, and terminal completion; committed and pushed as `4ef3f10`.
 210. AT-2026-05-17-216 - completed - added the downloads-owned runtime policy applier port with focused TDD while keeping composition-root concrete wiring, direct shared-runtime mutation from downloads code, transport, frontend, scheduler work, active runtime mutation, concrete IO, retry/backoff, and terminal completion out of scope; committed and pushed as `1094c10`.
-211. AT-2026-05-17-217 - completed - wired the concrete downloads runtime policy applier in composition-root with focused TDD while keeping host transport, frontend, scheduler work, active runtime mutation, concrete IO, retry/backoff, and terminal completion out of scope; commit/push pending.
+211. AT-2026-05-17-217 - completed - wired the concrete downloads runtime policy applier in composition-root with focused TDD while keeping host transport, frontend, scheduler work, active runtime mutation, concrete IO, retry/backoff, and terminal completion out of scope; committed and pushed as `37765ef`.
+212. AT-2026-05-17-218 - completed - added documentation-budget rules to keep task logs in `.artifacts/ai` and reserve `docs/` updates for durable boundaries, contracts, models, error semantics, wiring, and validation rules; commit and push pending.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

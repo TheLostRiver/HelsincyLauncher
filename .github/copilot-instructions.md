@@ -31,6 +31,7 @@ Add task-specific docs when relevant:
 3. When decomposing or delegating subtasks, include exact doc paths, scope limits, allowed files, constraints, and validation gates.
 4. Use the narrowest validation required by the controlling docs.
 5. Do not move backend-owned truth into the frontend because the current repo still contains a frontend prototype.
+6. Documentation has a budget: write task logs, validation output, handoff notes, and commit ids to .artifacts/ai/. Update docs/ only for durable boundaries, public contracts, data models, error semantics, wiring rules, or validation rules.
 
 ## Atomic Task Execution
 
@@ -43,6 +44,7 @@ Add task-specific docs when relevant:
 7. If the same blocker cannot be repaired after 5 attempts, persist the bug details and current state, then stop and wait for user direction.
 8. When needed, use the workspace skill templates .github/skills/strict-doc-driven-development/active-atomic-task-template.md, .github/skills/strict-doc-driven-development/docs-update-log-template.md, .github/skills/strict-doc-driven-development/pending-push-template.md, and .github/skills/strict-doc-driven-development/blocked-bug-template.md to keep those records structured.
 9. Legacy root task_plan.md, progress.md, and findings.md are not the source of truth for new tasks and should stay archived under .artifacts/ai/legacy-root-planning/ rather than reappearing at repo root.
+10. Do not add long per-AT completion logs to README_IMPL.md. If a module implementation document must change, keep it to durable current state or next-boundary notes.
 
 ## Skill Usage
 
