@@ -1099,6 +1099,51 @@ Completed by AT-204:
 
 ---
 
+### 7.23 Downloads List-jobs Query Boundary
+
+`DownloadsFacade::list_jobs(...)` should not be implemented by guessing across every runtime and storage surface at once. The current documents point to `DownloadJobRepository` as the first dependency for `ListDownloadJobsQuery`, while the current `JobRuntime` trait still has only `snapshot(job_id)` and no list API. Therefore the first list slice should be a downloads-owned repository page, not a live runtime join.
+
+Current Rust reality:
+
+1. `ListDownloadJobsQueryDto` already carries `PageRequest` plus an optional `JobUiState` filter.
+2. `DownloadJobListDto` is `PageSlice<DownloadJobListItemDto>`.
+3. `DownloadJobListItemDto` carries `job_id`, `title`, `ui_state`, optional `progress_label`, and optional `throughput_bytes_per_sec`.
+4. `DownloadJobRepository` currently supports `create_job(...)`, `get_job(...)`, and `update_state(...)`, but no page/list method.
+5. `SqliteDownloadJobRepository` already stores the module-owned intake fields needed for a conservative list row: `job_id`, `target_id`, `kind`, `install_intent`, `priority`, and coarse module state.
+6. `JobRuntime` has no list method in current Rust; broader design documents mention `list_active(...)`, but that API has not landed.
+
+Boundary rules:
+
+1. The next Rust slice should implement only `list_jobs(...)`.
+2. The first read source should be the downloads-owned job repository, not `JobRuntime`.
+3. Extend `DownloadJobRepository` with a narrow page method that returns module-owned `DownloadJobRecord` values inside `PageSlice`, or an equivalent module-internal page type. Do not make the repository return public DTOs directly.
+4. `DownloadsFacade::list_jobs(...)` should map each record to `DownloadJobListItemDto` with conservative projection rules:
+   - `job_id` comes from the module record;
+   - `title` uses the stable target id until a richer display-name source exists;
+   - `ui_state` maps from `DownloadJobRecordState`;
+   - `progress_label` is `None`;
+   - `throughput_bytes_per_sec` is `None`.
+5. `ListDownloadJobsQueryDto.ui_state` may filter by the mapped module record state in this first slice.
+6. Pagination should honor `PageRequest.limit`; cursor encoding may stay simple and repository-local for now, but it must not leak SQLite row details into public DTO fields beyond the existing `PageCursor` string.
+7. The SQLite adapter must implement the new repository method if the trait changes, but it should not add schema changes.
+8. This slice must not add runtime list APIs, live runtime snapshot joins per row, policy storage, host transport changes, frontend behavior, concrete IO, retry/backoff, or terminal runtime completion.
+
+First Rust slice:
+
+1. add a focused RED test proving `list_jobs(...)` returns a page of module-owned download records as conservative `DownloadJobListItemDto` rows;
+2. add a focused RED test proving optional `ui_state` filtering is applied before projection;
+3. add only the repository page boundary, in-memory test implementation, facade projection helper, and SQLite adapter method needed to compile and pass;
+4. leave `get_policy(...)` and `update_policy(...)` as `DOWNLOADS_NOT_WIRED`;
+5. run focused module tests, adapter tests if touched, full affected module tests, rustfmt check, scoped `git diff --check`, and path-limited status before commit.
+
+Later slices:
+
+1. Live runtime list or snapshot-join behavior needs a separate `JobRuntime` list/read-source design.
+2. Rich display titles, aggregate progress, throughput, ETA, and policy budget projection need separate data sources.
+3. Policy read/write surfaces remain separate from `list_jobs(...)`.
+
+---
+
 ## 8. Error Semantics
 
 Downloads-domain errors use `DL_*` codes when they become stable public classifications.

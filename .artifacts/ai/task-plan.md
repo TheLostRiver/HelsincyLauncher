@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 79 - Downloads Get-job Snapshot Query Implementation
+Phase 80 - Downloads List-jobs Query Boundary
 
 ## Current Focus
 
@@ -616,6 +616,12 @@ Phase 79 - Downloads Get-job Snapshot Query Implementation
 - Atomic tasks: AT-2026-05-17-204
 - **Status:** complete
 
+### Phase 80: Downloads List-jobs Query Boundary
+
+- Outcome: document the first `DownloadsFacade::list_jobs(...)` implementation slice as a downloads-owned repository page and conservative list-item projection, while deferring runtime list APIs, live snapshot joins, policy storage, transport, frontend, concrete IO, retry/backoff, and terminal completion.
+- Atomic tasks: AT-2026-05-17-205
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -816,6 +822,7 @@ Phase 79 - Downloads Get-job Snapshot Query Implementation
 196. AT-2026-05-17-202 - completed - updated fake local resume execution to persist failed fake results through existing checkpoint helpers, keeping retry/backoff, public error projection, terminal runtime state, concrete IO, SQLite adapter changes, transport, composition-root, and frontend out of scope; then committed locally, with initial hash `eae3c4f` before PWF backfill amend.
 197. AT-2026-05-17-203 - completed - documented the downloads get-job snapshot query boundary before Rust coding, after confirming `list_jobs` and policy surfaces need separate future design; then committed locally, with initial hash `98c491b` before PWF backfill amend.
 198. AT-2026-05-17-204 - completed - implemented the downloads get-job snapshot query with focused TDD while keeping list/policy/runtime-list/adapter/transport/frontend surfaces out of scope; then committed locally, with initial hash `d1de743` before PWF backfill amend.
+199. AT-2026-05-17-205 - completed - documented the downloads list-jobs query boundary before Rust coding, selecting the downloads-owned job repository page as the first read source; then committed locally, with initial hash `c66d3bb` before PWF backfill amend.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

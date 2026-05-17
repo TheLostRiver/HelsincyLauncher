@@ -802,3 +802,12 @@
 - The production slice can stay inside `crates/module-downloads/src/facade/mod.rs` by projecting `JobSnapshot<()>` into `DownloadJobSnapshotDto` with `DownloadJobExtensionDto` built from `DownloadJobRecord`.
 - RED confirmed all three focused tests currently fail because `DownloadsFacade::get_job_snapshot(...)` returns `DOWNLOADS_NOT_WIRED` before touching module job lookup or runtime snapshot lookup.
 - GREEN confirmed `get_job_snapshot(...)` now composes module job facts and runtime snapshot facts, reuses `DL_JOB_NOT_FOUND` for missing module records, and returns `DL_JOB_SNAPSHOT_MISSING` when the runtime snapshot is absent after module ownership is confirmed.
+
+## Phase 80 Downloads List-jobs Query Boundary Findings
+
+- AT-2026-05-17-204 final commit is `2ccc436` and was pushed to `origin/main`.
+- The backend skeleton use-case table says `ListDownloadJobsQuery` depends on `DownloadJobRepository`.
+- The current repository-port design lists `DownloadJobRepository` with create/get/update only; it does not yet define pagination.
+- Current Rust `JobRuntime` exposes `snapshot(job_id)` but no list method, even though broader design docs mention a future `list_active(...)`.
+- `SqliteDownloadJobRepository` already stores the module job record fields needed for a conservative list row and can add a read method without schema changes.
+- The safest first `list_jobs(...)` slice is a repository-backed module record page, with live runtime joins and policy data left for later boundaries.
