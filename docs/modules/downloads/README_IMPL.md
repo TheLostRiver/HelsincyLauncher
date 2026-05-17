@@ -1376,6 +1376,14 @@ Later slices:
 2. Host transport tests can then prove `downloads_update_policy` persists the policy and applies the runtime snapshot without adding frontend work.
 3. Scheduler execution, active-job rescheduling, lease changes, snapshot migration, per-module caps, per-host caps, writer backpressure, concrete IO, retry/backoff, and terminal completion remain separate runtime-design slices.
 
+Completed by AT-216:
+
+1. `DownloadRuntimePolicyApplier` now defines the downloads-owned policy application port.
+2. `NoopDownloadRuntimePolicyApplier` keeps `DownloadFacade::new(...)` behavior stable for existing callers and tests.
+3. `DownloadFacade::with_runtime_policy_applier(...)` allows focused tests and later composition-root wiring to provide an explicit applier without changing `DownloadModuleDeps`.
+4. `DownloadsFacade::update_policy(...)` saves the normalized downloads policy snapshot, then passes that same normalized `DownloadPolicyDto` to the applier.
+5. Composition-root concrete wiring, direct `SharedJobRuntimeHost` calls from downloads code, host transport/frontend behavior, scheduler execution, active jobs, leases, snapshots, pending work, concrete IO, retry/backoff, and terminal runtime completion remain unchanged.
+
 ---
 
 ## 8. Error Semantics

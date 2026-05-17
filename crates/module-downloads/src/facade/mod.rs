@@ -125,6 +125,25 @@ pub trait DownloadPolicyStore: Send + Sync {
     fn save_policy(&self, policy: &DownloadPolicyDto) -> AppResult<()>;
 }
 
+/// Applies a normalized downloads policy to a runtime-facing policy surface.
+/// 将已规整的 downloads 策略应用到面向 runtime 的策略表面。
+pub trait DownloadRuntimePolicyApplier: Send + Sync {
+    /// Applies the already-persisted downloads policy snapshot.
+    /// 应用已经持久化的 downloads 策略快照。
+    fn apply_download_policy(&self, policy: &DownloadPolicyDto) -> AppResult<()>;
+}
+
+/// No-op runtime policy applier used until composition-root wires a concrete runtime.
+/// 在 composition-root 接入具体 runtime 之前使用的空操作策略应用器。
+#[derive(Debug, Clone, Copy, Default)]
+pub struct NoopDownloadRuntimePolicyApplier;
+
+impl DownloadRuntimePolicyApplier for NoopDownloadRuntimePolicyApplier {
+    fn apply_download_policy(&self, _policy: &DownloadPolicyDto) -> AppResult<()> {
+        Ok(())
+    }
+}
+
 /// In-memory policy store that keeps AT-208 inside the module boundary.
 /// 内存态策略存储，让 AT-208 仍然停留在模块边界内。
 #[derive(Debug, Clone)]
@@ -643,12 +662,30 @@ pub struct DownloadModuleDeps<J, C, M, S, W, R, P> {
 /// downloads 模块对外暴露的 use-case facade。
 pub struct DownloadFacade<J, C, M, S, W, R, P> {
     deps: DownloadModuleDeps<J, C, M, S, W, R, P>,
+    /// Applies persisted downloads policy snapshots to runtime-facing policy control.
+    /// 将已持久化的 downloads 策略快照应用到面向 runtime 的策略控制面。
+    runtime_policy_applier: Arc<dyn DownloadRuntimePolicyApplier>,
 }
 
 impl<J, C, M, S, W, R, P> DownloadFacade<J, C, M, S, W, R, P> {
     /// 用已经装配好的依赖束创建 downloads facade。
     pub fn new(deps: DownloadModuleDeps<J, C, M, S, W, R, P>) -> Self {
-        Self { deps }
+        Self::with_runtime_policy_applier(deps, NoopDownloadRuntimePolicyApplier)
+    }
+
+    /// Creates a downloads facade with an explicit runtime policy applier.
+    /// 使用显式 runtime 策略应用器创建 downloads facade。
+    pub fn with_runtime_policy_applier<A>(
+        deps: DownloadModuleDeps<J, C, M, S, W, R, P>,
+        runtime_policy_applier: A,
+    ) -> Self
+    where
+        A: DownloadRuntimePolicyApplier + 'static,
+    {
+        Self {
+            deps,
+            runtime_policy_applier: Arc::new(runtime_policy_applier),
+        }
     }
 
     /// 暴露依赖束，主要服务于 composition-root smoke test 与局部诊断。
@@ -748,7 +785,8 @@ impl<
     /// 保存面向 downloads 的策略快照，但不修改 runtime 队列策略。
     pub fn update_policy(&self, request: UpdateDownloadPolicyRequestDto) -> AppResult<()> {
         let policy = policy_from_update_request(request);
-        self.deps.policy_store.save_policy(&policy)
+        self.deps.policy_store.save_policy(&policy)?;
+        self.runtime_policy_applier.apply_download_policy(&policy)
     }
 }
 
@@ -984,8 +1022,9 @@ mod tests {
         DownloadManifestProviderPort, DownloadManifestSegment, DownloadModuleDeps,
         DownloadPendingResumeWork, DownloadPendingResumeWorkSource, DownloadResumeOutcome,
         DownloadResumeSegmentAction, DownloadResumeWorkItem, DownloadResumeWorkMode,
-        DownloadResumeWorkPlan, DownloadResumeWorkScheduler, DownloadStagingObjectStore,
-        DownloadStagingRoot, InMemoryDownloadPolicyStore, InMemoryDownloadResumeWorkScheduler,
+        DownloadResumeWorkPlan, DownloadResumeWorkScheduler, DownloadRuntimePolicyApplier,
+        DownloadStagingObjectStore, DownloadStagingRoot, InMemoryDownloadPolicyStore,
+        InMemoryDownloadResumeWorkScheduler,
     };
     use crate::contracts::{
         CancelDownloadRequestDto, DownloadPolicyDto, GetDownloadJobQueryDto,
@@ -1408,6 +1447,30 @@ mod tests {
         }
     }
 
+    #[derive(Clone, Default)]
+    struct RecordingDownloadRuntimePolicyApplier {
+        applied_policies: Arc<Mutex<Vec<DownloadPolicyDto>>>,
+    }
+
+    impl RecordingDownloadRuntimePolicyApplier {
+        fn applied_policies(&self) -> Vec<DownloadPolicyDto> {
+            self.applied_policies
+                .lock()
+                .expect("applied policy mutex should not be poisoned")
+                .clone()
+        }
+    }
+
+    impl DownloadRuntimePolicyApplier for RecordingDownloadRuntimePolicyApplier {
+        fn apply_download_policy(&self, policy: &DownloadPolicyDto) -> AppResult<()> {
+            self.applied_policies
+                .lock()
+                .expect("applied policy mutex should not be poisoned")
+                .push(policy.clone());
+            Ok(())
+        }
+    }
+
     #[derive(Clone)]
     struct PendingAwareJobRuntime {
         resume_scheduler: InMemoryDownloadResumeWorkScheduler,
@@ -1713,6 +1776,72 @@ mod tests {
         assert_eq!(high_clamped.concurrency_slots, 128);
         assert_eq!(high_clamped.bandwidth_limit_bytes_per_sec, None);
         assert!(high_clamped.auto_resume);
+    }
+
+    #[test]
+    fn update_policy_applies_normalized_snapshot_to_runtime_applier() {
+        let policy_applier = RecordingDownloadRuntimePolicyApplier::default();
+        let facade = DownloadFacade::with_runtime_policy_applier(
+            DownloadModuleDeps {
+                job_repo: RecordingDownloadJobRepository::default(),
+                checkpoint_repo: (),
+                manifest_provider: (),
+                staging_store: (),
+                resume_scheduler: (),
+                job_runtime: RecordingJobRuntime::default(),
+                policy_store: InMemoryDownloadPolicyStore::new(3),
+            },
+            policy_applier.clone(),
+        );
+
+        facade
+            .update_policy(UpdateDownloadPolicyRequestDto {
+                concurrency_slots: 512,
+                bandwidth_limit_bytes_per_sec: Some(256 * 1024),
+                auto_resume: false,
+            })
+            .expect("update_policy should store and apply the normalized policy");
+
+        let expected = DownloadPolicyDto {
+            concurrency_slots: 128,
+            bandwidth_limit_bytes_per_sec: Some(256 * 1024),
+            auto_resume: false,
+        };
+        assert_eq!(policy_applier.applied_policies(), vec![expected.clone()]);
+        assert_eq!(
+            facade
+                .get_policy(GetDownloadPolicyQueryDto::default())
+                .expect("policy store should retain the same normalized policy"),
+            expected
+        );
+    }
+
+    #[test]
+    fn update_policy_default_applier_keeps_policy_store_behavior() {
+        let facade = DownloadFacade::new(DownloadModuleDeps {
+            job_repo: RecordingDownloadJobRepository::default(),
+            checkpoint_repo: (),
+            manifest_provider: (),
+            staging_store: (),
+            resume_scheduler: (),
+            job_runtime: RecordingJobRuntime::default(),
+            policy_store: InMemoryDownloadPolicyStore::new(3),
+        });
+
+        facade
+            .update_policy(UpdateDownloadPolicyRequestDto {
+                concurrency_slots: 8,
+                bandwidth_limit_bytes_per_sec: None,
+                auto_resume: true,
+            })
+            .expect("default runtime policy applier should be a no-op");
+
+        let stored = facade
+            .get_policy(GetDownloadPolicyQueryDto::default())
+            .expect("default no-op applier should keep policy-store behavior intact");
+        assert_eq!(stored.concurrency_slots, 8);
+        assert_eq!(stored.bandwidth_limit_bytes_per_sec, None);
+        assert!(stored.auto_resume);
     }
 
     #[test]

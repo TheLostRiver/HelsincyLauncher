@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 90 - Downloads Runtime Policy Applier Boundary
+Phase 91 - Downloads Runtime Policy Applier Port
 
 ## Current Focus
 
@@ -682,6 +682,12 @@ Phase 90 - Downloads Runtime Policy Applier Boundary
 - Atomic tasks: AT-2026-05-17-215
 - **Status:** complete
 
+### Phase 91: Downloads Runtime Policy Applier Port
+
+- Outcome: add the downloads-owned runtime policy applier port and default no-op facade path so `update_policy(...)` can hand off normalized persisted policy snapshots without composition-root concrete runtime wiring, transport, frontend, scheduler work, active jobs/leases/snapshots, pending work, concrete IO, retry/backoff, or terminal completion.
+- Atomic tasks: AT-2026-05-17-216
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -892,7 +898,8 @@ Phase 90 - Downloads Runtime Policy Applier Boundary
 206. AT-2026-05-17-212 - completed - implemented startup seeding from persisted downloads policy into the initial shared runtime queue policy with focused composition-root TDD, while keeping live runtime mutation, scheduler work, transport, frontend, concrete IO, retry/backoff, and terminal completion out of scope; committed and pushed as `ed27996`.
 207. AT-2026-05-17-213 - completed - documented the live runtime policy update boundary before Rust coding, selecting a kernel-jobs `SharedJobRuntimeHost` policy-control surface as the first safe slice while deferring downloads facade wiring, transport, frontend, scheduler work, active runtime mutation, concrete IO, retry/backoff, and terminal completion; committed and pushed as `38c32b2`.
 208. AT-2026-05-17-214 - completed - added the kernel-jobs runtime policy control surface with focused TDD, keeping policy reads by-value while sharing updates across cloned runtime handles and deferring downloads facade wiring, composition-root wiring, host transport, frontend, scheduler work, active job/lease/snapshot changes, pending work, concrete IO, retry/backoff, and terminal completion; committed and pushed as `c92be25`.
-209. AT-2026-05-17-215 - completed - documented the downloads runtime policy applier boundary before Rust coding, selecting a downloads-owned facade applier port as the next safe slice while deferring composition-root concrete wiring, host transport, frontend, scheduler work, active runtime mutation, concrete IO, retry/backoff, and terminal completion; commit/push pending.
+209. AT-2026-05-17-215 - completed - documented the downloads runtime policy applier boundary before Rust coding, selecting a downloads-owned facade applier port as the next safe slice while deferring composition-root concrete wiring, host transport, frontend, scheduler work, active runtime mutation, concrete IO, retry/backoff, and terminal completion; committed and pushed as `4ef3f10`.
+210. AT-2026-05-17-216 - completed - added the downloads-owned runtime policy applier port with focused TDD while keeping composition-root concrete wiring, direct shared-runtime mutation from downloads code, transport, frontend, scheduler work, active runtime mutation, concrete IO, retry/backoff, and terminal completion out of scope; commit/push pending.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

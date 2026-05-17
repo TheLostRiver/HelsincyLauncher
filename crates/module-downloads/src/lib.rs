@@ -20,5 +20,6 @@ pub use facade::{
     DownloadPendingResumeWork, DownloadPendingResumeWorkSource, DownloadPolicyStore,
     DownloadResumeSegmentAction, DownloadResumeSegmentDecision, DownloadResumeWorkItem,
     DownloadResumeWorkMode, DownloadResumeWorkPlan, DownloadResumeWorkScheduler,
-    InMemoryDownloadPolicyStore, InMemoryDownloadResumeWorkScheduler,
+    DownloadRuntimePolicyApplier, InMemoryDownloadPolicyStore, InMemoryDownloadResumeWorkScheduler,
+    NoopDownloadRuntimePolicyApplier,
 };

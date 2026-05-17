@@ -903,3 +903,12 @@
 - Current `DownloadsFacade::update_policy(...)` normalizes and persists `DownloadPolicyDto` through `DownloadPolicyStore`, but has no dedicated runtime policy applier dependency.
 - The next safe Rust slice should introduce a downloads-owned policy applier port that receives the normalized persisted `DownloadPolicyDto`; composition-root concrete wiring to `SharedJobRuntimeHost::update_policy(...)` should remain a later slice.
 - README_IMPL 7.28 now pins the first Rust slice to `module-downloads`: add a narrow runtime policy applier port, call it with normalized `DownloadPolicyDto` after persistence, and keep concrete runtime wiring in composition-root for a later task.
+
+## Phase 91 Downloads Runtime Policy Applier Port Findings
+
+- AT-2026-05-17-215 final commit is `4ef3f10` and was pushed to `origin/main`.
+- Current `DownloadModuleDeps` is constructed directly in many module tests, so adding another required generic field would create wide test churn.
+- A smaller module-local approach is to store a runtime policy applier inside `DownloadFacade` itself: `new(...)` can install a no-op default, and a new opt-in constructor can accept a test/later composition applier.
+- The applier should receive `DownloadPolicyDto`, not `RuntimeQueuePolicy`, so downloads code stays independent from concrete runtime policy construction and `SharedJobRuntimeHost`.
+- RED/GREEN confirmed `DownloadsFacade::update_policy(...)` saves the normalized policy and passes that same normalized `DownloadPolicyDto` to a dedicated `DownloadRuntimePolicyApplier`.
+- `NoopDownloadRuntimePolicyApplier` keeps existing `DownloadFacade::new(...)` behavior stable; the opt-in `with_runtime_policy_applier(...)` constructor supports focused tests and later composition-root wiring without changing `DownloadModuleDeps`.

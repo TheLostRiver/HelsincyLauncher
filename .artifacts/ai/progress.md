@@ -8540,6 +8540,16 @@
 - Drafted README_IMPL 7.28 to define a downloads-owned runtime policy applier port as the next Rust slice, with composition-root concrete wiring and direct `SharedJobRuntimeHost` calls deferred.
 - Scoped `git diff --check` passed with CRLF normalization warnings only. Commit/push are next.
 
+### Agent Note: 2026-05-17 19:38:06
+- Phase: Phase 91 - Downloads Runtime Policy Applier Port
+- AT-2026-05-17-215 was committed and pushed as `4ef3f10`.
+- Started AT-2026-05-17-216 to implement the README_IMPL 7.28 first Rust slice with TDD.
+- Implementation boundary selected after reading current code: keep `DownloadModuleDeps` stable, add a facade-owned default no-op policy applier plus an opt-in constructor for tests/later composition wiring.
+- RED/GREEN completed: the new applier handoff test failed before `DownloadRuntimePolicyApplier` existed, then passed after the minimal port/default/constructor implementation.
+- Focused no-op and existing policy-store tests passed; full downloads module tests passed with 47 passed / 0 failed.
+- Affected composition check and touched-file rustfmt check passed.
+- Final scoped diff check, commit, and push are next.
+
 ### Auto Record: 2026-05-17 19:24:27
 - Tool: apply_patch
 - Phase: Phase 84 - Downloads Policy SQLite Persistence Boundary
@@ -8588,6 +8598,69 @@
 ### Auto Record: 2026-05-17 19:32:57
 - Tool: apply_patch
 - Phase: Phase 90 - Downloads Runtime Policy Applier Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 19:35:12
+- Tool: apply_patch
+- Phase: Phase 91 - Downloads Runtime Policy Applier Port
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 19:35:24
+- Tool: apply_patch
+- Phase: Phase 91 - Downloads Runtime Policy Applier Port
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 19:36:10
+- Tool: apply_patch
+- Phase: Phase 91 - Downloads Runtime Policy Applier Port
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-17 19:37:03
+- Tool: apply_patch
+- Phase: Phase 91 - Downloads Runtime Policy Applier Port
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-17 19:37:13
+- Tool: apply_patch
+- Phase: Phase 91 - Downloads Runtime Policy Applier Port
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-17 19:37:20
+- Tool: apply_patch
+- Phase: Phase 91 - Downloads Runtime Policy Applier Port
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-17 19:37:26
+- Tool: apply_patch
+- Phase: Phase 91 - Downloads Runtime Policy Applier Port
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\lib.rs` (update)
+
+### Auto Record: 2026-05-17 19:38:02
+- Tool: apply_patch
+- Phase: Phase 91 - Downloads Runtime Policy Applier Port
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 19:38:39
+- Tool: apply_patch
+- Phase: Phase 91 - Downloads Runtime Policy Applier Port
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
