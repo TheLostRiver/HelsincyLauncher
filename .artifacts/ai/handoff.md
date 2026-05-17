@@ -94,11 +94,17 @@
 
 - task id: AT-2026-05-17-237
 - title: Cover host runtime command downloads deferred path
+- status: completed; final commit `a8e3492`, pushed to `origin/main`
+
+## Active Atomic Task
+
+- task id: AT-2026-05-17-238
+- title: Define downloads concrete segment execution boundary
 - status: completed; validation passed; publication will be recorded from Git history after commit/push
 
 ## Current Slice
 
-- `src-tauri/tests/transport_wiring_smoke.rs`
+- `docs/modules/downloads/README_IMPL.md`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -107,8 +113,8 @@
 
 ## Next Resume Point
 
-1. Commit and push AT-2026-05-17-237 if not already published.
-2. Next backend slice should be selected from the runtime/downloads execution path after reading the relevant docs again.
+1. Commit and push AT-2026-05-17-238 if not already published.
+2. Next Rust slice can use README_IMPL 7.35 to add a module-owned executor adapter shell behind `DownloadSegmentExecutionPort`.
 
 ## Validation
 
@@ -192,6 +198,10 @@
 - AT-237 required context read in focused chunks: IPC command section, downloads deferred run docs, current downloads driver run reason, shared runtime deferred non-mutation, and current transport smoke helper.
 - AT-237 validation passed: host transport smoke now proves a queued production downloads job returns `Deferred` through `jobs_run_next_execution_turn`, reason contains `execution port not wired`, and the snapshot remains `Queued` / `Queued`.
 - Full desktop package tests, desktop compile gate, scoped rustfmt, and scoped diff-check passed.
+- AT-237 final commit `a8e3492` was pushed to `origin/main`.
+- AT-238 required context read in focused chunks: downloads module docs, README_IMPL runtime sections, Tauri download runtime fetch/write/verify/staging references, kernel-jobs runtime context references, and current segment execution request/result/port shape.
+- AT-238 README_IMPL 7.35 defines the next safe Rust slice: a module-owned executor adapter shell behind the existing `DownloadSegmentExecutionPort`, starting with fake/in-memory sub-ports or adapter-shell tests and no real IO.
+- AT-238 scoped docs/PWF diff-check passed with CRLF normalization warnings only.
 - AT-224 found that downloads should not call `prepare_resume_execution_turn(...)` from `run(...)` unless an execution-port path is present, because that helper drains pending work after checkpoint reload.
 - README_IMPL 7.31 defines the next Rust slice: add an optional downloads-owned segment execution port or equivalent explicit strategy, keep the default constructor deferred/non-draining, and test fake completed execution through `run(...)`.
 - AT-224 scoped `git diff --check` passed with CRLF normalization warnings only.

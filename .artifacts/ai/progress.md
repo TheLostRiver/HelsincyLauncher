@@ -9773,6 +9773,20 @@
   - scoped `git diff --check` with CRLF normalization warnings only.
 - `.artifacts/tmp` remained empty after the test run.
 
+## Agent Note: 2026-05-17 23:22 CST - Opened AT-2026-05-17-238
+
+- AT-237 was committed and pushed as `a8e3492`.
+- Opened AT-238 as a docs-only durable boundary task for the next downloads concrete segment execution step.
+- Required context confirms the next step must first define fetch/write/verify ownership around the existing `DownloadSegmentExecutionPort`; directly wiring real IO would mix too many runtime, retry, terminal-state, and storage concerns.
+- Next action: add a concise README_IMPL section that defines the next Rust slice and non-goals without adding a task log.
+
+## Agent Note: 2026-05-17 23:28 CST - Completed AT-2026-05-17-238
+
+- Added README_IMPL 7.35, defining the concrete segment execution port boundary.
+- The next Rust slice is now documented as a module-owned executor adapter shell behind the existing `DownloadSegmentExecutionPort`.
+- The boundary explicitly starts with fake/in-memory sub-ports or adapter-shell tests and keeps real HTTP/disk/hash IO, retry/backoff, terminal projection, scheduler loops, host transport, frontend, schema, and public `DL_*` execution errors out of scope.
+- Validation: scoped docs/PWF `git diff --check` passed with CRLF normalization warnings only.
+
 ### Auto Record: 2026-05-17 22:09:13
 - Tool: apply_patch
 - Phase: Phase 109 - Composition One-shot Runtime Execution Helper
@@ -10040,5 +10054,71 @@
 ### Auto Record: 2026-05-17 22:28:11
 - Tool: apply_patch
 - Phase: Phase 112 - Host Runtime Command Downloads Deferred Coverage
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 22:29:52
+- Tool: apply_patch
+- Phase: Phase 112 - Host Runtime Command Downloads Deferred Coverage
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-17 22:30:03
+- Tool: apply_patch
+- Phase: Phase 113 - Downloads Concrete Segment Execution Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 22:30:17
+- Tool: apply_patch
+- Phase: Phase 113 - Downloads Concrete Segment Execution Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 22:30:29
+- Tool: apply_patch
+- Phase: Phase 113 - Downloads Concrete Segment Execution Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 22:30:39
+- Tool: apply_patch
+- Phase: Phase 113 - Downloads Concrete Segment Execution Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 22:31:08
+- Tool: apply_patch
+- Phase: Phase 113 - Downloads Concrete Segment Execution Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 22:31:32
+- Tool: apply_patch
+- Phase: Phase 113 - Downloads Concrete Segment Execution Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 22:31:40
+- Tool: apply_patch
+- Phase: Phase 113 - Downloads Concrete Segment Execution Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 22:31:47
+- Tool: apply_patch
+- Phase: Phase 113 - Downloads Concrete Segment Execution Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 22:31:56
+- Tool: apply_patch
+- Phase: Phase 113 - Downloads Concrete Segment Execution Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 22:32:09
+- Tool: apply_patch
+- Phase: Phase 113 - Downloads Concrete Segment Execution Boundary
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)

@@ -1565,6 +1565,38 @@ Validation should stay in `launcher-kernel-jobs` first:
 3. existing no-queued and deterministic selector tests keep passing;
 4. existing accepted/deferred one-shot dispatch tests keep passing.
 
+### 7.35 Concrete Segment Execution Port Boundary
+
+The host can now manually ask the shared runtime to run one queued execution turn, and production downloads dispatch correctly defers because no concrete segment execution port is wired. The next downloads-owned boundary is therefore not a scheduler loop or host command. It is the smallest concrete execution adapter shape behind the existing module-local `DownloadSegmentExecutionPort`.
+
+Current Rust reality:
+
+1. `DownloadSegmentExecutionRequest` already carries the job id, segment id, file id, source locator, staging write target, optional hash expectation, range offsets, resume mode, and checkpoint reference.
+2. `DownloadSegmentExecutionPort` is module-local and can already return `Accepted`, `Completed`, or `Failed` module results.
+3. `DownloadJobDriver::run(...)` only calls local execution when an execution port is explicitly present; production composition still wires no port and therefore returns `Deferred`.
+4. Concrete fetch/write/verify ownership is documented in `docs/TauriDownloadRuntimeDesign.md`, but no Rust port boundary is wired for it yet.
+
+First Rust slice:
+
+1. keep `DownloadSegmentExecutionPort` as the driver-facing boundary and define a small module-owned executor adapter shell behind it;
+2. split concrete responsibilities only as far as the test needs: fetch source bytes from `source_locator`, write them under the staging-relative `write_target`, and optionally verify `expected_hash`;
+3. start with a fake/in-memory implementation of those sub-ports or an adapter shell test, not real HTTP or disk writes;
+4. return existing `DownloadSegmentExecutionResult` values so checkpoint mutation code remains unchanged;
+5. keep composition-root production wiring unchanged until the adapter proves real or fake completion through focused module tests.
+
+Non-goals:
+
+1. no real HTTP range requests, provider object fetches, staging file writes, artifact moves, or hash verification in the first boundary slice;
+2. no retry/backoff, terminal runtime completion/failure projection, snapshot-writer context, durable leases, scheduler loop, host transport, frontend, SQLite schema, or public `DL_*` execution errors;
+3. no new `kernel-jobs` payloads and no segment details exposed through host transport.
+
+Validation should stay in `launcher-module-downloads` first:
+
+1. focused tests prove the executor adapter receives the existing request facts without changing their shape;
+2. focused tests prove fake sub-ports can produce an existing `Completed` or `Failed` result;
+3. existing driver run/deferred tests keep passing;
+4. composition-root wiring remains unchanged until a later slice explicitly scopes production execution-port wiring.
+
 ---
 
 ## 8. Error Semantics

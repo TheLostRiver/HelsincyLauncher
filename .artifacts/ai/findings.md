@@ -1116,3 +1116,13 @@
 - Validation confirmed the host command reaches the queued production downloads job and returns `Deferred` with `execution port not wired`.
 - The snapshot remains `Queued` / `Queued`, preserving the documented deferred non-mutation rule.
 - AT-237 touched only the transport smoke test plus PWF records; no production Rust behavior changed.
+- AT-2026-05-17-237 final commit `a8e3492` was pushed to `origin/main`.
+
+## Phase 113 Downloads Concrete Segment Execution Boundary Findings
+
+- Required context was read in focused chunks: downloads module docs routing/current-state table, README_IMPL runtime execution sections, Tauri download runtime fetcher/writer/verifier/staging references, kernel-jobs driver/runtime context references, and current segment execution request/result/port shape.
+- Current `DownloadSegmentExecutionPort` is intentionally broad enough for fake/future executors, but real IO still needs explicit fetch/write/verify responsibility boundaries before production wiring.
+- `DownloadSegmentExecutionRequest` already carries source locator, staging write target, optional hash expectation, range offsets, resume mode, and checkpoint reference, so the next boundary can avoid changing public host transport or `kernel-jobs` payloads.
+- Real execution must not be introduced in the same slice as retry/backoff, terminal snapshot projection, scheduler loops, leases, or frontend state.
+- README_IMPL 7.35 now defines the next safe Rust slice as a module-owned executor adapter shell behind `DownloadSegmentExecutionPort`, starting with fake/in-memory sub-ports or adapter-shell tests rather than real IO.
+- AT-238 scoped docs/PWF diff-check passed with CRLF normalization warnings only.

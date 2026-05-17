@@ -2,40 +2,38 @@
 
 ## Identity
 
-- task id: AT-2026-05-17-237
-- title: Cover host runtime command downloads deferred path
+- task id: AT-2026-05-17-238
+- title: Define downloads concrete segment execution boundary
 - status: completed
 
 ## Goal
 
-Add focused host transport smoke coverage proving that `jobs_run_next_execution_turn` can see a queued production downloads job, returns a successful deferred DTO while the production downloads driver has no execution port, and leaves the job snapshot queued.
+Document the next durable downloads implementation boundary for moving from fake/local segment execution results toward real fetch/write/verify execution ports, without writing concrete IO, scheduler loops, retry/backoff, terminal projection, host transport, frontend, or schema changes.
 
 ## Scope
 
 - in scope:
-  - `src-tauri/tests/transport_wiring_smoke.rs`
+  - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
   - `.artifacts/ai/progress.md`
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
-  - production Rust changes
+  - Rust production or test code
   - frontend code
-  - downloads module behavior changes
-  - composition-root helper changes
-  - kernel-jobs runtime behavior changes
-  - scheduler loops/background tasks/timers
-  - durable leases or precise active-slot accounting
-  - terminal completed/failed snapshot projection
+  - host transport changes
   - concrete HTTP/file/hash execution
   - retry/backoff policy
+  - terminal runtime completion/failure projection
+  - scheduler loops/background tasks/timers
+  - durable leases or precise active-slot accounting
   - SQLite schema or adapter changes
   - unrelated dirty files
 
 ## Allowed Files
 
-1. src-tauri/tests/transport_wiring_smoke.rs
+1. docs/modules/downloads/README_IMPL.md
 2. .artifacts/ai/active-task.md
 3. .artifacts/ai/task-plan.md
 4. .artifacts/ai/progress.md
@@ -46,35 +44,32 @@ Add focused host transport smoke coverage proving that `jobs_run_next_execution_
 
 Read before writing:
 
-1. docs/TauriIPCAndStateContractsDesign.md 7.4.
-2. docs/modules/downloads/README_IMPL.md 7.31-7.34.
-3. Current `DownloadJobDriver::run(...)` deferred reason.
-4. Current `SharedJobRuntimeHost::run_next_execution_turn(...)` deferred non-mutation behavior.
-5. Current `src-tauri/tests/transport_wiring_smoke.rs` isolated host helper.
+1. docs/modules/downloads/README_ARCH.md/API/FLOW routing snippets.
+2. docs/modules/downloads/README_IMPL.md current state and sections 7.31-7.34.
+3. docs/TauriDownloadRuntimeDesign.md fetcher/writer/verifier/staging rules.
+4. docs/TauriKernelJobsRuntimeDesign.md runtime context and driver execution rules.
+5. Current `DownloadSegmentExecutionRequest`, `DownloadSegmentExecutionResult`, and `DownloadSegmentExecutionPort`.
 
 ## Hypothesis
 
-- falsifiable coverage hypothesis: with an isolated host graph, `downloads_start` queues a production downloads job, then `jobs_run_next_execution_turn` returns a successful `Deferred` DTO whose reason mentions the missing downloads execution port, and the stored snapshot remains `Queued`.
+- falsifiable design hypothesis: the next safe implementation boundary is not real IO yet; it should first define module-local concrete execution sub-port responsibilities and a future executor adapter shape while keeping current `DownloadSegmentExecutionPort` and runtime dispatch contracts stable.
 
 ## Cheap Check
 
-1. Add a transport smoke assertion after queueing one isolated downloads job.
-2. Reuse the project-local sqlite helper and clean up after dropping the service handle.
-3. Run focused transport smoke, scoped rustfmt, desktop package tests, desktop check, and scoped diff-check.
+1. Add a concise README_IMPL section after the current runtime execution sections.
+2. Keep it durable-boundary only, not a per-task log.
+3. Run scoped docs/PWF `git diff --check`.
 
 ## Validation Gate
 
-1. The new smoke assertion passes without production code changes.
-2. The deferred reason proves production downloads execution is not wired yet.
-3. Snapshot state and UI state remain queued after deferred dispatch.
-4. Focused and package-level desktop validation pass before commit/push.
+1. The new section identifies the next Rust slice and its non-goals.
+2. It does not duplicate full earlier history or widen into task logs.
+3. It keeps concrete IO, retry/backoff, terminal runtime state, transport, frontend, and schema out of scope.
+4. Scoped docs/PWF diff-check passes before commit/push.
 
 ## Validation Result
 
-1. Added isolated transport smoke coverage for a queued production downloads job dispatched through `jobs_run_next_execution_turn`.
-2. The command returned a successful `Deferred` DTO whose reason contains `execution port not wired`.
-3. The stored job snapshot remained `JobState::Queued` and `JobUiState::Queued`.
-4. Focused smoke passed: `cargo test -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml transport_wiring_smoke` passed with 1 integration test.
-5. Full desktop package tests passed with 3 unit tests and 1 integration smoke test.
-6. Compile gate passed: `cargo check -p my-epic-launcher-desktop --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`.
-7. Scoped `rustfmt --edition 2021 --check src-tauri\tests\transport_wiring_smoke.rs` passed; scoped `git diff --check` passed with CRLF normalization warnings only.
+1. Added `docs/modules/downloads/README_IMPL.md` section 7.35 for the concrete segment execution port boundary.
+2. The section defines the next Rust slice as a module-owned executor adapter shell behind the existing `DownloadSegmentExecutionPort`.
+3. The section keeps real HTTP/disk/hash IO, retry/backoff, terminal projection, scheduler loops, host transport, frontend, schema, and public `DL_*` execution errors out of scope.
+4. Scoped `git diff --check -- docs/modules/downloads/README_IMPL.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/findings.md .artifacts/ai/handoff.md .artifacts/ai/progress.md` passed with CRLF normalization warnings only.
