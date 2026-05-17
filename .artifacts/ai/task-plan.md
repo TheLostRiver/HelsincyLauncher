@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 66 - Downloads Segment Execution Ports Boundary
+Phase 67 - Downloads Segment Execution Request Handoff
 
 ## Current Focus
 
@@ -538,6 +538,12 @@ Phase 66 - Downloads Segment Execution Ports Boundary
 - Atomic tasks: AT-2026-05-17-191
 - **Status:** complete
 
+### Phase 67: Downloads Segment Execution Request Handoff
+
+- Outcome: add a module-local segment execution request/result/port shell and a driver helper that converts `PendingWorkAccepted` work into stable job-scoped requests without concrete IO or runtime completion.
+- Atomic tasks: AT-2026-05-17-192
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -725,6 +731,7 @@ Phase 66 - Downloads Segment Execution Ports Boundary
 183. AT-2026-05-17-189 - completed - documented the downloads driver execution boundary after durable segment checkpoint persistence; scoped readback/status and `git diff --check` passed with CRLF warnings only, then committed locally.
 184. AT-2026-05-17-190 - completed - added downloads driver local execution-turn classification with focused TDD, preserving shared runtime and concrete IO boundaries; then committed locally.
 185. AT-2026-05-17-191 - completed - updated README_IMPL with the completed local execution-turn reality and defined the next segment execution ports boundary before coding; then committed locally.
+186. AT-2026-05-17-192 - completed - added downloads segment execution request handoff shell with focused TDD, keeping concrete IO/runtime completion out of scope; then committed locally.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

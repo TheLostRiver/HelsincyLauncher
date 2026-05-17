@@ -684,3 +684,11 @@
 - `README_IMPL.md` 7.13 still described the module-local execution-turn method as a future option, so the implementation document must be updated before more backend coding.
 - The next code task should not jump directly to HTTP range requests, staging writes, hash verification, runtime snapshot completion, or host/frontend projection.
 - The safe next design boundary is a module-local segment execution ports boundary: define how `DownloadDriverExecutionTurn::PendingWorkAccepted` can be translated into future fetch/write/verify/checkpoint operations while keeping concrete IO and runtime `run()` out of scope until separately tested.
+
+## Phase 67 Downloads Segment Execution Request Handoff Findings
+
+- AT-2026-05-17-191 committed locally as `3d7f246`; its file set was clean after commit.
+- README_IMPL 7.14 defines the first Rust slice as request/result/port shell plus local driver helper only.
+- Existing `DownloadResumeWorkItem` already carries most segment execution input fields; the missing stable request context is the owning `JobId`.
+- The focused RED test should assert stable ordering across pending work entries and plan items so future execution ports do not reorder segments accidentally.
+- Non-`PendingWorkAccepted` turns should not produce segment execution requests; `NoPendingWork` remains a classification, not completion.

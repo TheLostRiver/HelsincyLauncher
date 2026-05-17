@@ -2,8 +2,8 @@
 
 ## Latest Published Atomic Task
 
-- task id: AT-2026-05-17-191
-- title: Define downloads segment execution ports boundary
+- task id: AT-2026-05-17-192
+- title: Add downloads segment execution request handoff shell
 - status: completed and committed locally; verify final amended hash with `git log --oneline -1`
 
 ## Current In-progress Atomic Task
@@ -12,7 +12,8 @@
 
 ## Current Slice
 
-- `docs/modules/downloads/README_IMPL.md`
+- `crates/module-downloads/src/driver.rs`
+- `crates/module-downloads/src/lib.rs`
 - `.artifacts/ai/active-task.md`
 - `.artifacts/ai/task-plan.md`
 - `.artifacts/ai/progress.md`
@@ -21,32 +22,32 @@
 
 ## Context Read
 
-- AT-190 final log/status confirmation.
-- `docs/modules/downloads/README_IMPL.md` section 7.13 and adjacent implementation state.
-- `.artifacts/ai/handoff.md` and `.artifacts/ai/task-plan.md` current phase/ledger snippets.
+- README, CONTRIBUTING, docs map, downloads module docs, README_IMPL 7.13 and 7.14, kernel-jobs/download runtime design snippets, testing strategy, code comment standard.
+- Current `crates/module-downloads/src/driver.rs` and `crates/module-downloads/src/lib.rs`.
 
 ## Next Resume Point
 
-1. AT-192 can code the first Rust slice from README_IMPL 7.14: convert `PendingWorkAccepted` work into stable job-scoped segment execution requests and add only request/result/port shell plus local driver helper.
-2. Keep concrete HTTP fetch, staging writes, hash verification, checkpoint mutation, runtime completion, transport, frontend, SQLite schema, composition-root, and `kernel-jobs` unchanged unless explicitly scoped later.
+1. Reassess README_IMPL 7.14 for the next safe slice. Do not jump directly to concrete IO.
+2. Keep concrete HTTP fetch, staging writes, hash verification, checkpoint mutation, runtime completion, transport, frontend, SQLite schema, composition-root changes, and `kernel-jobs` changes out of scope unless the next task explicitly documents them.
 
 ## Validation
 
-- README_IMPL 7.13 readback confirmed AT-190 current Rust reality is documented.
-- README_IMPL 7.14 readback confirmed the next segment execution ports boundary and first Rust slice are documented.
+- RED focused `segment_execution_request` filter failed on missing request/helper API.
+- GREEN focused `segment_execution_request` filter passed with 2 tests.
+- Full `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 31 tests.
+- `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed after rustfmt.
 - Scoped `git diff --check` passed with CRLF warnings only.
-- Path-limited status showed only AT-191 docs/PWF files.
 
 ## Boundaries
 
 - Do not modify files outside `D:\DEV\MyEpicLauncher`.
 - Do not run destructive commands.
-- Do not change Rust code, `kernel-jobs`, composition-root, transport, frontend, SQLite schema, concrete IO, verifier, snapshot mutation, or completion APIs in AT-191.
+- Do not implement concrete HTTP fetch, staging writes, hash verification, checkpoint mutation, runtime completion, transport, frontend, SQLite schema, composition-root changes, or `kernel-jobs` changes.
 - Skip push unless a safe push path is explicitly authorized later.
 
 ## Dirty Worktree To Preserve
 
-- Unrelated unstaged/unknown work remains present and must not be committed with AT-191:
+- Unrelated unstaged/unknown work remains present and must not be committed with AT-192:
   - `Cargo.lock`
   - `MyEpicLauncher.pen`
   - frontend files under `app/` and `components/`

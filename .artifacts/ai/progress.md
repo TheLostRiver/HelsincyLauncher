@@ -6115,6 +6115,25 @@
 - Path-limited status showed only AT-191 docs/PWF files in the intended commit set.
 - AT-191 was committed locally with only the docs/PWF file set; verify the final amended hash with `git log --oneline -1`.
 
+## 2026-05-17 - AT-192 Started
+
+- Confirmed AT-191 final commit as `3d7f246 docs: define downloads segment execution ports`.
+- Confirmed the AT-191 file set is clean.
+- Read README_IMPL 7.14 and current `crates/module-downloads/src/driver.rs` / `src/lib.rs` before coding.
+- Re-read the TDD skill and will start with focused RED tests before production changes.
+- Selected the first Rust slice from README_IMPL 7.14: segment execution request/result/port shell plus local driver helper only.
+- RED focused `segment_execution_request` tests were added in `crates/module-downloads/src/driver.rs`.
+- RED failed for the intended reason: `DownloadSegmentExecutionRequest` and `prepare_segment_execution_requests` do not exist yet.
+- GREEN implementation added `DownloadSegmentExecutionRequest`, `DownloadSegmentExecutionResult`, `DownloadSegmentExecutionPort`, and `DownloadJobDriver::prepare_segment_execution_requests(...)`.
+- Focused `segment_execution_request` test filter passed: 2 tests passed, 29 filtered out.
+- Full `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed: 31 tests passed and doc tests had 0 tests.
+- Initial rustfmt check failed only on a long test helper signature; `cargo fmt` fixed it.
+- Final `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed.
+- Scoped source diff review confirmed AT-192 only adds request/result/port shell, local conversion helper, tests, and crate re-exports.
+- Scoped `git diff --check` passed with CRLF warnings only.
+- Path-limited status showed only AT-192 code/PWF files in the intended commit set.
+- AT-192 was committed locally with only the code/PWF file set; verify the final amended hash with `git log --oneline -1`.
+
 ### Auto Record: 2026-05-17 00:12:03
 - Tool: apply_patch
 - Phase: Phase 64 - Downloads Driver Execution Boundary
@@ -6376,5 +6395,119 @@
 ### Auto Record: 2026-05-17 13:24:55
 - Tool: apply_patch
 - Phase: Phase 66 - Downloads Segment Execution Ports Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 13:26:16
+- Tool: apply_patch
+- Phase: Phase 66 - Downloads Segment Execution Ports Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-17 13:26:29
+- Tool: apply_patch
+- Phase: Phase 67 - Downloads Segment Execution Request Handoff
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 13:26:39
+- Tool: apply_patch
+- Phase: Phase 67 - Downloads Segment Execution Request Handoff
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 13:26:48
+- Tool: apply_patch
+- Phase: Phase 67 - Downloads Segment Execution Request Handoff
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 13:27:03
+- Tool: apply_patch
+- Phase: Phase 67 - Downloads Segment Execution Request Handoff
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (delete)
+
+### Auto Record: 2026-05-17 13:27:34
+- Tool: apply_patch
+- Phase: Phase 67 - Downloads Segment Execution Request Handoff
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-17 13:27:47
+- Tool: apply_patch
+- Phase: Phase 67 - Downloads Segment Execution Request Handoff
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 13:28:12
+- Tool: apply_patch
+- Phase: Phase 67 - Downloads Segment Execution Request Handoff
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-17 13:28:19
+- Tool: apply_patch
+- Phase: Phase 67 - Downloads Segment Execution Request Handoff
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\lib.rs` (update)
+
+### Auto Record: 2026-05-17 13:28:38
+- Tool: apply_patch
+- Phase: Phase 67 - Downloads Segment Execution Request Handoff
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 13:29:14
+- Tool: apply_patch
+- Phase: Phase 67 - Downloads Segment Execution Request Handoff
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 13:29:35
+- Tool: apply_patch
+- Phase: Phase 67 - Downloads Segment Execution Request Handoff
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 13:29:42
+- Tool: apply_patch
+- Phase: Phase 67 - Downloads Segment Execution Request Handoff
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 13:29:50
+- Tool: apply_patch
+- Phase: Phase 67 - Downloads Segment Execution Request Handoff
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 13:30:02
+- Tool: apply_patch
+- Phase: Phase 67 - Downloads Segment Execution Request Handoff
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 13:30:31
+- Tool: apply_patch
+- Phase: Phase 67 - Downloads Segment Execution Request Handoff
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 13:30:37
+- Tool: apply_patch
+- Phase: Phase 67 - Downloads Segment Execution Request Handoff
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 13:30:47
+- Tool: apply_patch
+- Phase: Phase 67 - Downloads Segment Execution Request Handoff
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 13:30:57
+- Tool: apply_patch
+- Phase: Phase 67 - Downloads Segment Execution Request Handoff
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)

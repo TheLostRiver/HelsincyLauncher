@@ -3,7 +3,9 @@ use std::sync::Arc;
 use launcher_kernel_foundation::{AppResult, JobId};
 use launcher_kernel_jobs::{JobDriver, JobSnapshot, RestoreDisposition};
 
-use crate::facade::{DownloadPendingResumeWork, DownloadPendingResumeWorkSource};
+use crate::facade::{
+    DownloadPendingResumeWork, DownloadPendingResumeWorkSource, DownloadResumeWorkMode,
+};
 
 /// 持久化下载 checkpoint 的最小记录。
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -118,6 +120,66 @@ pub enum DownloadDriverExecutionTurn {
     },
 }
 
+/// Module-local request handed to future segment execution ports.
+/// 交给后续 segment 执行端口的模块本地请求。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DownloadSegmentExecutionRequest {
+    /// Downloads job id that owns this segment execution request.
+    /// 拥有此 segment 执行请求的 downloads 作业标识。
+    pub job_id: JobId,
+    /// Stable segment identifier used by the future executor route.
+    /// 后续 executor 路由使用的稳定 segment 标识。
+    pub segment_id: String,
+    /// Stable logical file identifier guarding against stale checkpoints.
+    /// 用于防止误用陈旧 checkpoint 的稳定逻辑文件标识。
+    pub file_id: String,
+    /// Provider fetch reference kept behind the downloads boundary.
+    /// 保留在 downloads 边界内的 provider 拉取引用。
+    pub source_locator: String,
+    /// Staging-relative output target for the future writer.
+    /// 后续 writer 使用的 staging 相对输出目标。
+    pub write_target: String,
+    /// Optional verifier expectation copied from the resume work item.
+    /// 从 resume work item 复制的可选校验期望。
+    pub expected_hash: Option<String>,
+    /// Segment-relative resume offset or manifest start offset.
+    /// segment 相对续传偏移或 manifest 起始偏移。
+    pub start_offset: u64,
+    /// Total segment length expected by scheduler and verifier.
+    /// scheduler 与 verifier 期望的 segment 总长度。
+    pub length: u64,
+    /// Whether execution should resume partially or start from scratch.
+    /// 执行时应部分续传还是从头开始。
+    pub resume_mode: DownloadResumeWorkMode,
+    /// Module-local checkpoint reference carried into later checkpoint mutation.
+    /// 带入后续 checkpoint mutation 的模块本地 checkpoint 引用。
+    pub checkpoint_ref: Option<String>,
+}
+
+/// Module-local result shell for future segment execution ports.
+/// 后续 segment 执行端口使用的模块本地结果壳。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum DownloadSegmentExecutionResult {
+    /// The request was accepted by a fake or future executor boundary.
+    /// 请求已被 fake 或后续 executor 边界接收。
+    Accepted {
+        /// Segment request that crossed the local execution boundary.
+        /// 穿过本地执行边界的 segment 请求。
+        request: DownloadSegmentExecutionRequest,
+    },
+}
+
+/// Port shell for handing segment requests to later fetch/write/verify code.
+/// 将 segment 请求交给后续 fetch/write/verify 代码的端口壳。
+pub trait DownloadSegmentExecutionPort: Send + Sync {
+    /// Accepts a prepared segment request without defining concrete IO here.
+    /// 接收已准备好的 segment 请求，但不在此处定义具体 IO。
+    fn accept_segment_execution(
+        &self,
+        request: &DownloadSegmentExecutionRequest,
+    ) -> AppResult<DownloadSegmentExecutionResult>;
+}
+
 /// `downloads/download` 任务种类的恢复驱动。
 ///
 /// 只有在持久化下载 checkpoint 仍然存在时，stage 2 restore 才允许把
@@ -181,6 +243,38 @@ impl DownloadJobDriver {
             pending_work,
         })
     }
+
+    /// Builds stable segment execution requests from an accepted local execution turn.
+    /// 从已接收的本地 execution turn 构建稳定的 segment execution 请求。
+    pub fn prepare_segment_execution_requests(
+        &self,
+        turn: &DownloadDriverExecutionTurn,
+    ) -> AppResult<Vec<DownloadSegmentExecutionRequest>> {
+        let DownloadDriverExecutionTurn::PendingWorkAccepted { pending_work, .. } = turn else {
+            return Ok(Vec::new());
+        };
+
+        Ok(pending_work
+            .iter()
+            .flat_map(|work| {
+                work.plan
+                    .items
+                    .iter()
+                    .map(|item| DownloadSegmentExecutionRequest {
+                        job_id: work.job_id.clone(),
+                        segment_id: item.segment_id.clone(),
+                        file_id: item.file_id.clone(),
+                        source_locator: item.source_locator.clone(),
+                        write_target: item.write_target.clone(),
+                        expected_hash: item.expected_hash.clone(),
+                        start_offset: item.start_offset,
+                        length: item.length,
+                        resume_mode: item.resume_mode,
+                        checkpoint_ref: item.checkpoint_ref.clone(),
+                    })
+            })
+            .collect())
+    }
 }
 
 impl JobDriver<()> for DownloadJobDriver {
@@ -221,7 +315,7 @@ mod tests {
 
     use super::{
         DownloadCheckpointRecord, DownloadCheckpointRepository, DownloadDriverExecutionTurn,
-        DownloadJobDriver,
+        DownloadJobDriver, DownloadSegmentExecutionRequest,
     };
 
     #[derive(Default)]
@@ -282,6 +376,43 @@ mod tests {
                 resume_mode: DownloadResumeWorkMode::FromStart,
                 checkpoint_ref: None,
             }],
+        }
+    }
+
+    fn make_resume_work_plan_with_items(segment_ids: &[&str]) -> DownloadResumeWorkPlan {
+        DownloadResumeWorkPlan {
+            items: segment_ids
+                .iter()
+                .map(|segment_id| DownloadResumeWorkItem {
+                    segment_id: (*segment_id).into(),
+                    file_id: "file-1".into(),
+                    source_locator: format!("https://example.invalid/{segment_id}"),
+                    write_target: format!("{segment_id}.part"),
+                    expected_hash: None,
+                    start_offset: 0,
+                    length: 1024,
+                    resume_mode: DownloadResumeWorkMode::FromStart,
+                    checkpoint_ref: None,
+                })
+                .collect(),
+        }
+    }
+
+    fn make_segment_execution_request(
+        job_id: &JobId,
+        segment_id: &str,
+    ) -> DownloadSegmentExecutionRequest {
+        DownloadSegmentExecutionRequest {
+            job_id: job_id.clone(),
+            segment_id: segment_id.into(),
+            file_id: "file-1".into(),
+            source_locator: format!("https://example.invalid/{segment_id}"),
+            write_target: format!("{segment_id}.part"),
+            expected_hash: None,
+            start_offset: 0,
+            length: 1024,
+            resume_mode: DownloadResumeWorkMode::FromStart,
+            checkpoint_ref: None,
         }
     }
 
@@ -447,6 +578,71 @@ mod tests {
             turn,
             DownloadDriverExecutionTurn::NoPendingWork { checkpoint },
             "empty pending work must not be confused with runtime completion"
+        );
+    }
+
+    #[test]
+    fn download_job_driver_segment_execution_requests_preserve_pending_work_order() {
+        let repo = Arc::new(InMemoryCheckpointRepository::default());
+        let driver = DownloadJobDriver::new(repo);
+        let job_id = JobId::generate();
+        let checkpoint = DownloadCheckpointRecord::empty(job_id.clone());
+        let first_plan = make_resume_work_plan_with_items(&["segment-a", "segment-b"]);
+        let second_plan = make_resume_work_plan("segment-c");
+        let turn = DownloadDriverExecutionTurn::PendingWorkAccepted {
+            checkpoint,
+            pending_work: vec![
+                DownloadPendingResumeWork {
+                    job_id: job_id.clone(),
+                    plan: first_plan,
+                },
+                DownloadPendingResumeWork {
+                    job_id: job_id.clone(),
+                    plan: second_plan,
+                },
+            ],
+        };
+
+        let requests = driver
+            .prepare_segment_execution_requests(&turn)
+            .expect("pending work should convert into segment execution requests");
+
+        assert_eq!(
+            requests,
+            vec![
+                make_segment_execution_request(&job_id, "segment-a"),
+                make_segment_execution_request(&job_id, "segment-b"),
+                make_segment_execution_request(&job_id, "segment-c"),
+            ],
+            "segment execution request conversion must preserve pending-work and item order"
+        );
+    }
+
+    #[test]
+    fn download_job_driver_segment_execution_requests_ignore_non_pending_turns() {
+        let repo = Arc::new(InMemoryCheckpointRepository::default());
+        let driver = DownloadJobDriver::new(repo);
+        let job_id = JobId::generate();
+        let checkpoint = DownloadCheckpointRecord::empty(job_id.clone());
+
+        let missing_requests = driver
+            .prepare_segment_execution_requests(&DownloadDriverExecutionTurn::CheckpointMissing {
+                job_id,
+            })
+            .expect("checkpoint-missing turn should not produce execution requests");
+        assert!(
+            missing_requests.is_empty(),
+            "checkpoint-missing turns must not start segment execution"
+        );
+
+        let empty_requests = driver
+            .prepare_segment_execution_requests(&DownloadDriverExecutionTurn::NoPendingWork {
+                checkpoint,
+            })
+            .expect("no-pending turn should not produce execution requests");
+        assert!(
+            empty_requests.is_empty(),
+            "no-pending turns must not be confused with segment execution"
         );
     }
 }
