@@ -10253,6 +10253,31 @@
   - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
   - `rustfmt --edition 2021 --check crates\module-downloads\src\driver.rs crates\module-downloads\src\lib.rs` passed.
 
+## 2026-05-17 23:30 - AT-241 commit and AT-242 opening
+
+- AT-241 was committed and pushed:
+  - commit `cab15c2`
+  - message `feat: map downloads segment handled failures`
+  - pushed to `origin/main`
+- Opened AT-242 as a docs-boundary task for the staging write-target guard.
+- Read focused context for AT-242:
+  - README_IMPL 7.35/7.36
+  - Tauri download runtime SegmentWriter/staging/failure sections
+  - storage design notes that staging files live on the file system
+  - current `write_target` and writer sub-port shape
+- Next:
+  - define the next Rust slice as pure staging target validation before real writer IO.
+
+## 2026-05-17 23:34 - AT-242 docs boundary complete
+
+- Added README_IMPL 7.37 `Segment Staging Target Guard Boundary`.
+- Defined accepted targets as non-empty relative paths made of normal components.
+- Defined rejected targets: empty strings, absolute paths, drive prefixes, UNC-style paths, `.` segments, `..` segments, and normalized-empty values.
+- Defined rejection as a handled module-local segment failure with `downloaded_bytes = 0` and `retryable = false`.
+- Kept real IO, host canonicalization, production writer wiring, public `DL_WRITE_FAILED` projection, retry/backoff, runtime terminal state, transport, and frontend out of scope.
+- Validation:
+  - `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- docs/modules/downloads/README_IMPL.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md` passed with CRLF normalization warnings only.
+
 ### Auto Record: 2026-05-17 22:51:54
 - Tool: apply_patch
 - Phase: Phase 114 - Downloads Segment Executor Adapter Shell
@@ -10440,6 +10465,66 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
 
 ### Auto Record: 2026-05-17 23:03:52
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 23:05:26
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-17 23:05:35
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 23:05:50
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 23:06:01
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 23:06:14
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 23:06:25
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 23:06:31
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 23:06:40
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 23:06:54
+- Tool: apply_patch
+- Phase: Phase 114 - Downloads Segment Executor Adapter Shell
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 23:07:07
 - Tool: apply_patch
 - Phase: Phase 114 - Downloads Segment Executor Adapter Shell
 - Files:

@@ -294,6 +294,18 @@
   - `launcher-composition-root` check
   - scoped rustfmt check
 
+## Latest Handoff - AT-2026-05-17-242
+
+- Status: docs boundary validated; commit/push pending at the time of this note.
+- Scope completed:
+  - Added README_IMPL 7.37 `Segment Staging Target Guard Boundary`.
+  - Defined safe staging-relative `write_target` acceptance and unsafe target rejection cases.
+  - Defined unsafe target rejection as a local handled segment failure, not public `DL_WRITE_FAILED` projection yet.
+- Next likely code task:
+  - add focused tests for safe/unsafe staging target guard behavior;
+  - implement pure module-owned target guard with no file system side effects;
+  - optionally prove guard rejection can feed `DownloadSegmentHandledFailure` for future write sub-ports.
+
 ## Dirty Worktree To Preserve
 
 - Unrelated unstaged/unknown work remains present and must not be committed with AT-218:

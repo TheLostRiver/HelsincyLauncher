@@ -1156,3 +1156,12 @@
 - RED/GREEN confirmed the adapter now distinguishes handled segment failures from infrastructure errors: `DownloadSegmentWriteOutcome::Failed` maps to `DownloadSegmentExecutionResult::Failed`, while a verifier `AppError` still propagates unchanged.
 - New outcome types remain module-local/public Rust extension points only; no public `DL_*` execution projection, transport DTO, retry/backoff, terminal runtime state, production wiring, real IO, or frontend work was added.
 - Validation passed for focused adapter tests, the existing failed-result checkpoint mutation test, full `launcher-module-downloads` lib tests, `launcher-composition-root` check, and scoped rustfmt.
+
+## Phase 117 Downloads Segment Staging Target Guard Boundary Findings
+
+- Required context was read in focused chunks: README/docs routing and documentation-budget rules from this session, README_IMPL 7.35/7.36, Tauri download runtime SegmentWriter/staging/failure notes, storage placement notes for download staging files, and current `write_target`/writer sub-port shape.
+- Real writer IO is still premature because staging root ownership, path normalization, partial/temp naming, and artifact moves must not be guessed inside the executor adapter.
+- The next safe backend slice can still make progress without disk IO: validate `DownloadSegmentExecutionRequest.write_target` as a staging-relative target before a writer would touch the file system.
+- Unsafe `write_target` values are a handled module-local segment failure for now, not a stable public `DL_*` error or host transport projection.
+- README_IMPL 7.37 now defines accepted/rejected staging target cases and keeps the first Rust guard pure: no directory creation, file opening, host canonicalization, artifact movement, hash verification, provider inspection, production wiring, or public error projection.
+- The next Rust slice is now concrete: add focused RED tests for safe and unsafe staging-relative targets, implement a module-owned guard, and prove unsafe targets can become the existing handled failure path without disk IO.

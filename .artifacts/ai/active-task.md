@@ -2,25 +2,26 @@
 
 ## Identity
 
-- task id: AT-2026-05-17-241
-- title: Add downloads segment executor handled failure mapping
+- task id: AT-2026-05-17-242
+- title: Define downloads segment staging target guard boundary
 - status: completed
 
 ## Goal
 
-Implement README_IMPL 7.36: let `DownloadSegmentExecutor` map fake/in-memory handled fetch/write/verify sub-port failures into the existing module-local `DownloadSegmentExecutionResult::Failed`, while preserving propagated `AppError` for infrastructure/configuration failures.
+Document the next safe downloads Rust slice after executor success/failure mapping: a pure staging-relative write-target guard that can reject unsafe `write_target` values before any real file writes, without adding HTTP, disk IO, hash verification, production wiring, host transport, frontend, or public `DL_*` execution projection.
 
 ## Scope
 
 - in scope:
-  - `crates/module-downloads/src/driver.rs`
-  - `crates/module-downloads/src/lib.rs`
+  - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
   - `.artifacts/ai/progress.md`
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
+  - Rust production code
+  - Rust tests
   - real HTTP range requests or provider object fetches
   - real staging writes, artifact moves, or hash verification
   - composition-root production execution-port wiring
@@ -32,40 +33,37 @@ Implement README_IMPL 7.36: let `DownloadSegmentExecutor` map fake/in-memory han
 
 ## Allowed Files
 
-1. crates/module-downloads/src/driver.rs
-2. crates/module-downloads/src/lib.rs
-3. .artifacts/ai/active-task.md
-4. .artifacts/ai/task-plan.md
-5. .artifacts/ai/progress.md
-6. .artifacts/ai/findings.md
-7. .artifacts/ai/handoff.md
+1. docs/modules/downloads/README_IMPL.md
+2. .artifacts/ai/active-task.md
+3. .artifacts/ai/task-plan.md
+4. .artifacts/ai/progress.md
+5. .artifacts/ai/findings.md
+6. .artifacts/ai/handoff.md
 
 ## Required Context Read
 
 Read before writing:
 
-1. README.md and docs/README.md routing.
-2. docs/ModuleDocumentationStandard.md documentation-budget rules.
-3. docs/modules/downloads/README_ARCH.md/API/FLOW relevant boundaries.
-4. docs/modules/downloads/README_IMPL.md 7.35 and 7.36.
-5. docs/TauriErrorHandlingAndProjectionDesign.md `AppError` versus public projection rules.
-6. Current `DownloadSegmentExecutor` and adapter tests.
+1. README/docs routing and documentation-budget rules already refreshed in this session.
+2. docs/modules/downloads/README_IMPL.md 7.35 and 7.36.
+3. docs/TauriDownloadRuntimeDesign.md SegmentWriter/staging/checkpoint/failure sections.
+4. docs/TauriStorageAndDatabaseDesign.md storage placement for staging files.
+5. Current `DownloadSegmentExecutionRequest.write_target` and writer sub-port shape.
 
 ## Hypothesis
 
-- falsifiable implementation hypothesis: a small module-local handled-failure outcome can let fake write/verify sub-ports return `Failed` through `DownloadSegmentExecutor` without changing the driver-facing `DownloadSegmentExecutionResult` shape or production composition wiring.
+- falsifiable documentation hypothesis: the first safe step toward real writer IO is a pure staging target guard that validates `write_target` as a relative, normalized, non-empty, non-escaping path before any file system side effect exists.
 
 ## Cheap Check
 
-1. Add RED tests for handled write/verify failure mapping and infrastructure `AppError` propagation.
-2. Add minimal handled-failure/outcome structs or enums behind the sub-port traits.
-3. Keep the successful adapter test green.
-4. Run focused adapter tests, failed-result checkpoint tests, full module tests, composition-root check, scoped rustfmt, and scoped diff-check.
+1. Add a compact README_IMPL subsection after 7.36.
+2. Define the next Rust slice as pure write-target guard logic.
+3. Keep real IO, production wiring, public error projection, and retry/terminal behavior out of scope.
+4. Run scoped docs/PWF diff-check.
 
 ## Validation Gate
 
-1. RED test fails before production code because handled-failure outcome types/mapping are missing.
-2. GREEN focused tests pass after implementation.
-3. Existing failed-result checkpoint tests still pass.
-4. Full `launcher-module-downloads` lib tests and composition-root compile gate pass.
-5. Scoped rustfmt and diff-check pass before commit/push.
+1. README_IMPL explicitly names the next code test target.
+2. README_IMPL defines accepted/rejected staging target cases.
+3. README_IMPL states whether rejection maps to local handled failure versus `AppError`.
+4. Scoped docs/PWF diff-check passes before commit/push.

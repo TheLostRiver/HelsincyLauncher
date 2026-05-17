@@ -1616,6 +1616,24 @@ Next Rust slice:
 3. preserve propagation for true `AppError` infrastructure failures;
 4. run focused adapter tests plus existing driver failed-result checkpoint tests.
 
+### 7.37 Segment Staging Target Guard Boundary
+
+The executor can now produce completed and failed module-local results, but real writer IO still needs a path-safety boundary. The next Rust slice should validate the staging-relative `write_target` before any file system write exists.
+
+Boundary rules:
+
+1. accepted targets are non-empty relative paths made of normal path components, for example `file-a/segment-0001.part`;
+2. rejected targets include empty strings, absolute paths, drive prefixes, UNC-style paths, `.` segments, `..` segments, and values that normalize to no file name;
+3. rejection is a handled module-local segment failure with `downloaded_bytes = 0`, `retryable = false`, and a local diagnostic reason;
+4. the guard must not create directories, open files, canonicalize through the host file system, move artifacts, verify hashes, or inspect provider URLs;
+5. production writer wiring, real staging root ownership, public `DL_WRITE_FAILED` projection, retry/backoff, runtime terminal state, host transport, and frontend behavior remain later boundaries.
+
+Next Rust slice:
+
+1. add a focused RED test for a safe relative target and several unsafe targets;
+2. implement a small module-owned staging target guard usable by future write sub-ports;
+3. prove unsafe targets can be converted into the existing handled failure path without touching disk.
+
 ---
 
 ## 8. Error Semantics
