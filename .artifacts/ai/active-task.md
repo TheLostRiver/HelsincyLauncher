@@ -2,28 +2,28 @@
 
 ## Identity
 
-- task id: AT-2026-05-17-192
-- title: Add downloads segment execution request handoff shell
+- task id: AT-2026-05-17-193
+- title: Add downloads fake segment execution acceptance
 - status: completed
 
 ## Goal
 
-按 README_IMPL 7.14 的 first Rust slice，新增 downloads 模块本地的 segment execution request/result/port shell，并增加本地 driver helper，把 `DownloadDriverExecutionTurn::PendingWorkAccepted` 中的 pending work 转换为稳定、有序、带 `JobId` 的 segment execution requests。
+在 AT-192 已经生成稳定 `DownloadSegmentExecutionRequest` 的基础上，先规划并实现一个 fake/local execution port acceptance 边界：`DownloadJobDriver` 只负责按顺序把 segment execution requests 交给注入的 `DownloadSegmentExecutionPort`，并收集模块本地 `DownloadSegmentExecutionResult`。
 
-本轮只证明 request handoff 边界，不执行真实下载。
+本轮仍然不做真实 HTTP fetch，只证明端口 handoff 顺序和结果收集。
 
 ## Scope
 
 - in scope:
+  - `docs/modules/downloads/README_IMPL.md`
   - `crates/module-downloads/src/driver.rs`
-  - `crates/module-downloads/src/lib.rs`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
   - `.artifacts/ai/progress.md`
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
-  - concrete HTTP fetch / provider object fetch
+  - concrete HTTP range requests or provider object fetch
   - staging file writes or artifact moves
   - hash/length verification
   - checkpoint mutation or SQLite schema changes
@@ -33,8 +33,8 @@
 
 ## Allowed Files
 
-1. crates/module-downloads/src/driver.rs
-2. crates/module-downloads/src/lib.rs
+1. docs/modules/downloads/README_IMPL.md
+2. crates/module-downloads/src/driver.rs
 3. .artifacts/ai/active-task.md
 4. .artifacts/ai/task-plan.md
 5. .artifacts/ai/progress.md
@@ -43,52 +43,62 @@
 
 ## Required Context Read
 
-Already read in scoped snippets this session:
+Read this turn before coding:
 
 1. README.md
 2. CONTRIBUTING.md
 3. docs/README.md
-4. docs/modules/downloads/README_ARCH.md
-5. docs/modules/downloads/README_API.md
-6. docs/modules/downloads/README_FLOW.md
-7. docs/modules/downloads/README_IMPL.md sections 7.13 and 7.14
-8. docs/TauriKernelJobsRuntimeDesign.md driver/runtime sections
-9. docs/TauriDownloadRuntimeDesign.md scheduler/fetcher/writer/verifier/checkpoint sections
-10. docs/TauriTestingStrategyAndQualityGateDesign.md backend test matrix
-11. docs/TauriCodeCommentStandard.md comment rules plus user request for bilingual comments
-12. crates/module-downloads/src/driver.rs
-13. crates/module-downloads/src/lib.rs
+4. docs/modules/downloads/README_IMPL.md section 7.14
+5. docs/TauriDownloadRuntimeDesign.md fetch/write/verify/checkpoint sections
+6. superpowers TDD skill
+7. current git log/status for AT-192
+
+Previously read in this session and still governing scope:
+
+1. docs/modules/downloads/README_ARCH.md
+2. docs/modules/downloads/README_API.md
+3. docs/modules/downloads/README_FLOW.md
+4. docs/TauriKernelJobsRuntimeDesign.md
+5. docs/TauriTestingStrategyAndQualityGateDesign.md
+6. docs/TauriCodeCommentStandard.md
+7. crates/module-downloads/src/driver.rs
+8. crates/module-downloads/src/lib.rs
 
 ## Hypothesis
 
-- falsifiable local hypothesis: focused driver tests can prove `PendingWorkAccepted` maps to stable job-scoped segment execution requests in pending-work/item order without adding concrete IO or runtime execution.
+- falsifiable local hypothesis: focused driver tests can prove requests are handed to a fake `DownloadSegmentExecutionPort` in stable order and that non-IO result collection works without introducing concrete fetch/write/verify behavior.
 
 ## Cheap Check
 
-1. Add focused RED tests in `crates/module-downloads/src/driver.rs`.
-2. Run focused `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml segment_execution_request`.
-3. Implement the minimal request/result/port shell and local helper.
-4. Run focused test, full `launcher-module-downloads` tests, `cargo fmt --check`, scoped `git diff --check`, and path-limited status.
+1. Update README_IMPL with the AT-193 boundary before coding.
+2. Add focused RED tests in `crates/module-downloads/src/driver.rs`.
+3. Run focused `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml segment_execution_acceptance`.
+4. Implement the minimal local driver helper.
+5. Run focused test, full module test, rustfmt check, scoped `git diff --check`, and path-limited status.
 
 ## Validation Gate
 
-1. RED fails for missing request/helper API.
-2. GREEN keeps only local request handoff behavior.
-3. Public comments are bilingual and existing English comments are preserved.
-4. Focused and full module tests pass.
-5. Formatting and scoped diff checks pass.
-6. Commit only AT-192 files locally.
+1. README_IMPL documents the fake segment execution acceptance boundary.
+2. RED fails for missing driver helper.
+3. GREEN keeps only local port handoff/result collection behavior.
+4. Public comments are bilingual and existing English comments are preserved.
+5. Focused and full module tests pass.
+6. Formatting and scoped diff checks pass.
+7. Commit only AT-193 files locally.
 
 ## Validation Result
 
-- RED: focused `segment_execution_request` filter failed on missing `DownloadSegmentExecutionRequest` and `prepare_segment_execution_requests`.
-- GREEN: focused `segment_execution_request` filter passed with 2 tests.
-- Full module: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 31 tests.
-- Format: `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed after rustfmt adjusted one test helper signature.
-- Diff: scoped `git diff --check` passed with CRLF warnings only.
-- Local commit: completed with the AT-192 code/PWF file set; verify the final amended hash with `git log --oneline -1`.
+1. README_IMPL now records the fake/local segment execution acceptance boundary.
+2. RED confirmed with `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml segment_execution_acceptance`; failure was the expected missing `accept_segment_execution_requests` helper.
+3. GREEN added only `DownloadJobDriver::accept_segment_execution_requests(...)`, delegating each request to `DownloadSegmentExecutionPort` and collecting results in order.
+4. Focused test passed: 1 passed, 0 failed.
+5. Full downloads module test passed: 32 passed, 0 failed.
+6. `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check` passed.
+7. Scoped `git diff --check` passed with CRLF normalization warnings only.
+8. Initial local commit created as `0655ac2`; PWF backfill is amended into the same task commit.
 
 ## Notes
 
-- AT-2026-05-17-191 committed locally as `3d7f246`.
+- AT-2026-05-17-192 committed locally as `5ab0bec`.
+- AT-2026-05-17-193 initial local commit created as `0655ac2`; final amended hash is available from `git log`.
 - Push remains skipped unless a safe push path is explicitly authorized later.

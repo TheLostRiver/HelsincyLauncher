@@ -6134,6 +6134,14 @@
 - Path-limited status showed only AT-192 code/PWF files in the intended commit set.
 - AT-192 was committed locally with only the code/PWF file set; verify the final amended hash with `git log --oneline -1`.
 
+## 2026-05-17 - AT-193 Started
+
+- Confirmed AT-192 final commit as `5ab0bec feat: add downloads segment execution requests`.
+- Confirmed the AT-192 file set is clean.
+- Re-read README, CONTRIBUTING, docs map, README_IMPL 7.14, download runtime fetch/write/verify/checkpoint excerpts, and the TDD skill.
+- Selected fake/local segment execution port acceptance as the next narrow boundary.
+- Started AT-193 with docs plus TDD implementation scope; concrete HTTP, staging writes, verification, checkpoint mutation, runtime completion, transport, frontend, SQLite schema, composition-root, and `kernel-jobs` remain out of scope.
+
 ### Auto Record: 2026-05-17 00:12:03
 - Tool: apply_patch
 - Phase: Phase 64 - Downloads Driver Execution Boundary
@@ -6509,5 +6517,145 @@
 ### Auto Record: 2026-05-17 13:30:57
 - Tool: apply_patch
 - Phase: Phase 67 - Downloads Segment Execution Request Handoff
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 13:36:14
+- Tool: apply_patch
+- Phase: Phase 67 - Downloads Segment Execution Request Handoff
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-17 13:36:24
+- Tool: apply_patch
+- Phase: Phase 68 - Downloads Fake Segment Execution Acceptance
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 13:36:35
+- Tool: apply_patch
+- Phase: Phase 68 - Downloads Fake Segment Execution Acceptance
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 13:36:43
+- Tool: apply_patch
+- Phase: Phase 68 - Downloads Fake Segment Execution Acceptance
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 13:36:57
+- Tool: apply_patch
+- Phase: Phase 68 - Downloads Fake Segment Execution Acceptance
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (delete)
+
+### Auto Record: 2026-05-17 13:37:20
+- Tool: apply_patch
+- Phase: Phase 68 - Downloads Fake Segment Execution Acceptance
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 13:39:56
+- Tool: apply_patch
+- Phase: Phase 68 - Downloads Fake Segment Execution Acceptance
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-17 13:40:16
+- Tool: apply_patch
+- Phase: Phase 68 - Downloads Fake Segment Execution Acceptance
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+## 2026-05-17 - AT-2026-05-17-193 Validation
+
+- Re-read the narrow AT-193 planning surface and README_IMPL section 7.15 before coding.
+- Added the RED test `download_job_driver_segment_execution_acceptance_preserves_request_order` with a recording fake `DownloadSegmentExecutionPort`.
+- RED command: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml segment_execution_acceptance`.
+- RED result: failed with expected `no method named accept_segment_execution_requests` compiler error.
+- GREEN implementation: added `DownloadJobDriver::accept_segment_execution_requests(...)`, which delegates each prepared `DownloadSegmentExecutionRequest` to the injected port and collects `DownloadSegmentExecutionResult` values in order.
+- Focused validation passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml segment_execution_acceptance` reported 1 passed, 0 failed.
+- Full module validation passed: `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` reported 32 passed, 0 failed.
+- Formatting validation passed: `cargo fmt -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --check`.
+- Scoped diff validation passed: `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- ...` returned exit 0 with CRLF normalization warnings only.
+- Path-limited status contains only AT-193 files; unrelated dirty files remain preserved and uncommitted.
+- Initial local commit created as `0655ac2`; PWF commit metadata backfill pending amend into the same task commit.
+
+### Auto Record: 2026-05-17 13:41:11
+- Tool: apply_patch
+- Phase: Phase 68 - Downloads Fake Segment Execution Acceptance
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 13:41:17
+- Tool: apply_patch
+- Phase: Phase 68 - Downloads Fake Segment Execution Acceptance
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 13:41:28
+- Tool: apply_patch
+- Phase: Phase 68 - Downloads Fake Segment Execution Acceptance
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 13:41:41
+- Tool: apply_patch
+- Phase: Phase 68 - Downloads Fake Segment Execution Acceptance
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 13:41:53
+- Tool: apply_patch
+- Phase: Phase 68 - Downloads Fake Segment Execution Acceptance
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 13:42:38
+- Tool: apply_patch
+- Phase: Phase 68 - Downloads Fake Segment Execution Acceptance
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 13:42:43
+- Tool: apply_patch
+- Phase: Phase 68 - Downloads Fake Segment Execution Acceptance
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 13:42:46
+- Tool: apply_patch
+- Phase: Phase 68 - Downloads Fake Segment Execution Acceptance
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 13:42:53
+- Tool: apply_patch
+- Phase: Phase 68 - Downloads Fake Segment Execution Acceptance
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 13:43:13
+- Tool: apply_patch
+- Phase: Phase 68 - Downloads Fake Segment Execution Acceptance
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 13:43:18
+- Tool: apply_patch
+- Phase: Phase 68 - Downloads Fake Segment Execution Acceptance
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 13:43:22
+- Tool: apply_patch
+- Phase: Phase 68 - Downloads Fake Segment Execution Acceptance
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 13:43:27
+- Tool: apply_patch
+- Phase: Phase 68 - Downloads Fake Segment Execution Acceptance
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)

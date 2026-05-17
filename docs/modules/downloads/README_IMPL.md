@@ -85,6 +85,7 @@ Implementation truth should move through module facade and ports first. Do not p
 | resume scheduler execution shell | module-local `InMemoryDownloadResumeWorkScheduler` records pending `DownloadResumeWorkPlan` values before runtime enqueue; composition now wires this shell instead of the `()` placeholder; no fetch/write/verify or persistence behavior is wired yet | module facade test + composition smoke |
 | driver pending-work consumption boundary | `DownloadPendingResumeWorkSource` and job-id-scoped draining on `InMemoryDownloadResumeWorkScheduler` prove future driver consumption can drain one job without discarding unrelated pending work; current Rust still has no `JobDriver::run()` | module source/drain tests |
 | driver execution-turn classification | `DownloadJobDriver::prepare_resume_execution_turn(...)` reloads durable checkpoint facts before draining pending work and returns a downloads-owned classification; still no fetch/write/verify, runtime `run()`, snapshot completion, transport, or frontend projection | driver unit tests |
+| segment execution request handoff | `DownloadSegmentExecutionRequest` / `DownloadSegmentExecutionPort` exist and `DownloadJobDriver::prepare_segment_execution_requests(...)` converts accepted pending work into ordered job-scoped requests; still no real execution | driver unit tests |
 | list/get/policy surfaces | not wired yet | future slices |
 
 ---
@@ -759,7 +760,43 @@ First Rust slice after this document:
 3. keep `kernel-jobs`, composition-root, host transport, frontend, SQLite schema, real fetch/write/verify, checkpoint mutation, and runtime completion unchanged;
 4. run focused module tests, full module tests, rustfmt check, scoped `git diff --check`, and path-limited status before commit.
 
-Only after that request/port handoff exists should a later slice pick one concrete execution concern, such as fake fetch acceptance, staging write contract, verifier contract, or checkpoint mutation after a fake segment result. Each of those must remain its own atomic task.
+Current Rust slice:
+
+1. `DownloadSegmentExecutionRequest` captures the owning `JobId` plus segment execution facts derived from `DownloadResumeWorkItem`.
+2. `DownloadSegmentExecutionResult` is a module-local result shell with an `Accepted` variant.
+3. `DownloadSegmentExecutionPort` is a module-local port shell for handing requests to later fake or concrete execution boundaries.
+4. `DownloadJobDriver::prepare_segment_execution_requests(...)` converts `PendingWorkAccepted` turns into stable ordered segment requests.
+5. Non-pending turns produce no segment execution requests.
+6. `kernel-jobs`, composition-root, host transport, frontend, SQLite schema, real fetch/write/verify, checkpoint mutation, and runtime completion remain unchanged.
+
+Only after that request/port handoff exists should a later slice pick one concrete execution concern, such as fake execution acceptance, staging write contract, verifier contract, or checkpoint mutation after a fake segment result. Each of those must remain its own atomic task.
+
+---
+
+### 7.15 Fake Segment Execution Acceptance Boundary
+
+The next safe code slice is fake/local execution acceptance through `DownloadSegmentExecutionPort`. This is not HTTP fetching. It only proves that prepared segment execution requests can cross a narrow module-owned port in stable order and return module-local results.
+
+Current Rust reality:
+
+1. `DownloadSegmentExecutionRequest` values can already be prepared from `PendingWorkAccepted`.
+2. `DownloadSegmentExecutionPort` exists but no driver helper delegates a batch of requests to it.
+3. There is no concrete fetcher, writer, verifier, checkpoint mutation, runtime completion, host transport, or frontend projection.
+
+Boundary rules:
+
+1. The driver helper may accept a `&dyn DownloadSegmentExecutionPort` plus a slice of `DownloadSegmentExecutionRequest`.
+2. It must call the port once per request and preserve request order in the returned `DownloadSegmentExecutionResult` list.
+3. It may propagate the first `AppResult` error returned by the port, but it must not invent public `DL_*` execution errors yet.
+4. The test fake may record accepted requests and return `DownloadSegmentExecutionResult::Accepted`.
+5. The production slice must not perform HTTP range requests, file writes, hash verification, checkpoint saves, snapshot updates, job completion, event publication, or retry/backoff behavior.
+
+First Rust slice:
+
+1. add focused RED tests proving ordered request handoff and result collection through a recording fake port;
+2. add only the local `DownloadJobDriver` helper required for those tests;
+3. keep request/result/port shapes stable unless the tests reveal a missing field;
+4. run focused module tests, full module tests, rustfmt check, scoped `git diff --check`, and path-limited status before commit.
 
 ---
 

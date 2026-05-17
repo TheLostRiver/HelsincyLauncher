@@ -275,6 +275,19 @@ impl DownloadJobDriver {
             })
             .collect())
     }
+
+    /// Accepts prepared segment requests through a module-local execution port.
+    /// 通过模块本地执行端口接收已准备好的 segment 请求。
+    pub fn accept_segment_execution_requests(
+        &self,
+        execution_port: &dyn DownloadSegmentExecutionPort,
+        requests: &[DownloadSegmentExecutionRequest],
+    ) -> AppResult<Vec<DownloadSegmentExecutionResult>> {
+        requests
+            .iter()
+            .map(|request| execution_port.accept_segment_execution(request))
+            .collect()
+    }
 }
 
 impl JobDriver<()> for DownloadJobDriver {
@@ -315,7 +328,8 @@ mod tests {
 
     use super::{
         DownloadCheckpointRecord, DownloadCheckpointRepository, DownloadDriverExecutionTurn,
-        DownloadJobDriver, DownloadSegmentExecutionRequest,
+        DownloadJobDriver, DownloadSegmentExecutionPort, DownloadSegmentExecutionRequest,
+        DownloadSegmentExecutionResult,
     };
 
     #[derive(Default)]
@@ -346,6 +360,36 @@ mod tests {
                 .expect("checkpoint mutex should not be poisoned")
                 .insert(checkpoint.job_id.clone());
             Ok(())
+        }
+    }
+
+    #[derive(Default)]
+    struct RecordingSegmentExecutionPort {
+        accepted_requests: Mutex<Vec<DownloadSegmentExecutionRequest>>,
+    }
+
+    impl RecordingSegmentExecutionPort {
+        fn accepted_requests(&self) -> Vec<DownloadSegmentExecutionRequest> {
+            self.accepted_requests
+                .lock()
+                .expect("recording execution port mutex should not be poisoned")
+                .clone()
+        }
+    }
+
+    impl DownloadSegmentExecutionPort for RecordingSegmentExecutionPort {
+        fn accept_segment_execution(
+            &self,
+            request: &DownloadSegmentExecutionRequest,
+        ) -> launcher_kernel_foundation::AppResult<DownloadSegmentExecutionResult> {
+            self.accepted_requests
+                .lock()
+                .expect("recording execution port mutex should not be poisoned")
+                .push(request.clone());
+
+            Ok(DownloadSegmentExecutionResult::Accepted {
+                request: request.clone(),
+            })
         }
     }
 
@@ -643,6 +687,44 @@ mod tests {
         assert!(
             empty_requests.is_empty(),
             "no-pending turns must not be confused with segment execution"
+        );
+    }
+
+    #[test]
+    fn download_job_driver_segment_execution_acceptance_preserves_request_order() {
+        let repo = Arc::new(InMemoryCheckpointRepository::default());
+        let driver = DownloadJobDriver::new(repo);
+        let execution_port = RecordingSegmentExecutionPort::default();
+        let job_id = JobId::generate();
+        let requests = vec![
+            make_segment_execution_request(&job_id, "segment-a"),
+            make_segment_execution_request(&job_id, "segment-b"),
+            make_segment_execution_request(&job_id, "segment-c"),
+        ];
+
+        let results = driver
+            .accept_segment_execution_requests(&execution_port, &requests)
+            .expect("fake segment execution acceptance should collect local results");
+
+        assert_eq!(
+            execution_port.accepted_requests(),
+            requests,
+            "fake execution port must be called once per request in stable order"
+        );
+        assert_eq!(
+            results,
+            vec![
+                DownloadSegmentExecutionResult::Accepted {
+                    request: make_segment_execution_request(&job_id, "segment-a"),
+                },
+                DownloadSegmentExecutionResult::Accepted {
+                    request: make_segment_execution_request(&job_id, "segment-b"),
+                },
+                DownloadSegmentExecutionResult::Accepted {
+                    request: make_segment_execution_request(&job_id, "segment-c"),
+                },
+            ],
+            "driver acceptance helper must preserve result order"
         );
     }
 }

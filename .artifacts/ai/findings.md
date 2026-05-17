@@ -692,3 +692,11 @@
 - Existing `DownloadResumeWorkItem` already carries most segment execution input fields; the missing stable request context is the owning `JobId`.
 - The focused RED test should assert stable ordering across pending work entries and plan items so future execution ports do not reorder segments accidentally.
 - Non-`PendingWorkAccepted` turns should not produce segment execution requests; `NoPendingWork` remains a classification, not completion.
+
+## Phase 68 Downloads Fake Segment Execution Acceptance Findings
+
+- AT-2026-05-17-192 committed locally as `5ab0bec`; the AT-192 file set was clean after commit.
+- README_IMPL 7.14 now permits picking one concrete execution concern after request/port handoff, but each concern must remain its own atomic task.
+- The next smallest concern is fake/local execution port acceptance, not real HTTP fetch: use `DownloadSegmentExecutionPort` as the boundary and test with a recording fake.
+- The driver helper should preserve request order and collect `DownloadSegmentExecutionResult` values, while leaving retry, checkpoint mutation, snapshot updates, and concrete IO to later slices.
+- RED/GREEN confirmed that a module-local helper can delegate prepared requests through `DownloadSegmentExecutionPort` in stable order without widening into HTTP fetch, staging writes, verification, checkpoint mutation, runtime completion, transport, or frontend work.
