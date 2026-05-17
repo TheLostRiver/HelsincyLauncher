@@ -92,6 +92,7 @@ Implementation truth should move through module facade and ports first. Do not p
 | fake local resume execution orchestration | `DownloadJobDriver::execute_local_resume_turn(...)` chains the local execution-turn, request handoff, fake execution port, and checkpoint mutation helpers without runtime `run()`, concrete IO, SQLite adapter/schema changes, transport, or frontend behavior | driver unit tests |
 | fake segment failure result contract | `DownloadSegmentExecutionResult::Failed` carries request facts, downloaded bytes known at failure time, a local reason string, and a retryable hint without public `DL_*` execution projection, checkpoint mutation, retry policy, runtime completion, concrete IO, transport, or frontend behavior | driver unit tests |
 | fake failed-result checkpoint mutation | `DownloadJobDriver::record_failed_segment_checkpoints(...)` reloads checkpoint facts, applies same-job failed fake results as `Failed` segment status/progress, and saves through `DownloadCheckpointRepository` while deferring retry/backoff, public error projection, terminal runtime state, concrete IO, SQLite adapter/schema, transport, composition-root, and frontend behavior | driver unit tests |
+| fake local mixed-result checkpoint orchestration | not wired yet; next Rust slice may have `execute_local_resume_turn(...)` record both completed and failed fake results through existing checkpoint mutation helpers while deferring retry/backoff, public error projection, terminal runtime state, concrete IO, SQLite adapter/schema, transport, composition-root, and frontend behavior | future driver unit tests |
 | list/get/policy surfaces | not wired yet | future slices |
 
 ---
@@ -1007,6 +1008,36 @@ Completed by AT-200:
 4. Existing `offset`, `partial_path`, `etag`, and `hash_state_ref` are preserved on replacement; appended facts use the request's current `start_offset` and `None` optional persistence tokens.
 5. The helper saves through `DownloadCheckpointRepository` only when at least one failed result is applied.
 6. Retry/backoff, public `DL_*` projection, terminal runtime state, concrete IO, SQLite adapter/schema, transport, composition-root, and frontend behavior remain unchanged.
+
+---
+
+### 7.21 Fake Local Mixed-result Checkpoint Orchestration Boundary
+
+The next safe code slice is local orchestration of mixed fake execution results. `execute_local_resume_turn(...)` already proves one fake completed segment can flow end to end, but it currently records completed results only. Now that failed-result checkpoint mutation exists, the local orchestration helper should reconcile both completed and failed results through existing checkpoint helpers.
+
+Current Rust reality:
+
+1. `execute_local_resume_turn(...)` prepares the execution turn, builds segment requests, delegates to the execution port, and calls `record_completed_segment_checkpoints(...)`.
+2. `record_completed_segment_checkpoints(...)` records same-job completed results.
+3. `record_failed_segment_checkpoints(...)` records same-job failed results.
+4. A fake local execution turn that returns only failed results is currently collected but not persisted by `execute_local_resume_turn(...)`.
+
+Boundary rules:
+
+1. The next Rust slice may update `execute_local_resume_turn(...)` to call both existing checkpoint mutation helpers after collecting execution results.
+2. The orchestration helper should not duplicate checkpoint mutation logic; it should delegate to `record_completed_segment_checkpoints(...)` and `record_failed_segment_checkpoints(...)`.
+3. Completed results should be recorded before failed results, so a defensive mixed result set has a deterministic final local order.
+4. The helper should keep returning `AppResult<Option<DownloadCheckpointRecord>>`; the returned checkpoint should reflect the last checkpoint state produced by the existing helpers.
+5. Missing checkpoint behavior should remain local and optional; do not introduce a public execution error in this slice.
+6. The helper must not perform retry/backoff, choose terminal job state, mutate runtime snapshots, release leases, publish events, or introduce public `DL_*` execution errors.
+7. The helper must not perform HTTP range requests, provider object fetches, staging file writes, artifact moves, hash or length verification, SQLite schema changes, SQLite adapter changes, transport projection, composition-root wiring, or frontend changes.
+
+First Rust slice:
+
+1. add a focused RED test proving `execute_local_resume_turn(...)` persists a fake failed result through `record_failed_segment_checkpoints(...)`;
+2. keep the existing completed-result orchestration behavior green;
+3. update only the local orchestration helper to call both existing mutation helpers;
+4. run focused module tests, full module tests, rustfmt check, scoped `git diff --check`, and path-limited status before commit.
 
 ---
 

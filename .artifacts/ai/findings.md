@@ -766,4 +766,11 @@
 - Current `record_completed_segment_checkpoints(...)` provides the local mutation shape to mirror: reload checkpoint, filter same-job result values, replace or append segment facts, save only when a matching result was applied, and return the checkpoint option.
 - For failed results, the helper should preserve existing offset/partial persistence tokens on replacement because `DownloadSegmentExecutionResult::Failed` does not carry those tokens; appended failed facts should use request start offset and `None` optional persistence tokens.
 - RED/GREEN confirmed `record_failed_segment_checkpoints(...)` can reload checkpoint facts, ignore accepted/completed results, replace a matching failed segment in place, preserve existing offset and optional persistence tokens, and save through the repository port without adding retry/backoff, public error projection, terminal runtime state, concrete IO, transport, composition-root, SQLite adapter/schema, or frontend behavior.
+
+## Phase 76 Downloads Fake Local Mixed-result Checkpoint Orchestration Boundary Findings
+
+- AT-2026-05-17-200 final commit is `c973da9` and was pushed to `origin/main`.
+- `execute_local_resume_turn(...)` currently prepares a turn, builds requests, delegates to the execution port, and records completed segment checkpoints only.
+- Since failed-result checkpoint mutation now exists, the next orchestration boundary should define how the local helper records both completed and failed fake result facts while still avoiding retry/backoff, public error projection, terminal runtime state, concrete IO, runtime `run()`, transport, composition-root, SQLite adapter/schema, and frontend behavior.
+- README_IMPL 7.21 now pins the first Rust slice: update `execute_local_resume_turn(...)` to delegate to both existing checkpoint mutation helpers after collecting execution results, keeping mutation logic inside those helpers.
 - RED/GREEN confirmed `record_failed_segment_checkpoints(...)` can replace a matching failed segment checkpoint, preserve existing partial persistence tokens, ignore accepted/completed results, and save through the repository port without widening into retry/backoff, public error projection, runtime terminal state, concrete IO, transport, composition-root, SQLite adapter/schema, or frontend behavior.

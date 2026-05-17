@@ -7016,6 +7016,15 @@
 - Scoped diff validation passed with CRLF normalization warnings only.
 - Initial local commit created as `94573e3`; PWF backfill is being amended into the same task commit before push.
 
+## 2026-05-17 - AT-201 Started
+
+- AT-200 final commit is `c973da9` and `git push origin main` succeeded.
+- Re-read README_IMPL current-state table and sections 7.18 through 7.20 plus current driver snippets for `execute_local_resume_turn(...)`, `record_completed_segment_checkpoints(...)`, and `record_failed_segment_checkpoints(...)`.
+- Decision: the next safe task is documentation-first mixed-result checkpoint orchestration. The local orchestration helper currently records completed results only, so the next Rust slice should be constrained before changing it.
+- Updated README_IMPL with section 7.21. The next Rust slice is now constrained to having `execute_local_resume_turn(...)` delegate to both existing completed and failed checkpoint mutation helpers, with no retry/backoff, public error projection, terminal runtime state, concrete IO, SQLite adapter/schema, transport, composition-root, or frontend work.
+- Validation: scoped `git diff --check` over AT-201 files passed with CRLF normalization warnings only.
+- Initial local commit created as `9f6402a`; PWF backfill is being amended into the same task commit before push.
+
 ### Auto Record: 2026-05-17 14:13:18
 - Tool: apply_patch
 - Phase: Phase 71 - Downloads Fake Local Resume Execution Orchestration
@@ -7583,5 +7592,101 @@
 ### Auto Record: 2026-05-17 14:43:57
 - Tool: apply_patch
 - Phase: Phase 75 - Downloads Fake Failed-result Checkpoint Mutation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:44:59
+- Tool: apply_patch
+- Phase: Phase 75 - Downloads Fake Failed-result Checkpoint Mutation
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-17 14:45:18
+- Tool: apply_patch
+- Phase: Phase 76 - Downloads Fake Local Mixed-result Checkpoint Orchestration Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 14:45:26
+- Tool: apply_patch
+- Phase: Phase 76 - Downloads Fake Local Mixed-result Checkpoint Orchestration Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:45:36
+- Tool: apply_patch
+- Phase: Phase 76 - Downloads Fake Local Mixed-result Checkpoint Orchestration Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 14:46:11
+- Tool: apply_patch
+- Phase: Phase 76 - Downloads Fake Local Mixed-result Checkpoint Orchestration Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 14:46:35
+- Tool: apply_patch
+- Phase: Phase 76 - Downloads Fake Local Mixed-result Checkpoint Orchestration Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 14:46:45
+- Tool: apply_patch
+- Phase: Phase 76 - Downloads Fake Local Mixed-result Checkpoint Orchestration Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 14:46:53
+- Tool: apply_patch
+- Phase: Phase 76 - Downloads Fake Local Mixed-result Checkpoint Orchestration Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 14:47:16
+- Tool: apply_patch
+- Phase: Phase 76 - Downloads Fake Local Mixed-result Checkpoint Orchestration Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:47:25
+- Tool: apply_patch
+- Phase: Phase 76 - Downloads Fake Local Mixed-result Checkpoint Orchestration Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-17 14:47:38
+- Tool: apply_patch
+- Phase: Phase 76 - Downloads Fake Local Mixed-result Checkpoint Orchestration Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 14:48:03
+- Tool: apply_patch
+- Phase: Phase 76 - Downloads Fake Local Mixed-result Checkpoint Orchestration Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 14:49:05
+- Tool: apply_patch
+- Phase: Phase 76 - Downloads Fake Local Mixed-result Checkpoint Orchestration Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-17 14:49:22
+- Tool: apply_patch
+- Phase: Phase 76 - Downloads Fake Local Mixed-result Checkpoint Orchestration Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-17 14:49:30
+- Tool: apply_patch
+- Phase: Phase 76 - Downloads Fake Local Mixed-result Checkpoint Orchestration Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 14:49:41
+- Tool: apply_patch
+- Phase: Phase 76 - Downloads Fake Local Mixed-result Checkpoint Orchestration Boundary
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
