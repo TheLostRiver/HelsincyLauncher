@@ -9393,6 +9393,20 @@
 - First commit attempt failed because Git author identity was not configured in this shell. Resolution: use one-shot commit config from the previous commit author (`Codex <codex@example.local>`) instead of writing global config.
 - AT-230 commit was created with one-shot Git author config; the commit may be amended once to remove stale PWF "pending" wording before push.
 
+## Session Note: 2026-05-17 AT-230 Publication / AT-231 Start
+
+- AT-2026-05-17-230 was amended to remove stale PWF pending wording and pushed to `origin/main` as `8db4900`.
+- Opened AT-2026-05-17-231 as a docs-first boundary task for the next `kernel-jobs` selector slice.
+- Required context read in focused chunks: README_IMPL 7.33, kernel-jobs queue-policy design, downloads concurrency/budget notes, and current task-plan state.
+- Working hypothesis: the next safe Rust slice is a minimal one-shot `max_concurrent_jobs` gate inside `run_next_execution_turn(...)`, not a scheduler loop, lease model, per-module fairness, terminal projection, or downloads IO change.
+
+## Session Note: 2026-05-17 AT-231 Validation
+
+- Updated `docs/modules/downloads/README_IMPL.md` with section 7.34 for the one-shot queue policy slot gate boundary.
+- Boundary: `run_next_execution_turn(...)` should count current `Running` snapshots from `list_resumable()`, defer when `running_count >= RuntimeQueuePolicy::max_concurrent_jobs`, and otherwise preserve deterministic queued selection.
+- Out of scope remains scheduler loops, durable leases, precise active-slot accounting, per-module fairness, terminal projection, downloads IO, transport, frontend, and SQLite schema changes.
+- Scoped command passed: `git -c safe.directory=D:/DEV/MyEpicLauncher diff --check -- docs/modules/downloads/README_IMPL.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/progress.md .artifacts/ai/findings.md .artifacts/ai/handoff.md` with CRLF normalization warnings only.
+
 ### Auto Record: 2026-05-17 21:25:04
 - Tool: apply_patch
 - Phase: Phase 105 - One-shot Queued Execution Selector
@@ -9450,3 +9464,42 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 21:31:37
+- Tool: apply_patch
+- Phase: Phase 106 - One-shot Queue Policy Slot Gate Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 21:31:49
+- Tool: apply_patch
+- Phase: Phase 106 - One-shot Queue Policy Slot Gate Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-17 21:32:10
+- Tool: apply_patch
+- Phase: Phase 106 - One-shot Queue Policy Slot Gate Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-17 21:32:47
+- Tool: apply_patch
+- Phase: Phase 106 - One-shot Queue Policy Slot Gate Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-17 21:33:00
+- Tool: apply_patch
+- Phase: Phase 106 - One-shot Queue Policy Slot Gate Boundary
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)

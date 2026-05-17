@@ -1043,3 +1043,12 @@
 - Plain git commands are blocked by repository ownership protection in this shell; use temporary `git -c safe.directory=D:/DEV/MyEpicLauncher ...` so no global config or project-external files are modified.
 - RED/GREEN confirmed `SharedJobRuntimeHost::run_next_execution_turn(...)` filters only `Queued` snapshots, orders ties by job id after `updated_at`, delegates one selected job to existing dispatch, and returns `Deferred` when no queued snapshot exists.
 - Validation passed for focused queued-selector tests, full `launcher-kernel-jobs` lib tests, `launcher-composition-root` check, scoped rustfmt, and scoped diff-check.
+- AT-2026-05-17-230 final commit `8db4900` was pushed to `origin/main`.
+
+## Phase 106 One-shot Queue Policy Slot Gate Boundary Findings
+
+- Required context was read in focused chunks: README_IMPL 7.33, kernel-jobs queue policy design, downloads concurrency/budget notes, current task plan, and AT-230 pushed state.
+- `run_next_execution_turn(...)` now selects one queued snapshot deterministically, but it does not yet use `RuntimeQueuePolicy::max_concurrent_jobs`.
+- The safe next boundary is not a scheduler loop or lease model; it is a minimal snapshot-observed gate that counts current `JobState::Running` snapshots from `list_resumable()` and defers selection when that count is greater than or equal to `max_concurrent_jobs`.
+- `max_concurrent_jobs == 0` should mean no runtime capacity for this selector, even though downloads user-facing policy is normally clamped before it reaches `RuntimeQueuePolicy`.
+- README_IMPL 7.34 now defines the next Rust slice and validation expectations; scoped docs/PWF `git diff --check` passed with CRLF normalization warnings only.

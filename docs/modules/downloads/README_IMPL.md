@@ -1538,6 +1538,35 @@ Validation should stay in `launcher-kernel-jobs` first:
 
 ---
 
+### 7.34 One-shot Queue Policy Slot Gate Boundary
+
+After one-shot queued selection exists, the next shared-runtime risk is starting queued work even when the runtime policy says no capacity remains. The first policy-aware slice should stay one-shot and snapshot-observed; it should not pretend to be the final scheduler, lease, or active-slot system.
+
+Current Rust reality:
+
+1. `SharedJobRuntimeHost::run_next_execution_turn(...)` reads `list_resumable()`, filters `Queued`, sorts by `(updated_at, job_id)`, and delegates one selected candidate to `run_one_execution_turn(...)`.
+2. `run_next_execution_turn(...)` currently ignores `RuntimeQueuePolicy::max_concurrent_jobs`.
+3. `run_one_execution_turn(...)` projects `Accepted` to `Running`, so current `Running` snapshots are the only stable in-Rust signal for coarse runtime capacity.
+4. The runtime still has no durable leases, host ownership, precise active-slot table, per-module fairness, or background scheduler loop.
+
+First Rust slice:
+
+1. inside `run_next_execution_turn(...)`, read resumable snapshots once and count current `JobState::Running` snapshots before selecting queued candidates;
+2. read the current `RuntimeQueuePolicy` snapshot and compare `running_count >= max_concurrent_jobs`;
+3. when the policy has no remaining capacity, return `JobRunDisposition::Deferred` with an explicit capacity-related reason and do not dispatch a queued job;
+4. treat `max_concurrent_jobs == 0` as no runtime capacity for this selector, even though downloads user-facing policy is normally clamped before it reaches `RuntimeQueuePolicy`;
+5. when capacity remains, preserve the existing queued filter, deterministic `(updated_at, job_id)` ordering, and delegation to `run_one_execution_turn(...)`;
+6. keep scheduler loops/background tasks, durable leases, precise active-slot accounting, per-module caps/fairness, cancellation/snapshot-writer context, downloads concrete IO, retry/backoff, terminal projection, host transport, frontend, and SQLite schema changes out of this slice.
+
+Validation should stay in `launcher-kernel-jobs` first:
+
+1. focused tests prove a running snapshot at the configured capacity defers the next queued dispatch;
+2. focused tests prove remaining capacity still dispatches the deterministic queued candidate;
+3. existing no-queued and deterministic selector tests keep passing;
+4. existing accepted/deferred one-shot dispatch tests keep passing.
+
+---
+
 ## 8. Error Semantics
 
 Downloads-domain errors use `DL_*` codes when they become stable public classifications.

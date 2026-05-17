@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 105 - One-shot Queued Execution Selector
+Phase 106 - One-shot Queue Policy Slot Gate Boundary
 
 ## Current Focus
 
@@ -19,7 +19,8 @@ Phase 105 - One-shot Queued Execution Selector
 - AT-2026-05-17-227 was published as commit `fc615db` after defining the accepted execution state projection boundary.
 - AT-2026-05-17-228 was published as commit `fb9fb57` after implementing accepted dispatch projection in `kernel-jobs`.
 - AT-2026-05-17-229 was published as commit `d339db7` after defining a deterministic one-shot queued execution selection boundary.
-- AT-2026-05-17-230 completed the TDD-backed `kernel-jobs` one-shot queued selector.
+- AT-2026-05-17-230 was published as commit `8db4900` after completing the TDD-backed `kernel-jobs` one-shot queued selector.
+- AT-2026-05-17-231 completed the next one-shot queue policy slot gate boundary before Rust changes.
 - AT-2026-05-17-220 was published as commit `aa8d6e3` after documenting the shared runtime execution-turn boundary.
 - AT-2026-05-17-219 was published as commit `f618718` after adding host transport smoke coverage for downloads policy runtime application.
 - AT-2026-05-17-218 was published as commit `5aae7f1` after adding documentation-budget rules.
@@ -785,6 +786,12 @@ Phase 105 - One-shot Queued Execution Selector
 - Atomic tasks: AT-2026-05-17-230
 - **Status:** complete
 
+### Phase 106: One-shot Queue Policy Slot Gate Boundary
+
+- Outcome: document the next `kernel-jobs` one-shot selector boundary for respecting `RuntimeQueuePolicy::max_concurrent_jobs` via a minimal snapshot-observed running-count gate while leaving scheduler loops, durable leases, precise active-slot accounting, fairness, terminal projection, downloads IO, transport, frontend, and SQLite schema changes out of scope.
+- Atomic tasks: AT-2026-05-17-231
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -1010,7 +1017,8 @@ Phase 105 - One-shot Queued Execution Selector
 221. AT-2026-05-17-227 - completed - defined the accepted execution state projection boundary before `kernel-jobs` Rust changes; committed and pushed as `fc615db`.
 222. AT-2026-05-17-228 - completed - implemented accepted dispatch projection in `kernel-jobs`; committed and pushed as `fb9fb57`.
 223. AT-2026-05-17-229 - completed - defined deterministic one-shot queued execution selection before Rust changes; committed and pushed as `d339db7`.
-224. AT-2026-05-17-230 - completed - implemented deterministic one-shot queued execution selection in `kernel-jobs`; publication handled in Git history.
+224. AT-2026-05-17-230 - completed - implemented deterministic one-shot queued execution selection in `kernel-jobs`; committed and pushed as `8db4900`.
+225. AT-2026-05-17-231 - completed - defined one-shot queue policy slot gate boundary before Rust changes; publication handled in Git history.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
