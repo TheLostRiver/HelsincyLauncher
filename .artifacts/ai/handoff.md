@@ -496,7 +496,7 @@
 
 ## Current Handoff - AT-2026-05-19-255
 
-- Status: completed; commit/push pending.
+- Status: completed; final commit `1baf9a7`, pushed to `origin/main`.
 - Scope:
   - Update `docs/modules/downloads/README_IMPL.md` with 7.42 composition-root segment executor wiring boundary.
   - Update root `README.md` so the first entry point reflects downloads concrete segment execution progress and the module implementation doc.

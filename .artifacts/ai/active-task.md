@@ -77,3 +77,4 @@ Read before writing:
 - Root README now records downloads concrete segment execution progress and links `docs/modules/downloads/README_IMPL.md`.
 - PWF records corrected AT-254 as committed/pushed at `43a44e1`.
 - Scoped `git diff --check` passed for the task files with CRLF warnings only.
+- Published as commit `1baf9a7` and pushed to `origin/main`.
