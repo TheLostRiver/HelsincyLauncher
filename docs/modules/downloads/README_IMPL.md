@@ -162,8 +162,8 @@ Recommended order:
 4. completed: define concrete executor composition-root wiring without introducing real provider HTTP behavior;
 5. completed: implement the composition-root wiring proof with explicit static/local sources while keeping default desktop production deferred;
 6. completed: define and implement runtime terminal completion/failure projection after concrete execution can advance checkpoints deterministically;
-7. next: teach the downloads driver to return explicit terminal dispositions only after module checkpoint proof says the job is complete or terminally failed;
-8. add retry/backoff and public `DL_*` execution error projection only after concrete failures are classified;
+7. next: teach the downloads driver to return `Completed` only after a completion-first checkpoint proof says the known segment set is complete;
+8. add retry/backoff, terminal failed driver decisions, and public `DL_*` execution error projection only after concrete failures are classified;
 9. keep host transport and frontend changes last, exposing only aggregate job snapshots and stable command/query DTOs.
 
 Every slice must preserve these boundaries:
@@ -1862,9 +1862,38 @@ Implementation status:
 
 Next boundary:
 
-1. define when `DownloadJobDriver::run(...)` may return `Completed` or `TerminalFailed` after local checkpoint mutation;
-2. keep the proof downloads-owned, based on persisted checkpoint facts, and do not make `kernel-jobs` inspect segment internals;
-3. keep retry/backoff, stable public `DL_*` execution errors, host transport, frontend projection, provider HTTP, and schema changes separate.
+1. define the completion-first rule for when `DownloadJobDriver::run(...)` may return `Completed` after local checkpoint mutation;
+2. keep `TerminalFailed` reserved for a later retry/backoff and failure-classification boundary;
+3. keep the proof downloads-owned, based on persisted checkpoint facts, and do not make `kernel-jobs` inspect segment internals;
+4. keep stable public `DL_*` execution errors, host transport, frontend projection, provider HTTP, and schema changes separate.
+
+### 7.44 Downloads Driver Completion-first Terminal Decision Boundary
+
+`kernel-jobs` can now project explicit terminal dispositions, but the downloads driver must still decide when it is honest to return one. The first downloads-owned terminal decision should be completion-first. Terminal failure needs retry/backoff and failure classification first.
+
+Current Rust reality:
+
+1. `DownloadJobDriver::run(...)` returns `Accepted` whenever `execute_local_resume_turn(...)` persists any completed or failed segment checkpoint mutation.
+2. `execute_local_resume_turn(...)` returns the saved checkpoint from failed-result mutation when any failed result exists, otherwise the saved checkpoint from completed-result mutation.
+3. `DownloadSegmentCheckpointRecord` persists `status`, byte counts, offsets, and persistence tokens, but it does not persist the local failure reason or retryable hint from `DownloadSegmentExecutionResult::Failed`.
+4. `DownloadDriverExecutionTurn::NoPendingWork` is explicitly not terminal completion.
+5. `JobRunDisposition::TerminalFailed` exists in `kernel-jobs`, but using it from downloads before retry/backoff classification would collapse retryable segment failures into job-level terminal failure too early.
+
+Boundary rules:
+
+1. `DownloadJobDriver::run(...)` may return `JobRunDisposition::Completed` only after a local execution turn saves a non-empty checkpoint whose known segment records are all `DownloadSegmentCheckpointStatus::Completed`;
+2. an empty checkpoint, missing checkpoint, missing execution port, no pending work, accepted-only result set, or any remaining `Pending` / `InProgress` segment must not return `Completed`;
+3. a saved checkpoint that contains `Failed` segment facts must remain non-terminal for now, because retry/backoff and stable public execution-error projection are still separate boundaries;
+4. the completion proof belongs inside `module-downloads`; `launcher-kernel-jobs` must continue to observe only the explicit `JobRunDisposition`, not segment records;
+5. this boundary must not add public `DL_*` execution codes, host transport DTO fields, frontend state, provider HTTP behavior, SQLite schema changes, scheduler loops, or leases.
+
+First Rust slice:
+
+1. add a focused RED driver test where a completed local execution turn leaves a non-empty all-completed checkpoint and `run(...)` returns `JobRunDisposition::Completed`;
+2. add focused coverage that a failed segment checkpoint mutation still returns a non-terminal disposition until retry/backoff classification exists;
+3. add the smallest downloads-owned helper or inline decision needed to classify the saved checkpoint after `execute_local_resume_turn(...)`;
+4. keep missing execution port, missing checkpoint, no pending work, accepted-only results, and default production deferred behavior unchanged;
+5. run focused downloads driver tests, full `launcher-module-downloads --lib`, `cargo check -p launcher-composition-root`, scoped rustfmt, and scoped diff-check.
 
 ---
 

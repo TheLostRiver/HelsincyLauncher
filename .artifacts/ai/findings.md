@@ -1299,3 +1299,11 @@
 - `JobSnapshot` currently has no error payload field, so the first failed terminal projection can only set `JobState::Failed` / `JobUiState::Failed`; stable error payload projection must remain later.
 - The focused RED test should fail on missing terminal disposition variants before production code changes.
 - RED/GREEN confirmed explicit terminal dispositions are enough for runtime-owned projection: `Completed` maps to completed snapshot state, `TerminalFailed` maps to failed snapshot state, while existing accepted/deferred/non-terminal failure behavior remains covered by the existing test suite.
+
+## Phase 130 Downloads Driver Completion-first Terminal Boundary Findings
+
+- Required context was read in focused chunks: README current status, README_IMPL 7.43, downloads checkpoint/status structs, completed/failed checkpoint mutation helpers, `execute_local_resume_turn(...)`, `DownloadJobDriver::run(...)`, facade all-sealed completion precedent, and existing completion/failure references.
+- `DownloadJobDriver::run(...)` currently treats any checkpoint mutation as `Accepted`, including failed segment checkpoint mutations.
+- Current failed segment checkpoint persistence drops the local failure reason and retryable hint, so using `TerminalFailed` from downloads now would be too broad.
+- The safe first driver terminal decision is completion-only: non-empty known checkpoint, all segment statuses `Completed`, and only after the module has saved that checkpoint.
+- `NoPendingWork`, empty checkpoints, `Pending`/`InProgress`/`Failed` segment facts, missing execution port, missing checkpoint, and accepted-only result sets must remain non-terminal for the first Rust slice.

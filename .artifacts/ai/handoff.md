@@ -570,6 +570,22 @@
 - Next likely task:
   - define the downloads driver terminal decision boundary before allowing `DownloadJobDriver::run(...)` to return `Completed` or `TerminalFailed`.
 
+## Current Handoff - AT-2026-05-19-259
+
+- Status: completed; commit/push pending.
+- Scope:
+  - root README
+  - `docs/modules/downloads/README_IMPL.md`
+  - PWF records under `.artifacts/ai`
+- Boundary selected:
+  - first downloads terminal decision should be completion-first only;
+  - `DownloadJobDriver::run(...)` may return `Completed` after a saved non-empty checkpoint has all known segment records `Completed`;
+  - `TerminalFailed` remains reserved because current failed checkpoint records do not persist retryable/reason facts.
+- Validation passed:
+  - scoped `git diff --check` for README, README_IMPL, and PWF task files passed with CRLF normalization warnings only.
+- Next likely code task:
+  - add focused downloads driver RED tests for all-completed checkpoint returning `JobRunDisposition::Completed` and failed checkpoint mutation remaining non-terminal.
+
 ## Dirty Worktree To Preserve
 
 - Unrelated unstaged/unknown work remains present and must not be committed with AT-249:

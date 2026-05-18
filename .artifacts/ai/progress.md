@@ -11588,6 +11588,21 @@
 - Published AT-258 as `ac12ec0 feat: project terminal job run dispositions` and pushed it to `origin/main`.
 - Next likely task: define when `DownloadJobDriver::run(...)` may return `Completed` or `TerminalFailed` based on persisted checkpoint facts, before coding the downloads driver behavior.
 
+## Agent Note: 2026-05-19 - Start AT-2026-05-19-259
+
+- AT-258 and its publish record are pushed; the next Rust change needs a downloads-owned terminal decision boundary first.
+- Read focused docs/code context around README_IMPL 7.43, `DownloadSegmentCheckpointStatus`, checkpoint mutation helpers, `execute_local_resume_turn(...)`, `DownloadJobDriver::run(...)`, and all-sealed completion precedent.
+- Selected a docs-first completion-only boundary: first Rust slice may return `Completed` for a non-empty all-completed known checkpoint, while `TerminalFailed` remains reserved until retry/backoff and failure classification preserve enough facts.
+- Preserved Rust code, transport, frontend, provider HTTP, retry/backoff, public `DL_*`, schema, scheduler, and lease work out of AT-259.
+
+## Agent Note: 2026-05-19 - Complete AT-2026-05-19-259
+
+- Updated root README so the first entry point says the next backend slice is downloads driver completion-first terminal implementation.
+- Added README_IMPL 7.44 with the current Rust reality, boundary rules, and first Rust slice for returning `JobRunDisposition::Completed` only after a saved non-empty all-completed known checkpoint.
+- Kept `TerminalFailed` reserved for later retry/backoff/failure classification because current failed checkpoint facts do not persist retryability or reason.
+- Validation passed: scoped `git diff --check` for README, README_IMPL, and PWF task files returned only CRLF normalization warnings.
+- Next likely code task: implement README_IMPL 7.44 with focused downloads driver TDD.
+
 ### Auto Record: 2026-05-19 02:52:22
 - Tool: apply_patch
 - Phase: Phase 128 - Runtime Terminal Projection Boundary (in_progress)
@@ -11664,6 +11679,26 @@
 ### Auto Record: 2026-05-19 03:06:02
 - Tool: apply_patch
 - Phase: Phase 129 - Kernel-jobs Terminal Projection (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 03:15:29
+- Tool: apply_patch
+- Phase: Phase 130 - Downloads Driver Completion-first Terminal Boundary (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\README.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 03:16:18
+- Tool: apply_patch
+- Phase: Phase 130 - Downloads Driver Completion-first Terminal Boundary (complete)
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
