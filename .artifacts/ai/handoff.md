@@ -513,6 +513,30 @@
 - Next likely code task:
   - implement a focused composition-root private static executor wiring proof with TDD, explicit static source input, app-data staging root, and default desktop deferred behavior preserved.
 
+## Current Handoff - AT-2026-05-19-256
+
+- Status: completed; commit/push pending.
+- Scope:
+  - `crates/composition-root/src/bootstrap.rs`
+  - PWF records under `.artifacts/ai/`
+- Planned TDD path:
+  - Add a focused composition-root test that calls a missing private static executor wiring helper.
+  - Watch it fail for the missing helper.
+  - Implement the smallest helper using explicit static sources, app-data staging, filesystem writer, length verifier, and `DownloadJobDriver::with_pending_resume_work_source_and_execution_port(...)`.
+  - Verify focused test, default deferred behavior, composition-root check, rustfmt, and diff-check.
+- Preserved boundaries:
+  - No default desktop production execution-port wiring, no real HTTP/provider behavior, no retry/backoff/public execution error projection, no host transport/frontend/schema changes.
+- Validation passed:
+  - RED failed on missing private static executor wiring helper.
+  - Focused static wiring test passed after implementation.
+  - Focused composition-root download tests passed.
+  - Full composition-root tests passed.
+  - `cargo check -p launcher-composition-root` passed.
+  - Full downloads module lib tests passed with 71/71.
+  - Scoped rustfmt check passed after formatting.
+- Next likely task:
+  - reassess README_IMPL after the deterministic wiring proof; likely define the runtime terminal completion/failure projection boundary before changing shared runtime state.
+
 ## Dirty Worktree To Preserve
 
 - Unrelated unstaged/unknown work remains present and must not be committed with AT-249:

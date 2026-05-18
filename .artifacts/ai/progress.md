@@ -11466,6 +11466,22 @@
 - Published AT-255 as `1baf9a7 docs: define downloads executor wiring boundary` and pushed it to `origin/main`.
 - Next likely task: implement the focused composition-root static executor wiring proof with TDD, keeping default desktop production downloads execution deferred.
 
+## Agent Note: 2026-05-19 - Start AT-2026-05-19-256
+
+- Confirmed `main` and `origin/main` are aligned at `04735b4` after the AT-255 PWF publish-record commit.
+- Read focused implementation context before code: README_IMPL 7.42, composition-root bootstrap tests/builders, downloads driver run/checkpoint mutation, executor sub-ports, SQLite checkpoint repository, and relevant test helper patterns.
+- Selected RED test shape: composition-root private helper wires an explicit static source map and app-data staging into a downloads driver; the test should fail first because that helper does not exist.
+- Preserved unrelated dirty files and kept frontend/transport/schema work out of scope.
+
+## Agent Note: 2026-05-19 - Complete AT-2026-05-19-256
+
+- RED observed: focused composition-root test failed with missing `build_download_job_driver_with_static_segment_executor`.
+- Implemented a test-only composition-root helper that builds `DownloadSegmentExecutor` from explicit static sources, `DownloadSegmentFilesystemWritePort`, and `DownloadSegmentLengthVerifyPort`, then injects it through `DownloadJobDriver::with_pending_resume_work_source_and_execution_port(...)`.
+- Added a regression test proving default `build_download_job_driver(...)` still defers without an execution port and keeps pending work queued.
+- Format issue logged and fixed: initial `cargo fmt --check` only wanted the test-only import list wrapped; scoped `cargo fmt` fixed it and the later format check passed.
+- Validation passed: focused static wiring test, focused composition-root download tests, full composition-root tests, composition-root check, full downloads lib tests, scoped rustfmt check.
+- Next likely task: decide whether to document or implement the next runtime terminal completion/failure projection boundary now that deterministic local execution can mutate checkpoints in a focused wiring proof.
+
 ### Auto Record: 2026-05-19 02:24:19
 - Tool: apply_patch
 - Phase: Phase 126 - Downloads Composition-root Segment Executor Wiring Boundary (complete)
@@ -11493,5 +11509,38 @@
 - Files:
   - `.artifacts/ai/active-task.md` (update)
   - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-19 02:34:11
+- Tool: apply_patch
+- Phase: Phase 127 - Downloads Composition-root Static Executor Wiring Proof (in_progress)
+- Files:
+  - `.artifacts/ai/active-task.md` (delete)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+  - `crates/composition-root/src/bootstrap.rs` (update)
+
+### Auto Record: 2026-05-19 02:34:59
+- Tool: apply_patch
+- Phase: Phase 127 - Downloads Composition-root Static Executor Wiring Proof (in_progress)
+- Files:
+  - `crates/composition-root/src/bootstrap.rs` (update)
+
+### Auto Record: 2026-05-19 02:35:45
+- Tool: apply_patch
+- Phase: Phase 127 - Downloads Composition-root Static Executor Wiring Proof (in_progress)
+- Files:
+  - `crates/composition-root/src/bootstrap.rs` (update)
+
+### Auto Record: 2026-05-19 02:38:53
+- Tool: apply_patch
+- Phase: Phase 127 - Downloads Composition-root Static Executor Wiring Proof (complete)
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
   - `.artifacts/ai/progress.md` (update)
   - `.artifacts/ai/handoff.md` (update)

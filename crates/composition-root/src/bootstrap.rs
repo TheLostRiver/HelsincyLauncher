@@ -27,6 +27,12 @@ use launcher_module_downloads::{
     DownloadModuleDeps, DownloadPendingResumeWorkSource, DownloadPolicyStore,
     DownloadRuntimePolicyApplier, InMemoryDownloadResumeWorkScheduler,
 };
+#[cfg(test)]
+use launcher_module_downloads::{
+    DownloadSegmentExecutionPort, DownloadSegmentExecutor, DownloadSegmentFilesystemWritePort,
+    DownloadSegmentLengthVerifyPort, DownloadSegmentStaticFetchPort,
+    DownloadSegmentStaticFetchSource,
+};
 use launcher_module_engines::{EngineFacade, EngineJobDriver, EngineModuleDeps};
 use launcher_module_fab::{FabFacade, FabModuleDeps, FabPrewarmJobDriver, FabSyncJobDriver};
 
@@ -375,6 +381,36 @@ fn build_download_job_driver(
     )
 }
 
+#[cfg(test)]
+fn build_download_job_driver_with_static_segment_executor(
+    download_checkpoint_repo: Arc<dyn DownloadCheckpointRepository>,
+    download_resume_work_source: Arc<dyn DownloadPendingResumeWorkSource>,
+    app_data_dir: impl AsRef<std::path::Path>,
+    static_sources: impl IntoIterator<Item = (String, DownloadSegmentStaticFetchSource)>,
+) -> DownloadJobDriver {
+    let execution_port = build_static_download_segment_execution_port(app_data_dir, static_sources);
+    DownloadJobDriver::with_pending_resume_work_source_and_execution_port(
+        download_checkpoint_repo,
+        download_resume_work_source,
+        execution_port,
+    )
+}
+
+#[cfg(test)]
+fn build_static_download_segment_execution_port(
+    app_data_dir: impl AsRef<std::path::Path>,
+    static_sources: impl IntoIterator<Item = (String, DownloadSegmentStaticFetchSource)>,
+) -> Arc<dyn DownloadSegmentExecutionPort> {
+    // 测试专用 helper 必须显式传入静态源，避免默认桌面装配把空 fetcher 接成生产执行路径。
+    // The test-only helper requires explicit static sources so default desktop wiring stays deferred.
+    let staging_root = app_data_dir.as_ref().join(".downloads").join("staging");
+    Arc::new(DownloadSegmentExecutor::new(
+        Arc::new(DownloadSegmentStaticFetchPort::new(static_sources)),
+        Arc::new(DownloadSegmentFilesystemWritePort::new(staging_root)),
+        Arc::new(DownloadSegmentLengthVerifyPort),
+    ))
+}
+
 // Startup only depends on assembled facades/runtime surfaces, not concrete repository types.
 // Startup 只依赖已装配的 facade/runtime 表面，不依赖具体 repository 类型。
 fn build_startup_pipeline(
@@ -409,12 +445,17 @@ fn invalid_builder_input(builder: &str, detail: &str) -> AppError {
 mod tests {
     use super::*;
 
-    use launcher_kernel_foundation::JobId;
-    use launcher_kernel_jobs::{JobRunDisposition, RuntimeQueuePolicy};
+    use launcher_kernel_foundation::{IsoDateTime, JobId};
+    use launcher_kernel_jobs::{
+        JobDriver, JobExecutionContext, JobProgress, JobRunDisposition, JobSnapshot, JobState,
+        JobUiState, RuntimeQueuePolicy,
+    };
     use launcher_module_downloads::{
         contracts::{DownloadPolicyDto, UpdateDownloadPolicyRequestDto},
-        DownloadPolicyStore, DownloadResumeWorkItem, DownloadResumeWorkMode,
-        DownloadResumeWorkPlan, DownloadResumeWorkScheduler,
+        DownloadCheckpointRecord, DownloadCheckpointRepository, DownloadPolicyStore,
+        DownloadResumeWorkItem, DownloadResumeWorkMode, DownloadResumeWorkPlan,
+        DownloadResumeWorkScheduler, DownloadSegmentCheckpointRecord,
+        DownloadSegmentCheckpointStatus, DownloadSegmentStaticFetchSource,
     };
 
     fn project_local_sqlite_path(name: &str) -> PathBuf {
@@ -436,6 +477,21 @@ mod tests {
         .expect("project-local sqlite test directory should be creatable");
         let _ = std::fs::remove_file(&sqlite_path);
         sqlite_path
+    }
+
+    fn project_local_app_data_dir(name: &str) -> PathBuf {
+        let workspace_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .parent()
+            .and_then(std::path::Path::parent)
+            .expect("composition-root should live under the workspace crates directory")
+            .to_path_buf();
+        let app_data_dir = workspace_root.join(".artifacts").join("tmp").join(name);
+        assert!(
+            app_data_dir.starts_with(&workspace_root),
+            "test app-data path must stay inside the project workspace"
+        );
+        let _ = std::fs::remove_dir_all(&app_data_dir);
+        app_data_dir
     }
 
     #[test]
@@ -580,6 +636,133 @@ mod tests {
         let _ = std::fs::remove_file(&tmp_path);
     }
 
+    #[test]
+    fn static_download_executor_wiring_records_completed_checkpoint_and_writes_staging_file() {
+        let tmp_path = project_local_sqlite_path("at256_downloads_static_executor.sqlite3");
+        let app_data_dir = project_local_app_data_dir("at256_downloads_static_executor_app_data");
+        let sqlite_config = SqliteStorageAdapterConfig::new(tmp_path.clone());
+        let checkpoint_repo = SqliteDownloadCheckpointRepository::new(sqlite_config);
+        let scheduler = InMemoryDownloadResumeWorkScheduler::new();
+        let job_id = JobId::generate();
+        let segment_id = "segment-static-executor";
+        let source_locator = format!("https://example.invalid/{segment_id}");
+        let plan = DownloadResumeWorkPlan {
+            items: vec![DownloadResumeWorkItem {
+                segment_id: segment_id.into(),
+                file_id: "file-1".into(),
+                source_locator: source_locator.clone(),
+                write_target: format!("{segment_id}.part"),
+                expected_hash: None,
+                start_offset: 0,
+                length: 4,
+                resume_mode: DownloadResumeWorkMode::FromStart,
+                checkpoint_ref: None,
+            }],
+        };
+
+        checkpoint_repo
+            .save(&DownloadCheckpointRecord::empty(job_id.clone()))
+            .expect("test checkpoint should be persisted before driver run");
+        scheduler
+            .schedule_resume_work(&job_id, &plan)
+            .expect("test scheduler should register pending work");
+
+        let driver = build_download_job_driver_with_static_segment_executor(
+            Arc::new(checkpoint_repo.clone()),
+            Arc::new(scheduler.clone()),
+            &app_data_dir,
+            [(
+                source_locator,
+                DownloadSegmentStaticFetchSource::new(b"rust".to_vec(), Some("etag-static".into())),
+            )],
+        );
+        let snapshot = make_download_snapshot(job_id.clone());
+
+        let disposition = driver
+            .run(JobExecutionContext::new(&snapshot))
+            .expect("static executor wiring should run one deterministic segment");
+
+        assert_eq!(disposition, JobRunDisposition::Accepted);
+        assert!(
+            scheduler.pending_work().is_empty(),
+            "accepted static executor run should consume pending work"
+        );
+        assert_eq!(
+            checkpoint_repo
+                .load(&job_id)
+                .expect("checkpoint load should succeed")
+                .expect("checkpoint should still exist")
+                .segments,
+            vec![DownloadSegmentCheckpointRecord {
+                job_id: job_id.clone(),
+                segment_id: segment_id.into(),
+                file_id: "file-1".into(),
+                offset: 0,
+                length: 4,
+                downloaded_bytes: 4,
+                status: DownloadSegmentCheckpointStatus::Completed,
+                partial_path: Some(format!("{segment_id}.part")),
+                etag: Some("etag-static".into()),
+                hash_state_ref: None,
+            }],
+            "static executor wiring should persist the completed segment facts"
+        );
+
+        let written_path = app_data_dir
+            .join(".downloads")
+            .join("staging")
+            .join(job_id.as_str())
+            .join(format!("{segment_id}.part"));
+        assert_eq!(
+            std::fs::read(&written_path).expect("staging file should be written"),
+            b"rust",
+            "filesystem writer should write fetched static bytes under app-data staging"
+        );
+
+        let _ = std::fs::remove_file(&tmp_path);
+        let _ = std::fs::remove_dir_all(&app_data_dir);
+    }
+
+    #[test]
+    fn default_download_driver_wiring_still_defers_without_static_executor() {
+        let tmp_path = project_local_sqlite_path("at256_downloads_default_deferred.sqlite3");
+        let sqlite_config = SqliteStorageAdapterConfig::new(tmp_path.clone());
+        let checkpoint_repo = SqliteDownloadCheckpointRepository::new(sqlite_config);
+        let scheduler = InMemoryDownloadResumeWorkScheduler::new();
+        let job_id = JobId::generate();
+        let plan = make_resume_work_plan("segment-default-deferred");
+        let driver = build_download_job_driver(
+            Arc::new(checkpoint_repo.clone()),
+            Arc::new(scheduler.clone()),
+        );
+
+        checkpoint_repo
+            .save(&DownloadCheckpointRecord::empty(job_id.clone()))
+            .expect("test checkpoint should be persisted before driver run");
+        scheduler
+            .schedule_resume_work(&job_id, &plan)
+            .expect("test scheduler should register pending work");
+        let snapshot = make_download_snapshot(job_id);
+
+        let disposition = driver
+            .run(JobExecutionContext::new(&snapshot))
+            .expect("default driver wiring should return a non-terminal result");
+
+        match disposition {
+            JobRunDisposition::Deferred { reason } => {
+                assert!(reason.contains("execution port not wired"));
+            }
+            other => panic!("default download driver wiring should defer, got {other:?}"),
+        }
+        assert_eq!(
+            scheduler.pending_work().len(),
+            1,
+            "default deferred driver run must keep pending work for a later explicit executor"
+        );
+
+        let _ = std::fs::remove_file(&tmp_path);
+    }
+
     fn make_resume_work_plan(segment_id: &str) -> DownloadResumeWorkPlan {
         DownloadResumeWorkPlan {
             items: vec![DownloadResumeWorkItem {
@@ -593,6 +776,20 @@ mod tests {
                 resume_mode: DownloadResumeWorkMode::FromStart,
                 checkpoint_ref: None,
             }],
+        }
+    }
+
+    fn make_download_snapshot(job_id: JobId) -> JobSnapshot<()> {
+        JobSnapshot {
+            job_id,
+            module: "downloads".into(),
+            kind: "download".into(),
+            state: JobState::Queued,
+            ui_state: JobUiState::Queued,
+            progress: JobProgress::pending(),
+            recoverable: true,
+            updated_at: IsoDateTime::now(),
+            extension: None,
         }
     }
 }

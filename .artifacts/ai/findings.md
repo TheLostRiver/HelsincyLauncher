@@ -1273,3 +1273,13 @@
 - `DownloadSegmentExecutor` can now compose static fetch, filesystem write, and length verify ports, but no real provider fetcher or explicit production local-source config exists.
 - Wiring an empty `DownloadSegmentStaticFetchPort` into default desktop production would change behavior from `Deferred` to handled segment failure for normal provider locators, so the next code slice should keep default `build_desktop_services(...)` deferred.
 - The safe first composition-root proof should use an explicit private static-source helper/test path, derive staging from `app_data_dir/.downloads/staging`, and avoid host transport, frontend, schema, retry/backoff, public `DL_*` execution projection, or real HTTP behavior.
+
+## Phase 127 Downloads Composition-root Static Executor Wiring Proof Findings
+
+- Required code context was read in focused chunks: composition-root downloads module/driver registry builders, existing composition tests, downloads driver `run(...)`, local execution turn/checkpoint mutation helpers, static fetcher/writer/verifier definitions, and SQLite checkpoint repository persistence.
+- The focused RED test should call a missing composition-root private helper so the first failure is the absent wiring seam, not an assertion mismatch after production code was written.
+- The test can reuse existing module behavior: save an empty checkpoint, schedule one in-memory resume work item, run the driver with `JobExecutionContext`, then assert checkpoint completion and bytes written under `app_data_dir/.downloads/staging/<job_id>/...`.
+- Default `build_desktop_services(...)` should remain on `build_download_job_driver(...)` without an execution port; the existing runtime helper smoke should continue to defer when no queued job exists, and a new explicit default-deferred assertion can cover the downloads driver helper directly if needed.
+- RED/GREEN confirmed the composition-root helper assembles `DownloadSegmentExecutor` from explicit static sources, filesystem writer, and length verifier; the test recorded a completed checkpoint and wrote static bytes under app-data staging.
+- A separate composition-root regression test confirms default `build_download_job_driver(...)` still defers without an execution port and preserves pending work.
+- The helper is test-only for now, preserving the documented rule that default desktop production should not wire an empty static fetcher before a real provider fetcher or explicit source config exists.
