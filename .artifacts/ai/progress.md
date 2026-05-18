@@ -12034,6 +12034,28 @@
 - Push remains blocked from the prior safety review; no additional push attempt was made without explicit approval.
 - Commit `d25ef93 docs: define download backoff policy boundary` was created locally.
 
+## 2026-05-19 - AT-266 start
+
+- Registered AT-2026-05-19-266 as the pure segment retry/backoff policy implementation task.
+- Required context read in small batches: README roadmap, README_IMPL 7.47 policy defaults and first Rust slice, error-handling retry semantics, and download-runtime failed checkpoint preservation rules.
+- Planned TDD path: RED tests for 30s/120s schedule, exhausted attempt budget, user-attention classes, and no-automatic-retry classes; then implement the smallest pure helper and update README/README_IMPL after green.
+- Boundary reminder: no scheduler, no automatic retry dispatch, no SQLite schema change, no `TerminalFailed`, no public `DL_*`, no host/frontend/provider/lease/snapshot payload work.
+
+## 2026-05-19 - AT-266 completion
+
+- RED: `cargo test -p launcher-module-downloads download_segment_retry_policy --lib` failed before implementation due to missing `DownloadSegmentRetryPolicy` and `DownloadSegmentRetryDecision`.
+- Implemented the pure policy helper and decision enum in `crates/module-downloads/src/driver.rs`, exported them from `crates/module-downloads/src/lib.rs`, and added `IsoDateTime::add_seconds(...)` in `crates/kernel-foundation/src/time.rs`.
+- Updated README and README_IMPL to mark pure policy calculation complete and identify the next boundary: wiring policy into failed checkpoint mutation to persist `next_retry_after`.
+- Validation passed:
+  - `cargo test -p launcher-module-downloads download_segment_retry_policy --lib` -> 5 passed.
+  - `cargo test -p launcher-kernel-foundation --lib` -> 0 tests, exit 0.
+  - `cargo test -p launcher-module-downloads --lib` -> 78 passed.
+  - `cargo check -p launcher-composition-root` -> passed.
+  - `rustfmt --check crates/kernel-foundation/src/time.rs crates/module-downloads/src/driver.rs crates/module-downloads/src/lib.rs` -> passed.
+  - scoped `git diff --check` -> passed with CRLF normalization warnings only.
+- Checked `Cargo.lock`: only the pre-existing unrelated `launcher-module-engines` hunk remains, so it must stay out of this commit.
+- Removed unintended package-wide rustfmt noise from unrelated foundation files; only `crates/kernel-foundation/src/time.rs` remains in scope.
+
 ### Auto Record: 2026-05-19 04:17:57
 - Tool: apply_patch
 - Phase: Phase 135 - Retry Failure Facts Persistence (in_progress)
@@ -12168,5 +12190,69 @@
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 04:53:20
+- Tool: apply_patch
+- Phase: Phase 137 - Pure Segment Retry Policy (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 04:54:01
+- Tool: apply_patch
+- Phase: Phase 137 - Pure Segment Retry Policy (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-19 04:55:12
+- Tool: apply_patch
+- Phase: Phase 137 - Pure Segment Retry Policy (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml` (update)
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\lib.rs` (update)
+
+### Auto Record: 2026-05-19 04:56:03
+- Tool: apply_patch
+- Phase: Phase 137 - Pure Segment Retry Policy (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\README.md` (update)
+
+### Auto Record: 2026-05-19 04:58:01
+- Tool: apply_patch
+- Phase: Phase 137 - Pure Segment Retry Policy (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\Cargo.toml` (update)
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+  - `D:\DEV\MyEpicLauncher\crates\kernel-foundation\src\time.rs` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 05:00:18
+- Tool: apply_patch
+- Phase: Phase 137 - Pure Segment Retry Policy (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\kernel-foundation\src\time.rs` (update)
+
+### Auto Record: 2026-05-19 05:01:09
+- Tool: apply_patch
+- Phase: Phase 137 - Pure Segment Retry Policy (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 05:04:59
+- Tool: apply_patch
+- Phase: Phase 137 - Pure Segment Retry Policy (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)

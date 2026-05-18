@@ -2022,9 +2022,9 @@ Retry-ready facts are durable, so the next safe Rust slice is a pure policy calc
 Current Rust reality:
 
 1. Failed segment checkpoints can persist `failure_class`, `failure_retryable`, `retry_attempt_count`, and `next_retry_after`.
-2. Driver failed mutation currently leaves `next_retry_after = None`.
-3. `DownloadJobDriver::run(...)` still returns non-terminal `Accepted` for failed mutation.
-4. No module-local policy object owns max attempts, delay calculation, retry exhaustion, or user-attention classification.
+2. `DownloadSegmentRetryPolicy` now owns the pure policy calculation for automatic retry scheduling, exhausted attempts, user attention, and no-automatic-retry decisions.
+3. Driver failed mutation still leaves `next_retry_after = None` because the pure policy is not wired into checkpoint mutation yet.
+4. `DownloadJobDriver::run(...)` still returns non-terminal `Accepted` for failed mutation.
 
 Policy defaults for the first Rust slice:
 
@@ -2056,11 +2056,19 @@ Non-goals:
 4. no job-level aggregation of multiple failed segments;
 5. no `TerminalFailed` driver return until retry exhaustion aggregation, user-attention projection, and public error mapping are separately defined.
 
+Implementation status:
+
+1. `DownloadSegmentRetryPolicy` and `DownloadSegmentRetryDecision` exist in `module-downloads`.
+2. Focused tests prove attempt `1` schedules `now + 30s`, attempt `2` schedules `now + 120s`, and attempt `3` returns `RetryExhausted`.
+3. Focused tests prove `DiskNoSpace` and `PolicyBlocked` return `UserAttentionRequired`.
+4. Focused tests prove fatal, non-retryable, or incomplete failed facts return `NoAutomaticRetry`.
+5. The policy helper is pure and receives explicit `IsoDateTime now`; no scheduler, driver terminal projection, public `DL_*`, host/frontend DTO, provider HTTP, lease, or snapshot payload changed.
+
 Next implementation target:
 
-1. add RED tests for the pure policy helper using fixed `IsoDateTime` values;
-2. implement only deterministic decision and delay calculation;
-3. update README_IMPL implementation status after green while keeping driver failed mutation non-terminal.
+1. add RED tests for wiring `DownloadSegmentRetryPolicy` into `record_failed_segment_checkpoints(...)`;
+2. persist `next_retry_after` only when the pure policy returns `ScheduleRetry`;
+3. keep exhausted/user-attention/no-automatic-retry decisions non-terminal until job-level aggregation and public projection are separately defined.
 
 ---
 

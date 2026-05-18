@@ -1356,3 +1356,16 @@
 - README_IMPL 7.46 says the next boundary is a clock-owned `next_retry_after` calculation plus retry exhaustion/user-attention rules before `TerminalFailed`.
 - Error handling design says `retryable` is only a hint and does not mean immediate retry, retry count, backoff, or frontend-owned retry execution.
 - Download runtime design says failed/canceled tasks preserve recoverable staging and checkpoint by default; terminal cleanup and failure projection must not erase recovery facts prematurely.
+
+## 2026-05-19 - AT-266 context read
+
+- README_IMPL 7.47 defines the first code target as a pure policy helper accepting failed segment checkpoint facts and explicit `IsoDateTime now`; it must not read wall clock internally.
+- Automatic retry classes for the first policy slice are `NetworkTransient`, `WriteFailed`, `VerifyFailed`, and `Unknown` when `failure_retryable = Some(true)`.
+- Non-automatic classes are `NetworkFatal`, `ProviderManifestInvalid`, `DiskNoSpace`, and `PolicyBlocked`; `DiskNoSpace`, `PolicyBlocked`, and exhausted automatic classes need user attention.
+- Delay schedule is attempt 1 -> `now + 30s`, attempt 2 -> `now + 120s`, attempt 3+ exhausted.
+
+## 2026-05-19 - AT-266 implementation findings
+
+- Time arithmetic for downloads policy is better centralized on `IsoDateTime::add_seconds(...)` than by adding a direct `chrono` dependency to `module-downloads`; this avoids mixing AT-266 with the pre-existing dirty `Cargo.lock` hunk.
+- `DownloadSegmentRetryPolicy` remains pure because it receives `IsoDateTime now` explicitly and does not read `IsoDateTime::now()` internally.
+- Exhausted automatic retry returns `RetryExhausted` rather than `UserAttentionRequired`; later job-level aggregation can decide how that maps to user attention or terminal failure.

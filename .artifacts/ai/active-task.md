@@ -2,17 +2,20 @@
 
 ## Identity
 
-- task id: AT-2026-05-19-265
-- title: Define backoff policy and terminal failure eligibility boundary
+- task id: AT-2026-05-19-266
+- title: Implement pure download segment retry policy
 - status: completed
 
 ## Goal
 
-Document the next downloads backend boundary after durable retry facts: define the pure backoff policy, retry exhaustion, user-attention, and terminal failure eligibility rules before any Rust retry policy implementation.
+Implement the first Rust slice from downloads README_IMPL 7.47: a pure module-local retry/backoff policy helper that classifies automatic retry scheduling, exhaustion, user attention, and no-automatic-retry decisions without wiring scheduler or terminal projection.
 
 ## Scope
 
 - in scope:
+  - `crates/module-downloads/src/driver.rs`
+  - `crates/module-downloads/src/lib.rs`
+  - `crates/kernel-foundation/src/time.rs` for the small shared `IsoDateTime` offset helper required by pure policy time arithmetic
   - `README.md`
   - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
@@ -21,7 +24,6 @@ Document the next downloads backend boundary after durable retry facts: define t
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
-  - Rust code changes
   - SQLite schema changes
   - retry scheduler implementation or execution loops
   - returning `TerminalFailed` from downloads driver
@@ -30,53 +32,67 @@ Document the next downloads backend boundary after durable retry facts: define t
 
 ## Allowed Files
 
-1. README.md
-2. docs/modules/downloads/README_IMPL.md
-3. .artifacts/ai/active-task.md
-4. .artifacts/ai/task-plan.md
-5. .artifacts/ai/progress.md
-6. .artifacts/ai/findings.md
-7. .artifacts/ai/handoff.md
+1. crates/module-downloads/src/driver.rs
+2. crates/module-downloads/src/lib.rs
+3. crates/kernel-foundation/src/time.rs
+4. README.md
+5. docs/modules/downloads/README_IMPL.md
+6. .artifacts/ai/active-task.md
+7. .artifacts/ai/task-plan.md
+8. .artifacts/ai/progress.md
+9. .artifacts/ai/findings.md
+10. .artifacts/ai/handoff.md
 
 ## Required Context Read
 
 Read before writing:
 
-1. `README.md` current status and near-term roadmap after AT-264.
-2. `docs/modules/downloads/README_IMPL.md` 7.46 implementation status and next boundary.
+1. `README.md` current status and near-term roadmap after AT-265.
+2. `docs/modules/downloads/README_IMPL.md` 7.47 policy defaults and first Rust slice.
 3. `docs/TauriErrorHandlingAndProjectionDesign.md` retryable semantics and stable public code rules.
 4. `docs/TauriDownloadRuntimeDesign.md` checkpoint save rules and failure classification principles.
 5. `docs/modules/downloads/README_API.md`, `README_ARCH.md`, and `README_FLOW.md` module boundary notes.
 
 ## Hypothesis
 
-- falsifiable documentation hypothesis: the next safe code slice is a pure retry/backoff policy calculator that can classify automatic retry eligibility, retry exhaustion, and user-attention needs without scheduling work or returning `TerminalFailed`.
+- falsifiable implementation hypothesis: a pure retry policy helper can produce deterministic retry scheduling/exhaustion/user-attention decisions from persisted failed segment facts and explicit `IsoDateTime now` without touching scheduler, driver terminal projection, storage, host, or frontend code.
 
 ## Cheap Check
 
-1. Update README current status to point the next Rust slice at pure backoff policy calculation.
-2. Add README_IMPL 7.47 defining automatic retry gates, max attempts, delay schedule, user-attention classes, terminal-candidate constraints, and first Rust slice.
-3. Update PWF records and handoff.
-4. Run scoped `git diff --check` for touched docs/task files.
+1. Add RED tests for first-attempt retry scheduling, second-attempt retry scheduling, automatic retry exhaustion, user-attention classes, and no-automatic-retry classes.
+2. Implement the smallest `DownloadSegmentRetryPolicy` / decision type that passes those tests.
+3. Update README and README_IMPL implementation status after green.
+4. Run focused/full downloads tests, composition check, scoped rustfmt, and scoped diff-check.
 5. Commit locally; do not reattempt push unless the user explicitly approves after the prior safety block.
 
 ## Validation Gate
 
-1. README names pure retry/backoff policy calculation as the next Rust slice.
-2. README_IMPL 7.47 defines deterministic policy rules without starting retry execution.
-3. Public `DL_*`, `TerminalFailed`, host/frontend, provider, scheduler, lease, and snapshot error payload work remain explicitly out of scope.
-4. Scoped diff-check passes or CRLF-only warnings are recorded.
+1. RED tests fail for missing retry policy/decision types before implementation.
+2. `cargo test -p launcher-module-downloads --lib` passes after implementation.
+3. `cargo test -p launcher-kernel-foundation --lib` passes for the shared time helper.
+4. `cargo check -p launcher-composition-root` passes.
+5. Public `DL_*`, `TerminalFailed`, host/frontend, provider, scheduler, lease, and snapshot error payload work remain explicitly out of scope.
+6. README and README_IMPL reflect the completed pure policy slice.
 
 ## Completion Evidence
 
-- Updated `README.md` current roadmap to say the next downloads Rust slice is a pure backoff policy calculator before scheduler, `TerminalFailed`, or public `DL_*`.
-- Added `docs/modules/downloads/README_IMPL.md` 7.47 defining:
-  - automatic retry gates by `failure_retryable` and `DownloadSegmentFailureClass`;
-  - initial max automatic segment retry attempts of three observed failures;
-  - deterministic delay schedule of attempt 1 -> 30s and attempt 2 -> 120s;
-  - exhausted/user-attention/terminal-candidate boundaries;
-  - first Rust slice as a pure policy helper with fixed `IsoDateTime now` input.
-- Preserved Rust code, SQLite schema, retry scheduler loops, automatic dispatch, `TerminalFailed`, public `DL_*`, host/frontend/provider/lease/snapshot payload changes out of scope.
-- Validation: scoped `git diff --check` over README, README_IMPL, and PWF files passed with CRLF normalization warnings only.
-- Commit `d25ef93` created locally.
-- Push was not reattempted because the previous direct `origin/main` push was blocked by the safety reviewer and explicit approval is required before retrying.
+- RED evidence:
+  - `cargo test -p launcher-module-downloads download_segment_retry_policy --lib` failed before implementation because `DownloadSegmentRetryPolicy` and `DownloadSegmentRetryDecision` did not exist.
+- Implemented `DownloadSegmentRetryPolicy` and `DownloadSegmentRetryDecision` as a pure module-local policy helper.
+- Added focused policy tests proving:
+  - attempt `1` schedules `now + 30s`;
+  - attempt `2` schedules `now + 120s`;
+  - attempt `3` returns `RetryExhausted`;
+  - `DiskNoSpace` and `PolicyBlocked` return `UserAttentionRequired`;
+  - fatal, non-retryable, or incomplete failed facts return `NoAutomaticRetry`.
+- Added `IsoDateTime::add_seconds(...)` in `kernel-foundation` so policy time arithmetic reuses the shared time wrapper without adding a new module dependency.
+- README and downloads README_IMPL were updated to mark this pure policy slice complete and route the next boundary to wiring the policy into failed checkpoint mutation.
+- Validation:
+  - `cargo test -p launcher-module-downloads download_segment_retry_policy --lib` -> 5 passed.
+  - `cargo test -p launcher-kernel-foundation --lib` -> 0 tests, exit 0.
+  - `cargo test -p launcher-module-downloads --lib` -> 78 passed.
+  - `cargo check -p launcher-composition-root` -> passed.
+  - `rustfmt --check crates/kernel-foundation/src/time.rs crates/module-downloads/src/driver.rs crates/module-downloads/src/lib.rs` -> passed.
+  - scoped `git diff --check` -> passed with CRLF normalization warnings only.
+- `Cargo.lock` was inspected and only contains a pre-existing unrelated `launcher-module-engines` hunk; it must remain uncommitted for this AT.
+- Unintended package-wide rustfmt noise in unrelated foundation files was removed; only `time.rs` remains in scope.

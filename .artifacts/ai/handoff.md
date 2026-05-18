@@ -727,3 +727,31 @@
 - Publish:
   - Local commit `d25ef93 docs: define download backoff policy boundary` exists.
   - Push was not reattempted because the previous direct `origin/main` push was blocked by the safety reviewer and explicit approval is required before retrying.
+## Current Handoff - AT-2026-05-19-266
+
+- Status: completed; local commit pending.
+- Scope:
+  - `crates/module-downloads/src/driver.rs`
+  - `crates/module-downloads/src/lib.rs`
+  - `crates/kernel-foundation/src/time.rs` for the shared `IsoDateTime` offset helper required by policy time arithmetic
+  - root README and downloads README_IMPL after green
+  - PWF records under `.artifacts/ai`
+- TDD target:
+  - pure retry/backoff policy tests for attempt 1 -> 30s, attempt 2 -> 120s, attempt 3+ exhausted, user-attention classes, and no-automatic-retry classes.
+- Completed:
+  - `DownloadSegmentRetryPolicy`
+  - `DownloadSegmentRetryDecision`
+  - `IsoDateTime::add_seconds(...)`
+  - README/README_IMPL status and next-boundary updates.
+- Validation:
+  - `cargo test -p launcher-module-downloads download_segment_retry_policy --lib` -> 5 passed after RED failed on missing types.
+  - `cargo test -p launcher-kernel-foundation --lib` -> 0 tests, exit 0.
+  - `cargo test -p launcher-module-downloads --lib` -> 78 passed.
+  - `cargo check -p launcher-composition-root` -> passed.
+  - `rustfmt --check crates/kernel-foundation/src/time.rs crates/module-downloads/src/driver.rs crates/module-downloads/src/lib.rs` -> passed.
+  - scoped `git diff --check` -> passed with CRLF normalization warnings only.
+- Note:
+  - `Cargo.lock` has a pre-existing unrelated `launcher-module-engines` hunk and must not be committed for this AT.
+  - Unintended package-wide rustfmt noise in unrelated foundation files was removed; only `time.rs` is part of this AT.
+- Boundaries:
+  - no scheduler loop, automatic retry dispatch, SQLite schema, `TerminalFailed`, public `DL_*`, host/frontend/provider HTTP, production wiring, leases, or snapshot error payload change.

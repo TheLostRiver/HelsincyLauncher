@@ -20,6 +20,12 @@ impl IsoDateTime {
     pub fn as_datetime(&self) -> &DateTime<Utc> {
         &self.0
     }
+
+    /// 基于当前 UTC 时间戳返回增加指定秒数后的新包装值。
+    /// Returns a new wrapper value offset from this UTC timestamp by the given seconds.
+    pub fn add_seconds(&self, seconds: i64) -> Self {
+        Self(self.0 + chrono::Duration::seconds(seconds))
+    }
 }
 
 impl Display for IsoDateTime {

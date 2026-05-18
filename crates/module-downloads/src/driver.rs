@@ -84,6 +84,110 @@ pub enum DownloadSegmentFailureClass {
     Unknown,
 }
 
+/// segment 失败事实经过纯 retry policy 后得到的模块本地决策。
+/// Module-local decision produced by the pure retry policy from persisted segment failure facts.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum DownloadSegmentRetryDecision {
+    /// 已计算出最早自动重试时间，但尚未调度任何后台任务。
+    /// Earliest automatic retry time was calculated, but no background work is scheduled here.
+    ScheduleRetry {
+        /// 后端自动重试最早可执行时间。
+        /// Earliest backend-owned automatic retry eligibility time.
+        next_retry_after: IsoDateTime,
+    },
+    /// 自动重试预算已耗尽，后续需要 job-level 聚合和投影决策。
+    /// Automatic retry budget is exhausted; later job-level aggregation/projection must decide next steps.
+    RetryExhausted,
+    /// 失败需要用户或系统动作，不应由当前 slice 自动重试。
+    /// Failure needs user or system action and should not be retried automatically in this slice.
+    UserAttentionRequired,
+    /// 当前事实不足或策略不允许自动重试。
+    /// Current facts are incomplete or policy does not allow automatic retry.
+    NoAutomaticRetry,
+}
+
+/// 纯 segment retry/backoff 策略，只计算决策，不读取时钟也不调度任务。
+/// Pure segment retry/backoff policy: calculates decisions without reading clocks or scheduling work.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct DownloadSegmentRetryPolicy {
+    max_automatic_attempts: u32,
+    first_retry_delay_seconds: i64,
+    second_retry_delay_seconds: i64,
+}
+
+impl Default for DownloadSegmentRetryPolicy {
+    fn default() -> Self {
+        Self {
+            max_automatic_attempts: 3,
+            first_retry_delay_seconds: 30,
+            second_retry_delay_seconds: 120,
+        }
+    }
+}
+
+impl DownloadSegmentRetryPolicy {
+    /// 基于已持久化的失败事实和显式 `now` 计算下一步 retry 决策。
+    /// Calculates the next retry decision from persisted failure facts and an explicit `now`.
+    pub fn decide_failed_segment(
+        &self,
+        segment: &DownloadSegmentCheckpointRecord,
+        now: &IsoDateTime,
+    ) -> DownloadSegmentRetryDecision {
+        if segment.status != DownloadSegmentCheckpointStatus::Failed {
+            return DownloadSegmentRetryDecision::NoAutomaticRetry;
+        }
+
+        let Some(failure_class) = segment.failure_class else {
+            return DownloadSegmentRetryDecision::NoAutomaticRetry;
+        };
+
+        if Self::requires_user_attention(failure_class) {
+            return DownloadSegmentRetryDecision::UserAttentionRequired;
+        }
+
+        if segment.failure_retryable != Some(true) || !Self::allows_automatic_retry(failure_class) {
+            return DownloadSegmentRetryDecision::NoAutomaticRetry;
+        }
+
+        let Some(attempt_count) = segment.retry_attempt_count else {
+            return DownloadSegmentRetryDecision::NoAutomaticRetry;
+        };
+        if attempt_count == 0 {
+            return DownloadSegmentRetryDecision::NoAutomaticRetry;
+        }
+        if attempt_count >= self.max_automatic_attempts {
+            return DownloadSegmentRetryDecision::RetryExhausted;
+        }
+
+        let delay_seconds = match attempt_count {
+            1 => self.first_retry_delay_seconds,
+            2 => self.second_retry_delay_seconds,
+            _ => return DownloadSegmentRetryDecision::RetryExhausted,
+        };
+
+        DownloadSegmentRetryDecision::ScheduleRetry {
+            next_retry_after: now.add_seconds(delay_seconds),
+        }
+    }
+
+    fn allows_automatic_retry(failure_class: DownloadSegmentFailureClass) -> bool {
+        matches!(
+            failure_class,
+            DownloadSegmentFailureClass::NetworkTransient
+                | DownloadSegmentFailureClass::WriteFailed
+                | DownloadSegmentFailureClass::VerifyFailed
+                | DownloadSegmentFailureClass::Unknown
+        )
+    }
+
+    fn requires_user_attention(failure_class: DownloadSegmentFailureClass) -> bool {
+        matches!(
+            failure_class,
+            DownloadSegmentFailureClass::DiskNoSpace | DownloadSegmentFailureClass::PolicyBlocked
+        )
+    }
+}
+
 /// Segment-level persisted checkpoint fact owned by downloads.
 /// downloads 拥有的 segment 级持久化 checkpoint 事实。
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1135,9 +1239,10 @@ mod tests {
         DownloadSegmentFetchOutcome, DownloadSegmentFetchPort, DownloadSegmentFetchResult,
         DownloadSegmentFilesystemWritePort, DownloadSegmentGuardedWritePort,
         DownloadSegmentHandledFailure, DownloadSegmentLengthVerifyPort,
-        DownloadSegmentStagingTarget, DownloadSegmentStaticFetchPort,
-        DownloadSegmentStaticFetchSource, DownloadSegmentVerifyOutcome, DownloadSegmentVerifyPort,
-        DownloadSegmentWriteOutcome, DownloadSegmentWritePort, DownloadSegmentWriteResult,
+        DownloadSegmentRetryDecision, DownloadSegmentRetryPolicy, DownloadSegmentStagingTarget,
+        DownloadSegmentStaticFetchPort, DownloadSegmentStaticFetchSource,
+        DownloadSegmentVerifyOutcome, DownloadSegmentVerifyPort, DownloadSegmentWriteOutcome,
+        DownloadSegmentWritePort, DownloadSegmentWriteResult,
     };
 
     #[derive(Default)]
@@ -1939,6 +2044,127 @@ mod tests {
             failure_class: None,
             retry_attempt_count: None,
             next_retry_after: None,
+        }
+    }
+
+    fn failed_segment_for_retry_policy(
+        failure_class: DownloadSegmentFailureClass,
+        retryable: bool,
+        retry_attempt_count: u32,
+    ) -> DownloadSegmentCheckpointRecord {
+        let job_id = JobId::generate();
+        let mut segment = make_segment_checkpoint_record(
+            &job_id,
+            "segment-retry-policy",
+            DownloadSegmentCheckpointStatus::Failed,
+        );
+        segment.failure_retryable = Some(retryable);
+        segment.failure_class = Some(failure_class);
+        segment.retry_attempt_count = Some(retry_attempt_count);
+        segment
+    }
+
+    fn scheduled_delay_seconds(decision: DownloadSegmentRetryDecision, now: &IsoDateTime) -> i64 {
+        let DownloadSegmentRetryDecision::ScheduleRetry { next_retry_after } = decision else {
+            panic!("retry policy decision should schedule a retry");
+        };
+        next_retry_after
+            .as_datetime()
+            .signed_duration_since(now.as_datetime().clone())
+            .num_seconds()
+    }
+
+    #[test]
+    fn download_segment_retry_policy_schedules_first_retry_after_thirty_seconds() {
+        let policy = DownloadSegmentRetryPolicy::default();
+        let now = IsoDateTime::now();
+        let segment =
+            failed_segment_for_retry_policy(DownloadSegmentFailureClass::NetworkTransient, true, 1);
+
+        let decision = policy.decide_failed_segment(&segment, &now);
+
+        assert_eq!(
+            scheduled_delay_seconds(decision, &now),
+            30,
+            "first automatic retry attempt should use the documented 30s delay"
+        );
+    }
+
+    #[test]
+    fn download_segment_retry_policy_schedules_second_retry_after_one_hundred_twenty_seconds() {
+        let policy = DownloadSegmentRetryPolicy::default();
+        let now = IsoDateTime::now();
+        let segment =
+            failed_segment_for_retry_policy(DownloadSegmentFailureClass::VerifyFailed, true, 2);
+
+        let decision = policy.decide_failed_segment(&segment, &now);
+
+        assert_eq!(
+            scheduled_delay_seconds(decision, &now),
+            120,
+            "second automatic retry attempt should use the documented 120s delay"
+        );
+    }
+
+    #[test]
+    fn download_segment_retry_policy_exhausts_third_automatic_retry_attempt() {
+        let policy = DownloadSegmentRetryPolicy::default();
+        let now = IsoDateTime::now();
+        let segment =
+            failed_segment_for_retry_policy(DownloadSegmentFailureClass::WriteFailed, true, 3);
+
+        let decision = policy.decide_failed_segment(&segment, &now);
+
+        assert_eq!(
+            decision,
+            DownloadSegmentRetryDecision::RetryExhausted,
+            "third observed automatic retry failure should exhaust the segment retry budget"
+        );
+    }
+
+    #[test]
+    fn download_segment_retry_policy_routes_attention_classes_to_user_attention() {
+        let policy = DownloadSegmentRetryPolicy::default();
+        let now = IsoDateTime::now();
+
+        for failure_class in [
+            DownloadSegmentFailureClass::DiskNoSpace,
+            DownloadSegmentFailureClass::PolicyBlocked,
+        ] {
+            let segment = failed_segment_for_retry_policy(failure_class, true, 1);
+
+            assert_eq!(
+                policy.decide_failed_segment(&segment, &now),
+                DownloadSegmentRetryDecision::UserAttentionRequired,
+                "documented user-attention classes should not schedule automatic retry"
+            );
+        }
+    }
+
+    #[test]
+    fn download_segment_retry_policy_returns_no_automatic_retry_for_fatal_or_missing_facts() {
+        let policy = DownloadSegmentRetryPolicy::default();
+        let now = IsoDateTime::now();
+        let fatal_segment =
+            failed_segment_for_retry_policy(DownloadSegmentFailureClass::NetworkFatal, true, 1);
+        let non_retryable_segment = failed_segment_for_retry_policy(
+            DownloadSegmentFailureClass::NetworkTransient,
+            false,
+            1,
+        );
+        let missing_count_segment = {
+            let mut segment =
+                failed_segment_for_retry_policy(DownloadSegmentFailureClass::Unknown, true, 1);
+            segment.retry_attempt_count = None;
+            segment
+        };
+
+        for segment in [fatal_segment, non_retryable_segment, missing_count_segment] {
+            assert_eq!(
+                policy.decide_failed_segment(&segment, &now),
+                DownloadSegmentRetryDecision::NoAutomaticRetry,
+                "fatal, non-retryable, or incomplete facts must not schedule automatic retry"
+            );
         }
     }
 
