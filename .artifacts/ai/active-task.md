@@ -74,4 +74,4 @@ Read before writing:
 - Updated `docs/modules/downloads/README_IMPL.md` 6.1 and added 7.44 with the completion-first terminal decision boundary.
 - Validation: scoped `git diff --check` over README, README_IMPL, and PWF task files passed with CRLF normalization warnings only.
 - No Rust, transport, frontend, provider, retry/backoff, public `DL_*`, schema, scheduler, or lease files were edited.
-- Commit/push pending.
+- Published as commit `bf6af24` and pushed to `origin/main`.

@@ -572,7 +572,7 @@
 
 ## Current Handoff - AT-2026-05-19-259
 
-- Status: completed; commit/push pending.
+- Status: completed; final commit `bf6af24`, pushed to `origin/main`.
 - Scope:
   - root README
   - `docs/modules/downloads/README_IMPL.md`

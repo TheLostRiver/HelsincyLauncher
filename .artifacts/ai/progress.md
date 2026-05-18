@@ -11601,6 +11601,7 @@
 - Added README_IMPL 7.44 with the current Rust reality, boundary rules, and first Rust slice for returning `JobRunDisposition::Completed` only after a saved non-empty all-completed known checkpoint.
 - Kept `TerminalFailed` reserved for later retry/backoff/failure classification because current failed checkpoint facts do not persist retryability or reason.
 - Validation passed: scoped `git diff --check` for README, README_IMPL, and PWF task files returned only CRLF normalization warnings.
+- Published AT-259 as `bf6af24 docs: define downloads completion terminal boundary` and pushed it to `origin/main`.
 - Next likely code task: implement README_IMPL 7.44 with focused downloads driver TDD.
 
 ### Auto Record: 2026-05-19 02:52:22
@@ -11697,6 +11698,15 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
 
 ### Auto Record: 2026-05-19 03:16:18
+- Tool: apply_patch
+- Phase: Phase 130 - Downloads Driver Completion-first Terminal Boundary (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 03:18:19
 - Tool: apply_patch
 - Phase: Phase 130 - Downloads Driver Completion-first Terminal Boundary (complete)
 - Files:
