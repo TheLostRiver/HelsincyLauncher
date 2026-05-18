@@ -322,7 +322,7 @@
 
 ## Latest Handoff - AT-2026-05-18-244
 
-- Status: completed; commit/push pending at the time this handoff entry was written.
+- Status: completed; final commit `e447444`, pushed to `origin/main`.
 - Scope:
   - Define README_IMPL 7.38 for a guarded downloads writer sub-port boundary.
   - Keep this slice documentation/PWF-only.
@@ -336,6 +336,21 @@
 - Preserved boundaries:
   - No Rust code in AT-244.
   - No real staging writes, directory creation, temp naming, artifact moves, hash checks, production wiring, retry/backoff, public `DL_*` projection, host transport, frontend, or schema work.
+
+## Latest Handoff - AT-2026-05-18-245
+
+- Status: completed; commit/push pending at the time this handoff entry was written.
+- Scope:
+  - Added focused TDD for a guarded downloads writer wrapper.
+  - Implemented only the module-owned wrapper behind `DownloadSegmentWritePort`.
+- Validation passed:
+  - RED failed on missing `DownloadSegmentGuardedWritePort`;
+  - focused guarded writer tests passed;
+  - full `launcher-module-downloads --lib` passed;
+  - `launcher-composition-root` check passed;
+  - scoped rustfmt and diff-check passed.
+- Preserved boundaries:
+  - No real disk IO, no composition-root wiring, no retry/backoff, no public `DL_*` projection, no host transport/frontend/schema work.
 
 ## Dirty Worktree To Preserve
 

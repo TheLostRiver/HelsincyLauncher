@@ -376,6 +376,35 @@ pub trait DownloadSegmentWritePort: Send + Sync {
     ) -> AppResult<DownloadSegmentWriteOutcome>;
 }
 
+/// Guarded writer wrapper that rejects unsafe staging targets before delegation.
+/// 带防护的 writer 包装器：在委托前拒绝不安全的 staging 目标。
+#[derive(Clone)]
+pub struct DownloadSegmentGuardedWritePort {
+    inner: Arc<dyn DownloadSegmentWritePort>,
+}
+
+impl DownloadSegmentGuardedWritePort {
+    /// Creates a guarded writer around an explicit module-owned writer port.
+    /// 围绕显式的模块自有 writer 端口创建带防护的 writer。
+    pub fn new(inner: Arc<dyn DownloadSegmentWritePort>) -> Self {
+        Self { inner }
+    }
+}
+
+impl DownloadSegmentWritePort for DownloadSegmentGuardedWritePort {
+    fn write_segment(
+        &self,
+        request: &DownloadSegmentExecutionRequest,
+        fetched: &DownloadSegmentFetchResult,
+    ) -> AppResult<DownloadSegmentWriteOutcome> {
+        if let Err(failure) = DownloadSegmentStagingTarget::parse(&request.write_target) {
+            return Ok(DownloadSegmentWriteOutcome::Failed(failure));
+        }
+
+        self.inner.write_segment(request, fetched)
+    }
+}
+
 /// Module-owned verifier boundary used behind `DownloadSegmentExecutionPort`.
 /// 位于 `DownloadSegmentExecutionPort` 背后的模块自有 verifier 边界。
 pub trait DownloadSegmentVerifyPort: Send + Sync {
@@ -803,9 +832,10 @@ mod tests {
         DownloadJobDriver, DownloadSegmentCheckpointRecord, DownloadSegmentCheckpointStatus,
         DownloadSegmentExecutionPort, DownloadSegmentExecutionRequest,
         DownloadSegmentExecutionResult, DownloadSegmentExecutor, DownloadSegmentFetchOutcome,
-        DownloadSegmentFetchPort, DownloadSegmentFetchResult, DownloadSegmentHandledFailure,
-        DownloadSegmentStagingTarget, DownloadSegmentVerifyOutcome, DownloadSegmentVerifyPort,
-        DownloadSegmentWriteOutcome, DownloadSegmentWritePort, DownloadSegmentWriteResult,
+        DownloadSegmentFetchPort, DownloadSegmentFetchResult, DownloadSegmentGuardedWritePort,
+        DownloadSegmentHandledFailure, DownloadSegmentStagingTarget, DownloadSegmentVerifyOutcome,
+        DownloadSegmentVerifyPort, DownloadSegmentWriteOutcome, DownloadSegmentWritePort,
+        DownloadSegmentWriteResult,
     };
 
     #[derive(Default)]
@@ -1021,6 +1051,24 @@ mod tests {
         }
     }
 
+    struct InfrastructureFailureWritePort;
+
+    impl DownloadSegmentWritePort for InfrastructureFailureWritePort {
+        fn write_segment(
+            &self,
+            _request: &DownloadSegmentExecutionRequest,
+            _fetched: &DownloadSegmentFetchResult,
+        ) -> launcher_kernel_foundation::AppResult<DownloadSegmentWriteOutcome> {
+            Err(AppError::new(
+                "TEST_WRITER_INFRASTRUCTURE",
+                "writer infrastructure is unavailable",
+                false,
+                AppErrorSeverity::Error,
+                CorrelationId::generate(),
+            ))
+        }
+    }
+
     #[derive(Default)]
     struct RecordingVerifyPort {
         verifications: Mutex<Vec<(DownloadSegmentExecutionRequest, Option<String>, u64)>>,
@@ -1116,6 +1164,83 @@ mod tests {
                 "unsafe target rejection should stay module-local and diagnostic"
             );
         }
+    }
+
+    #[test]
+    fn download_segment_guarded_write_port_rejects_unsafe_target_without_delegating() {
+        let job_id = JobId::generate();
+        let mut request = make_segment_execution_request(&job_id, "segment-unsafe-target");
+        request.write_target = "../escape.part".into();
+        let fetched = DownloadSegmentFetchResult {
+            bytes: vec![5, 6, 7],
+            etag: None,
+        };
+        let writer = Arc::new(RecordingWritePort::default());
+        let guarded = DownloadSegmentGuardedWritePort::new(writer.clone());
+
+        let outcome = guarded
+            .write_segment(&request, &fetched)
+            .expect("unsafe target should become a handled write outcome");
+
+        assert!(
+            writer.writes().is_empty(),
+            "unsafe staging targets must not reach the wrapped writer"
+        );
+        let DownloadSegmentWriteOutcome::Failed(failure) = outcome else {
+            panic!("unsafe target should become a handled write failure");
+        };
+        assert_eq!(failure.downloaded_bytes, 0);
+        assert!(!failure.retryable);
+        assert!(failure.reason.contains("unsafe staging write target"));
+    }
+
+    #[test]
+    fn download_segment_guarded_write_port_delegates_safe_target_once() {
+        let job_id = JobId::generate();
+        let request = make_segment_execution_request(&job_id, "segment-safe-target");
+        let fetched = DownloadSegmentFetchResult {
+            bytes: vec![8, 9, 10, 11],
+            etag: Some("etag-safe".into()),
+        };
+        let writer = Arc::new(RecordingWritePort::default());
+        let guarded = DownloadSegmentGuardedWritePort::new(writer.clone());
+
+        let outcome = guarded
+            .write_segment(&request, &fetched)
+            .expect("safe target should delegate to wrapped writer");
+
+        let writes = writer.writes();
+        assert_eq!(
+            writes,
+            vec![(request.clone(), fetched.bytes.clone())],
+            "safe target delegation should preserve request and fetched bytes"
+        );
+        assert_eq!(
+            outcome,
+            DownloadSegmentWriteOutcome::Written(DownloadSegmentWriteResult {
+                downloaded_bytes: fetched.bytes.len() as u64,
+                partial_path: Some(request.write_target.clone()),
+                hash_state_ref: Some(format!("hash-{}", request.segment_id)),
+            })
+        );
+    }
+
+    #[test]
+    fn download_segment_guarded_write_port_propagates_inner_app_error() {
+        let job_id = JobId::generate();
+        let request = make_segment_execution_request(&job_id, "segment-writer-error");
+        let fetched = DownloadSegmentFetchResult {
+            bytes: vec![1],
+            etag: None,
+        };
+        let guarded =
+            DownloadSegmentGuardedWritePort::new(Arc::new(InfrastructureFailureWritePort));
+
+        let err = guarded
+            .write_segment(&request, &fetched)
+            .expect_err("writer infrastructure errors should propagate");
+
+        assert_eq!(err.code, "TEST_WRITER_INFRASTRUCTURE");
     }
 
     fn make_snapshot(job_id: JobId) -> launcher_kernel_jobs::JobSnapshot<()> {

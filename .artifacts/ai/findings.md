@@ -1182,3 +1182,11 @@
 - AT-243 added the pure `DownloadSegmentStagingTarget` guard, but `DownloadSegmentWritePort` still receives the raw request; integrating the guard directly into a future disk writer would mix path-safety semantics with IO too early.
 - The next durable boundary should be a module-owned guarded writer wrapper behind `DownloadSegmentWritePort`: unsafe targets become `DownloadSegmentWriteOutcome::Failed`, safe targets delegate unchanged to an injected writer.
 - Real directories, file writes, temp naming, staging-root canonicalization, artifact moves, hash checks, public `DL_*` projection, retry/backoff, terminal runtime state, production wiring, transport, frontend, and schema remain out of scope.
+
+## Phase 116 Downloads Guarded Writer Port Findings
+
+- Required context for AT-245 is already fresh in this session: README/docs routing, module docs, README_IMPL 7.38, runtime writer/staging notes, storage staging ownership, and current writer/guard code.
+- The wrapper should be module-owned and test-only/future-port friendly: it should hold `Arc<dyn DownloadSegmentWritePort>` and implement the same trait.
+- Unsafe target handling can reuse `DownloadSegmentStagingTarget::parse(...)` directly, returning `Ok(DownloadSegmentWriteOutcome::Failed(failure))` so the existing executor mapping turns it into a failed segment result later.
+- Safe target delegation should not rewrite the request yet because no concrete writer accepts a typed `DownloadSegmentStagingTarget` value in this boundary.
+- RED/GREEN confirmed the wrapper rejects unsafe targets without calling the inner writer, delegates safe targets exactly once, and propagates inner writer `AppError` values unchanged.

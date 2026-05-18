@@ -10682,6 +10682,20 @@
 - Opened Phase 115 / AT-2026-05-18-244 to document the guarded writer sub-port boundary before any Rust writer integration.
 - Added README_IMPL 7.38 and updated PWF records; scoped `git diff --check` for touched docs/PWF files passed with CRLF normalization warnings only.
 
+## 2026-05-18 - AT-2026-05-18-245 Guarded Writer Port
+
+- Opened Phase 116 / AT-2026-05-18-245 after AT-244 was committed and pushed.
+- Next step is RED tests for unsafe-target rejection without delegation, safe delegation, and inner `AppError` propagation before adding production code.
+- RED: `cargo test -p launcher-module-downloads --lib download_segment_guarded_write_port --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` failed on unresolved `DownloadSegmentGuardedWritePort`, proving the new tests covered missing behavior.
+- GREEN: added `DownloadSegmentGuardedWritePort` with bilingual doc comments and re-exported it from `launcher-module-downloads`.
+- Validation passed:
+  - focused guarded writer tests: 3 passed;
+  - focused executor adapter tests: 3 passed;
+  - full `launcher-module-downloads --lib`: 60 passed;
+  - `cargo check -p launcher-composition-root`;
+  - scoped `cargo fmt --package launcher-module-downloads -- --check`;
+  - scoped `git diff --check` for AT-245 files, with CRLF normalization warnings only.
+
 ### Auto Record: 2026-05-18 13:04:59
 - Tool: apply_patch
 - Phase: Phase 115 - Downloads Guarded Writer Boundary (in_progress)
@@ -10705,5 +10719,44 @@
 - Files:
   - `.artifacts/ai/active-task.md` (update)
   - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-18 13:15:18
+- Tool: apply_patch
+- Phase: Phase 116 - Downloads Guarded Writer Port (in_progress)
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-18 13:15:35
+- Tool: apply_patch
+- Phase: Phase 116 - Downloads Guarded Writer Port (in_progress)
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+
+### Auto Record: 2026-05-18 13:17:04
+- Tool: apply_patch
+- Phase: Phase 116 - Downloads Guarded Writer Port (in_progress)
+- Files:
+  - `crates/module-downloads/src/driver.rs` (update)
+
+### Auto Record: 2026-05-18 13:18:05
+- Tool: apply_patch
+- Phase: Phase 116 - Downloads Guarded Writer Port (in_progress)
+- Files:
+  - `crates/module-downloads/src/driver.rs` (update)
+  - `crates/module-downloads/src/lib.rs` (update)
+
+### Auto Record: 2026-05-18 13:20:54
+- Tool: apply_patch
+- Phase: Phase 116 - Downloads Guarded Writer Port (complete)
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
   - `.artifacts/ai/progress.md` (update)
   - `.artifacts/ai/handoff.md` (update)
