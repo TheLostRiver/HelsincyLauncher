@@ -156,7 +156,7 @@ MyEpicLauncher/
 短期最明确的下一步不是继续扩写大蓝图，而是：
 
 1. 在已经通过 smoke gate 的 backend skeleton 基线上继续推进更窄的集成切片。
-2. downloads 后端下一步应先落 retry count、next retry eligibility 和 internal failure class 的 Rust 持久化切片，再允许 driver 返回 `TerminalFailed` 或公开稳定 `DL_*` 执行错误。
+2. downloads 后端已落 durable `failure_class`、`retry_attempt_count` 和 `next_retry_after` checkpoint 事实；下一步应先定义 backoff policy、retry exhaustion 和 terminal failure eligibility，再允许 driver 返回 `TerminalFailed` 或公开稳定 `DL_*` 执行错误。
 3. 把 contributor-facing 的协作入口和 current-repo 导航补平。
 4. 保持 README、`.artifacts/ai` 协议和深度设计文档之间的一致性。
 

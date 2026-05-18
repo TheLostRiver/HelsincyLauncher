@@ -1335,3 +1335,17 @@
 - Download runtime design says retryable errors can retry locally at the segment level, non-retryable errors may terminate the job while preserving checkpoint/staging facts, and verification failures should redownload affected segments first.
 - The next boundary needs an internal failure class before public `DL_*` projection; stable public codes become compatibility contracts once exposed.
 - Durable retry policy facts should separate failed-attempt count from next retry eligibility, so a checkpoint can survive process restart without depending on transient memory queues.
+## 2026-05-19 - AT-264 context read
+
+- Read `README.md` near-term roadmap: next downloads backend work is retry count, next retry eligibility, and internal failure class persistence before any `TerminalFailed` or stable public `DL_*` execution error.
+- Read `docs/modules/downloads/README_IMPL.md` 7.46: add module-local failure class, carry it through handled failures and failed execution results, persist optional `failure_class`, `retry_attempt_count`, and `next_retry_after`; new failed facts start at attempt count `1`, replacing existing failed facts increments the persisted count, and `next_retry_after` stays unset until a separate backoff policy slice.
+- Read `docs/TauriErrorHandlingAndProjectionDesign.md`: `retryable` is only a retry hint, not retry count, backoff, frontend execution, or automatic backend retry proof.
+- Read `docs/TauriDownloadRuntimeDesign.md`: checkpoint facts are backend-owned and must be persisted before failed/canceled/completed terminal transitions.
+- Read downloads module API/ARCH/FLOW docs: frontend consumes aggregate projections only; this AT stays in backend driver/storage and must not alter frontend transport or UI surfaces.
+
+## 2026-05-19 - AT-264 implementation findings
+
+- `DownloadSegmentFailureClass` can stay module-owned while still being exported through the Rust crate root for storage adapter mapping; no host transport or frontend DTO needs it.
+- `next_retry_after` can be stored as RFC3339 text via `IsoDateTime::to_string()` and parsed back through the existing serde-based `IsoDateTime` path, so no new `chrono` dependency was needed in `launcher-adapter-storage-sqlite`.
+- `record_failed_segment_checkpoints(...)` should derive `retry_attempt_count` only from an existing failed checkpoint record; non-failed existing records start at `1` when replaced by a failed fact.
+- `DownloadJobDriver::run(...)` remains non-terminal for failed checkpoint mutation after the new retry facts are durable.

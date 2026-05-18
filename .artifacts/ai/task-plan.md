@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 134 - Retry Backoff Failure-Class Boundary (complete)
+Phase 135 - Retry Failure Facts Persistence (complete)
 
 ## Current Focus
 
@@ -53,6 +53,7 @@ Phase 134 - Retry Backoff Failure-Class Boundary (complete)
 - AT-2026-05-19-261 defined failed segment metadata persistence and retry classification before Rust changes; committed and pushed as `124dbb3`.
 - AT-2026-05-19-262 implemented durable failed segment metadata through checkpoint records and SQLite round-trip mapping; committed and pushed as `74cdf2c`.
 - AT-2026-05-19-263 defined the retry/backoff/failure-class persistence boundary before Rust policy fields; committed and pushed as `4642653`.
+- AT-2026-05-19-264 completed the first README_IMPL 7.46 Rust slice: internal failure class plus retry attempt and retry eligibility checkpoint facts, with README updates after green.
 - AT-2026-05-17-220 was published as commit `aa8d6e3` after documenting the shared runtime execution-turn boundary.
 - AT-2026-05-17-219 was published as commit `f618718` after adding host transport smoke coverage for downloads policy runtime application.
 - AT-2026-05-17-218 was published as commit `5aae7f1` after adding documentation-budget rules.

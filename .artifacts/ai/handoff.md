@@ -677,3 +677,29 @@
   - `.codex` files
   - `src/`
   - `crates/composition-root/src/startup.rs`
+## Current Handoff - AT-2026-05-19-264
+
+- Status: completed; local commit/push pending.
+- Scope:
+  - `crates/module-downloads/src/driver.rs`
+  - `crates/module-downloads/src/facade/mod.rs` fixture updates only if required by widened checkpoint records
+  - `crates/adapter-storage-sqlite/src/lib.rs`
+  - `crates/adapter-storage-sqlite/Cargo.toml` only if timestamp parsing requires it
+  - root README and `docs/modules/downloads/README_IMPL.md` after green
+  - PWF records under `.artifacts/ai`
+- TDD target:
+  - RED driver coverage for failed checkpoint mutation preserving an internal failure class, starting/incrementing `retry_attempt_count`, leaving `next_retry_after` unset, and staying non-terminal failed before implementation.
+  - RED SQLite checkpoint round-trip coverage for `failure_class`, `retry_attempt_count`, and `next_retry_after` failed before implementation.
+- Completed:
+  - `DownloadSegmentFailureClass` is carried through handled failure and failed execution result paths.
+  - `DownloadSegmentCheckpointRecord` persists optional `failure_class`, `retry_attempt_count`, and `next_retry_after`.
+  - SQLite checkpoint schema/backfill/save/load mapping preserves the new fields.
+  - README and downloads README_IMPL now route the next boundary to backoff policy, retry exhaustion, and terminal failure eligibility.
+- Validation:
+  - `cargo test -p launcher-module-downloads --lib` -> 73 passed.
+  - `cargo test -p launcher-adapter-storage-sqlite --lib` -> 3 passed.
+  - `cargo check -p launcher-composition-root` -> passed.
+  - `cargo fmt -p launcher-module-downloads -p launcher-adapter-storage-sqlite -- --check` -> passed.
+  - scoped `git diff --check` -> passed with CRLF normalization warnings only.
+- Boundaries:
+  - no retry scheduler loop, background worker, automatic retry dispatch, public `DL_*`, `TerminalFailed`, host/frontend/provider HTTP, production wiring, leases, or snapshot error payload change.

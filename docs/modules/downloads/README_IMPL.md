@@ -1942,24 +1942,24 @@ Implementation status:
 2. `record_failed_segment_checkpoints(...)` preserves local `DownloadSegmentExecutionResult::Failed` reason/retryable metadata while keeping failed mutation non-terminal;
 3. `SqliteDownloadCheckpointRepository` creates and backfills `failure_reason` / `failure_retryable` columns and maps them through save/load;
 4. focused driver and SQLite round-trip tests prove the metadata survives in-memory mutation and durable adapter persistence;
-5. retry count, next retry time, failure class, public `DL_*` execution errors, and `TerminalFailed` driver decisions remain out of this slice.
+5. retry count, next retry time, failure class, public `DL_*` execution errors, and `TerminalFailed` driver decisions remain out of this slice; retry facts and failure class are handled by the following 7.46 persistence slice.
 
 Next boundary:
 
-1. define durable retry count and backoff scheduling facts without overloading the `retryable` hint;
-2. introduce a module-owned failure class that can later project to stable public `DL_*` errors;
+1. keep 7.46 as the durable retry-facts persistence slice;
+2. after that, define backoff policy, retry exhaustion, and user-attention rules;
 3. only then decide when a downloads driver failure is terminal enough to return `JobRunDisposition::TerminalFailed`.
 
 ### 7.46 Retry/Backoff And Failure-Class Persistence Boundary
 
-Failed segment reason and retryable hint are now durable, but they still do not describe retry policy. The next Rust slice must persist policy-ready retry facts and an internal failure class without starting a scheduler loop or exposing public execution errors.
+Failed segment reason and retryable hint are durable, and this slice adds policy-ready retry facts plus an internal failure class without starting a scheduler loop or exposing public execution errors.
 
 Current Rust reality:
 
-1. `DownloadSegmentCheckpointRecord` can now preserve local `failure_reason` and `failure_retryable`.
-2. `DownloadSegmentExecutionResult::Failed` still carries only reason/retryable and has no explicit failure class.
-3. No checkpoint field records how many failed attempts have been observed for a segment.
-4. No checkpoint field records the earliest retry eligibility time after a backoff decision.
+1. `DownloadSegmentCheckpointRecord` now preserves local `failure_reason`, `failure_retryable`, optional `failure_class`, optional `retry_attempt_count`, and optional `next_retry_after`.
+2. `DownloadSegmentExecutionResult::Failed` now carries reason/retryable plus a module-owned `DownloadSegmentFailureClass`.
+3. Failed checkpoint mutation starts `retry_attempt_count` at `1` for a new failed fact and increments the previous persisted count when replacing an existing failed segment.
+4. `next_retry_after` remains unset by driver mutation because no backoff policy/clock slice has calculated automatic retry eligibility yet.
 5. `DownloadJobDriver::run(...)` keeps failed checkpoint mutation non-terminal, and that must remain true until retry exhaustion and terminal policy are explicit.
 
 Boundary rules:
@@ -1998,6 +1998,20 @@ Non-goals:
 2. no public `DL_*` execution error projection or host/frontend DTO change;
 3. no provider HTTP behavior, network backoff, CDN policy, or production wiring;
 4. no `TerminalFailed` decision until retry exhaustion, user-attention, and public projection rules are separately defined.
+
+Implementation status:
+
+1. `DownloadSegmentFailureClass` is present in `module-downloads` and is carried through handled failures and failed execution results.
+2. Failed checkpoint records persist `failure_class`, `retry_attempt_count`, and `next_retry_after` through in-memory driver mutation and SQLite save/load mapping.
+3. New failed segment facts start with `retry_attempt_count = 1`; replacing an existing failed segment increments the persisted count.
+4. `next_retry_after` can round-trip through SQLite, but driver mutation leaves it unset until a later backoff policy owns the calculation.
+5. Failed driver mutation still returns non-terminal `Accepted`; no public `DL_*`, host/frontend DTO, provider HTTP, retry scheduler, lease, snapshot payload, or `TerminalFailed` behavior changed.
+
+Next boundary:
+
+1. define the backoff policy and clock-owned `next_retry_after` calculation;
+2. define retry exhaustion and user-attention rules for segment failures;
+3. only then introduce any downloads-owned `TerminalFailed` driver decision or public `DL_*` execution projection.
 
 ---
 

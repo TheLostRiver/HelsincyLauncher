@@ -15,7 +15,7 @@ use launcher_module_downloads::{
     contracts::{DownloadPolicyDto, ListDownloadJobsQueryDto},
     DownloadCheckpointRecord, DownloadCheckpointRepository, DownloadJobRecord,
     DownloadJobRecordState, DownloadJobRepository, DownloadPolicyStore,
-    DownloadSegmentCheckpointRecord, DownloadSegmentCheckpointStatus,
+    DownloadSegmentCheckpointRecord, DownloadSegmentCheckpointStatus, DownloadSegmentFailureClass,
 };
 use launcher_module_fab::{
     contracts::{FabAssetDetailDto, FabInventoryListQueryDto},
@@ -724,6 +724,9 @@ impl SqliteDownloadCheckpointRepository {
                 hash_state_ref TEXT NULL,
                 failure_reason TEXT NULL,
                 failure_retryable INTEGER NULL,
+                failure_class TEXT NULL,
+                retry_attempt_count INTEGER NULL,
+                next_retry_after TEXT NULL,
                 PRIMARY KEY (job_id, segment_id),
                 FOREIGN KEY (job_id) REFERENCES download_job_checkpoints(job_id) ON DELETE CASCADE
             );",
@@ -739,6 +742,9 @@ impl SqliteDownloadCheckpointRepository {
         })?;
         self.ensure_segment_checkpoint_column(&conn, "failure_reason", "TEXT NULL")?;
         self.ensure_segment_checkpoint_column(&conn, "failure_retryable", "INTEGER NULL")?;
+        self.ensure_segment_checkpoint_column(&conn, "failure_class", "TEXT NULL")?;
+        self.ensure_segment_checkpoint_column(&conn, "retry_attempt_count", "INTEGER NULL")?;
+        self.ensure_segment_checkpoint_column(&conn, "next_retry_after", "TEXT NULL")?;
         Ok(())
     }
 
@@ -839,7 +845,8 @@ impl SqliteDownloadCheckpointRepository {
             .prepare(
                 "SELECT job_id, segment_id, file_id, segment_offset, segment_length,
                         downloaded_bytes, status, partial_path, etag, hash_state_ref,
-                        failure_reason, failure_retryable
+                        failure_reason, failure_retryable, failure_class,
+                        retry_attempt_count, next_retry_after
                  FROM download_segment_checkpoints
                  WHERE job_id = ?1
                  ORDER BY segment_index ASC",
@@ -893,6 +900,15 @@ impl SqliteDownloadCheckpointRepository {
             let failure_retryable_raw: Option<i64> = row.get(11).map_err(|e| {
                 sqlite_read_error(format!("segment failure_retryable decode failed: {e}"))
             })?;
+            let failure_class_raw: Option<String> = row.get(12).map_err(|e| {
+                sqlite_read_error(format!("segment failure_class decode failed: {e}"))
+            })?;
+            let retry_attempt_count_raw: Option<i64> = row.get(13).map_err(|e| {
+                sqlite_read_error(format!("segment retry_attempt_count decode failed: {e}"))
+            })?;
+            let next_retry_after_raw: Option<String> = row.get(14).map_err(|e| {
+                sqlite_read_error(format!("segment next_retry_after decode failed: {e}"))
+            })?;
 
             segments.push(DownloadSegmentCheckpointRecord {
                 job_id: JobId::new(segment_job_id),
@@ -912,6 +928,15 @@ impl SqliteDownloadCheckpointRepository {
                 failure_retryable: decode_optional_bool(
                     "segment failure_retryable",
                     failure_retryable_raw,
+                )?,
+                failure_class: decode_optional_segment_failure_class(failure_class_raw)?,
+                retry_attempt_count: decode_optional_u32(
+                    "segment retry_attempt_count",
+                    retry_attempt_count_raw,
+                )?,
+                next_retry_after: decode_optional_iso_datetime(
+                    "segment next_retry_after",
+                    next_retry_after_raw,
                 )?,
             });
         }
@@ -961,8 +986,9 @@ impl SqliteDownloadCheckpointRepository {
                 "INSERT INTO download_segment_checkpoints
                  (job_id, segment_index, segment_id, file_id, segment_offset, segment_length,
                   downloaded_bytes, status, partial_path, etag, hash_state_ref,
-                  failure_reason, failure_retryable)
-                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)",
+                  failure_reason, failure_retryable, failure_class,
+                  retry_attempt_count, next_retry_after)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16)",
                 rusqlite::params![
                     segment.job_id.to_string(),
                     i64::try_from(segment_index).map_err(|e| {
@@ -979,6 +1005,9 @@ impl SqliteDownloadCheckpointRepository {
                     segment.hash_state_ref,
                     segment.failure_reason,
                     encode_optional_bool(segment.failure_retryable),
+                    encode_optional_segment_failure_class(segment.failure_class),
+                    encode_optional_u32(segment.retry_attempt_count),
+                    segment.next_retry_after.as_ref().map(ToString::to_string),
                 ],
             )
             .map_err(|e| sqlite_write_error(format!("segment checkpoint insert failed: {e}")))?;
@@ -1012,9 +1041,61 @@ fn decode_segment_checkpoint_status(raw: &str) -> AppResult<DownloadSegmentCheck
     }
 }
 
+fn encode_segment_failure_class(value: DownloadSegmentFailureClass) -> &'static str {
+    match value {
+        DownloadSegmentFailureClass::NetworkTransient => "network_transient",
+        DownloadSegmentFailureClass::NetworkFatal => "network_fatal",
+        DownloadSegmentFailureClass::ProviderManifestInvalid => "provider_manifest_invalid",
+        DownloadSegmentFailureClass::DiskNoSpace => "disk_no_space",
+        DownloadSegmentFailureClass::WriteFailed => "write_failed",
+        DownloadSegmentFailureClass::VerifyFailed => "verify_failed",
+        DownloadSegmentFailureClass::PolicyBlocked => "policy_blocked",
+        DownloadSegmentFailureClass::Unknown => "unknown",
+    }
+}
+
+fn decode_segment_failure_class(raw: &str) -> AppResult<DownloadSegmentFailureClass> {
+    match raw {
+        "network_transient" => Ok(DownloadSegmentFailureClass::NetworkTransient),
+        "network_fatal" => Ok(DownloadSegmentFailureClass::NetworkFatal),
+        "provider_manifest_invalid" => Ok(DownloadSegmentFailureClass::ProviderManifestInvalid),
+        "disk_no_space" => Ok(DownloadSegmentFailureClass::DiskNoSpace),
+        "write_failed" => Ok(DownloadSegmentFailureClass::WriteFailed),
+        "verify_failed" => Ok(DownloadSegmentFailureClass::VerifyFailed),
+        "policy_blocked" => Ok(DownloadSegmentFailureClass::PolicyBlocked),
+        "unknown" => Ok(DownloadSegmentFailureClass::Unknown),
+        _ => Err(sqlite_read_error(format!(
+            "unsupported segment failure class `{raw}`"
+        ))),
+    }
+}
+
+fn encode_optional_segment_failure_class(
+    value: Option<DownloadSegmentFailureClass>,
+) -> Option<&'static str> {
+    value.map(encode_segment_failure_class)
+}
+
+fn decode_optional_segment_failure_class(
+    raw: Option<String>,
+) -> AppResult<Option<DownloadSegmentFailureClass>> {
+    raw.as_deref().map(decode_segment_failure_class).transpose()
+}
+
 fn decode_u64_text(field: &str, raw: &str) -> AppResult<u64> {
     raw.parse::<u64>()
         .map_err(|e| sqlite_read_error(format!("{field} parse failed: {e}")))
+}
+
+fn encode_optional_u32(value: Option<u32>) -> Option<i64> {
+    value.map(i64::from)
+}
+
+fn decode_optional_u32(field: &str, raw: Option<i64>) -> AppResult<Option<u32>> {
+    raw.map(|value| {
+        u32::try_from(value).map_err(|e| sqlite_read_error(format!("{field} parse failed: {e}")))
+    })
+    .transpose()
 }
 
 fn encode_optional_bool(value: Option<bool>) -> Option<i64> {
@@ -1030,6 +1111,17 @@ fn decode_optional_bool(field: &str, raw: Option<i64>) -> AppResult<Option<bool>
             "{field} has unsupported boolean value `{other}`"
         ))),
     }
+}
+
+fn decode_optional_iso_datetime(
+    field: &str,
+    raw: Option<String>,
+) -> AppResult<Option<IsoDateTime>> {
+    raw.map(|value| {
+        serde_json::from_str::<IsoDateTime>(&format!(r#""{value}""#))
+            .map_err(|e| sqlite_read_error(format!("{field} parse failed: {e}")))
+    })
+    .transpose()
 }
 
 fn sqlite_read_error(message: String) -> launcher_kernel_foundation::AppError {
@@ -1467,6 +1559,8 @@ mod tests {
             tmp_path.clone(),
         ));
         let job_id = JobId::generate();
+        let next_retry_after: IsoDateTime = serde_json::from_str(r#""2026-05-19T04:20:00Z""#)
+            .expect("static retry eligibility timestamp should parse");
         let checkpoint = DownloadCheckpointRecord {
             job_id: job_id.clone(),
             segments: vec![
@@ -1483,6 +1577,9 @@ mod tests {
                     hash_state_ref: Some("hash-a".into()),
                     failure_reason: None,
                     failure_retryable: None,
+                    failure_class: None,
+                    retry_attempt_count: None,
+                    next_retry_after: None,
                 },
                 DownloadSegmentCheckpointRecord {
                     job_id: job_id.clone(),
@@ -1497,6 +1594,9 @@ mod tests {
                     hash_state_ref: None,
                     failure_reason: None,
                     failure_retryable: None,
+                    failure_class: None,
+                    retry_attempt_count: None,
+                    next_retry_after: None,
                 },
                 DownloadSegmentCheckpointRecord {
                     job_id: job_id.clone(),
@@ -1511,6 +1611,9 @@ mod tests {
                     hash_state_ref: Some("hash-c".into()),
                     failure_reason: Some("network timeout while reading segment".into()),
                     failure_retryable: Some(true),
+                    failure_class: Some(DownloadSegmentFailureClass::NetworkTransient),
+                    retry_attempt_count: Some(3),
+                    next_retry_after: Some(next_retry_after),
                 },
             ],
         };

@@ -4,7 +4,9 @@ use std::io::{Seek, SeekFrom, Write};
 use std::path::{Component, Path, PathBuf};
 use std::sync::Arc;
 
-use launcher_kernel_foundation::{AppError, AppErrorSeverity, AppResult, CorrelationId, JobId};
+use launcher_kernel_foundation::{
+    AppError, AppErrorSeverity, AppResult, CorrelationId, IsoDateTime, JobId,
+};
 use launcher_kernel_jobs::{
     JobDriver, JobExecutionContext, JobRunDisposition, JobSnapshot, RestoreDisposition,
 };
@@ -52,6 +54,36 @@ pub enum DownloadSegmentCheckpointStatus {
     Failed,
 }
 
+/// downloads 模块内部拥有的 segment 失败分类，后续才能投影成稳定公开 `DL_*`。
+/// Module-owned segment failure class that can later project to stable public `DL_*` codes.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DownloadSegmentFailureClass {
+    /// 临时网络或读取失败，未来策略可选择本地重试。
+    /// Temporary network or fetch failure that future policy may retry locally.
+    NetworkTransient,
+    /// 不预期自动恢复的网络或读取失败。
+    /// Network or fetch failure that is not expected to recover automatically.
+    NetworkFatal,
+    /// manifest 或 source 事实无效，导致当前请求不可安全执行。
+    /// Invalid manifest or source facts that make the current request unsafe to execute.
+    ProviderManifestInvalid,
+    /// 容量不足，需要用户或系统先释放空间。
+    /// Capacity failure that needs user or system action before retry.
+    DiskNoSpace,
+    /// staging 写入失败，但尚未细分为容量问题。
+    /// Staging write failure that is not specifically classified as capacity.
+    WriteFailed,
+    /// 长度、hash 或完整性校验失败，需要重新处理受影响 segment。
+    /// Length, hash, or integrity verification failure for the affected segment.
+    VerifyFailed,
+    /// 本地策略、安全或路径校验阻止了执行。
+    /// Local policy, safety, or path validation blocked execution.
+    PolicyBlocked,
+    /// 暂时无法细分的 adapter-shell 失败。
+    /// Adapter-shell failure that is not yet classifiable.
+    Unknown,
+}
+
 /// Segment-level persisted checkpoint fact owned by downloads.
 /// downloads 拥有的 segment 级持久化 checkpoint 事实。
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -92,6 +124,15 @@ pub struct DownloadSegmentCheckpointRecord {
     /// 与失败 segment 事实一起保留的重试提示；它不是重试策略本身。
     /// Retry hint captured with the failed segment fact; this is not a retry policy.
     pub failure_retryable: Option<bool>,
+    /// 内部失败分类；保持模块私有语义，不能直接当公开错误码使用。
+    /// Internal failure class; keep module-local semantics and do not expose it as a public error code.
+    pub failure_class: Option<DownloadSegmentFailureClass>,
+    /// 已持久化的 segment 失败执行次数，不代表排队重试次数或 UI 点击次数。
+    /// Persisted failed execution attempts for this segment, not queued retries or UI clicks.
+    pub retry_attempt_count: Option<u32>,
+    /// 后端自动重试最早可执行时间；当前切片不计算该值。
+    /// Earliest backend-owned automatic retry eligibility; this slice does not compute it.
+    pub next_retry_after: Option<IsoDateTime>,
 }
 
 /// 提供下载 checkpoint 读取与保存能力的最小仓储边界。
@@ -213,6 +254,9 @@ pub enum DownloadSegmentExecutionResult {
         /// Retry hint for later policy slices; this does not trigger retry here.
         /// 供后续策略切片使用的重试提示；这里不会触发重试。
         retryable: bool,
+        /// Internal failure class for later retry and public projection policy.
+        /// 供后续重试与公开投影策略使用的内部失败分类。
+        failure_class: DownloadSegmentFailureClass,
     },
 }
 
@@ -256,6 +300,9 @@ pub struct DownloadSegmentHandledFailure {
     /// Retry hint for later policy slices; this does not trigger retry here.
     /// 供后续策略切片使用的重试提示；这里不会触发重试。
     pub retryable: bool,
+    /// 内部失败分类，后续策略只能基于该字段而不是 reason 文本分类。
+    /// Internal failure class; later policy must use this instead of parsing reason text.
+    pub failure_class: DownloadSegmentFailureClass,
 }
 
 impl DownloadSegmentHandledFailure {
@@ -268,6 +315,7 @@ impl DownloadSegmentHandledFailure {
             downloaded_bytes: self.downloaded_bytes,
             reason: self.reason,
             retryable: self.retryable,
+            failure_class: self.failure_class,
         }
     }
 }
@@ -322,6 +370,7 @@ impl DownloadSegmentStagingTarget {
             downloaded_bytes: 0,
             reason: format!("unsafe staging write target: {write_target}"),
             retryable: false,
+            failure_class: DownloadSegmentFailureClass::PolicyBlocked,
         }
     }
 }
@@ -457,6 +506,7 @@ fn static_fetch_failure(reason: String) -> DownloadSegmentHandledFailure {
         downloaded_bytes: 0,
         reason,
         retryable: false,
+        failure_class: DownloadSegmentFailureClass::ProviderManifestInvalid,
     }
 }
 
@@ -630,6 +680,7 @@ impl DownloadSegmentVerifyPort for DownloadSegmentLengthVerifyPort {
                     request.segment_id, request.length, completed_bytes
                 ),
                 retryable: true,
+                failure_class: DownloadSegmentFailureClass::VerifyFailed,
             },
         ))
     }
@@ -878,6 +929,9 @@ impl DownloadJobDriver {
                 hash_state_ref: hash_state_ref.clone(),
                 failure_reason: None,
                 failure_retryable: None,
+                failure_class: None,
+                retry_attempt_count: None,
+                next_retry_after: None,
             };
 
             if let Some(index) = existing_index {
@@ -915,6 +969,7 @@ impl DownloadJobDriver {
                 downloaded_bytes,
                 reason,
                 retryable,
+                failure_class,
             } = result
             else {
                 continue;
@@ -928,8 +983,8 @@ impl DownloadJobDriver {
                 .segments
                 .iter()
                 .position(|segment| segment.segment_id == request.segment_id);
-            let (offset, partial_path, etag, hash_state_ref) = existing_index
-                .and_then(|index| checkpoint.segments.get(index))
+            let existing_segment = existing_index.and_then(|index| checkpoint.segments.get(index));
+            let (offset, partial_path, etag, hash_state_ref) = existing_segment
                 .map(|segment| {
                     (
                         segment.offset,
@@ -939,6 +994,11 @@ impl DownloadJobDriver {
                     )
                 })
                 .unwrap_or((request.start_offset, None, None, None));
+            let retry_attempt_count = existing_segment
+                .filter(|segment| segment.status == DownloadSegmentCheckpointStatus::Failed)
+                .and_then(|segment| segment.retry_attempt_count)
+                .unwrap_or(0)
+                .saturating_add(1);
             let failed_segment = DownloadSegmentCheckpointRecord {
                 job_id: checkpoint.job_id.clone(),
                 segment_id: request.segment_id.clone(),
@@ -952,6 +1012,9 @@ impl DownloadJobDriver {
                 hash_state_ref,
                 failure_reason: Some(reason.clone()),
                 failure_retryable: Some(*retryable),
+                failure_class: Some(*failure_class),
+                retry_attempt_count: Some(retry_attempt_count),
+                next_retry_after: None,
             };
 
             if let Some(index) = existing_index {
@@ -1068,13 +1131,13 @@ mod tests {
         DownloadCheckpointRecord, DownloadCheckpointRepository, DownloadDriverExecutionTurn,
         DownloadJobDriver, DownloadSegmentCheckpointRecord, DownloadSegmentCheckpointStatus,
         DownloadSegmentExecutionPort, DownloadSegmentExecutionRequest,
-        DownloadSegmentExecutionResult, DownloadSegmentExecutor, DownloadSegmentFetchOutcome,
-        DownloadSegmentFetchPort, DownloadSegmentFetchResult, DownloadSegmentFilesystemWritePort,
-        DownloadSegmentGuardedWritePort, DownloadSegmentHandledFailure,
-        DownloadSegmentLengthVerifyPort, DownloadSegmentStagingTarget,
-        DownloadSegmentStaticFetchPort, DownloadSegmentStaticFetchSource,
-        DownloadSegmentVerifyOutcome, DownloadSegmentVerifyPort, DownloadSegmentWriteOutcome,
-        DownloadSegmentWritePort, DownloadSegmentWriteResult,
+        DownloadSegmentExecutionResult, DownloadSegmentExecutor, DownloadSegmentFailureClass,
+        DownloadSegmentFetchOutcome, DownloadSegmentFetchPort, DownloadSegmentFetchResult,
+        DownloadSegmentFilesystemWritePort, DownloadSegmentGuardedWritePort,
+        DownloadSegmentHandledFailure, DownloadSegmentLengthVerifyPort,
+        DownloadSegmentStagingTarget, DownloadSegmentStaticFetchPort,
+        DownloadSegmentStaticFetchSource, DownloadSegmentVerifyOutcome, DownloadSegmentVerifyPort,
+        DownloadSegmentWriteOutcome, DownloadSegmentWritePort, DownloadSegmentWriteResult,
     };
 
     #[derive(Default)]
@@ -1166,6 +1229,7 @@ mod tests {
                 downloaded_bytes: 128,
                 reason: "network timeout while reading segment".into(),
                 retryable: true,
+                failure_class: DownloadSegmentFailureClass::NetworkTransient,
             })
         }
     }
@@ -1411,6 +1475,7 @@ mod tests {
                     downloaded_bytes: 2,
                     reason: "staging writer reported a handled short write".into(),
                     retryable: true,
+                    failure_class: DownloadSegmentFailureClass::WriteFailed,
                 },
             ))
         }
@@ -1555,6 +1620,7 @@ mod tests {
             downloaded_bytes,
             reason,
             retryable,
+            failure_class,
         } = result
         else {
             panic!("length mismatch should flow through the executor as a failed segment result");
@@ -1571,6 +1637,11 @@ mod tests {
         assert!(
             reason.contains("segment length mismatch"),
             "failure reason should stay local and diagnostic"
+        );
+        assert_eq!(
+            failure_class,
+            DownloadSegmentFailureClass::VerifyFailed,
+            "length mismatch should carry verifier-owned failure classification"
         );
     }
 
@@ -1865,6 +1936,9 @@ mod tests {
             hash_state_ref: None,
             failure_reason: None,
             failure_retryable: None,
+            failure_class: None,
+            retry_attempt_count: None,
+            next_retry_after: None,
         }
     }
 
@@ -1987,6 +2061,9 @@ mod tests {
                 hash_state_ref: Some("hash-segment-run-completed".into()),
                 failure_reason: None,
                 failure_retryable: None,
+                failure_class: None,
+                retry_attempt_count: None,
+                next_retry_after: None,
             }],
             "fake completed run should persist checkpoint mutation"
         );
@@ -2043,6 +2120,9 @@ mod tests {
                 hash_state_ref: None,
                 failure_reason: Some("network timeout while reading segment".into()),
                 failure_retryable: Some(true),
+                failure_class: Some(DownloadSegmentFailureClass::NetworkTransient),
+                retry_attempt_count: Some(1),
+                next_retry_after: None,
             }],
             "fake failed run should persist checkpoint mutation without terminal projection"
         );
@@ -2446,6 +2526,7 @@ mod tests {
                 downloaded_bytes: 128,
                 reason: "network timeout while reading segment".into(),
                 retryable: true,
+                failure_class: DownloadSegmentFailureClass::NetworkTransient,
             }],
             "fake failure must preserve local metadata for a later checkpoint or retry slice"
         );
@@ -2520,6 +2601,7 @@ mod tests {
                 downloaded_bytes: 2,
                 reason: "staging writer reported a handled short write".into(),
                 retryable: true,
+                failure_class: DownloadSegmentFailureClass::WriteFailed,
             },
             "handled sub-port failures should become module-local failed execution results"
         );
@@ -2557,6 +2639,7 @@ mod tests {
                 downloaded_bytes: 0,
                 reason: "unsafe staging write target: ../escape.part".into(),
                 retryable: false,
+                failure_class: DownloadSegmentFailureClass::PolicyBlocked,
             },
             "unsafe target rejection should become the existing failed execution result shape"
         );
@@ -2647,6 +2730,9 @@ mod tests {
             hash_state_ref: Some("hash-segment-completed".into()),
             failure_reason: None,
             failure_retryable: None,
+            failure_class: None,
+            retry_attempt_count: None,
+            next_retry_after: None,
         };
         let expected_segments = vec![unrelated_segment, expected_completed_segment];
 
@@ -2701,6 +2787,7 @@ mod tests {
             downloaded_bytes: 128,
             reason: "network timeout while reading segment".into(),
             retryable: true,
+            failure_class: DownloadSegmentFailureClass::NetworkTransient,
         };
 
         let saved_checkpoint = driver
@@ -2736,6 +2823,9 @@ mod tests {
             hash_state_ref: Some("old-failed-hash".into()),
             failure_reason: Some("network timeout while reading segment".into()),
             failure_retryable: Some(true),
+            failure_class: Some(DownloadSegmentFailureClass::NetworkTransient),
+            retry_attempt_count: Some(1),
+            next_retry_after: None,
         };
         let expected_segments = vec![unrelated_segment, expected_failed_segment];
 
@@ -2750,6 +2840,103 @@ mod tests {
                 .segments,
             expected_segments,
             "driver helper must persist failed checkpoint facts through the repository port"
+        );
+    }
+
+    #[test]
+    fn download_job_driver_failed_result_checkpoint_mutation_tracks_retry_facts() {
+        let repo = Arc::new(InMemoryCheckpointRepository::default());
+        let driver = DownloadJobDriver::new(repo.clone());
+        let job_id = JobId::generate();
+        let mut existing_failed = make_segment_checkpoint_record(
+            &job_id,
+            "segment-retry-existing",
+            DownloadSegmentCheckpointStatus::Failed,
+        );
+        existing_failed.downloaded_bytes = 96;
+        existing_failed.failure_reason = Some("previous transient failure".into());
+        existing_failed.failure_retryable = Some(true);
+        existing_failed.failure_class = Some(DownloadSegmentFailureClass::NetworkTransient);
+        existing_failed.retry_attempt_count = Some(2);
+        existing_failed.next_retry_after = None;
+        repo.save(&DownloadCheckpointRecord {
+            job_id: job_id.clone(),
+            segments: vec![existing_failed],
+        })
+        .expect("saving a checkpoint before failed retry mutation should succeed");
+
+        let mut existing_request =
+            make_segment_execution_request(&job_id, "segment-retry-existing");
+        existing_request.start_offset = 256;
+        let existing_failed_result = DownloadSegmentExecutionResult::Failed {
+            request: existing_request,
+            downloaded_bytes: 192,
+            reason: "network timeout while reading segment".into(),
+            retryable: true,
+            failure_class: DownloadSegmentFailureClass::NetworkTransient,
+        };
+        let new_failed_result = DownloadSegmentExecutionResult::Failed {
+            request: make_segment_execution_request(&job_id, "segment-retry-new"),
+            downloaded_bytes: 64,
+            reason: "disk write rejected segment".into(),
+            retryable: false,
+            failure_class: DownloadSegmentFailureClass::WriteFailed,
+        };
+
+        let saved_checkpoint = driver
+            .record_failed_segment_checkpoints(
+                &job_id,
+                &[existing_failed_result, new_failed_result],
+            )
+            .expect("failed retry facts should be saved through the checkpoint repository")
+            .expect("existing checkpoint should be reloaded before failed retry mutation");
+
+        assert_eq!(
+            saved_checkpoint.segments,
+            vec![
+                DownloadSegmentCheckpointRecord {
+                    job_id: job_id.clone(),
+                    segment_id: "segment-retry-existing".into(),
+                    file_id: "file-1".into(),
+                    offset: 0,
+                    length: 1024,
+                    downloaded_bytes: 192,
+                    status: DownloadSegmentCheckpointStatus::Failed,
+                    partial_path: None,
+                    etag: None,
+                    hash_state_ref: None,
+                    failure_reason: Some("network timeout while reading segment".into()),
+                    failure_retryable: Some(true),
+                    failure_class: Some(DownloadSegmentFailureClass::NetworkTransient),
+                    retry_attempt_count: Some(3),
+                    next_retry_after: None,
+                },
+                DownloadSegmentCheckpointRecord {
+                    job_id: job_id.clone(),
+                    segment_id: "segment-retry-new".into(),
+                    file_id: "file-1".into(),
+                    offset: 0,
+                    length: 1024,
+                    downloaded_bytes: 64,
+                    status: DownloadSegmentCheckpointStatus::Failed,
+                    partial_path: None,
+                    etag: None,
+                    hash_state_ref: None,
+                    failure_reason: Some("disk write rejected segment".into()),
+                    failure_retryable: Some(false),
+                    failure_class: Some(DownloadSegmentFailureClass::WriteFailed),
+                    retry_attempt_count: Some(1),
+                    next_retry_after: None,
+                },
+            ],
+            "failed mutation should persist internal failure class, retry count, and no retry eligibility yet"
+        );
+        assert_eq!(
+            repo.load(&job_id)
+                .expect("loading saved checkpoint should succeed")
+                .expect("saved checkpoint should exist"),
+            saved_checkpoint,
+            "driver helper must persist retry facts through the repository port"
         );
     }
 
@@ -2801,6 +2988,9 @@ mod tests {
             hash_state_ref: Some("hash-segment-orchestrated".into()),
             failure_reason: None,
             failure_retryable: None,
+            failure_class: None,
+            retry_attempt_count: None,
+            next_retry_after: None,
         };
 
         assert_eq!(
@@ -2860,6 +3050,9 @@ mod tests {
             hash_state_ref: None,
             failure_reason: Some("network timeout while reading segment".into()),
             failure_retryable: Some(true),
+            failure_class: Some(DownloadSegmentFailureClass::NetworkTransient),
+            retry_attempt_count: Some(1),
+            next_retry_after: None,
         };
 
         assert_eq!(

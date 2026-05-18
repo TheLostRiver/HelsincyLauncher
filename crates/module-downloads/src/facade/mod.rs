@@ -2205,6 +2205,9 @@ mod tests {
                     hash_state_ref: Some("hash-partial".into()),
                     failure_reason: None,
                     failure_retryable: None,
+                    failure_class: None,
+                    retry_attempt_count: None,
+                    next_retry_after: None,
                 },
             ]),
             manifest_provider: RecordingManifestProvider::with_segments(vec![
@@ -2283,6 +2286,9 @@ mod tests {
                     hash_state_ref: Some("hash-partial".into()),
                     failure_reason: None,
                     failure_retryable: None,
+                    failure_class: None,
+                    retry_attempt_count: None,
+                    next_retry_after: None,
                 },
             ]),
             manifest_provider: RecordingManifestProvider::with_segments(vec![
@@ -2475,6 +2481,9 @@ mod tests {
                     hash_state_ref: None,
                     failure_reason: None,
                     failure_retryable: None,
+                    failure_class: None,
+                    retry_attempt_count: None,
+                    next_retry_after: None,
                 },
             ]),
             manifest_provider: RecordingManifestProvider::with_segments(vec![
@@ -2535,6 +2544,9 @@ mod tests {
                     hash_state_ref: None,
                     failure_reason: None,
                     failure_retryable: None,
+                    failure_class: None,
+                    retry_attempt_count: None,
+                    next_retry_after: None,
                 },
             ]),
             manifest_provider: RecordingManifestProvider::with_segments(vec![
@@ -2604,6 +2616,9 @@ mod tests {
                     hash_state_ref: None,
                     failure_reason: None,
                     failure_retryable: None,
+                    failure_class: None,
+                    retry_attempt_count: None,
+                    next_retry_after: None,
                 },
             ]),
             manifest_provider: RecordingManifestProvider::with_segments(vec![
@@ -2667,6 +2682,9 @@ mod tests {
             hash_state_ref: None,
             failure_reason: None,
             failure_retryable: None,
+            failure_class: None,
+            retry_attempt_count: None,
+            next_retry_after: None,
         }];
 
         let decisions = build_resume_segment_decisions(&manifest, &checkpoints)
@@ -2712,6 +2730,9 @@ mod tests {
             hash_state_ref: Some("hash-state-1".into()),
             failure_reason: None,
             failure_retryable: None,
+            failure_class: None,
+            retry_attempt_count: None,
+            next_retry_after: None,
         }];
 
         let decisions = build_resume_segment_decisions(&manifest, &checkpoints)
@@ -2757,6 +2778,9 @@ mod tests {
             hash_state_ref: None,
             failure_reason: None,
             failure_retryable: None,
+            failure_class: None,
+            retry_attempt_count: None,
+            next_retry_after: None,
         }];
 
         let decisions = build_resume_segment_decisions(&manifest, &checkpoints)
@@ -2863,6 +2887,9 @@ mod tests {
                 hash_state_ref: None,
                 failure_reason: None,
                 failure_retryable: None,
+                failure_class: None,
+                retry_attempt_count: None,
+                next_retry_after: None,
             },
             DownloadSegmentCheckpointRecord {
                 job_id: job_id.clone(),
@@ -2877,6 +2904,9 @@ mod tests {
                 hash_state_ref: Some("hash-partial".into()),
                 failure_reason: None,
                 failure_retryable: None,
+                failure_class: None,
+                retry_attempt_count: None,
+                next_retry_after: None,
             },
             DownloadSegmentCheckpointRecord {
                 job_id,
@@ -2891,6 +2921,9 @@ mod tests {
                 hash_state_ref: None,
                 failure_reason: None,
                 failure_retryable: None,
+                failure_class: None,
+                retry_attempt_count: None,
+                next_retry_after: None,
             },
         ];
         let decisions = build_resume_segment_decisions(&manifest, &checkpoints)

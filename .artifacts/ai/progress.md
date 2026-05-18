@@ -11989,3 +11989,124 @@
   - `D:/DEV/MyEpicLauncher/.artifacts/ai/task-plan.md` (update)
   - `D:/DEV/MyEpicLauncher/.artifacts/ai/progress.md` (update)
   - `D:/DEV/MyEpicLauncher/.artifacts/ai/handoff.md` (update)
+## 2026-05-19 - AT-264 start
+
+- Registered AT-2026-05-19-264 as the next implementation task after AT-263.
+- Required context read in small batches: README roadmap, downloads README_IMPL 7.46, error projection retry semantics, download runtime checkpoint rules, and downloads module API/ARCH/FLOW docs.
+- Planned TDD path: add RED driver and SQLite tests for `failure_class`, `retry_attempt_count`, and `next_retry_after`; implement minimal driver/storage persistence; then update README and README_IMPL after green.
+- Boundary reminder: no retry scheduler loop, no automatic retry dispatch, no public `DL_*`, no `TerminalFailed`, no host/frontend/provider/lease/snapshot payload work.
+
+## 2026-05-19 - AT-264 completion
+
+- Added RED driver coverage for failure class plus retry fact persistence; it failed before implementation due to missing enum/fields.
+- Added RED SQLite round-trip coverage for `failure_class`, `retry_attempt_count`, and `next_retry_after`; it failed before implementation due to missing enum/fields.
+- Implemented the minimal driver/storage slice:
+  - `DownloadSegmentFailureClass`
+  - `DownloadSegmentHandledFailure.failure_class`
+  - `DownloadSegmentExecutionResult::Failed.failure_class`
+  - `DownloadSegmentCheckpointRecord.failure_class`
+  - `DownloadSegmentCheckpointRecord.retry_attempt_count`
+  - `DownloadSegmentCheckpointRecord.next_retry_after`
+- Updated failed checkpoint mutation to start new failed attempts at `1`, increment existing failed attempts, and keep `next_retry_after` unset.
+- Updated SQLite checkpoint schema/backfill/save/load/round-trip mapping for the new facts.
+- Updated README and downloads README_IMPL so the next boundary is backoff policy, retry exhaustion, and terminal failure eligibility.
+- Validation passed:
+  - `cargo test -p launcher-module-downloads --lib` -> 73 passed.
+  - `cargo test -p launcher-adapter-storage-sqlite --lib` -> 3 passed.
+  - `cargo check -p launcher-composition-root` -> passed.
+  - `cargo fmt -p launcher-module-downloads -p launcher-adapter-storage-sqlite -- --check` -> passed.
+  - scoped `git diff --check` -> passed with CRLF normalization warnings only.
+
+### Auto Record: 2026-05-19 04:17:57
+- Tool: apply_patch
+- Phase: Phase 135 - Retry Failure Facts Persistence (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 04:23:21
+- Tool: apply_patch
+- Phase: Phase 135 - Retry Failure Facts Persistence (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+  - `D:\DEV\MyEpicLauncher\crates\adapter-storage-sqlite\src\lib.rs` (update)
+
+### Auto Record: 2026-05-19 04:27:56
+- Tool: apply_patch
+- Phase: Phase 135 - Retry Failure Facts Persistence (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-19 04:28:05
+- Tool: apply_patch
+- Phase: Phase 135 - Retry Failure Facts Persistence (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\lib.rs` (update)
+
+### Auto Record: 2026-05-19 04:29:29
+- Tool: apply_patch
+- Phase: Phase 135 - Retry Failure Facts Persistence (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-19 04:29:45
+- Tool: apply_patch
+- Phase: Phase 135 - Retry Failure Facts Persistence (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-19 04:30:32
+- Tool: apply_patch
+- Phase: Phase 135 - Retry Failure Facts Persistence (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-19 04:31:33
+- Tool: apply_patch
+- Phase: Phase 135 - Retry Failure Facts Persistence (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-19 04:34:03
+- Tool: apply_patch
+- Phase: Phase 135 - Retry Failure Facts Persistence (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\facade\mod.rs` (update)
+
+### Auto Record: 2026-05-19 04:35:25
+- Tool: apply_patch
+- Phase: Phase 135 - Retry Failure Facts Persistence (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\adapter-storage-sqlite\src\lib.rs` (update)
+
+### Auto Record: 2026-05-19 04:35:36
+- Tool: apply_patch
+- Phase: Phase 135 - Retry Failure Facts Persistence (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\adapter-storage-sqlite\src\lib.rs` (update)
+
+### Auto Record: 2026-05-19 04:35:50
+- Tool: apply_patch
+- Phase: Phase 135 - Retry Failure Facts Persistence (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 04:38:01
+- Tool: apply_patch
+- Phase: Phase 135 - Retry Failure Facts Persistence (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\README.md` (update)
+
+### Auto Record: 2026-05-19 04:40:59
+- Tool: apply_patch
+- Phase: Phase 135 - Retry Failure Facts Persistence (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
