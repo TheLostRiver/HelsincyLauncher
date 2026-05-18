@@ -10892,6 +10892,18 @@
   - `cargo test -p launcher-module-downloads --lib --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 66/66 tests.
   - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
   - `cargo fmt --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --package launcher-module-downloads -- --check` passed.
+- Final commit `6684205` was pushed to `origin/main`.
+
+## 2026-05-19 - AT-2026-05-19-253 Downloads Static Segment Fetcher Boundary
+
+- Opened Phase 124 / AT-2026-05-19-253 after AT-252 was committed and pushed as `6684205`.
+- Read downloads fetch/provider/source-locator notes, download runtime fetcher/provider/range/resume notes, provider adapter ownership rules, retryable/public projection rules, and `start_offset` semantics before editing.
+- Updated README_IMPL port status, completion roadmap, length verifier implementation status, and added 7.41 for the first static byte-source fetcher boundary.
+- Validation passed:
+  - README_IMPL port status/roadmap and 7.41 were re-read.
+  - PWF check reported Phase 124 in progress before final status update, matching the task state at that moment.
+  - Scoped docs/PWF `git diff --check` passed with CRLF warnings only.
+- Next step is docs/PWF-only commit.
 
 ### Auto Record: 2026-05-19 00:52:22
 - Tool: apply_patch
@@ -11265,5 +11277,65 @@
 ### Auto Record: 2026-05-19 01:46:43
 - Tool: apply_patch
 - Phase: Phase 123 - Downloads Length Verifier Partial Resume Semantics (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 01:49:38
+- Tool: apply_patch
+- Phase: Phase 123 - Downloads Length Verifier Partial Resume Semantics (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-19 01:49:55
+- Tool: apply_patch
+- Phase: Phase 124 - Downloads Static Segment Fetcher Boundary (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-19 01:50:25
+- Tool: apply_patch
+- Phase: Phase 124 - Downloads Static Segment Fetcher Boundary (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-19 01:50:45
+- Tool: apply_patch
+- Phase: Phase 124 - Downloads Static Segment Fetcher Boundary (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-19 01:51:01
+- Tool: apply_patch
+- Phase: Phase 124 - Downloads Static Segment Fetcher Boundary (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-19 01:51:16
+- Tool: apply_patch
+- Phase: Phase 124 - Downloads Static Segment Fetcher Boundary (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 01:52:07
+- Tool: apply_patch
+- Phase: Phase 124 - Downloads Static Segment Fetcher Boundary (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-19 01:52:22
+- Tool: apply_patch
+- Phase: Phase 124 - Downloads Static Segment Fetcher Boundary (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-19 01:52:35
+- Tool: apply_patch
+- Phase: Phase 124 - Downloads Static Segment Fetcher Boundary (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-19 01:52:47
+- Tool: apply_patch
+- Phase: Phase 124 - Downloads Static Segment Fetcher Boundary (complete)
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)

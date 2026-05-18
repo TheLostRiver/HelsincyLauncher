@@ -447,9 +447,9 @@
 - Preserved boundaries:
   - No hash algorithms, no disk readback, no file/job-level integrity sealing, no retry/backoff, no public `DL_VERIFY_FAILED` projection, no production wiring, no host transport/frontend/schema work.
 
-## Current Handoff - AT-2026-05-19-252
+## Latest Handoff - AT-2026-05-19-252
 
-- Status: completed; commit/push pending.
+- Status: completed; final commit `6684205`, pushed to `origin/main`.
 - Scope:
   - Correct `DownloadSegmentLengthVerifyPort` partial resume completion semantics.
   - Update README_IMPL 7.40 to document from-start versus partial length checks.
@@ -462,6 +462,20 @@
   - Scoped rustfmt check passed.
 - Preserved boundaries:
   - No fetcher boundary or HTTP range implementation, no hash algorithms, no file/job-level integrity sealing, no retry/backoff, no public `DL_VERIFY_FAILED` projection, no production wiring, no host transport/frontend/schema work.
+
+## Current Handoff - AT-2026-05-19-253
+
+- Status: completed; commit/push pending.
+- Scope:
+  - Update README_IMPL port status, roadmap, verifier implementation status, and add static fetcher boundary 7.41.
+  - Update PWF records for Phase 124.
+- Validation passed:
+  - README_IMPL port status/roadmap and 7.41 were re-read.
+  - Scoped docs/PWF diff-check passed with CRLF warnings only.
+- Preserved boundaries:
+  - No Rust code, no real HTTP range requests, no provider auth/CDN/retry behavior, no public network/provider error projection, no production wiring, no host transport/frontend/schema work.
+- Next likely code task:
+  - implement `DownloadSegmentStaticFetchPort` with focused TDD for from-start bytes+etag, partial remaining bytes, and handled missing/invalid source failures.
 
 ## Dirty Worktree To Preserve
 

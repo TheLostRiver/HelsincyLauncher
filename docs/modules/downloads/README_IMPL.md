@@ -139,9 +139,9 @@ Do not skip directly from checkpoint to `JobRuntime::resume`. The module owns bu
 | `DownloadManifestProviderPort` | minimal facade port exists | currently returns a minimal `DownloadManifestPlan` handle |
 | `JobRuntime` | shared kernel-jobs runtime trait exists | resume uses job-level `EnqueueJobRequest<()>`; segment details still stay out of `kernel-jobs` |
 | `DownloadSegmentExecutionPort` | driver-facing port exists | module-local segment requests can return accepted, completed, or failed execution results |
-| `DownloadSegmentFetchPort` | executor sub-port exists | currently fake/in-memory only; concrete provider fetch remains a later boundary |
+| `DownloadSegmentFetchPort` | executor sub-port exists | currently fake/in-memory only; deterministic static byte-source fetcher is the next boundary before real provider/HTTP range behavior |
 | `DownloadSegmentWritePort` | executor sub-port exists | guarded wrapper validates staging-relative targets and `DownloadSegmentFilesystemWritePort` implements job-scoped staging writes; production wiring remains later |
-| `DownloadSegmentVerifyPort` | executor sub-port exists | currently fake verifier only; concrete byte-length verifier is the next boundary, while hash verification remains later |
+| `DownloadSegmentVerifyPort` | executor sub-port exists | `DownloadSegmentLengthVerifyPort` verifies from-start and partial byte counts; hash verification remains later |
 
 When adding a port:
 
@@ -157,8 +157,8 @@ The downloads module should continue in small backend-owned slices. The remainin
 Recommended order:
 
 1. completed: define and implement a concrete filesystem staging writer behind `DownloadSegmentWritePort`;
-2. next: define and implement a concrete verifier shell, starting with byte-length checks before hash algorithms;
-3. define the fetcher boundary for provider/local byte sources before introducing real HTTP range behavior;
+2. completed: define and implement a concrete verifier shell, starting with byte-length checks before hash algorithms;
+3. next: define the fetcher boundary for provider/local byte sources before introducing real HTTP range behavior;
 4. wire the concrete executor into composition-root only after fetch/write/verify sub-ports are independently covered;
 5. add runtime terminal completion/failure projection after concrete execution can advance checkpoints deterministically;
 6. add retry/backoff and public `DL_*` execution error projection only after concrete failures are classified;
@@ -1731,13 +1731,46 @@ Non-goals:
 2. no direct exposure of segment or chunk details through host IPC;
 3. no change to `DownloadSegmentExecutionRequest`, `DownloadSegmentExecutionResult`, or checkpoint record shapes.
 
+Implementation status:
+
+1. `DownloadSegmentLengthVerifyPort` verifies from-start requests with `written.downloaded_bytes == request.length`;
+2. partial requests verify with `request.start_offset + written.downloaded_bytes == request.length`;
+3. focused tests cover direct success, partial success, and executor-routed handled mismatch failure;
+4. hash algorithms, file/job-level integrity sealing, public `DL_VERIFY_FAILED`, retry/backoff, and production wiring remain later.
+
 Next Rust slice:
 
-1. add focused RED tests for a length match returning `Verified`;
-2. add focused RED tests for a length mismatch returning a handled verify failure through `DownloadSegmentExecutor`;
-3. implement a small `DownloadSegmentLengthVerifyPort` behind `DownloadSegmentVerifyPort`;
-4. re-export the verifier if it is intended for later composition-root wiring;
-5. validate with focused verifier/executor tests, full downloads module tests, composition-root check, scoped rustfmt, and scoped diff-check.
+1. define and implement the first deterministic fetcher behind `DownloadSegmentFetchPort`;
+2. start with static/local byte sources so fetch/write/verify can be tested together before real provider HTTP range behavior;
+3. keep provider auth, network backoff, public `DL_NETWORK_*` / `DL_PROVIDER_*` projection, production wiring, host transport, frontend, and schema changes out of that fetcher slice.
+
+### 7.41 Static Segment Fetcher Boundary
+
+The next fetcher slice should make `DownloadSegmentFetchPort` concrete enough for deterministic local execution tests without introducing network behavior. The first fetcher is a static byte-source fetcher keyed by the existing `source_locator`.
+
+Boundary rules:
+
+1. the fetcher sits behind `DownloadSegmentFetchPort` and remains module-local execution infrastructure;
+2. configured sources are keyed by exact `request.source_locator` values and carry bytes plus an optional etag;
+3. `FromStart` requests return the configured segment bytes unchanged because the locator is treated as already segment-scoped for this boundary;
+4. `Partial` requests return bytes after `request.start_offset`, so a partial writer can append only the remaining bytes and the length verifier can check total completion;
+5. missing source locators or impossible partial offsets return `DownloadSegmentFetchOutcome::Failed` with a module-local diagnostic reason and no public `DL_*` code;
+6. fetched results preserve the configured etag when one is available.
+
+Non-goals:
+
+1. no real HTTP range requests, provider authentication, CDN policy, retries, backoff, streaming IO, Tokio worker pools, provider adapter wiring, public `DL_NETWORK_*` / `DL_PROVIDER_*` projection, host transport, frontend, SQLite schema changes, or production composition-root wiring;
+2. no provider-specific chunk model leaks into `kernel-jobs`, host IPC, or frontend projection;
+3. no direct filesystem reads in the fetcher; filesystem staging remains owned by the writer.
+
+Next Rust slice:
+
+1. add focused RED tests for a static fetcher returning bytes and etag for a from-start request;
+2. add focused RED tests for a partial request returning only the remaining bytes after `start_offset`;
+3. add focused RED tests for a missing locator or invalid partial offset returning a handled fetch failure;
+4. implement a small `DownloadSegmentStaticFetchPort` behind `DownloadSegmentFetchPort`;
+5. re-export the fetcher if it is intended for later composition-root wiring;
+6. validate with focused fetcher/executor tests, full downloads module tests, composition-root check, scoped rustfmt, and scoped diff-check.
 
 ---
 

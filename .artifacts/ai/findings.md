@@ -1249,3 +1249,11 @@
 - Therefore from-start verification can compare `written.downloaded_bytes == request.length`, but partial verification must compare `request.start_offset + written.downloaded_bytes == request.length`.
 - This is a local verifier semantics fix and should not introduce fetcher, hash, retry/backoff, public error projection, production wiring, transport, frontend, or schema work.
 - RED/GREEN confirmed the corrected semantics: partial completion with `start_offset = 6`, current write bytes `4`, and total length `10` now verifies successfully.
+
+## Phase 124 Downloads Static Segment Fetcher Boundary Findings
+
+- Required context was read in focused chunks: downloads module fetch/provider/source-locator notes, download runtime fetcher/provider/range/resume notes, provider adapter ownership rules, retryable/public projection rules, and `DownloadResumeWorkItem` / `DownloadSegmentExecutionRequest` offset semantics.
+- The first fetcher should stay deterministic and module-local: exact `source_locator` lookup into configured static bytes, preserving optional etag.
+- `FromStart` should return the configured segment bytes unchanged because this boundary treats the locator as already segment-scoped.
+- `Partial` should return bytes after `request.start_offset`, matching the corrected length verifier and partial writer semantics.
+- Missing locators or impossible partial offsets can be handled fetch failures for now; real network/provider errors and stable public `DL_NETWORK_*` / `DL_PROVIDER_*` projection remain later.

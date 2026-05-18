@@ -2,18 +2,17 @@
 
 ## Identity
 
-- task id: AT-2026-05-19-252
-- title: Correct downloads length verifier partial resume semantics
+- task id: AT-2026-05-19-253
+- title: Define downloads static segment fetcher boundary
 - status: completed
 
 ## Goal
 
-Fix the concrete length verifier so partial resume verification treats `request.start_offset + written.downloaded_bytes == request.length` as a completed segment, while keeping from-start behavior unchanged.
+Document the next downloads fetcher slice before coding, starting with a deterministic static/local byte-source fetcher behind `DownloadSegmentFetchPort` and leaving real HTTP range/provider behavior for later.
 
 ## Scope
 
 - in scope:
-  - `crates/module-downloads/src/driver.rs`
   - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
@@ -21,62 +20,55 @@ Fix the concrete length verifier so partial resume verification treats `request.
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
-  - fetcher boundary or HTTP range implementation
-  - hash algorithm verification
-  - file-level or job-level manifest sealing
-  - retry/backoff policy
-  - public `DL_VERIFY_FAILED` DTO projection
+  - Rust production code
+  - real HTTP range requests
+  - provider authentication, CDN policy, or retry/backoff
+  - public `DL_NETWORK_*` / `DL_PROVIDER_*` projection
+  - streaming fetch, backpressure, or Tokio worker pools
   - composition-root production execution-port wiring
   - host transport, frontend, or SQLite schema changes
   - unrelated dirty files
 
 ## Allowed Files
 
-1. crates/module-downloads/src/driver.rs
-2. docs/modules/downloads/README_IMPL.md
-3. .artifacts/ai/active-task.md
-4. .artifacts/ai/task-plan.md
-5. .artifacts/ai/progress.md
-6. .artifacts/ai/findings.md
-7. .artifacts/ai/handoff.md
+1. docs/modules/downloads/README_IMPL.md
+2. .artifacts/ai/active-task.md
+3. .artifacts/ai/task-plan.md
+4. .artifacts/ai/progress.md
+5. .artifacts/ai/findings.md
+6. .artifacts/ai/handoff.md
 
 ## Required Context Read
 
 Read before writing:
 
-1. `docs/modules/downloads/README_IMPL.md` 7.40 verifier boundary.
-2. `DownloadSegmentExecutionRequest` field comments for `start_offset`, `length`, and `resume_mode`.
-3. `DownloadResumeWorkItem` derivation showing partial items use `start_offset = checkpoint.downloaded_bytes` and `length = segment.length`.
-4. Current `DownloadSegmentLengthVerifyPort` implementation and focused verifier tests.
-
-## Root Cause
-
-- AT-251 implemented the documented direct comparison `written.downloaded_bytes == request.length`.
-- While preparing the fetcher boundary, code inspection showed partial resume work stores the already completed byte count in `request.start_offset` while `length` remains the total segment length.
-- The writer reports bytes written in the current operation, not total segment completion, so partial verification must add the starting offset before comparing against total length.
+1. downloads module docs for provider/fetch/source locator boundaries.
+2. `docs/TauriDownloadRuntimeDesign.md` fetcher/provider/range/resume notes.
+3. `docs/TauriRepositoryPortsAndAdapterDesign.md` provider adapter ownership rules.
+4. `docs/TauriErrorHandlingAndProjectionDesign.md` retryable and public projection rules.
+5. `DownloadResumeWorkItem` and `DownloadSegmentExecutionRequest` start-offset semantics from code.
 
 ## Hypothesis
 
-- falsifiable implementation hypothesis: a RED test with `resume_mode = Partial`, `start_offset = 6`, `length = 10`, and `written.downloaded_bytes = 4` should fail on the current verifier and pass after the verifier computes completed bytes as `start_offset + written.downloaded_bytes` for partial requests.
+- falsifiable planning hypothesis: the next safe fetcher slice can be documented as a deterministic static byte-source fetcher that looks up `request.source_locator`, returns full segment bytes for `FromStart`, returns remaining bytes for `Partial`, preserves an optional etag, and maps missing/invalid static source facts to handled fetch failures without introducing real HTTP/provider behavior.
 
 ## Cheap Check
 
-1. Add RED test for partial resume completion.
-2. Update README_IMPL 7.40 to document from-start versus partial length semantics.
-3. Implement the smallest verifier fix.
-4. Run focused verifier tests, full downloads module tests, composition-root check, scoped rustfmt, and scoped diff-check.
+1. Update README_IMPL port status and roadmap now that the verifier is implemented.
+2. Add a focused fetcher boundary section defining static byte-source behavior, non-goals, and next RED tests.
+3. Re-read changed README_IMPL snippets.
+4. Run PWF check and scoped docs/PWF `git diff --check`.
 
 ## Validation Gate
 
-1. RED partial verifier test fails before production fix.
-2. Focused verifier tests pass after the fix.
-3. Full downloads module tests and composition-root compile gate pass.
-4. Scoped rustfmt and diff-check pass before commit/push.
+1. README_IMPL states writer and length verifier are implemented and fetcher is next.
+2. README_IMPL defines from-start and partial static fetch behavior.
+3. README_IMPL keeps real HTTP/provider/retry/public projection out of scope.
+4. Scoped diff-check passes before commit/push.
 
 ## Completion Evidence
 
-- RED: `cargo test -p launcher-module-downloads --lib download_segment_length_verify_port_accepts_partial_completion_from_start_offset --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` failed because partial completion returned a handled mismatch failure.
-- GREEN: `cargo test -p launcher-module-downloads --lib download_segment_length_verify_port --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 3/3 focused verifier tests.
-- Regression: `cargo test -p launcher-module-downloads --lib --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 66/66 tests.
-- Compile gate: `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
-- Format gate: `cargo fmt --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --package launcher-module-downloads -- --check` passed.
+- README_IMPL port status and roadmap now mark writer and length verifier as implemented, with fetcher as the next boundary.
+- README_IMPL 7.41 defines static source lookup, from-start behavior, partial remaining-byte behavior, handled missing/invalid source failures, and non-goals.
+- PWF check reported 123/124 phases complete before final status update, as expected while Phase 124 was still in progress.
+- Scoped docs/PWF `git diff --check` passed with CRLF warnings only.
