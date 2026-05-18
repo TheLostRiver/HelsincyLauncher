@@ -515,7 +515,7 @@
 
 ## Current Handoff - AT-2026-05-19-256
 
-- Status: completed; commit/push pending.
+- Status: completed; final commit `38940ff`, pushed to `origin/main`.
 - Scope:
   - `crates/composition-root/src/bootstrap.rs`
   - PWF records under `.artifacts/ai/`

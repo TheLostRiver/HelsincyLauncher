@@ -11480,6 +11480,7 @@
 - Added a regression test proving default `build_download_job_driver(...)` still defers without an execution port and keeps pending work queued.
 - Format issue logged and fixed: initial `cargo fmt --check` only wanted the test-only import list wrapped; scoped `cargo fmt` fixed it and the later format check passed.
 - Validation passed: focused static wiring test, focused composition-root download tests, full composition-root tests, composition-root check, full downloads lib tests, scoped rustfmt check.
+- Published AT-256 as `38940ff test: add downloads static executor wiring proof` and pushed it to `origin/main`.
 - Next likely task: decide whether to document or implement the next runtime terminal completion/failure projection boundary now that deterministic local execution can mutate checkpoints in a focused wiring proof.
 
 ### Auto Record: 2026-05-19 02:24:19
@@ -11542,5 +11543,14 @@
   - `.artifacts/ai/active-task.md` (update)
   - `.artifacts/ai/task-plan.md` (update)
   - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-19 02:40:56
+- Tool: apply_patch
+- Phase: Phase 127 - Downloads Composition-root Static Executor Wiring Proof (complete)
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
   - `.artifacts/ai/progress.md` (update)
   - `.artifacts/ai/handoff.md` (update)
