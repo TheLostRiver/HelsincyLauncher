@@ -1321,3 +1321,11 @@
 - `DownloadSegmentExecutionResult::Failed` and `DownloadSegmentHandledFailure` carry `reason` and `retryable` while in memory, but `DownloadSegmentCheckpointRecord` does not persist those facts.
 - `SqliteDownloadCheckpointRepository` uses explicit segment checkpoint columns, so durable failed metadata needs an explicit adapter/schema update rather than hidden JSON.
 - `TerminalFailed` should remain unused from downloads until failed checkpoint facts can distinguish retryable, terminal, and needs-attention states without reason-substring matching.
+## 2026-05-19 - AT-262 Failed Metadata Persistence Context
+
+- README and downloads README_IMPL now make failed metadata persistence the next backend slice before retry/backoff, terminal failed, or public `DL_*` projection.
+- Downloads module docs keep frontend limited to aggregate job projections; this task must not touch frontend state or expose segment details.
+- `DownloadSegmentExecutionResult::Failed` and `DownloadSegmentHandledFailure` already carry `reason` and `retryable`, but `record_failed_segment_checkpoints(...)` currently drops them by destructuring with `..`.
+- `DownloadSegmentCheckpointRecord` currently stores job/segment/file/range/progress/status/staging/hash/provider facts only; adding optional failed metadata keeps non-failed segment construction backward-compatible inside Rust.
+- `SqliteDownloadCheckpointRepository` owns table/mapping details for `download_segment_checkpoints`; it currently selects/inserts only status/progress/staging/hash/provider columns, so SQLite round-trip must be extended in the adapter.
+- Error design says `retryable` is a hint, not retry policy; this task should persist the hint without adding retry counts, backoff, auto-retry, or public execution error codes.

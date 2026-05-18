@@ -86,6 +86,12 @@ pub struct DownloadSegmentCheckpointRecord {
     /// Reference to incremental hash state when recomputing is expensive.
     /// 当重新计算成本较高时，指向增量 hash 状态的引用。
     pub hash_state_ref: Option<String>,
+    /// segment 失败时保留的模块本地诊断原因，不作为公开错误码使用。
+    /// Module-local failure reason captured for diagnostics when this segment failed.
+    pub failure_reason: Option<String>,
+    /// 与失败 segment 事实一起保留的重试提示；它不是重试策略本身。
+    /// Retry hint captured with the failed segment fact; this is not a retry policy.
+    pub failure_retryable: Option<bool>,
 }
 
 /// 提供下载 checkpoint 读取与保存能力的最小仓储边界。
@@ -870,6 +876,8 @@ impl DownloadJobDriver {
                 partial_path: partial_path.clone(),
                 etag: etag.clone(),
                 hash_state_ref: hash_state_ref.clone(),
+                failure_reason: None,
+                failure_retryable: None,
             };
 
             if let Some(index) = existing_index {
@@ -905,7 +913,8 @@ impl DownloadJobDriver {
             let DownloadSegmentExecutionResult::Failed {
                 request,
                 downloaded_bytes,
-                ..
+                reason,
+                retryable,
             } = result
             else {
                 continue;
@@ -941,6 +950,8 @@ impl DownloadJobDriver {
                 partial_path,
                 etag,
                 hash_state_ref,
+                failure_reason: Some(reason.clone()),
+                failure_retryable: Some(*retryable),
             };
 
             if let Some(index) = existing_index {
@@ -1852,6 +1863,8 @@ mod tests {
             partial_path: None,
             etag: None,
             hash_state_ref: None,
+            failure_reason: None,
+            failure_retryable: None,
         }
     }
 
@@ -1972,6 +1985,8 @@ mod tests {
                 partial_path: Some("segment-run-completed.part".into()),
                 etag: Some("etag-segment-run-completed".into()),
                 hash_state_ref: Some("hash-segment-run-completed".into()),
+                failure_reason: None,
+                failure_retryable: None,
             }],
             "fake completed run should persist checkpoint mutation"
         );
@@ -2026,6 +2041,8 @@ mod tests {
                 partial_path: None,
                 etag: None,
                 hash_state_ref: None,
+                failure_reason: Some("network timeout while reading segment".into()),
+                failure_retryable: Some(true),
             }],
             "fake failed run should persist checkpoint mutation without terminal projection"
         );
@@ -2628,6 +2645,8 @@ mod tests {
             partial_path: Some("segment-completed.part".into()),
             etag: Some("etag-segment-completed".into()),
             hash_state_ref: Some("hash-segment-completed".into()),
+            failure_reason: None,
+            failure_retryable: None,
         };
         let expected_segments = vec![unrelated_segment, expected_completed_segment];
 
@@ -2715,6 +2734,8 @@ mod tests {
             partial_path: Some("old-segment-failed.part".into()),
             etag: Some("old-failed-etag".into()),
             hash_state_ref: Some("old-failed-hash".into()),
+            failure_reason: Some("network timeout while reading segment".into()),
+            failure_retryable: Some(true),
         };
         let expected_segments = vec![unrelated_segment, expected_failed_segment];
 
@@ -2778,6 +2799,8 @@ mod tests {
             partial_path: Some("segment-orchestrated.part".into()),
             etag: Some("etag-segment-orchestrated".into()),
             hash_state_ref: Some("hash-segment-orchestrated".into()),
+            failure_reason: None,
+            failure_retryable: None,
         };
 
         assert_eq!(
@@ -2835,6 +2858,8 @@ mod tests {
             partial_path: None,
             etag: None,
             hash_state_ref: None,
+            failure_reason: Some("network timeout while reading segment".into()),
+            failure_retryable: Some(true),
         };
 
         assert_eq!(

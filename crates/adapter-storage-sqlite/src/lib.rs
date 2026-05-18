@@ -722,6 +722,8 @@ impl SqliteDownloadCheckpointRepository {
                 partial_path TEXT NULL,
                 etag TEXT NULL,
                 hash_state_ref TEXT NULL,
+                failure_reason TEXT NULL,
+                failure_retryable INTEGER NULL,
                 PRIMARY KEY (job_id, segment_id),
                 FOREIGN KEY (job_id) REFERENCES download_job_checkpoints(job_id) ON DELETE CASCADE
             );",
@@ -734,6 +736,45 @@ impl SqliteDownloadCheckpointRepository {
                 launcher_kernel_foundation::AppErrorSeverity::Warning,
                 launcher_kernel_foundation::CorrelationId::generate(),
             )
+        })?;
+        self.ensure_segment_checkpoint_column(&conn, "failure_reason", "TEXT NULL")?;
+        self.ensure_segment_checkpoint_column(&conn, "failure_retryable", "INTEGER NULL")?;
+        Ok(())
+    }
+
+    fn ensure_segment_checkpoint_column(
+        &self,
+        conn: &rusqlite::Connection,
+        column_name: &str,
+        column_definition: &str,
+    ) -> AppResult<()> {
+        let exists: i64 = conn
+            .query_row(
+                "SELECT COUNT(1) FROM pragma_table_info('download_segment_checkpoints') WHERE name = ?1",
+                rusqlite::params![column_name],
+                |row| row.get(0),
+            )
+            .map_err(|e| {
+                sqlite_read_error(format!(
+                    "segment checkpoint schema inspection failed for {column_name}: {e}"
+                ))
+            })?;
+        if exists > 0 {
+            return Ok(());
+        }
+
+        // 这里仅补当前 adapter 自己拥有的 checkpoint 表列，不引入跨模块 migration 框架。
+        // This only backfills this adapter-owned checkpoint table, not a cross-module migration framework.
+        conn.execute(
+            &format!(
+                "ALTER TABLE download_segment_checkpoints ADD COLUMN {column_name} {column_definition}"
+            ),
+            [],
+        )
+        .map_err(|e| {
+            sqlite_write_error(format!(
+                "segment checkpoint schema backfill failed for {column_name}: {e}"
+            ))
         })?;
         Ok(())
     }
@@ -797,7 +838,8 @@ impl SqliteDownloadCheckpointRepository {
         let mut segment_stmt = conn
             .prepare(
                 "SELECT job_id, segment_id, file_id, segment_offset, segment_length,
-                        downloaded_bytes, status, partial_path, etag, hash_state_ref
+                        downloaded_bytes, status, partial_path, etag, hash_state_ref,
+                        failure_reason, failure_retryable
                  FROM download_segment_checkpoints
                  WHERE job_id = ?1
                  ORDER BY segment_index ASC",
@@ -845,6 +887,12 @@ impl SqliteDownloadCheckpointRepository {
             let hash_state_ref: Option<String> = row.get(9).map_err(|e| {
                 sqlite_read_error(format!("segment hash_state_ref decode failed: {e}"))
             })?;
+            let failure_reason: Option<String> = row.get(10).map_err(|e| {
+                sqlite_read_error(format!("segment failure_reason decode failed: {e}"))
+            })?;
+            let failure_retryable_raw: Option<i64> = row.get(11).map_err(|e| {
+                sqlite_read_error(format!("segment failure_retryable decode failed: {e}"))
+            })?;
 
             segments.push(DownloadSegmentCheckpointRecord {
                 job_id: JobId::new(segment_job_id),
@@ -860,6 +908,11 @@ impl SqliteDownloadCheckpointRepository {
                 partial_path,
                 etag,
                 hash_state_ref,
+                failure_reason,
+                failure_retryable: decode_optional_bool(
+                    "segment failure_retryable",
+                    failure_retryable_raw,
+                )?,
             });
         }
 
@@ -907,8 +960,9 @@ impl SqliteDownloadCheckpointRepository {
             tx.execute(
                 "INSERT INTO download_segment_checkpoints
                  (job_id, segment_index, segment_id, file_id, segment_offset, segment_length,
-                  downloaded_bytes, status, partial_path, etag, hash_state_ref)
-                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
+                  downloaded_bytes, status, partial_path, etag, hash_state_ref,
+                  failure_reason, failure_retryable)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)",
                 rusqlite::params![
                     segment.job_id.to_string(),
                     i64::try_from(segment_index).map_err(|e| {
@@ -923,6 +977,8 @@ impl SqliteDownloadCheckpointRepository {
                     segment.partial_path,
                     segment.etag,
                     segment.hash_state_ref,
+                    segment.failure_reason,
+                    encode_optional_bool(segment.failure_retryable),
                 ],
             )
             .map_err(|e| sqlite_write_error(format!("segment checkpoint insert failed: {e}")))?;
@@ -959,6 +1015,21 @@ fn decode_segment_checkpoint_status(raw: &str) -> AppResult<DownloadSegmentCheck
 fn decode_u64_text(field: &str, raw: &str) -> AppResult<u64> {
     raw.parse::<u64>()
         .map_err(|e| sqlite_read_error(format!("{field} parse failed: {e}")))
+}
+
+fn encode_optional_bool(value: Option<bool>) -> Option<i64> {
+    value.map(|value| if value { 1 } else { 0 })
+}
+
+fn decode_optional_bool(field: &str, raw: Option<i64>) -> AppResult<Option<bool>> {
+    match raw {
+        None => Ok(None),
+        Some(0) => Ok(Some(false)),
+        Some(1) => Ok(Some(true)),
+        Some(other) => Err(sqlite_read_error(format!(
+            "{field} has unsupported boolean value `{other}`"
+        ))),
+    }
 }
 
 fn sqlite_read_error(message: String) -> launcher_kernel_foundation::AppError {
@@ -1410,6 +1481,8 @@ mod tests {
                     partial_path: Some("staging/file-a.part".into()),
                     etag: Some("etag-a".into()),
                     hash_state_ref: Some("hash-a".into()),
+                    failure_reason: None,
+                    failure_retryable: None,
                 },
                 DownloadSegmentCheckpointRecord {
                     job_id: job_id.clone(),
@@ -1422,6 +1495,22 @@ mod tests {
                     partial_path: None,
                     etag: None,
                     hash_state_ref: None,
+                    failure_reason: None,
+                    failure_retryable: None,
+                },
+                DownloadSegmentCheckpointRecord {
+                    job_id: job_id.clone(),
+                    segment_id: "segment-failed".into(),
+                    file_id: "file-c".into(),
+                    offset: 8192,
+                    length: 2048,
+                    downloaded_bytes: 256,
+                    status: DownloadSegmentCheckpointStatus::Failed,
+                    partial_path: Some("staging/file-c.part".into()),
+                    etag: Some("etag-c".into()),
+                    hash_state_ref: Some("hash-c".into()),
+                    failure_reason: Some("network timeout while reading segment".into()),
+                    failure_retryable: Some(true),
                 },
             ],
         };

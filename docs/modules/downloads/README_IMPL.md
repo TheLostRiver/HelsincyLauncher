@@ -91,7 +91,7 @@ Implementation truth should move through module facade and ports first. Do not p
 | fake completed-result checkpoint mutation | `DownloadJobDriver::record_completed_segment_checkpoints(...)` reloads checkpoint facts, applies same-job completed fake results into `DownloadSegmentCheckpointRecord` values, and saves via `DownloadCheckpointRepository`; still no SQLite adapter/schema, concrete IO, runtime completion, transport, or frontend changes | driver unit tests |
 | fake local resume execution orchestration | `DownloadJobDriver::execute_local_resume_turn(...)` chains the local execution-turn, request handoff, fake execution port, and checkpoint mutation helpers without runtime `run()`, concrete IO, SQLite adapter/schema changes, transport, or frontend behavior | driver unit tests |
 | fake segment failure result contract | `DownloadSegmentExecutionResult::Failed` carries request facts, downloaded bytes known at failure time, a local reason string, and a retryable hint without public `DL_*` execution projection, checkpoint mutation, retry policy, runtime completion, concrete IO, transport, or frontend behavior | driver unit tests |
-| fake failed-result checkpoint mutation | `DownloadJobDriver::record_failed_segment_checkpoints(...)` reloads checkpoint facts, applies same-job failed fake results as `Failed` segment status/progress, and saves through `DownloadCheckpointRepository` while deferring retry/backoff, public error projection, terminal runtime state, concrete IO, SQLite adapter/schema, transport, composition-root, and frontend behavior | driver unit tests |
+| fake failed-result checkpoint mutation | `DownloadJobDriver::record_failed_segment_checkpoints(...)` reloads checkpoint facts, applies same-job failed fake results as `Failed` segment status/progress plus local reason/retryable metadata, and saves through `DownloadCheckpointRepository` while deferring retry/backoff, public error projection, terminal runtime state, concrete IO, transport, composition-root, and frontend behavior | driver unit tests + SQLite round-trip test |
 | fake local mixed-result checkpoint orchestration | `execute_local_resume_turn(...)` records both completed and failed fake results through existing checkpoint mutation helpers while deferring retry/backoff, public error projection, terminal runtime state, concrete IO, SQLite adapter/schema, transport, composition-root, and frontend behavior | driver unit tests |
 | list/get/policy surfaces | `get_job_snapshot` composes module job records with shared runtime snapshots; `list_jobs` projects module repository pages; `get_policy` / `update_policy` use a downloads-owned in-memory policy store while runtime application and SQLite persistence remain later | module facade tests + adapter/composition check |
 
@@ -1910,20 +1910,20 @@ Next boundary:
 
 ### 7.45 Failed Segment Metadata And Retry Classification Boundary
 
-The driver now completes jobs when the known checkpoint is entirely completed, but failed segment facts still do not carry enough durable metadata to decide retry, terminal failure, or public error projection. The next boundary must make failed checkpoint facts classifiable before any `TerminalFailed` path is enabled.
+The driver now completes jobs when the known checkpoint is entirely completed, and failed segment facts now preserve the first local diagnostic metadata needed by later policy slices. The remaining boundary is durable retry/backoff and failure classification before any `TerminalFailed` path is enabled.
 
 Current Rust reality:
 
 1. `DownloadSegmentExecutionResult::Failed` carries a module-local `reason` string and `retryable` hint while the execution result is in memory.
-2. `DownloadSegmentHandledFailure` also carries `downloaded_bytes`, `reason`, and `retryable`, but those facts are flattened when `record_failed_segment_checkpoints(...)` writes a `DownloadSegmentCheckpointRecord`.
-3. `DownloadSegmentCheckpointRecord` persists `status = Failed`, byte facts, and optional staging/hash/provider tokens, but it does not persist failure reason, retryability, retry count, next retry time, or failure class.
-4. `SqliteDownloadCheckpointRepository` round-trips only the current checkpoint fields, so durable failure metadata would require an explicit adapter/schema boundary.
+2. `DownloadSegmentHandledFailure` also carries `downloaded_bytes`, `reason`, and `retryable`, and `record_failed_segment_checkpoints(...)` now copies those local facts into failed segment checkpoint records.
+3. `DownloadSegmentCheckpointRecord` persists `status = Failed`, byte facts, optional staging/hash/provider tokens, local failure reason, and local retryable hint, but it does not yet persist retry count, next retry time, or failure class.
+4. `SqliteDownloadCheckpointRepository` round-trips `failure_reason` and `failure_retryable` through the segment checkpoint table, including a narrow column backfill for existing local tables.
 5. `DownloadJobDriver::run(...)` currently keeps failed checkpoint mutation non-terminal, which is correct until retry/backoff classification is durable.
 
 Boundary rules:
 
 1. failed segment facts need a module-owned durable classification before the driver can decide retry versus terminal failure;
-2. local diagnostic `reason` strings may be preserved for diagnostics, but driver policy must not rely on substring matching;
+2. local diagnostic `reason` strings are preserved for diagnostics, but driver policy must not rely on substring matching;
 3. `retryable` remains a hint, not the retry engine itself; retry count, backoff delay, and scheduling policy must be explicit later fields or policy decisions;
 4. public `DL_*` execution errors must wait until internal failure classes are stable enough to project;
 5. the first persistence slice must not change host transport, frontend state, provider HTTP behavior, production wiring, leases, scheduler loops, or job snapshot error payloads.
@@ -1935,6 +1935,20 @@ First Rust slice:
 3. update in-memory checkpoint tests first, then SQLite checkpoint round-trip tests and adapter mapping;
 4. keep `DownloadJobDriver::run(...)` returning non-terminal `Accepted` for failed checkpoint mutation until retry count/backoff and terminal-failure policy are separately defined;
 5. run focused downloads driver tests, adapter checkpoint round-trip tests, full affected module/adapter tests, `cargo check -p launcher-composition-root`, scoped rustfmt, and scoped diff-check.
+
+Implementation status:
+
+1. `DownloadSegmentCheckpointRecord` now has optional `failure_reason` and `failure_retryable` fields;
+2. `record_failed_segment_checkpoints(...)` preserves local `DownloadSegmentExecutionResult::Failed` reason/retryable metadata while keeping failed mutation non-terminal;
+3. `SqliteDownloadCheckpointRepository` creates and backfills `failure_reason` / `failure_retryable` columns and maps them through save/load;
+4. focused driver and SQLite round-trip tests prove the metadata survives in-memory mutation and durable adapter persistence;
+5. retry count, next retry time, failure class, public `DL_*` execution errors, and `TerminalFailed` driver decisions remain out of this slice.
+
+Next boundary:
+
+1. define durable retry count and backoff scheduling facts without overloading the `retryable` hint;
+2. introduce a module-owned failure class that can later project to stable public `DL_*` errors;
+3. only then decide when a downloads driver failure is terminal enough to return `JobRunDisposition::TerminalFailed`.
 
 ---
 

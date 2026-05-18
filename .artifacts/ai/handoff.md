@@ -619,6 +619,35 @@
 - Next likely code task:
   - add failed metadata fields to `DownloadSegmentCheckpointRecord`, record them from failed execution results, and update SQLite checkpoint round-trip tests.
 
+## Current Handoff - AT-2026-05-19-262
+
+- Status: completed; commit/push pending.
+- Scope:
+  - `crates/module-downloads/src/driver.rs`
+  - `crates/module-downloads/src/facade/mod.rs` test fixture updates for the widened checkpoint record
+  - `crates/adapter-storage-sqlite/src/lib.rs`
+  - root README and `docs/modules/downloads/README_IMPL.md` after green
+  - PWF records under `.artifacts/ai`
+- TDD target:
+  - RED driver test for failed checkpoint mutation preserving local reason and retryable hint failed on missing fields, then passed after implementation.
+  - RED SQLite checkpoint round-trip assertion for the same metadata failed on missing fields, then passed after implementation.
+- Completed implementation:
+  - `DownloadSegmentCheckpointRecord` now carries optional `failure_reason` and `failure_retryable`.
+  - failed checkpoint mutation persists failed execution reason/retryable into checkpoint facts.
+  - SQLite checkpoint table creation/backfill and save/load mapping preserve failed metadata.
+  - README and downloads implementation doc now mark failed metadata persistence complete.
+- Validation passed:
+  - `cargo test -p launcher-module-downloads --lib` -> 72 passed.
+  - `cargo test -p launcher-adapter-storage-sqlite --lib` -> 3 passed.
+  - `cargo check -p launcher-composition-root` -> passed.
+  - `cargo fmt -p launcher-module-downloads -p launcher-adapter-storage-sqlite -- --check` -> passed.
+  - scoped `git diff --check` -> CRLF warnings only.
+- Boundaries:
+  - keep failed mutation non-terminal;
+  - no retry/backoff scheduling, public `DL_*`, host transport, frontend, provider HTTP, production wiring, leases, scheduler loop, or snapshot error payload changes.
+- Next likely task:
+  - define retry count, backoff scheduling facts, and module-owned failure class before enabling `TerminalFailed` or public `DL_*` projection.
+
 ## Dirty Worktree To Preserve
 
 - Unrelated unstaged/unknown work remains present and must not be committed with AT-249:

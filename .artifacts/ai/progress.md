@@ -11642,6 +11642,30 @@
 - Pushed `124dbb3` to `origin/main`.
 - Next likely code task remains failed metadata persistence on checkpoint records and SQLite round-trip mapping, with downloads driver failure mutation still non-terminal.
 
+## Agent Note: 2026-05-19 - Start AT-2026-05-19-262
+
+- Started AT-262 to persist failed segment metadata through downloads checkpoint records and SQLite mapping.
+- Read README, docs map, downloads ARCH/API/FLOW/IMPL 7.45, download runtime failure/checkpoint rules, error retryable semantics, testing gates, AI transaction protocol, comment standard, current repo architecture, backend skeleton, repository/adapter design, and focused Rust implementation surfaces.
+- Planned TDD path: first add failing driver and SQLite round-trip tests for failed reason/retryable persistence, then implement minimal record/schema/mapping changes.
+- Boundaries preserved for this task: no `TerminalFailed`, no retry/backoff engine, no stable public `DL_*` projection, no host/frontend/provider/scheduler/lease/snapshot error payload changes.
+
+## Agent Note: 2026-05-19 - Complete AT-2026-05-19-262
+
+- RED checks behaved as expected:
+  - `cargo test -p launcher-module-downloads download_job_driver_failed_result_checkpoint_mutation_replaces_and_saves_segment` failed because `DownloadSegmentCheckpointRecord` had no `failure_reason` / `failure_retryable` fields.
+  - `cargo test -p launcher-adapter-storage-sqlite sqlite_download_checkpoint_round_trips_segment_facts` failed for the same missing fields.
+- Added optional failed metadata fields to `DownloadSegmentCheckpointRecord` with Chinese-first bilingual comments.
+- Updated `record_failed_segment_checkpoints(...)` to preserve failed execution `reason` and `retryable` into checkpoint facts.
+- Updated `SqliteDownloadCheckpointRepository` to create/backfill `failure_reason` and `failure_retryable`, save/load them, and reject invalid stored boolean values.
+- Updated facade test fixtures to set non-failed metadata to `None`, and updated README plus downloads README_IMPL to reflect the new completed boundary.
+- Validation passed:
+  - `cargo test -p launcher-module-downloads --lib` -> 72 passed.
+  - `cargo test -p launcher-adapter-storage-sqlite --lib` -> 3 passed.
+  - `cargo check -p launcher-composition-root` -> passed.
+  - `cargo fmt -p launcher-module-downloads -p launcher-adapter-storage-sqlite -- --check` -> passed.
+  - scoped `git diff --check` -> passed with CRLF normalization warnings only.
+- Next likely task: define retry count, backoff scheduling facts, and module-owned failure class before enabling `TerminalFailed` or public `DL_*` projection.
+
 ### Auto Record: 2026-05-19 02:52:22
 - Tool: apply_patch
 - Phase: Phase 128 - Runtime Terminal Projection Boundary (in_progress)
@@ -11827,3 +11851,67 @@
   - `D:/DEV/MyEpicLauncher/.artifacts/ai/active-task.md` (update)
   - `D:/DEV/MyEpicLauncher/.artifacts/ai/handoff.md` (update)
   - `D:/DEV/MyEpicLauncher/.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-19 03:46:19
+- Tool: apply_patch
+- Phase: Phase 133 - Failed Segment Metadata Persistence (in_progress)
+- Files:
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/active-task.md` (update)
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/task-plan.md` (update)
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/findings.md` (update)
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/progress.md` (update)
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-19 03:46:46
+- Tool: apply_patch
+- Phase: Phase 133 - Failed Segment Metadata Persistence (in_progress)
+- Files:
+  - `D:/DEV/MyEpicLauncher/crates/module-downloads/src/driver.rs` (update)
+  - `D:/DEV/MyEpicLauncher/crates/adapter-storage-sqlite/src/lib.rs` (update)
+
+### Auto Record: 2026-05-19 03:49:22
+- Tool: apply_patch
+- Phase: Phase 133 - Failed Segment Metadata Persistence (in_progress)
+- Files:
+  - `D:/DEV/MyEpicLauncher/crates/module-downloads/src/driver.rs` (update)
+  - `D:/DEV/MyEpicLauncher/crates/adapter-storage-sqlite/src/lib.rs` (update)
+
+### Auto Record: 2026-05-19 03:50:56
+- Tool: apply_patch
+- Phase: Phase 133 - Failed Segment Metadata Persistence (in_progress)
+- Files:
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/active-task.md` (update)
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-19 03:51:10
+- Tool: apply_patch
+- Phase: Phase 133 - Failed Segment Metadata Persistence (in_progress)
+- Files:
+  - `D:/DEV/MyEpicLauncher/crates/module-downloads/src/driver.rs` (update)
+
+### Auto Record: 2026-05-19 03:51:31
+- Tool: apply_patch
+- Phase: Phase 133 - Failed Segment Metadata Persistence (in_progress)
+- Files:
+  - `D:/DEV/MyEpicLauncher/crates/module-downloads/src/facade/mod.rs` (update)
+
+### Auto Record: 2026-05-19 03:53:40
+- Tool: apply_patch
+- Phase: Phase 133 - Failed Segment Metadata Persistence (in_progress)
+- Files:
+  - `D:/DEV/MyEpicLauncher/README.md` (update)
+
+### Auto Record: 2026-05-19 03:55:29
+- Tool: apply_patch
+- Phase: Phase 133 - Failed Segment Metadata Persistence (in_progress)
+- Files:
+  - `D:/DEV/MyEpicLauncher/crates/module-downloads/src/driver.rs` (update)
+
+### Auto Record: 2026-05-19 03:57:46
+- Tool: apply_patch
+- Phase: Phase 133 - Failed Segment Metadata Persistence (complete)
+- Files:
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/active-task.md` (update)
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/task-plan.md` (update)
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/progress.md` (update)
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/handoff.md` (update)

@@ -2203,6 +2203,8 @@ mod tests {
                     partial_path: Some("file.bin.part-0".into()),
                     etag: Some("etag-partial".into()),
                     hash_state_ref: Some("hash-partial".into()),
+                    failure_reason: None,
+                    failure_retryable: None,
                 },
             ]),
             manifest_provider: RecordingManifestProvider::with_segments(vec![
@@ -2279,6 +2281,8 @@ mod tests {
                     partial_path: Some("file.bin.part-0".into()),
                     etag: Some("etag-partial".into()),
                     hash_state_ref: Some("hash-partial".into()),
+                    failure_reason: None,
+                    failure_retryable: None,
                 },
             ]),
             manifest_provider: RecordingManifestProvider::with_segments(vec![
@@ -2469,6 +2473,8 @@ mod tests {
                     partial_path: Some("file.bin.part".into()),
                     etag: Some("etag-1".into()),
                     hash_state_ref: None,
+                    failure_reason: None,
+                    failure_retryable: None,
                 },
             ]),
             manifest_provider: RecordingManifestProvider::with_segments(vec![
@@ -2527,6 +2533,8 @@ mod tests {
                     partial_path: Some("file.bin.part".into()),
                     etag: Some("etag-1".into()),
                     hash_state_ref: None,
+                    failure_reason: None,
+                    failure_retryable: None,
                 },
             ]),
             manifest_provider: RecordingManifestProvider::with_segments(vec![
@@ -2594,6 +2602,8 @@ mod tests {
                     partial_path: Some("file.bin.part".into()),
                     etag: Some("etag-1".into()),
                     hash_state_ref: None,
+                    failure_reason: None,
+                    failure_retryable: None,
                 },
             ]),
             manifest_provider: RecordingManifestProvider::with_segments(vec![
@@ -2655,6 +2665,8 @@ mod tests {
             partial_path: Some("file.bin.part".into()),
             etag: Some("etag-1".into()),
             hash_state_ref: None,
+            failure_reason: None,
+            failure_retryable: None,
         }];
 
         let decisions = build_resume_segment_decisions(&manifest, &checkpoints)
@@ -2698,6 +2710,8 @@ mod tests {
             partial_path: Some("file.bin.part".into()),
             etag: Some("etag-1".into()),
             hash_state_ref: Some("hash-state-1".into()),
+            failure_reason: None,
+            failure_retryable: None,
         }];
 
         let decisions = build_resume_segment_decisions(&manifest, &checkpoints)
@@ -2741,6 +2755,8 @@ mod tests {
             partial_path: Some("file.bin.part".into()),
             etag: Some("etag-1".into()),
             hash_state_ref: None,
+            failure_reason: None,
+            failure_retryable: None,
         }];
 
         let decisions = build_resume_segment_decisions(&manifest, &checkpoints)
@@ -2845,6 +2861,8 @@ mod tests {
                 partial_path: Some("file.bin.part-0".into()),
                 etag: Some("etag-sealed".into()),
                 hash_state_ref: None,
+                failure_reason: None,
+                failure_retryable: None,
             },
             DownloadSegmentCheckpointRecord {
                 job_id: job_id.clone(),
@@ -2857,6 +2875,8 @@ mod tests {
                 partial_path: Some("file.bin.part-1".into()),
                 etag: Some("etag-partial".into()),
                 hash_state_ref: Some("hash-partial".into()),
+                failure_reason: None,
+                failure_retryable: None,
             },
             DownloadSegmentCheckpointRecord {
                 job_id,
@@ -2869,6 +2889,8 @@ mod tests {
                 partial_path: Some("file.bin.part-3".into()),
                 etag: Some("etag-mismatch".into()),
                 hash_state_ref: None,
+                failure_reason: None,
+                failure_retryable: None,
             },
         ];
         let decisions = build_resume_segment_decisions(&manifest, &checkpoints)
