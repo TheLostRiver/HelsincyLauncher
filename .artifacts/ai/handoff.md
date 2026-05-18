@@ -588,7 +588,7 @@
 
 ## Current Handoff - AT-2026-05-19-260
 
-- Status: completed; commit/push pending.
+- Status: completed; final commit `55ab2da`, pushed to `origin/main`.
 - Scope:
   - `crates/module-downloads/src/driver.rs`
   - root README and downloads README_IMPL implementation status after green

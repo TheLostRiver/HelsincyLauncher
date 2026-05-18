@@ -81,4 +81,4 @@ Read before writing:
 - Compile gate: `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
 - Format gate: `rustfmt --edition 2021 --check crates\module-downloads\src\driver.rs` passed.
 - Scoped diff-check passed for AT-260 files with CRLF normalization warnings only.
-- Commit/push pending.
+- Published as commit `55ab2da` and pushed to `origin/main`.

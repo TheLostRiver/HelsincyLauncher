@@ -49,7 +49,7 @@ Phase 131 - Downloads Driver Completion-first Terminal Implementation (complete)
 - AT-2026-05-19-257 defined the runtime terminal completion/failure projection boundary and refreshed root README before any `kernel-jobs` state changes; committed and pushed as `95c3e76`.
 - AT-2026-05-19-258 implemented the explicit `kernel-jobs` terminal disposition projection slice with focused TDD; committed and pushed as `ac12ec0`.
 - AT-2026-05-19-259 defined the downloads driver completion-first terminal decision boundary before Rust changes; committed and pushed as `bf6af24`.
-- AT-2026-05-19-260 implemented the downloads driver completion-first terminal decision with focused TDD; commit/push pending.
+- AT-2026-05-19-260 implemented the downloads driver completion-first terminal decision with focused TDD; committed and pushed as `55ab2da`.
 - AT-2026-05-17-220 was published as commit `aa8d6e3` after documenting the shared runtime execution-turn boundary.
 - AT-2026-05-17-219 was published as commit `f618718` after adding host transport smoke coverage for downloads policy runtime application.
 - AT-2026-05-17-218 was published as commit `5aae7f1` after adding documentation-budget rules.
@@ -1226,7 +1226,7 @@ Phase 131 - Downloads Driver Completion-first Terminal Implementation (complete)
 251. AT-2026-05-19-257 - completed - defined the runtime terminal completion/failure projection boundary and refreshed root README before `kernel-jobs` code changes; committed and pushed as `95c3e76`.
 252. AT-2026-05-19-258 - completed - implemented explicit terminal run disposition projection in `kernel-jobs` with focused TDD; committed and pushed as `ac12ec0`.
 253. AT-2026-05-19-259 - completed - defined the downloads driver completion-first terminal decision boundary before Rust changes; committed and pushed as `bf6af24`.
-254. AT-2026-05-19-260 - completed - implemented the downloads driver completion-first terminal decision with focused TDD; commit/push pending.
+254. AT-2026-05-19-260 - completed - implemented the downloads driver completion-first terminal decision with focused TDD; committed and pushed as `55ab2da`.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
