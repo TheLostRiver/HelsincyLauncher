@@ -2,79 +2,78 @@
 
 ## Identity
 
-- task id: AT-2026-05-19-256
-- title: Implement downloads composition-root static executor wiring proof
+- task id: AT-2026-05-19-257
+- title: Define runtime terminal completion/failure projection boundary
 - status: completed
 
 ## Goal
 
-Implement README_IMPL 7.42 with a focused composition-root TDD proof that an explicitly supplied static source map can wire `DownloadSegmentExecutor` into a downloads driver while default desktop production still defers when no execution port is wired.
+Update the durable downloads implementation docs and root README after the AT-256 static wiring proof, defining the next shared runtime terminal projection boundary before changing `kernel-jobs` state behavior.
 
 ## Scope
 
 - in scope:
-  - `crates/composition-root/src/bootstrap.rs`
+  - `README.md`
+  - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
   - `.artifacts/ai/progress.md`
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
-  - `README.md` and durable docs unless implementation reveals a documented boundary error
-  - `module-downloads` behavior changes
-  - default desktop production execution-port wiring
-  - real HTTP range requests, provider auth, CDN policy, retry/backoff, streaming workers
-  - public `DL_NETWORK_*` / `DL_PROVIDER_*` / `DL_WRITE_FAILED` / `DL_VERIFY_FAILED` projection
-  - host transport, frontend, SQLite schema, or unrelated dirty files
+  - Rust code changes
+  - downloads driver terminal decision implementation
+  - retry/backoff or stable public `DL_*` execution errors
+  - host transport, frontend, SQLite schema, provider HTTP, or real production execution-port wiring
+  - moving `.artifacts/ai` records to the repo root; current project docs keep `.artifacts/ai` authoritative
 
 ## Allowed Files
 
-1. crates/composition-root/src/bootstrap.rs
-2. .artifacts/ai/active-task.md
-3. .artifacts/ai/task-plan.md
-4. .artifacts/ai/progress.md
-5. .artifacts/ai/findings.md
-6. .artifacts/ai/handoff.md
+1. README.md
+2. docs/modules/downloads/README_IMPL.md
+3. .artifacts/ai/active-task.md
+4. .artifacts/ai/task-plan.md
+5. .artifacts/ai/progress.md
+6. .artifacts/ai/findings.md
+7. .artifacts/ai/handoff.md
 
 ## Required Context Read
 
 Read before writing:
 
-1. `docs/modules/downloads/README_IMPL.md` 7.42.
-2. `docs/TauriCompositionRootWiringDesign.md` composition-root assembly owner rules.
-3. `docs/TauriDownloadRuntimeDesign.md` staging/fetch/write/verify boundaries.
-4. `docs/TauriTestingStrategyAndQualityGateDesign.md` focused backend test guidance.
-5. `docs/TauriCodeCommentStandard.md` Chinese-first and boundary-comment rules.
-6. `crates/composition-root/src/bootstrap.rs` downloads driver registry and tests.
-7. `crates/module-downloads/src/driver.rs` `DownloadJobDriver::run(...)`, executor, writer, verifier, and checkpoint mutation behavior.
+1. `README.md` current status and near-term roadmap.
+2. `docs/README.md` README/docs update routing rules.
+3. `docs/ModuleDocumentationStandard.md` documentation-budget rules.
+4. `docs/modules/downloads/README_IMPL.md` 6.1 and 7.42.
+5. `docs/TauriKernelJobsRuntimeDesign.md` job lifecycle and snapshot projection rules.
+6. `docs/TauriDownloadRuntimeDesign.md` downloads checkpoint/runtime ownership.
+7. `docs/TauriErrorHandlingAndProjectionDesign.md` long-job failure and public error projection rules.
+8. `docs/TauriCompositionRootWiringDesign.md` assembly-owner rules.
+9. Current `kernel-jobs` runtime and downloads driver snippets for `JobRunDisposition`, checkpoint mutation, and default deferred wiring.
 
 ## Hypothesis
 
-- falsifiable implementation hypothesis: a private composition-root helper can build a downloads driver with `DownloadSegmentExecutor` from explicit static sources and `app_data_dir/.downloads/staging`, allowing a focused test to run one queued segment to `Completed`, while the default `build_desktop_services(...)` path still returns the existing deferred disposition.
+- falsifiable documentation hypothesis: after AT-256, the correct next durable boundary is an explicit `kernel-jobs` terminal disposition/projection contract, not immediate downloads production wiring or public `DL_*` execution errors; README and README_IMPL can describe this without changing Rust behavior.
 
 ## Cheap Check
 
-1. Add a RED composition-root test that calls the missing private static executor wiring helper.
-2. Verify the test fails because the helper does not exist.
-3. Implement the smallest helper using `DownloadSegmentStaticFetchPort`, `DownloadSegmentFilesystemWritePort`, `DownloadSegmentLengthVerifyPort`, and `DownloadJobDriver::with_pending_resume_work_source_and_execution_port(...)`.
-4. Re-run the focused test and the existing default-deferred smoke path.
-5. Run composition-root check/tests, scoped rustfmt, scoped diff-check, then commit and push.
+1. Update root README current status and roadmap.
+2. Update README_IMPL 6.1 and add a concise 7.43 terminal projection boundary.
+3. Update PWF task records and handoff.
+4. Run scoped `git diff --check` for the touched docs/task files.
+5. Commit and attempt push.
 
 ## Validation Gate
 
-1. RED failure observed before production/helper implementation.
-2. Focused composition-root static executor wiring test passes.
-3. Default desktop production no-execution-port/deferred behavior remains covered.
-4. `cargo check -p launcher-composition-root` passes.
-5. Scoped rustfmt and diff-check pass.
+1. README no longer says composition-root wiring proof is still next.
+2. README_IMPL records AT-256 implementation status and defines terminal projection before code.
+3. Scope keeps Rust/transport/frontend/provider/retry work out of this docs-only task.
+4. Scoped diff-check passes or any CRLF-only warnings are recorded.
 
 ## Completion Evidence
 
-- RED: `cargo test -p launcher-composition-root static_download_executor_wiring_records_completed_checkpoint_and_writes_staging_file --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` failed with `cannot find function build_download_job_driver_with_static_segment_executor`.
-- GREEN focused: the same focused test passed after adding the private static executor helper.
-- Focused regression: `cargo test -p launcher-composition-root download --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 5 bootstrap tests and 3 smoke tests.
-- Composition-root regression: `cargo test -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 14 unit tests and 7 integration tests.
-- Compile gate: `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
-- Module regression: `cargo test -p launcher-module-downloads --lib --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 71/71 tests.
-- Format gate: `cargo fmt --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --package launcher-composition-root -- --check` passed after scoped formatting.
-- Published as commit `38940ff` and pushed to `origin/main`.
+- Updated `README.md` current status and near-term roadmap to point at runtime terminal completion/failure projection.
+- Updated `docs/modules/downloads/README_IMPL.md` 6.1, 7.42 implementation status, and new 7.43 terminal projection boundary.
+- Validation: `git diff --check -- README.md docs/modules/downloads/README_IMPL.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/findings.md .artifacts/ai/progress.md .artifacts/ai/handoff.md` passed with CRLF normalization warnings only.
+- No Rust, transport, frontend, provider, retry/backoff, public `DL_*`, or schema files were edited.
+- Commit/push pending.

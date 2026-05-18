@@ -537,6 +537,22 @@
 - Next likely task:
   - reassess README_IMPL after the deterministic wiring proof; likely define the runtime terminal completion/failure projection boundary before changing shared runtime state.
 
+## Current Handoff - AT-2026-05-19-257
+
+- Status: completed; commit/push pending.
+- Scope:
+  - Update `README.md` current status/roadmap.
+  - Update `docs/modules/downloads/README_IMPL.md` port/roadmap status, 7.42 implementation status, and new 7.43 runtime terminal projection boundary.
+  - Update PWF records under `.artifacts/ai`.
+- Boundary selected:
+  - `JobRunDisposition::Accepted` remains non-terminal and projects only Running.
+  - Terminal Completed/Failed snapshot projection must be explicit, owned by `kernel-jobs`, and proven first with fake runtime drivers.
+  - Downloads driver terminal decisions, retry/backoff, public `DL_*` execution errors, provider HTTP, host transport, frontend, and schema work stay later.
+- Validation passed:
+  - Scoped `git diff --check` for README, README_IMPL, and PWF task files passed with CRLF normalization warnings only.
+- Next likely code task after this docs commit:
+  - add focused RED `launcher-kernel-jobs` tests for explicit terminal run dispositions projecting stored snapshots to Completed/Failed.
+
 ## Dirty Worktree To Preserve
 
 - Unrelated unstaged/unknown work remains present and must not be committed with AT-249:

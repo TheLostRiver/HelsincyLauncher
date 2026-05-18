@@ -140,7 +140,7 @@ Do not skip directly from checkpoint to `JobRuntime::resume`. The module owns bu
 | `JobRuntime` | shared kernel-jobs runtime trait exists | resume uses job-level `EnqueueJobRequest<()>`; segment details still stay out of `kernel-jobs` |
 | `DownloadSegmentExecutionPort` | driver-facing port exists | module-local segment requests can return accepted, completed, or failed execution results |
 | `DownloadSegmentFetchPort` | executor sub-port exists | `DownloadSegmentStaticFetchPort` provides deterministic static byte-source fetches; real provider/HTTP range behavior remains later |
-| `DownloadSegmentWritePort` | executor sub-port exists | guarded wrapper validates staging-relative targets and `DownloadSegmentFilesystemWritePort` implements job-scoped staging writes; production wiring remains later |
+| `DownloadSegmentWritePort` | executor sub-port exists | guarded wrapper validates staging-relative targets and `DownloadSegmentFilesystemWritePort` implements job-scoped staging writes; default production wiring remains deferred |
 | `DownloadSegmentVerifyPort` | executor sub-port exists | `DownloadSegmentLengthVerifyPort` verifies from-start and partial byte counts; hash verification remains later |
 
 When adding a port:
@@ -160,8 +160,8 @@ Recommended order:
 2. completed: define and implement a concrete verifier shell, starting with byte-length checks before hash algorithms;
 3. completed: define and implement the deterministic static fetcher boundary for local byte sources before real HTTP range behavior;
 4. completed: define concrete executor composition-root wiring without introducing real provider HTTP behavior;
-5. next: implement the composition-root wiring proof with explicit static/local sources while keeping default desktop production deferred;
-6. add runtime terminal completion/failure projection after concrete execution can advance checkpoints deterministically;
+5. completed: implement the composition-root wiring proof with explicit static/local sources while keeping default desktop production deferred;
+6. next: define and implement runtime terminal completion/failure projection after concrete execution can advance checkpoints deterministically;
 7. add retry/backoff and public `DL_*` execution error projection only after concrete failures are classified;
 8. keep host transport and frontend changes last, exposing only aggregate job snapshots and stable command/query DTOs.
 
@@ -1803,13 +1803,54 @@ Non-goals:
 2. no automatic startup/background execution loop and no change to `StartupPipelineFacade::run_one_runtime_execution_turn(...)` behavior;
 3. no segment payloads in `kernel-jobs` extension fields or host IPC.
 
-Next Rust slice:
+Implemented Rust slice:
 
-1. add a focused RED composition-root test for a private static executor wiring helper;
-2. construct `DownloadSegmentExecutor` from an explicit static source map, `DownloadSegmentFilesystemWritePort`, and `DownloadSegmentLengthVerifyPort`;
-3. build a downloads driver with `with_pending_resume_work_source_and_execution_port(...)` only in the focused helper/test path;
-4. prove default `build_desktop_services(...)` still defers downloads execution when no execution port is explicitly wired;
-5. run focused composition-root tests, full downloads module tests if public exports are touched, `cargo check -p launcher-composition-root`, scoped rustfmt, and scoped diff-check.
+1. added a focused RED composition-root test for a private static executor wiring helper;
+2. constructed `DownloadSegmentExecutor` from an explicit static source map, `DownloadSegmentFilesystemWritePort`, and `DownloadSegmentLengthVerifyPort`;
+3. built a downloads driver with `with_pending_resume_work_source_and_execution_port(...)` only in the focused helper/test path;
+4. proved default `build_download_job_driver(...)` still defers downloads execution when no execution port is explicitly wired;
+5. validated focused composition-root tests, full composition-root tests, full downloads module lib tests, `cargo check -p launcher-composition-root`, scoped rustfmt, and scoped diff-check.
+
+Implementation status:
+
+1. `launcher-composition-root` has a test-only helper that builds `DownloadSegmentExecutor` from explicit static sources, app-data staging, filesystem writer, and length verifier;
+2. the focused composition-root test proves the wired driver can drain one prepared work item, write deterministic bytes under `.downloads/staging/<job_id>/...`, verify length, and persist a completed segment checkpoint;
+3. a separate regression test proves the default `build_download_job_driver(...)` still defers without an execution port;
+4. default desktop production still does not wire an execution port, real provider fetching, public execution error projection, or host/frontend changes.
+
+Next boundary:
+
+1. define how the shared runtime projects explicit module terminal dispositions to `JobState::Completed` / `JobState::Failed`;
+2. keep `JobRunDisposition::Accepted` as non-terminal running work, because accepted checkpoint mutation is not the same thing as job completion;
+3. keep downloads segment failure classification, retry/backoff, and public `DL_*` execution errors separate from the first terminal snapshot projection.
+
+### 7.43 Runtime Terminal Completion/Failure Projection Boundary
+
+The static wiring proof shows that a focused downloads driver can mutate durable segment checkpoints through concrete local execution. The shared runtime still needs an explicit terminal projection contract before any module can claim a job is completed or failed at the runtime snapshot layer.
+
+Current Rust reality:
+
+1. `SharedJobRuntimeHost::run_one_execution_turn(...)` maps `JobRunDisposition::Accepted` to `JobState::Running` and `JobUiState::Running`.
+2. `JobRunDisposition::Deferred` leaves the stored snapshot unchanged.
+3. `JobRunDisposition::Failed { reason }` currently represents a non-terminal execution-turn failure/rejection; it is not persisted as `JobState::Failed`.
+4. `DownloadJobDriver::run(...)` returns `Accepted` when local execution produces any checkpoint mutation and `Deferred` when no execution port or no mutation exists.
+5. Downloads checkpoints can store completed and failed segment facts, but the runtime snapshot does not inspect segment records and must not infer terminal job state from them directly.
+
+Boundary rules:
+
+1. terminal snapshot projection belongs to `launcher-kernel-jobs`; modules may report explicit terminal dispositions, but they must not mutate `JobSnapshotStore` directly;
+2. `Accepted` remains non-terminal and only means "one execution turn was accepted or made progress";
+3. completed projection is allowed only after the module has already persisted durable completion proof in its own checkpoint/store;
+4. failed projection must stay separate from retryable handled segment failures until downloads classifies retry/backoff and stable public `DL_*` execution errors;
+5. the first projection slice should not add snapshot error payload fields, host transport DTO changes, frontend behavior, leases, background scheduler loops, SQLite schema changes, or provider/network behavior.
+
+First Rust slice:
+
+1. add explicit terminal dispositions to `JobRunDisposition`, starting with `Completed` and a clearly terminal failed variant that does not replace the existing non-terminal `Failed { reason }` semantics;
+2. update `SharedJobRuntimeHost::run_one_execution_turn(...)` so terminal dispositions project the stored snapshot to `JobState::Completed` / `JobUiState::Completed` or `JobState::Failed` / `JobUiState::Failed`;
+3. keep `Deferred`, `Accepted`, and the existing non-terminal `Failed { reason }` behavior unchanged unless the focused RED test proves otherwise;
+4. prove the projection with fake `kernel-jobs` drivers before changing downloads driver terminal decisions;
+5. run focused `launcher-kernel-jobs` tests, the full `launcher-kernel-jobs --lib` suite, `cargo check -p launcher-composition-root`, scoped rustfmt, and scoped diff-check.
 
 ---
 

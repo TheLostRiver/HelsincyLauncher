@@ -1283,3 +1283,11 @@
 - RED/GREEN confirmed the composition-root helper assembles `DownloadSegmentExecutor` from explicit static sources, filesystem writer, and length verifier; the test recorded a completed checkpoint and wrote static bytes under app-data staging.
 - A separate composition-root regression test confirms default `build_download_job_driver(...)` still defers without an execution port and preserves pending work.
 - The helper is test-only for now, preserving the documented rule that default desktop production should not wire an empty static fetcher before a real provider fetcher or explicit source config exists.
+
+## Phase 128 Runtime Terminal Projection Boundary Findings
+
+- Required context was read in focused chunks: root README, docs map, module documentation budget, downloads README_IMPL 6.1/7.42, kernel-jobs lifecycle design, download runtime ownership, error projection rules, composition-root wiring rules, current `kernel-jobs` runtime code, current downloads driver run/checkpoint code, and current composition-root static helper.
+- Current `kernel-jobs` code projects only `JobRunDisposition::Accepted` to `Running`; `Deferred` and the existing non-terminal `Failed { reason }` do not mutate stored snapshots.
+- Current `DownloadJobDriver::run(...)` returns `Accepted` when any checkpoint mutation happens through an execution port, so `Accepted` cannot be overloaded as completed or failed.
+- Downloads checkpoints can carry completed/failed segment facts, but terminal runtime projection must be explicit and runtime-owned; `kernel-jobs` must not inspect downloads segment internals.
+- The next safe code slice should add explicit terminal run dispositions and fake-driver runtime tests before changing downloads driver terminal decisions.

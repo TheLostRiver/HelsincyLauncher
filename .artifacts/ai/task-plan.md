@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 127 - Downloads Composition-root Static Executor Wiring Proof (complete)
+Phase 128 - Runtime Terminal Projection Boundary (complete)
 
 ## Current Focus
 
@@ -46,6 +46,7 @@ Phase 127 - Downloads Composition-root Static Executor Wiring Proof (complete)
 - AT-2026-05-19-254 completed the static segment fetcher with focused TDD; committed and pushed as `43a44e1`.
 - AT-2026-05-19-255 completed the composition-root segment executor wiring boundary and root README update; committed and pushed as `1baf9a7`.
 - AT-2026-05-19-256 completed the focused composition-root static executor wiring proof with TDD while preserving default deferred production behavior; committed and pushed as `38940ff`.
+- AT-2026-05-19-257 defined the runtime terminal completion/failure projection boundary and refreshed root README before any `kernel-jobs` state changes; commit/push pending.
 - AT-2026-05-17-220 was published as commit `aa8d6e3` after documenting the shared runtime execution-turn boundary.
 - AT-2026-05-17-219 was published as commit `f618718` after adding host transport smoke coverage for downloads policy runtime application.
 - AT-2026-05-17-218 was published as commit `5aae7f1` after adding documentation-budget rules.
@@ -943,6 +944,12 @@ Phase 127 - Downloads Composition-root Static Executor Wiring Proof (complete)
 - Atomic tasks: AT-2026-05-19-256
 - **Status:** complete
 
+### Phase 128: Runtime Terminal Projection Boundary
+
+- Outcome: define how explicit module terminal dispositions may project shared runtime snapshots to completed/failed after durable module proof exists, while keeping `Accepted` non-terminal and deferring retry/backoff/public `DL_*` projection.
+- Atomic tasks: AT-2026-05-19-257
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -1195,6 +1202,7 @@ Phase 127 - Downloads Composition-root Static Executor Wiring Proof (complete)
 248. AT-2026-05-19-254 - completed - implemented the static segment fetcher with focused TDD; committed and pushed as `43a44e1`.
 249. AT-2026-05-19-255 - completed - defined the downloads composition-root segment executor wiring boundary and updated README.md before Rust wiring code; committed and pushed as `1baf9a7`.
 250. AT-2026-05-19-256 - completed - implemented the focused composition-root static executor wiring proof with TDD while keeping default desktop production deferred; committed and pushed as `38940ff`.
+251. AT-2026-05-19-257 - completed - defined the runtime terminal completion/failure projection boundary and refreshed root README before `kernel-jobs` code changes; commit/push pending.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

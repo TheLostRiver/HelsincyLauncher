@@ -11554,3 +11554,44 @@
   - `.artifacts/ai/task-plan.md` (update)
   - `.artifacts/ai/progress.md` (update)
   - `.artifacts/ai/handoff.md` (update)
+
+## Agent Note: 2026-05-19 - Start AT-2026-05-19-257
+
+- Confirmed AT-256 is complete and pushed; root planning files are intentionally absent because `.artifacts/ai` remains the authoritative task record surface.
+- Read required context in focused chunks: root README, docs map, module docs budget, downloads README_IMPL 6.1/7.42, kernel-jobs lifecycle design, download runtime ownership, error projection rules, composition-root wiring rules, current `kernel-jobs` runtime, downloads driver run/checkpoint code, and composition-root static helper.
+- Selected a docs-first boundary task before Rust changes: define runtime terminal completion/failure projection and update root README so it no longer points at the already-completed composition-root wiring proof as the next step.
+- Preserved unrelated dirty files and kept Rust, transport, frontend, provider HTTP, retry/backoff, public `DL_*` errors, and schema changes out of AT-257.
+
+## Agent Note: 2026-05-19 - Complete AT-2026-05-19-257
+
+- Updated `README.md` current status and roadmap so the first entry point names runtime terminal completion/failure projection as the next backend slice.
+- Updated README_IMPL 6.1/7.42 and added 7.43 to define explicit terminal dispositions before any `kernel-jobs` code change.
+- Validation passed: scoped `git diff --check` over README, README_IMPL, and PWF task files returned only CRLF normalization warnings.
+- No Rust behavior, host transport, frontend, provider HTTP, retry/backoff, public `DL_*` execution error, or schema change was made.
+- Next likely code task: add focused `launcher-kernel-jobs` RED tests for explicit terminal run dispositions projecting stored snapshots to Completed/Failed.
+
+### Auto Record: 2026-05-19 02:52:22
+- Tool: apply_patch
+- Phase: Phase 128 - Runtime Terminal Projection Boundary (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\README.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 02:53:11
+- Tool: apply_patch
+- Phase: Phase 128 - Runtime Terminal Projection Boundary (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-19 02:54:07
+- Tool: apply_patch
+- Phase: Phase 128 - Runtime Terminal Projection Boundary (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
