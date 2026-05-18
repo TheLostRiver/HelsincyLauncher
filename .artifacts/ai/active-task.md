@@ -2,20 +2,17 @@
 
 ## Identity
 
-- task id: AT-2026-05-19-262
-- title: Persist failed segment metadata through checkpoint records
+- task id: AT-2026-05-19-263
+- title: Define retry/backoff and failure-class persistence boundary
 - status: completed
 
 ## Goal
 
-Implement the first downloads failed-metadata persistence slice: preserve module-local failure reason and retryable hint from failed execution results through `DownloadSegmentCheckpointRecord` and the SQLite checkpoint adapter.
+Document the next downloads backend boundary after failed reason/retryable persistence: define durable retry count, backoff scheduling facts, and module-owned failure classes before adding more Rust policy fields or enabling `TerminalFailed`.
 
 ## Scope
 
 - in scope:
-  - `crates/module-downloads/src/driver.rs`
-  - `crates/module-downloads/src/facade/mod.rs`
-  - `crates/adapter-storage-sqlite/src/lib.rs`
   - `README.md`
   - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
@@ -24,78 +21,56 @@ Implement the first downloads failed-metadata persistence slice: preserve module
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
+  - Rust code changes
+  - SQLite schema changes
+  - retry scheduler implementation or execution loops
   - returning `TerminalFailed` from downloads driver
-  - retry counts, backoff scheduling, retry queues, or retry execution
-  - stable public `DL_*` execution error projection
-  - host transport, frontend state, provider HTTP, production wiring, scheduler loops, leases, or job snapshot error payloads
-  - broad SQLite migration framework beyond the existing table-creation surface needed by current tests
+  - stable public `DL_*` error projection
+  - host transport, frontend state, provider HTTP, production wiring, leases, scheduler loops, or job snapshot error payloads
 
 ## Allowed Files
 
-1. crates/module-downloads/src/driver.rs
-2. crates/module-downloads/src/facade/mod.rs
-3. crates/adapter-storage-sqlite/src/lib.rs
-4. README.md
-5. docs/modules/downloads/README_IMPL.md
-6. .artifacts/ai/active-task.md
-7. .artifacts/ai/task-plan.md
-8. .artifacts/ai/progress.md
-9. .artifacts/ai/findings.md
-10. .artifacts/ai/handoff.md
+1. README.md
+2. docs/modules/downloads/README_IMPL.md
+3. .artifacts/ai/active-task.md
+4. .artifacts/ai/task-plan.md
+5. .artifacts/ai/progress.md
+6. .artifacts/ai/findings.md
+7. .artifacts/ai/handoff.md
 
 ## Required Context Read
 
 Read before writing:
 
-1. `README.md` current status and near-term roadmap.
-2. `docs/README.md` docs layering and update routing.
-3. `docs/modules/downloads/README_ARCH.md`, `README_API.md`, `README_FLOW.md`, and `README_IMPL.md` 7.45.
-4. `docs/TauriDownloadRuntimeDesign.md` checkpoint, resume, and failure classification rules.
-5. `docs/TauriErrorHandlingAndProjectionDesign.md` retryable and diagnostics semantics.
-6. `docs/TauriTestingStrategyAndQualityGateDesign.md` module/adapter verification gates.
-7. `docs/TauriAIDevelopmentTransactionProtocolDesign.md` atomic task and commit requirements.
-8. `docs/TauriCodeCommentStandard.md` Chinese-first comment requirements.
-9. `docs/TauriCurrentRepoArchitectureOverview.md`, `docs/TauriBackendSkeletonImplementationDesign.md`, and `docs/TauriRepositoryPortsAndAdapterDesign.md` module/adapter boundaries.
-10. `crates/module-downloads/src/driver.rs` checkpoint record, failed result, mutation helper, and focused tests.
-11. `crates/adapter-storage-sqlite/src/lib.rs` checkpoint schema, row mapping, and round-trip tests.
+1. `README.md` current status and near-term roadmap after AT-262.
+2. `docs/modules/downloads/README_IMPL.md` 7.45 implementation status and next boundary.
+3. `docs/TauriErrorHandlingAndProjectionDesign.md` retryable semantics and stable code rules.
+4. `docs/TauriDownloadRuntimeDesign.md` checkpoint save rules and failure classification principles.
 
 ## Hypothesis
 
-- falsifiable code hypothesis: adding optional failed reason and retryable fields to segment checkpoint facts, then mapping them through failed-result mutation and SQLite round-trip, is enough to make failure metadata durable while preserving the current non-terminal driver behavior.
+- falsifiable documentation hypothesis: the next safe slice is not retry execution, but a durable internal classification contract that separates retry hints, retry counters, next retry eligibility, and future public `DL_*` projection.
 
 ## Cheap Check
 
-1. Add a focused RED driver test proving failed checkpoint mutation persists `failure_reason` and `failure_retryable`.
-2. Add a focused RED SQLite round-trip assertion proving failed metadata survives save/load.
-3. Implement only the record fields, failed mutation mapping, and SQLite schema/load/save mapping needed to pass.
-4. Verify failed checkpoint mutation still produces non-terminal `Accepted` from `DownloadJobDriver::run(...)`.
-5. Update README and downloads implementation doc status after green.
-6. Run focused tests, affected crate tests, `cargo check -p launcher-composition-root`, scoped rustfmt, and scoped diff-check.
-7. Commit and attempt push.
+1. Update README current status and roadmap to say the retry/backoff/failure-class boundary is being defined before Rust policy fields.
+2. Add README_IMPL 7.46 with concrete field semantics, failure class names, non-goals, and first Rust slice.
+3. Update PWF task records and handoff.
+4. Run scoped `git diff --check` for touched docs/task files.
+5. Commit and attempt push.
 
 ## Validation Gate
 
-1. RED tests fail for missing failed metadata fields before production code.
-2. Failed execution result metadata is preserved in in-memory checkpoint mutation.
-3. SQLite checkpoint round-trip preserves failed metadata without exposing public `DL_*` errors.
-4. Existing completed/pending/in-progress checkpoint records can still be constructed and round-trip with no failed metadata.
-5. Downloads driver failed mutation remains non-terminal.
-6. No host, frontend, provider HTTP, production wiring, scheduler, lease, or snapshot error payload behavior changes.
+1. README no longer implies immediate retry engine implementation.
+2. README_IMPL defines retry count, next retry eligibility, and failure class without overloading `retryable`.
+3. Public `DL_*`, `TerminalFailed`, host/frontend, provider, scheduler, lease, and snapshot error payload work remain explicitly out of scope.
+4. Scoped diff-check passes or CRLF-only warnings are recorded.
 
 ## Completion Evidence
 
-- RED verification:
-  - `cargo test -p launcher-module-downloads download_job_driver_failed_result_checkpoint_mutation_replaces_and_saves_segment` failed on missing `failure_reason` / `failure_retryable` fields.
-  - `cargo test -p launcher-adapter-storage-sqlite sqlite_download_checkpoint_round_trips_segment_facts` failed on missing `failure_reason` / `failure_retryable` fields.
-- Implemented optional `failure_reason` and `failure_retryable` fields on `DownloadSegmentCheckpointRecord`.
-- Updated failed checkpoint mutation to preserve local failed execution reason/retryable metadata.
-- Updated SQLite checkpoint schema creation/backfill, save mapping, load mapping, and round-trip coverage for failed metadata.
-- Verified failed checkpoint mutation still stays non-terminal through `driver_run_with_failed_checkpoint_mutation_stays_non_terminal`.
-- Updated `README.md` and `docs/modules/downloads/README_IMPL.md` to mark failed metadata persistence complete and keep retry/backoff/failure classification as the next boundary.
-- Validation:
-  - `cargo test -p launcher-module-downloads --lib` passed: 72/72.
-  - `cargo test -p launcher-adapter-storage-sqlite --lib` passed: 3/3.
-  - `cargo check -p launcher-composition-root` passed.
-  - `cargo fmt -p launcher-module-downloads -p launcher-adapter-storage-sqlite -- --check` passed.
-  - scoped `git diff --check` passed with CRLF normalization warnings only.
-- Commit `74cdf2c` pushed to `origin/main`.
+- Updated `README.md` current status and roadmap to route the next implementation to retry count, next retry eligibility, and internal failure class Rust persistence.
+- Added `docs/modules/downloads/README_IMPL.md` 7.46 defining retry/backoff and failure-class persistence boundaries.
+- 7.46 defines internal failure class candidates, retry field semantics, first Rust slice, and non-goals.
+- Preserved Rust code, SQLite schema, retry execution, public `DL_*`, `TerminalFailed`, host transport, frontend, provider HTTP, production wiring, leases, scheduler loops, and snapshot error payloads out of scope.
+- Validation: scoped `git diff --check` over README, README_IMPL, and PWF task files passed with CRLF normalization warnings only.
+- Commit/push pending.

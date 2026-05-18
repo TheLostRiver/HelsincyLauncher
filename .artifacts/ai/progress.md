@@ -11672,6 +11672,25 @@
 - Pushed `74cdf2c` to `origin/main`.
 - Next likely task: define the retry/backoff/failure-class boundary before adding more Rust policy fields.
 
+## Agent Note: 2026-05-19 - Start AT-2026-05-19-263
+
+- Started AT-263 as a docs-only boundary before Rust policy fields.
+- Read README current status, downloads README_IMPL 7.45 status/next boundary, error retryable semantics, and download runtime failure classification principles.
+- Selected boundary: document durable retry attempt count, next retry eligibility, and module-owned failure class before implementing retry/backoff code or `TerminalFailed`.
+- Preserved Rust code, SQLite schema, retry execution, public `DL_*`, host transport, frontend, provider HTTP, production wiring, leases, scheduler loops, and snapshot error payloads out of scope.
+
+## Agent Note: 2026-05-19 - Complete AT-2026-05-19-263
+
+- Updated README so the near-term route is retry count, next retry eligibility, and internal failure class persistence before `TerminalFailed` or public `DL_*`.
+- Added README_IMPL 7.46 with:
+  - current Rust reality after AT-262;
+  - boundary rules separating retryable hint from retry policy;
+  - internal failure-class candidates;
+  - first Rust slice for `DownloadSegmentFailureClass`, failed result propagation, checkpoint fields, and SQLite round-trip;
+  - explicit non-goals for retry loops, public projection, host/frontend, provider HTTP, production wiring, and terminal failure.
+- Validation passed: scoped `git diff --check` over README, README_IMPL, and PWF task files returned only CRLF normalization warnings.
+- Next likely code task: implement `DownloadSegmentFailureClass`, `retry_attempt_count`, and `next_retry_after` persistence with TDD while keeping failed mutation non-terminal.
+
 ### Auto Record: 2026-05-19 02:52:22
 - Tool: apply_patch
 - Phase: Phase 128 - Runtime Terminal Projection Boundary (in_progress)
@@ -11925,6 +11944,31 @@
 ### Auto Record: 2026-05-19 04:00:26
 - Tool: apply_patch
 - Phase: Phase 133 - Failed Segment Metadata Persistence (complete)
+- Files:
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/active-task.md` (update)
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/task-plan.md` (update)
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/progress.md` (update)
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-19 04:04:32
+- Tool: apply_patch
+- Phase: Phase 134 - Retry Backoff Failure-Class Boundary (in_progress)
+- Files:
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/active-task.md` (update)
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/task-plan.md` (update)
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/findings.md` (update)
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/progress.md` (update)
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-19 04:05:18
+- Tool: apply_patch
+- Phase: Phase 134 - Retry Backoff Failure-Class Boundary (in_progress)
+- Files:
+  - `D:/DEV/MyEpicLauncher/README.md` (update)
+
+### Auto Record: 2026-05-19 04:06:06
+- Tool: apply_patch
+- Phase: Phase 134 - Retry Backoff Failure-Class Boundary (complete)
 - Files:
   - `D:/DEV/MyEpicLauncher/.artifacts/ai/active-task.md` (update)
   - `D:/DEV/MyEpicLauncher/.artifacts/ai/task-plan.md` (update)

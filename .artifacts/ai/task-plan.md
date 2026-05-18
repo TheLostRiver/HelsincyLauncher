@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 133 - Failed Segment Metadata Persistence (complete)
+Phase 134 - Retry Backoff Failure-Class Boundary (complete)
 
 ## Current Focus
 
@@ -52,6 +52,7 @@ Phase 133 - Failed Segment Metadata Persistence (complete)
 - AT-2026-05-19-260 implemented the downloads driver completion-first terminal decision with focused TDD; committed and pushed as `55ab2da`.
 - AT-2026-05-19-261 defined failed segment metadata persistence and retry classification before Rust changes; committed and pushed as `124dbb3`.
 - AT-2026-05-19-262 implemented durable failed segment metadata through checkpoint records and SQLite round-trip mapping; committed and pushed as `74cdf2c`.
+- AT-2026-05-19-263 defined the retry/backoff/failure-class persistence boundary before Rust policy fields; commit/push pending.
 - AT-2026-05-17-220 was published as commit `aa8d6e3` after documenting the shared runtime execution-turn boundary.
 - AT-2026-05-17-219 was published as commit `f618718` after adding host transport smoke coverage for downloads policy runtime application.
 - AT-2026-05-17-218 was published as commit `5aae7f1` after adding documentation-budget rules.
@@ -985,6 +986,12 @@ Phase 133 - Failed Segment Metadata Persistence (complete)
 - Atomic tasks: AT-2026-05-19-262
 - **Status:** complete
 
+### Phase 134: Retry Backoff Failure-Class Boundary
+
+- Outcome: define durable retry count, backoff eligibility, and module-owned failure classes before implementing Rust retry policy fields.
+- Atomic tasks: AT-2026-05-19-263
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -1243,6 +1250,7 @@ Phase 133 - Failed Segment Metadata Persistence (complete)
 254. AT-2026-05-19-260 - completed - implemented the downloads driver completion-first terminal decision with focused TDD; committed and pushed as `55ab2da`.
 255. AT-2026-05-19-261 - completed - defined failed segment metadata persistence and retry classification before Rust changes; committed and pushed as `124dbb3`.
 256. AT-2026-05-19-262 - completed - persisted failed segment reason/retryable metadata through checkpoint records and SQLite mapping; committed and pushed as `74cdf2c`.
+257. AT-2026-05-19-263 - completed - defined retry/backoff/failure-class persistence boundary before Rust policy fields; commit/push pending.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

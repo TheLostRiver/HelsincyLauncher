@@ -1950,6 +1950,55 @@ Next boundary:
 2. introduce a module-owned failure class that can later project to stable public `DL_*` errors;
 3. only then decide when a downloads driver failure is terminal enough to return `JobRunDisposition::TerminalFailed`.
 
+### 7.46 Retry/Backoff And Failure-Class Persistence Boundary
+
+Failed segment reason and retryable hint are now durable, but they still do not describe retry policy. The next Rust slice must persist policy-ready retry facts and an internal failure class without starting a scheduler loop or exposing public execution errors.
+
+Current Rust reality:
+
+1. `DownloadSegmentCheckpointRecord` can now preserve local `failure_reason` and `failure_retryable`.
+2. `DownloadSegmentExecutionResult::Failed` still carries only reason/retryable and has no explicit failure class.
+3. No checkpoint field records how many failed attempts have been observed for a segment.
+4. No checkpoint field records the earliest retry eligibility time after a backoff decision.
+5. `DownloadJobDriver::run(...)` keeps failed checkpoint mutation non-terminal, and that must remain true until retry exhaustion and terminal policy are explicit.
+
+Boundary rules:
+
+1. `failure_retryable` remains a hint about possibility, not proof that automatic retry is scheduled.
+2. `retry_attempt_count` should count persisted failed execution attempts for a segment, not queued retry jobs or UI button clicks.
+3. `next_retry_after` should mean the earliest backend-owned retry eligibility time; absence means no automatic retry has been scheduled by policy yet.
+4. `failure_class` must be module-owned and internal until a later public projection maps it to stable `DL_*` codes.
+5. Driver policy must never infer failure class by substring-matching `failure_reason`.
+6. Retry policy must be segment-scoped first; job-level `TerminalFailed` is allowed only after policy says no segment retry remains or user attention is required.
+
+Internal failure-class candidates:
+
+1. `NetworkTransient` for temporary fetch/connectivity failures that may retry locally.
+2. `NetworkFatal` for fetch failures that are not expected to recover automatically.
+3. `ProviderManifestInvalid` for manifest/source facts that make the request invalid.
+4. `DiskNoSpace` for capacity failures where retry needs user/system action first.
+5. `WriteFailed` for staging write failures not specifically classified as capacity.
+6. `VerifyFailed` for length/hash/integrity mismatch that should redownload affected segment facts first.
+7. `PolicyBlocked` for local policy, safety, or path validation failures.
+8. `Unknown` for temporary adapter-shell failures that are not yet classifiable.
+
+First Rust slice:
+
+1. add a module-local `DownloadSegmentFailureClass` enum or equivalent internal value object;
+2. carry that class through `DownloadSegmentHandledFailure` and `DownloadSegmentExecutionResult::Failed`;
+3. add optional `failure_class`, `retry_attempt_count`, and `next_retry_after` facts to `DownloadSegmentCheckpointRecord`;
+4. update failed checkpoint mutation so a new failed fact starts attempt count at `1`, and replacing an existing failed segment increments the persisted count;
+5. leave `next_retry_after` unset until a separate backoff policy/clock slice calculates it;
+6. update SQLite checkpoint mapping and round-trip tests for the new fields;
+7. keep `DownloadJobDriver::run(...)` returning non-terminal `Accepted` for failed checkpoint mutation.
+
+Non-goals:
+
+1. no retry scheduler loop, background worker, durable lease, or automatic retry dispatch;
+2. no public `DL_*` execution error projection or host/frontend DTO change;
+3. no provider HTTP behavior, network backoff, CDN policy, or production wiring;
+4. no `TerminalFailed` decision until retry exhaustion, user-attention, and public projection rules are separately defined.
+
 ---
 
 ## 8. Error Semantics

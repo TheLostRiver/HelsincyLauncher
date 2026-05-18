@@ -1329,3 +1329,9 @@
 - `DownloadSegmentCheckpointRecord` currently stores job/segment/file/range/progress/status/staging/hash/provider facts only; adding optional failed metadata keeps non-failed segment construction backward-compatible inside Rust.
 - `SqliteDownloadCheckpointRepository` owns table/mapping details for `download_segment_checkpoints`; it currently selects/inserts only status/progress/staging/hash/provider columns, so SQLite round-trip must be extended in the adapter.
 - Error design says `retryable` is a hint, not retry policy; this task should persist the hint without adding retry counts, backoff, auto-retry, or public execution error codes.
+## 2026-05-19 - AT-263 Retry/Backoff Boundary Context
+
+- AT-262 made failed `reason` and `retryable` durable, but `retryable` is explicitly only a hint in the error design, not automatic retry policy, retry count, or backoff timing.
+- Download runtime design says retryable errors can retry locally at the segment level, non-retryable errors may terminate the job while preserving checkpoint/staging facts, and verification failures should redownload affected segments first.
+- The next boundary needs an internal failure class before public `DL_*` projection; stable public codes become compatibility contracts once exposed.
+- Durable retry policy facts should separate failed-attempt count from next retry eligibility, so a checkpoint can survive process restart without depending on transient memory queues.

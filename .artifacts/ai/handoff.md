@@ -648,6 +648,25 @@
 - Next likely task:
   - define retry count, backoff scheduling facts, and module-owned failure class before enabling `TerminalFailed` or public `DL_*` projection.
 
+## Current Handoff - AT-2026-05-19-263
+
+- Status: completed; commit/push pending.
+- Scope:
+  - root README
+  - `docs/modules/downloads/README_IMPL.md`
+  - PWF records under `.artifacts/ai`
+- Boundary to define:
+  - durable retry attempt count;
+  - next retry eligibility/backoff fact;
+  - module-owned internal failure class;
+  - explicit non-goals for retry execution, public `DL_*`, and `TerminalFailed`.
+- Completed:
+  - README points the next implementation at retry count, next retry eligibility, and internal failure class persistence.
+  - README_IMPL 7.46 defines failure-class candidates, retry field semantics, first Rust slice, and non-goals.
+  - scoped doc diff-check passed with CRLF warnings only.
+- Next likely code task:
+  - implement `DownloadSegmentFailureClass`, `retry_attempt_count`, and `next_retry_after` persistence with TDD while keeping failed mutation non-terminal.
+
 ## Dirty Worktree To Preserve
 
 - Unrelated unstaged/unknown work remains present and must not be committed with AT-249:
