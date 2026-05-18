@@ -621,7 +621,7 @@
 
 ## Current Handoff - AT-2026-05-19-262
 
-- Status: completed; commit/push pending.
+- Status: completed; final commit `74cdf2c`, pushed to `origin/main`.
 - Scope:
   - `crates/module-downloads/src/driver.rs`
   - `crates/module-downloads/src/facade/mod.rs` test fixture updates for the widened checkpoint record

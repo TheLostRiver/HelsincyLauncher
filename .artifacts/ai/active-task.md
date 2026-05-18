@@ -98,4 +98,4 @@ Read before writing:
   - `cargo check -p launcher-composition-root` passed.
   - `cargo fmt -p launcher-module-downloads -p launcher-adapter-storage-sqlite -- --check` passed.
   - scoped `git diff --check` passed with CRLF normalization warnings only.
-- Commit/push pending.
+- Commit `74cdf2c` pushed to `origin/main`.

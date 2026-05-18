@@ -11666,6 +11666,12 @@
   - scoped `git diff --check` -> passed with CRLF normalization warnings only.
 - Next likely task: define retry count, backoff scheduling facts, and module-owned failure class before enabling `TerminalFailed` or public `DL_*` projection.
 
+## Agent Note: 2026-05-19 - Publish AT-2026-05-19-262
+
+- Committed AT-262 as `74cdf2c` with message `feat: persist failed download segment metadata`.
+- Pushed `74cdf2c` to `origin/main`.
+- Next likely task: define the retry/backoff/failure-class boundary before adding more Rust policy fields.
+
 ### Auto Record: 2026-05-19 02:52:22
 - Tool: apply_patch
 - Phase: Phase 128 - Runtime Terminal Projection Boundary (in_progress)
@@ -11908,6 +11914,15 @@
   - `D:/DEV/MyEpicLauncher/crates/module-downloads/src/driver.rs` (update)
 
 ### Auto Record: 2026-05-19 03:57:46
+- Tool: apply_patch
+- Phase: Phase 133 - Failed Segment Metadata Persistence (complete)
+- Files:
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/active-task.md` (update)
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/task-plan.md` (update)
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/progress.md` (update)
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-19 04:00:26
 - Tool: apply_patch
 - Phase: Phase 133 - Failed Segment Metadata Persistence (complete)
 - Files:
