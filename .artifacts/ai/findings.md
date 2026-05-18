@@ -1291,3 +1291,11 @@
 - Current `DownloadJobDriver::run(...)` returns `Accepted` when any checkpoint mutation happens through an execution port, so `Accepted` cannot be overloaded as completed or failed.
 - Downloads checkpoints can carry completed/failed segment facts, but terminal runtime projection must be explicit and runtime-owned; `kernel-jobs` must not inspect downloads segment internals.
 - The next safe code slice should add explicit terminal run dispositions and fake-driver runtime tests before changing downloads driver terminal decisions.
+
+## Phase 129 Kernel-jobs Terminal Projection Findings
+
+- Required code context was read in focused chunks: `kernel-jobs` runtime tests/helpers, `JobRunDisposition`, `run_one_execution_turn(...)`, queued selector behavior, package manifest, and `JobSnapshot` shape.
+- Existing `RecordingRunDriver` always returns `Accepted`, so AT-258 needs a separate fake driver that returns a configurable disposition without touching downloads.
+- `JobSnapshot` currently has no error payload field, so the first failed terminal projection can only set `JobState::Failed` / `JobUiState::Failed`; stable error payload projection must remain later.
+- The focused RED test should fail on missing terminal disposition variants before production code changes.
+- RED/GREEN confirmed explicit terminal dispositions are enough for runtime-owned projection: `Completed` maps to completed snapshot state, `TerminalFailed` maps to failed snapshot state, while existing accepted/deferred/non-terminal failure behavior remains covered by the existing test suite.

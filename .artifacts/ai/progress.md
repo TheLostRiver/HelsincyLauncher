@@ -11571,6 +11571,22 @@
 - Published AT-257 as `95c3e76 docs: define runtime terminal projection boundary` and pushed it to `origin/main`.
 - Next likely code task: add focused `launcher-kernel-jobs` RED tests for explicit terminal run dispositions projecting stored snapshots to Completed/Failed.
 
+## Agent Note: 2026-05-19 - Start AT-2026-05-19-258
+
+- AT-257 and its publish record are pushed; `main` is ready for the next code slice.
+- Read TDD workflow and focused `kernel-jobs` code context before editing production behavior.
+- Selected RED tests in `crates/kernel-jobs/src/runtime.rs` with fake drivers returning explicit terminal dispositions that do not exist yet.
+- Scope includes post-green README/README_IMPL status updates, but no downloads driver terminal decision, retry/backoff, public `DL_*`, transport, frontend, provider HTTP, schema, leases, or scheduler loop work.
+
+## Agent Note: 2026-05-19 - Complete AT-2026-05-19-258
+
+- RED observed: focused `launcher-kernel-jobs` test failed because `JobRunDisposition::Completed` and `JobRunDisposition::TerminalFailed` did not exist.
+- Added explicit terminal dispositions and runtime-owned projection branches in `SharedJobRuntimeHost::run_one_execution_turn(...)`.
+- Added focused fake-driver tests for completed and terminal-failed projection, preserving the existing non-terminal `Accepted`, `Deferred`, and `Failed { reason }` behavior.
+- Updated root README and downloads README_IMPL to mark the kernel runtime projection slice complete and identify the next boundary as downloads driver terminal decisions.
+- Validation passed: focused completed and terminal-failed tests, full `launcher-kernel-jobs --lib` 14/14, `cargo check -p launcher-composition-root`, scoped rustfmt, and scoped diff-check with CRLF warnings only.
+- Next likely task: define when `DownloadJobDriver::run(...)` may return `Completed` or `TerminalFailed` based on persisted checkpoint facts, before coding the downloads driver behavior.
+
 ### Auto Record: 2026-05-19 02:52:22
 - Tool: apply_patch
 - Phase: Phase 128 - Runtime Terminal Projection Boundary (in_progress)
@@ -11603,5 +11619,43 @@
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 02:59:56
+- Tool: apply_patch
+- Phase: Phase 129 - Kernel-jobs Terminal Projection (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 03:00:29
+- Tool: apply_patch
+- Phase: Phase 129 - Kernel-jobs Terminal Projection (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\kernel-jobs\src\runtime.rs` (update)
+
+### Auto Record: 2026-05-19 03:01:11
+- Tool: apply_patch
+- Phase: Phase 129 - Kernel-jobs Terminal Projection (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\kernel-jobs\src\runtime.rs` (update)
+
+### Auto Record: 2026-05-19 03:02:21
+- Tool: apply_patch
+- Phase: Phase 129 - Kernel-jobs Terminal Projection (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\README.md` (update)
+
+### Auto Record: 2026-05-19 03:03:57
+- Tool: apply_patch
+- Phase: Phase 129 - Kernel-jobs Terminal Projection (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)

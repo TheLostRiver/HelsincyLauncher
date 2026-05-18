@@ -553,6 +553,23 @@
 - Next likely code task after this docs commit:
   - add focused RED `launcher-kernel-jobs` tests for explicit terminal run dispositions projecting stored snapshots to Completed/Failed.
 
+## Current Handoff - AT-2026-05-19-258
+
+- Status: completed; commit/push pending.
+- Scope:
+  - `crates/kernel-jobs/src/runtime.rs`
+  - root README and downloads README_IMPL implementation status after green
+  - PWF records under `.artifacts/ai`
+- Completed TDD path:
+  - RED failed on missing terminal disposition variants.
+  - Added minimal `JobRunDisposition::Completed` and `JobRunDisposition::TerminalFailed { reason }` variants.
+  - Added projection branches in `SharedJobRuntimeHost::run_one_execution_turn(...)`.
+  - Verified focused tests, full `launcher-kernel-jobs --lib`, `cargo check -p launcher-composition-root`, scoped rustfmt, and diff-check.
+- Preserved boundaries:
+  - No downloads driver terminal decision logic, no retry/backoff/public `DL_*` errors, no snapshot error payload fields, no host transport/frontend/schema/provider/scheduler/lease changes.
+- Next likely task:
+  - define the downloads driver terminal decision boundary before allowing `DownloadJobDriver::run(...)` to return `Completed` or `TerminalFailed`.
+
 ## Dirty Worktree To Preserve
 
 - Unrelated unstaged/unknown work remains present and must not be committed with AT-249:

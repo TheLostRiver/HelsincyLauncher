@@ -161,9 +161,10 @@ Recommended order:
 3. completed: define and implement the deterministic static fetcher boundary for local byte sources before real HTTP range behavior;
 4. completed: define concrete executor composition-root wiring without introducing real provider HTTP behavior;
 5. completed: implement the composition-root wiring proof with explicit static/local sources while keeping default desktop production deferred;
-6. next: define and implement runtime terminal completion/failure projection after concrete execution can advance checkpoints deterministically;
-7. add retry/backoff and public `DL_*` execution error projection only after concrete failures are classified;
-8. keep host transport and frontend changes last, exposing only aggregate job snapshots and stable command/query DTOs.
+6. completed: define and implement runtime terminal completion/failure projection after concrete execution can advance checkpoints deterministically;
+7. next: teach the downloads driver to return explicit terminal dispositions only after module checkpoint proof says the job is complete or terminally failed;
+8. add retry/backoff and public `DL_*` execution error projection only after concrete failures are classified;
+9. keep host transport and frontend changes last, exposing only aggregate job snapshots and stable command/query DTOs.
 
 Every slice must preserve these boundaries:
 
@@ -1851,6 +1852,19 @@ First Rust slice:
 3. keep `Deferred`, `Accepted`, and the existing non-terminal `Failed { reason }` behavior unchanged unless the focused RED test proves otherwise;
 4. prove the projection with fake `kernel-jobs` drivers before changing downloads driver terminal decisions;
 5. run focused `launcher-kernel-jobs` tests, the full `launcher-kernel-jobs --lib` suite, `cargo check -p launcher-composition-root`, scoped rustfmt, and scoped diff-check.
+
+Implementation status:
+
+1. `JobRunDisposition::Completed` and `JobRunDisposition::TerminalFailed { reason }` now exist alongside the existing non-terminal `Accepted`, `Deferred`, and `Failed { reason }` variants;
+2. `SharedJobRuntimeHost::run_one_execution_turn(...)` projects `Completed` to `JobState::Completed` / `JobUiState::Completed` and `TerminalFailed` to `JobState::Failed` / `JobUiState::Failed`;
+3. `Accepted` still projects only to `Running`, while `Deferred` and the existing non-terminal `Failed { reason }` remain non-mutating;
+4. focused fake-driver tests cover completed and terminal-failed projection without touching downloads driver decisions.
+
+Next boundary:
+
+1. define when `DownloadJobDriver::run(...)` may return `Completed` or `TerminalFailed` after local checkpoint mutation;
+2. keep the proof downloads-owned, based on persisted checkpoint facts, and do not make `kernel-jobs` inspect segment internals;
+3. keep retry/backoff, stable public `DL_*` execution errors, host transport, frontend projection, provider HTTP, and schema changes separate.
 
 ---
 

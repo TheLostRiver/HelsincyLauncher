@@ -32,12 +32,18 @@ pub enum JobRunDisposition {
     /// The driver accepted the execution turn without claiming terminal completion.
     /// driver 已接受执行回合，但不声明终态完成。
     Accepted,
+    /// The driver has already persisted module-owned completion proof.
+    /// driver 已经持久化模块自有的完成证明。
+    Completed,
     /// The driver has no concrete execution path yet; this is not terminal failure.
     /// driver 尚未接入具体执行路径；这不是终态失败。
     Deferred { reason: String },
     /// The driver rejected or failed this execution turn without projecting terminal state.
     /// driver 拒绝或执行失败该回合，但不直接投影终态状态。
     Failed { reason: String },
+    /// The driver reports a terminal failure after module-owned failure proof exists.
+    /// driver 在模块自有失败证明存在后报告终态失败。
+    TerminalFailed { reason: String },
 }
 
 /// Read-only context passed from the shared runtime into a module execution turn.
@@ -261,14 +267,35 @@ impl SharedJobRuntimeHost {
         };
 
         let disposition = driver.run(JobExecutionContext::new(&snapshot))?;
-        if matches!(disposition, JobRunDisposition::Accepted) {
-            let mut running_snapshot = snapshot;
-            // Accepted is the first non-terminal execution projection; completion stays separate.
-            // Accepted 只是第一层非终态执行投影；完成语义保持在后续边界。
-            running_snapshot.state = JobState::Running;
-            running_snapshot.ui_state = JobUiState::Running;
-            running_snapshot.updated_at = IsoDateTime::now();
-            self.snapshot_store.update(&running_snapshot)?;
+        match &disposition {
+            JobRunDisposition::Accepted => {
+                let mut running_snapshot = snapshot;
+                // Accepted is the first non-terminal execution projection; completion stays separate.
+                // Accepted 只是第一层非终态执行投影；完成语义保持在后续边界。
+                running_snapshot.state = JobState::Running;
+                running_snapshot.ui_state = JobUiState::Running;
+                running_snapshot.updated_at = IsoDateTime::now();
+                self.snapshot_store.update(&running_snapshot)?;
+            }
+            JobRunDisposition::Completed => {
+                let mut completed_snapshot = snapshot;
+                // Terminal projection is runtime-owned; modules must persist their own proof first.
+                // 终态投影由 runtime 拥有；模块必须先持久化自己的证明。
+                completed_snapshot.state = JobState::Completed;
+                completed_snapshot.ui_state = JobUiState::Completed;
+                completed_snapshot.updated_at = IsoDateTime::now();
+                self.snapshot_store.update(&completed_snapshot)?;
+            }
+            JobRunDisposition::TerminalFailed { .. } => {
+                let mut failed_snapshot = snapshot;
+                // The first failed projection has no public error payload yet; that remains a later DTO boundary.
+                // 第一层失败投影暂不携带公开错误载荷；该内容留给后续 DTO 边界。
+                failed_snapshot.state = JobState::Failed;
+                failed_snapshot.ui_state = JobUiState::Failed;
+                failed_snapshot.updated_at = IsoDateTime::now();
+                self.snapshot_store.update(&failed_snapshot)?;
+            }
+            JobRunDisposition::Deferred { .. } | JobRunDisposition::Failed { .. } => {}
         }
 
         Ok(disposition)
@@ -531,6 +558,44 @@ mod tests {
         }
     }
 
+    struct TerminalRunDriver {
+        disposition: JobRunDisposition,
+    }
+
+    impl TerminalRunDriver {
+        fn completed() -> Self {
+            Self {
+                disposition: JobRunDisposition::Completed,
+            }
+        }
+
+        fn failed() -> Self {
+            Self {
+                disposition: JobRunDisposition::TerminalFailed {
+                    reason: "terminal failure from fake driver".into(),
+                },
+            }
+        }
+    }
+
+    impl JobDriver<()> for TerminalRunDriver {
+        fn module(&self) -> &'static str {
+            "test"
+        }
+
+        fn kind(&self) -> &'static str {
+            "terminal"
+        }
+
+        fn restore(&self, _snapshot: &JobSnapshot<()>) -> AppResult<RestoreDisposition> {
+            Ok(RestoreDisposition::Resumed)
+        }
+
+        fn run(&self, _context: JobExecutionContext<'_, ()>) -> AppResult<JobRunDisposition> {
+            Ok(self.disposition.clone())
+        }
+    }
+
     #[test]
     fn registry_resolved_driver_can_accept_execution_turn_with_read_only_context() {
         let driver = Arc::new(RecordingRunDriver::default());
@@ -601,6 +666,87 @@ mod tests {
             snapshot.ui_state,
             JobUiState::Running,
             "accepted execution should project the host/UI snapshot to running"
+        );
+    }
+
+    #[test]
+    fn execution_dispatch_projects_completed_driver_to_completed_snapshot() {
+        let runtime = SharedJobRuntimeHost::new(RuntimeQueuePolicy::new(1));
+        let job_id = JobId::generate();
+        runtime
+            .enqueue(EnqueueJobRequest {
+                job_id: job_id.clone(),
+                module: "test".into(),
+                kind: "terminal".into(),
+                priority: JobPriority::Normal,
+                recoverable: true,
+                extension: None,
+            })
+            .expect("terminal fixture should enqueue a queued snapshot");
+        let mut registry = super::JobDriverRegistry::new();
+        registry.register(Arc::new(TerminalRunDriver::completed()));
+
+        let disposition = runtime
+            .run_one_execution_turn(&job_id, &registry)
+            .expect("completed disposition should project a terminal snapshot");
+
+        assert_eq!(disposition, JobRunDisposition::Completed);
+        let snapshot = runtime
+            .snapshot(&job_id)
+            .expect("snapshot query should succeed")
+            .expect("completed snapshot should still exist");
+        assert_eq!(
+            snapshot.state,
+            JobState::Completed,
+            "completed execution should project the runtime snapshot to completed"
+        );
+        assert_eq!(
+            snapshot.ui_state,
+            JobUiState::Completed,
+            "completed execution should project the host/UI snapshot to completed"
+        );
+    }
+
+    #[test]
+    fn execution_dispatch_projects_terminal_failed_driver_to_failed_snapshot() {
+        let runtime = SharedJobRuntimeHost::new(RuntimeQueuePolicy::new(1));
+        let job_id = JobId::generate();
+        runtime
+            .enqueue(EnqueueJobRequest {
+                job_id: job_id.clone(),
+                module: "test".into(),
+                kind: "terminal".into(),
+                priority: JobPriority::Normal,
+                recoverable: true,
+                extension: None,
+            })
+            .expect("terminal fixture should enqueue a queued snapshot");
+        let mut registry = super::JobDriverRegistry::new();
+        registry.register(Arc::new(TerminalRunDriver::failed()));
+
+        let disposition = runtime
+            .run_one_execution_turn(&job_id, &registry)
+            .expect("terminal failed disposition should project a terminal snapshot");
+
+        match disposition {
+            JobRunDisposition::TerminalFailed { reason } => {
+                assert!(reason.contains("terminal failure"));
+            }
+            other => panic!("fake driver should return terminal failure, got {other:?}"),
+        }
+        let snapshot = runtime
+            .snapshot(&job_id)
+            .expect("snapshot query should succeed")
+            .expect("failed snapshot should still exist");
+        assert_eq!(
+            snapshot.state,
+            JobState::Failed,
+            "terminal failed execution should project the runtime snapshot to failed"
+        );
+        assert_eq!(
+            snapshot.ui_state,
+            JobUiState::Failed,
+            "terminal failed execution should project the host/UI snapshot to failed"
         );
     }
 

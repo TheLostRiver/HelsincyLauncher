@@ -2,17 +2,18 @@
 
 ## Identity
 
-- task id: AT-2026-05-19-257
-- title: Define runtime terminal completion/failure projection boundary
+- task id: AT-2026-05-19-258
+- title: Project explicit terminal run dispositions in kernel-jobs
 - status: completed
 
 ## Goal
 
-Update the durable downloads implementation docs and root README after the AT-256 static wiring proof, defining the next shared runtime terminal projection boundary before changing `kernel-jobs` state behavior.
+Implement README_IMPL 7.43's first Rust slice by adding explicit terminal run dispositions to `launcher-kernel-jobs` and projecting them to completed/failed runtime snapshots with focused TDD before changing downloads driver terminal decisions.
 
 ## Scope
 
 - in scope:
+  - `crates/kernel-jobs/src/runtime.rs`
   - `README.md`
   - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
@@ -21,59 +22,63 @@ Update the durable downloads implementation docs and root README after the AT-25
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
-  - Rust code changes
-  - downloads driver terminal decision implementation
+  - `module-downloads` driver terminal decision logic
   - retry/backoff or stable public `DL_*` execution errors
-  - host transport, frontend, SQLite schema, provider HTTP, or real production execution-port wiring
-  - moving `.artifacts/ai` records to the repo root; current project docs keep `.artifacts/ai` authoritative
+  - snapshot error payload fields
+  - host transport, frontend, SQLite schema, provider HTTP, real production execution-port wiring, leases, or scheduler loops
+  - unrelated dirty files
 
 ## Allowed Files
 
-1. README.md
-2. docs/modules/downloads/README_IMPL.md
-3. .artifacts/ai/active-task.md
-4. .artifacts/ai/task-plan.md
-5. .artifacts/ai/progress.md
-6. .artifacts/ai/findings.md
-7. .artifacts/ai/handoff.md
+1. crates/kernel-jobs/src/runtime.rs
+2. README.md
+3. docs/modules/downloads/README_IMPL.md
+4. .artifacts/ai/active-task.md
+5. .artifacts/ai/task-plan.md
+6. .artifacts/ai/progress.md
+7. .artifacts/ai/findings.md
+8. .artifacts/ai/handoff.md
 
 ## Required Context Read
 
 Read before writing:
 
 1. `README.md` current status and near-term roadmap.
-2. `docs/README.md` README/docs update routing rules.
-3. `docs/ModuleDocumentationStandard.md` documentation-budget rules.
-4. `docs/modules/downloads/README_IMPL.md` 6.1 and 7.42.
-5. `docs/TauriKernelJobsRuntimeDesign.md` job lifecycle and snapshot projection rules.
-6. `docs/TauriDownloadRuntimeDesign.md` downloads checkpoint/runtime ownership.
-7. `docs/TauriErrorHandlingAndProjectionDesign.md` long-job failure and public error projection rules.
-8. `docs/TauriCompositionRootWiringDesign.md` assembly-owner rules.
-9. Current `kernel-jobs` runtime and downloads driver snippets for `JobRunDisposition`, checkpoint mutation, and default deferred wiring.
+2. `docs/modules/downloads/README_IMPL.md` 7.43.
+3. `docs/TauriKernelJobsRuntimeDesign.md` lifecycle/snapshot projection rules.
+4. `docs/TauriTestingStrategyAndQualityGateDesign.md` focused Rust test guidance.
+5. `docs/TauriCodeCommentStandard.md` Chinese-first and bilingual companion comment rules.
+6. `crates/kernel-jobs/src/runtime.rs` `JobRunDisposition`, `run_one_execution_turn(...)`, and existing fake-driver tests.
+7. `crates/kernel-jobs/src/model.rs` `JobState`, `JobUiState`, and current snapshot shape.
 
 ## Hypothesis
 
-- falsifiable documentation hypothesis: after AT-256, the correct next durable boundary is an explicit `kernel-jobs` terminal disposition/projection contract, not immediate downloads production wiring or public `DL_*` execution errors; README and README_IMPL can describe this without changing Rust behavior.
+- falsifiable implementation hypothesis: adding explicit `Completed` and terminal failed dispositions to `JobRunDisposition`, while leaving `Accepted`, `Deferred`, and existing non-terminal `Failed { reason }` behavior unchanged, is sufficient for `SharedJobRuntimeHost::run_one_execution_turn(...)` to project stored snapshots to terminal states.
 
 ## Cheap Check
 
-1. Update root README current status and roadmap.
-2. Update README_IMPL 6.1 and add a concise 7.43 terminal projection boundary.
-3. Update PWF task records and handoff.
-4. Run scoped `git diff --check` for the touched docs/task files.
-5. Commit and attempt push.
+1. Add RED `launcher-kernel-jobs` tests using fake drivers that return missing terminal dispositions.
+2. Verify RED fails because the terminal disposition variants do not exist.
+3. Add the smallest enum variants and projection branches in `run_one_execution_turn(...)`.
+4. Re-run focused tests, full `launcher-kernel-jobs --lib`, `cargo check -p launcher-composition-root`, scoped rustfmt, scoped diff-check.
+5. Update README/README_IMPL implementation status, commit, and attempt push.
 
 ## Validation Gate
 
-1. README no longer says composition-root wiring proof is still next.
-2. README_IMPL records AT-256 implementation status and defines terminal projection before code.
-3. Scope keeps Rust/transport/frontend/provider/retry work out of this docs-only task.
-4. Scoped diff-check passes or any CRLF-only warnings are recorded.
+1. RED failure observed before production enum/projection changes.
+2. Focused terminal projection tests pass.
+3. Existing accepted/deferred behavior tests keep passing.
+4. Full `launcher-kernel-jobs --lib` passes.
+5. `cargo check -p launcher-composition-root` passes.
+6. Scoped rustfmt and diff-check pass.
 
 ## Completion Evidence
 
-- Updated `README.md` current status and near-term roadmap to point at runtime terminal completion/failure projection.
-- Updated `docs/modules/downloads/README_IMPL.md` 6.1, 7.42 implementation status, and new 7.43 terminal projection boundary.
-- Validation: `git diff --check -- README.md docs/modules/downloads/README_IMPL.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/findings.md .artifacts/ai/progress.md .artifacts/ai/handoff.md` passed with CRLF normalization warnings only.
-- No Rust, transport, frontend, provider, retry/backoff, public `DL_*`, or schema files were edited.
-- Published as commit `95c3e76` and pushed to `origin/main`.
+- RED: `cargo test -p launcher-kernel-jobs terminal --lib --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` failed with missing `JobRunDisposition::Completed` and `JobRunDisposition::TerminalFailed`.
+- GREEN focused terminal failed: `cargo test -p launcher-kernel-jobs terminal --lib --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed for `execution_dispatch_projects_terminal_failed_driver_to_failed_snapshot`.
+- GREEN focused completed: `cargo test -p launcher-kernel-jobs completed_driver --lib --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed for `execution_dispatch_projects_completed_driver_to_completed_snapshot`.
+- Regression: `cargo test -p launcher-kernel-jobs --lib --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 14/14 tests.
+- Compile gate: `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
+- Format gate: `rustfmt --edition 2021 --check crates\kernel-jobs\src\runtime.rs` passed.
+- Scoped diff-check passed for AT-258 files with CRLF normalization warnings only.
+- Commit/push pending.
