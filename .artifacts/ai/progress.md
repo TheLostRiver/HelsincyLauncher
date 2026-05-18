@@ -10864,7 +10864,20 @@
   - README_IMPL port status and 7.40 were re-read.
   - PWF check reported Phase 121 in progress before final status update, matching the task state at that moment.
   - Scoped docs/PWF `git diff --check` passed with CRLF warnings only.
-- Next step is docs/PWF-only commit.
+- Final commit `10d8c58` was pushed to `origin/main`.
+
+## 2026-05-19 - AT-2026-05-19-251 Downloads Segment Length Verifier
+
+- Opened Phase 122 / AT-2026-05-19-251 after AT-250 was committed and pushed as `10d8c58`.
+- Read existing verifier trait/outcome/executor code, crate re-export surface, and fake verifier test helpers before coding.
+- Added RED tests for direct byte-length verification and executor-routed handled mismatch failure; RED failed on the missing `DownloadSegmentLengthVerifyPort`.
+- Implemented `DownloadSegmentLengthVerifyPort` behind `DownloadSegmentVerifyPort` and re-exported it from `launcher-module-downloads`.
+- Validation passed:
+  - `cargo test -p launcher-module-downloads --lib download_segment_length_verify_port --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 2/2 tests.
+  - `cargo test -p launcher-module-downloads --lib download_segment_executor_adapter --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 4/4 focused adapter tests.
+  - `cargo test -p launcher-module-downloads --lib --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 65/65 tests.
+  - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
+  - `cargo fmt --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --package launcher-module-downloads -- --check` passed.
 
 ### Auto Record: 2026-05-19 00:52:22
 - Tool: apply_patch
@@ -11076,5 +11089,83 @@
 ### Auto Record: 2026-05-19 01:25:12
 - Tool: apply_patch
 - Phase: Phase 121 - Downloads Segment Length Verifier Boundary (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 01:28:36
+- Tool: apply_patch
+- Phase: Phase 121 - Downloads Segment Length Verifier Boundary (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-19 01:28:50
+- Tool: apply_patch
+- Phase: Phase 122 - Downloads Segment Length Verifier (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-19 01:29:01
+- Tool: apply_patch
+- Phase: Phase 122 - Downloads Segment Length Verifier (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-19 01:29:13
+- Tool: apply_patch
+- Phase: Phase 122 - Downloads Segment Length Verifier (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-19 01:29:25
+- Tool: apply_patch
+- Phase: Phase 122 - Downloads Segment Length Verifier (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 01:30:31
+- Tool: apply_patch
+- Phase: Phase 122 - Downloads Segment Length Verifier (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-19 01:31:07
+- Tool: apply_patch
+- Phase: Phase 122 - Downloads Segment Length Verifier (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-19 01:31:17
+- Tool: apply_patch
+- Phase: Phase 122 - Downloads Segment Length Verifier (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\lib.rs` (update)
+
+### Auto Record: 2026-05-19 01:33:35
+- Tool: apply_patch
+- Phase: Phase 122 - Downloads Segment Length Verifier (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-19 01:33:45
+- Tool: apply_patch
+- Phase: Phase 122 - Downloads Segment Length Verifier (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-19 01:34:00
+- Tool: apply_patch
+- Phase: Phase 122 - Downloads Segment Length Verifier (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-19 01:34:14
+- Tool: apply_patch
+- Phase: Phase 122 - Downloads Segment Length Verifier (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-19 01:34:25
+- Tool: apply_patch
+- Phase: Phase 122 - Downloads Segment Length Verifier (complete)
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)

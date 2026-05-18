@@ -1232,3 +1232,12 @@
 - The smallest useful verifier is byte-length only: compare `written.downloaded_bytes` with `request.length` after the writer returns facts.
 - A length mismatch can reuse the existing handled segment failure path through `DownloadSegmentVerifyOutcome::Failed`, preserving `AppError` for infrastructure/configuration failures and avoiding public `DL_VERIFY_FAILED` projection for now.
 - Hash verification, file-level verification, job-level manifest sealing, retry/backoff, runtime terminal state, host transport, frontend, and schema work remain later slices.
+
+## Phase 122 Downloads Segment Length Verifier Findings
+
+- Required code context was read in focused chunks: verifier outcomes, `DownloadSegmentVerifyPort`, `DownloadSegmentExecutor`, fake verifier test helpers, and crate re-export surface.
+- The existing executor already maps `DownloadSegmentVerifyOutcome::Failed` into `DownloadSegmentExecutionResult::Failed`, so the code slice can focus on a concrete verifier plus coverage instead of changing executor result shapes.
+- A direct verifier test should prove the success contract without fetch/write/executor noise.
+- An executor-routed mismatch test should prove the handled failure path uses `written.downloaded_bytes`, preserves the original request, and remains retryable without introducing public `DL_VERIFY_FAILED`.
+- RED/GREEN confirmed `DownloadSegmentLengthVerifyPort` verifies only `written.downloaded_bytes == request.length` and reports a retryable handled failure on mismatch.
+- The implementation does not read files, compute hashes, change checkpoint shapes, introduce public `DL_*` projection, or wire production composition-root execution.

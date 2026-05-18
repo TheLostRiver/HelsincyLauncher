@@ -505,6 +505,35 @@ pub trait DownloadSegmentVerifyPort: Send + Sync {
     ) -> AppResult<DownloadSegmentVerifyOutcome>;
 }
 
+/// 只校验 segment 写入字节数的第一版 concrete verifier。
+/// First concrete verifier that checks only the written segment byte count.
+#[derive(Clone, Debug, Default)]
+pub struct DownloadSegmentLengthVerifyPort;
+
+impl DownloadSegmentVerifyPort for DownloadSegmentLengthVerifyPort {
+    fn verify_segment(
+        &self,
+        request: &DownloadSegmentExecutionRequest,
+        _fetched: &DownloadSegmentFetchResult,
+        written: &DownloadSegmentWriteResult,
+    ) -> AppResult<DownloadSegmentVerifyOutcome> {
+        if written.downloaded_bytes == request.length {
+            return Ok(DownloadSegmentVerifyOutcome::Verified);
+        }
+
+        Ok(DownloadSegmentVerifyOutcome::Failed(
+            DownloadSegmentHandledFailure {
+                downloaded_bytes: written.downloaded_bytes,
+                reason: format!(
+                    "segment length mismatch for `{}`: expected {} bytes, wrote {} bytes",
+                    request.segment_id, request.length, written.downloaded_bytes
+                ),
+                retryable: true,
+            },
+        ))
+    }
+}
+
 /// Port shell for handing segment requests to later fetch/write/verify code.
 /// 将 segment 请求交给后续 fetch/write/verify 代码的端口壳。
 pub trait DownloadSegmentExecutionPort: Send + Sync {
@@ -923,8 +952,9 @@ mod tests {
         DownloadSegmentExecutionResult, DownloadSegmentExecutor, DownloadSegmentFetchOutcome,
         DownloadSegmentFetchPort, DownloadSegmentFetchResult, DownloadSegmentFilesystemWritePort,
         DownloadSegmentGuardedWritePort, DownloadSegmentHandledFailure,
-        DownloadSegmentStagingTarget, DownloadSegmentVerifyOutcome, DownloadSegmentVerifyPort,
-        DownloadSegmentWriteOutcome, DownloadSegmentWritePort, DownloadSegmentWriteResult,
+        DownloadSegmentLengthVerifyPort, DownloadSegmentStagingTarget,
+        DownloadSegmentVerifyOutcome, DownloadSegmentVerifyPort, DownloadSegmentWriteOutcome,
+        DownloadSegmentWritePort, DownloadSegmentWriteResult,
     };
 
     #[derive(Default)]
@@ -1209,6 +1239,68 @@ mod tests {
                 CorrelationId::new("executor-infra"),
             ))
         }
+    }
+
+    #[test]
+    fn download_segment_length_verify_port_accepts_matching_written_length() {
+        let job_id = JobId::generate();
+        let mut request = make_segment_execution_request(&job_id, "segment-length-match");
+        request.length = 4;
+        let fetched = DownloadSegmentFetchResult {
+            bytes: vec![1, 2, 3, 4],
+            etag: None,
+        };
+        let written = DownloadSegmentWriteResult {
+            downloaded_bytes: 4,
+            partial_path: Some(request.write_target.clone()),
+            hash_state_ref: None,
+        };
+        let verifier = DownloadSegmentLengthVerifyPort;
+
+        let outcome = verifier
+            .verify_segment(&request, &fetched, &written)
+            .expect("matching length should verify successfully");
+
+        assert_eq!(outcome, DownloadSegmentVerifyOutcome::Verified);
+    }
+
+    #[test]
+    fn download_segment_length_verify_port_mismatch_flows_through_executor_as_retryable_failure() {
+        let job_id = JobId::generate();
+        let mut request = make_segment_execution_request(&job_id, "segment-length-mismatch");
+        request.length = 5;
+        let executor = DownloadSegmentExecutor::new(
+            Arc::new(RecordingFetchPort::default()),
+            Arc::new(RecordingWritePort::default()),
+            Arc::new(DownloadSegmentLengthVerifyPort),
+        );
+
+        let result = executor
+            .accept_segment_execution(&request)
+            .expect("length mismatch should be a handled verifier failure");
+
+        let DownloadSegmentExecutionResult::Failed {
+            request: failed_request,
+            downloaded_bytes,
+            reason,
+            retryable,
+        } = result
+        else {
+            panic!("length mismatch should flow through the executor as a failed segment result");
+        };
+        assert_eq!(failed_request, request);
+        assert_eq!(
+            downloaded_bytes, 4,
+            "verifier mismatch should report the writer's best-known byte count"
+        );
+        assert!(
+            retryable,
+            "length mismatch should be retryable for a later segment retry policy"
+        );
+        assert!(
+            reason.contains("segment length mismatch"),
+            "failure reason should stay local and diagnostic"
+        );
     }
 
     #[test]

@@ -2,26 +2,27 @@
 
 ## Identity
 
-- task id: AT-2026-05-19-250
-- title: Define downloads segment length verifier boundary
+- task id: AT-2026-05-19-251
+- title: Add downloads segment length verifier
 - status: completed
 
 ## Goal
 
-Document the next downloads verifier shell slice before coding, so `DownloadSegmentVerifyPort` can get a concrete byte-length verifier without guessing hash, retry, public error, or production wiring semantics.
+Implement README_IMPL 7.40 as a concrete module-local byte-length verifier behind `DownloadSegmentVerifyPort`.
 
 ## Scope
 
 - in scope:
-  - `docs/modules/downloads/README_IMPL.md`
+  - `crates/module-downloads/src/driver.rs`
+  - `crates/module-downloads/src/lib.rs`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
   - `.artifacts/ai/progress.md`
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
-  - Rust production code
   - hash algorithm verification
+  - reading bytes back from disk
   - file-level or job-level manifest sealing
   - retry/backoff policy
   - public `DL_VERIFY_FAILED` DTO projection
@@ -31,45 +32,48 @@ Document the next downloads verifier shell slice before coding, so `DownloadSegm
 
 ## Allowed Files
 
-1. docs/modules/downloads/README_IMPL.md
-2. .artifacts/ai/active-task.md
-3. .artifacts/ai/task-plan.md
-4. .artifacts/ai/progress.md
-5. .artifacts/ai/findings.md
-6. .artifacts/ai/handoff.md
+1. crates/module-downloads/src/driver.rs
+2. crates/module-downloads/src/lib.rs
+3. .artifacts/ai/active-task.md
+4. .artifacts/ai/task-plan.md
+5. .artifacts/ai/progress.md
+6. .artifacts/ai/findings.md
+7. .artifacts/ai/handoff.md
 
 ## Required Context Read
 
 Read before writing:
 
-1. `README.md`, `docs/README.md`, and `CONTRIBUTING.md` entry/collaboration constraints.
-2. `docs/modules/downloads/README_ARCH.md`, `README_API.md`, `README_FLOW.md`, and `README_IMPL.md` verifier/segment sections.
-3. `docs/TauriDownloadRuntimeDesign.md` verifier, staging-first, and verification stages.
+1. README/docs routing and collaboration constraints from AT-250.
+2. `docs/modules/downloads/README_IMPL.md` 7.40.
+3. `docs/TauriDownloadRuntimeDesign.md` verifier and verification stage notes.
 4. `docs/TauriErrorHandlingAndProjectionDesign.md` retryable/public projection rules.
-5. `docs/TauriTestingStrategyAndQualityGateDesign.md` quality-gate guidance.
-6. `docs/TauriCodeCommentStandard.md` Chinese-first comment rule for the later code slice.
+5. Existing `DownloadSegmentVerifyPort`, `DownloadSegmentVerifyOutcome`, `DownloadSegmentExecutor`, and verifier test helpers.
 
 ## Hypothesis
 
-- falsifiable planning hypothesis: the next safe verifier slice can be documented as a module-local byte-length verifier that compares `written.downloaded_bytes` to `request.length`, returns `Verified` on match, returns an in-band handled failure on mismatch, and leaves hash/public projection/retry/wiring for later tasks.
+- falsifiable implementation hypothesis: `DownloadSegmentLengthVerifyPort` can return `Verified` when `written.downloaded_bytes == request.length`, return a retryable handled verify failure with `downloaded_bytes = written.downloaded_bytes` on mismatch, and feed the existing executor failure path without changing request/result/checkpoint shapes.
 
 ## Cheap Check
 
-1. Update README_IMPL port status and add a focused verifier shell boundary section.
-2. Record AT-249 as committed/pushed and AT-250 as the active docs boundary task.
-3. Re-read changed README_IMPL snippets.
-4. Run PWF check and scoped docs/PWF `git diff --check`.
+1. Add RED tests for direct length-match verification and executor-routed length mismatch failure.
+2. Implement the smallest verifier behind `DownloadSegmentVerifyPort`.
+3. Re-export the verifier from `launcher-module-downloads`.
+4. Run focused verifier tests, focused executor adapter tests, full downloads module tests, composition-root check, scoped rustfmt, and scoped diff-check.
 
 ## Validation Gate
 
-1. README_IMPL states the concrete filesystem writer is implemented and the verifier shell is next.
-2. README_IMPL defines verifier success/failure behavior, non-goals, and next Rust RED tests.
-3. PWF records identify AT-250 as docs-only and preserve unrelated dirty work.
-4. Scoped diff-check passes before commit/push.
+1. RED tests fail before production code because `DownloadSegmentLengthVerifyPort` is missing.
+2. GREEN focused verifier tests pass.
+3. Existing executor adapter tests pass.
+4. Full downloads module tests and composition-root compile gate pass.
+5. Scoped rustfmt and diff-check pass before commit/push.
 
 ## Completion Evidence
 
-- README_IMPL port status now records `DownloadSegmentFilesystemWritePort` as implemented and `DownloadSegmentVerifyPort` as the next byte-length verifier boundary.
-- README_IMPL 7.40 defines byte-length verifier success, handled mismatch failure, non-goals, and next Rust RED tests.
-- PWF check reported 120/121 phases complete before final status update, as expected while Phase 121 was still in progress.
-- Scoped docs/PWF `git diff --check` passed with CRLF warnings only.
+- RED: focused verifier tests failed before production code because `DownloadSegmentLengthVerifyPort` was missing.
+- GREEN: `cargo test -p launcher-module-downloads --lib download_segment_length_verify_port --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 2/2 tests.
+- Regression: `cargo test -p launcher-module-downloads --lib download_segment_executor_adapter --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 4/4 focused adapter tests.
+- Regression: `cargo test -p launcher-module-downloads --lib --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 65/65 tests.
+- Compile gate: `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
+- Format gate: `cargo fmt --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --package launcher-module-downloads -- --check` passed.
