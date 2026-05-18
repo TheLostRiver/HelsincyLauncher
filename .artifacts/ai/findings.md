@@ -1241,3 +1241,11 @@
 - An executor-routed mismatch test should prove the handled failure path uses `written.downloaded_bytes`, preserves the original request, and remains retryable without introducing public `DL_VERIFY_FAILED`.
 - RED/GREEN confirmed `DownloadSegmentLengthVerifyPort` verifies only `written.downloaded_bytes == request.length` and reports a retryable handled failure on mismatch.
 - The implementation does not read files, compute hashes, change checkpoint shapes, introduce public `DL_*` projection, or wire production composition-root execution.
+
+## Phase 123 Downloads Length Verifier Partial Resume Findings
+
+- Fetcher prerequisite reading exposed a verifier semantic gap: partial resume work carries `start_offset = checkpoint.downloaded_bytes` but keeps `length = segment.length`.
+- `DownloadSegmentWriteResult.downloaded_bytes` is the current write outcome, not the total segment completion count.
+- Therefore from-start verification can compare `written.downloaded_bytes == request.length`, but partial verification must compare `request.start_offset + written.downloaded_bytes == request.length`.
+- This is a local verifier semantics fix and should not introduce fetcher, hash, retry/backoff, public error projection, production wiring, transport, frontend, or schema work.
+- RED/GREEN confirmed the corrected semantics: partial completion with `start_offset = 6`, current write bytes `4`, and total length `10` now verifies successfully.

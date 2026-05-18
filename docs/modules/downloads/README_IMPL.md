@@ -1718,11 +1718,12 @@ The next concrete verifier slice should make `DownloadSegmentVerifyPort` useful 
 Boundary rules:
 
 1. the verifier sits behind `DownloadSegmentVerifyPort` and remains module-local execution infrastructure;
-2. success means `written.downloaded_bytes == request.length`;
-3. mismatch returns `DownloadSegmentVerifyOutcome::Failed` with the original request facts flowing through the existing executor failure path;
-4. the failure should report the best-known downloaded byte count as `written.downloaded_bytes`;
-5. the failure is retryable because a segment length mismatch can usually be corrected by refetching or rewriting that segment later;
-6. the verifier should not read files, recalculate bytes from disk, or inspect provider URLs in this first slice.
+2. `FromStart` success means `written.downloaded_bytes == request.length`;
+3. `Partial` success means `request.start_offset + written.downloaded_bytes == request.length`;
+4. mismatch returns `DownloadSegmentVerifyOutcome::Failed` with the original request facts flowing through the existing executor failure path;
+5. the failure should report the best-known total completed byte count, which is `written.downloaded_bytes` for from-start requests and `request.start_offset + written.downloaded_bytes` for partial requests;
+6. the failure is retryable because a segment length mismatch can usually be corrected by refetching or rewriting that segment later;
+7. the verifier should not read files, recalculate bytes from disk, or inspect provider URLs in this first slice.
 
 Non-goals:
 

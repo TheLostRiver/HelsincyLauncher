@@ -10878,6 +10878,20 @@
   - `cargo test -p launcher-module-downloads --lib --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 65/65 tests.
   - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
   - `cargo fmt --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --package launcher-module-downloads -- --check` passed.
+- Final commit `c8d1e5c` was pushed to `origin/main`.
+
+## 2026-05-19 - AT-2026-05-19-252 Downloads Length Verifier Partial Resume Semantics
+
+- Opened Phase 123 / AT-2026-05-19-252 after AT-251 was committed and pushed as `c8d1e5c`.
+- While reading fetcher prerequisites, discovered that partial resume work uses `start_offset = checkpoint.downloaded_bytes` while `length` remains the total segment length.
+- Root cause: AT-251 compared the current write byte count directly to total segment length, which is correct for from-start requests but wrong for partial resume completion.
+- Added RED test proving partial resume completion uses `start_offset + written.downloaded_bytes`; RED failed because the verifier returned a handled mismatch failure.
+- Updated README_IMPL 7.40 and `DownloadSegmentLengthVerifyPort` so from-start compares current written bytes to total length, while partial compares `start_offset + current written bytes` to total length.
+- Validation passed:
+  - `cargo test -p launcher-module-downloads --lib download_segment_length_verify_port --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 3/3 focused verifier tests.
+  - `cargo test -p launcher-module-downloads --lib --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 66/66 tests.
+  - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
+  - `cargo fmt --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --package launcher-module-downloads -- --check` passed.
 
 ### Auto Record: 2026-05-19 00:52:22
 - Tool: apply_patch
@@ -11167,5 +11181,89 @@
 ### Auto Record: 2026-05-19 01:34:25
 - Tool: apply_patch
 - Phase: Phase 122 - Downloads Segment Length Verifier (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 01:40:15
+- Tool: apply_patch
+- Phase: Phase 122 - Downloads Segment Length Verifier (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-19 01:40:29
+- Tool: apply_patch
+- Phase: Phase 123 - Downloads Length Verifier Partial Resume Semantics (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-19 01:40:44
+- Tool: apply_patch
+- Phase: Phase 123 - Downloads Length Verifier Partial Resume Semantics (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-19 01:41:01
+- Tool: apply_patch
+- Phase: Phase 123 - Downloads Length Verifier Partial Resume Semantics (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-19 01:41:13
+- Tool: apply_patch
+- Phase: Phase 123 - Downloads Length Verifier Partial Resume Semantics (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 01:42:10
+- Tool: apply_patch
+- Phase: Phase 123 - Downloads Length Verifier Partial Resume Semantics (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-19 01:42:55
+- Tool: apply_patch
+- Phase: Phase 123 - Downloads Length Verifier Partial Resume Semantics (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-19 01:43:08
+- Tool: apply_patch
+- Phase: Phase 123 - Downloads Length Verifier Partial Resume Semantics (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-19 01:44:09
+- Tool: apply_patch
+- Phase: Phase 123 - Downloads Length Verifier Partial Resume Semantics (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-19 01:45:10
+- Tool: apply_patch
+- Phase: Phase 123 - Downloads Length Verifier Partial Resume Semantics (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-19 01:45:22
+- Tool: apply_patch
+- Phase: Phase 123 - Downloads Length Verifier Partial Resume Semantics (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-19 01:45:37
+- Tool: apply_patch
+- Phase: Phase 123 - Downloads Length Verifier Partial Resume Semantics (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-19 01:45:49
+- Tool: apply_patch
+- Phase: Phase 123 - Downloads Length Verifier Partial Resume Semantics (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-19 01:46:43
+- Tool: apply_patch
+- Phase: Phase 123 - Downloads Length Verifier Partial Resume Semantics (complete)
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)

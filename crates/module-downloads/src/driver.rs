@@ -517,16 +517,23 @@ impl DownloadSegmentVerifyPort for DownloadSegmentLengthVerifyPort {
         _fetched: &DownloadSegmentFetchResult,
         written: &DownloadSegmentWriteResult,
     ) -> AppResult<DownloadSegmentVerifyOutcome> {
-        if written.downloaded_bytes == request.length {
+        let completed_bytes = match request.resume_mode {
+            DownloadResumeWorkMode::FromStart => written.downloaded_bytes,
+            DownloadResumeWorkMode::Partial => request
+                .start_offset
+                .saturating_add(written.downloaded_bytes),
+        };
+
+        if completed_bytes == request.length {
             return Ok(DownloadSegmentVerifyOutcome::Verified);
         }
 
         Ok(DownloadSegmentVerifyOutcome::Failed(
             DownloadSegmentHandledFailure {
-                downloaded_bytes: written.downloaded_bytes,
+                downloaded_bytes: completed_bytes,
                 reason: format!(
-                    "segment length mismatch for `{}`: expected {} bytes, wrote {} bytes",
-                    request.segment_id, request.length, written.downloaded_bytes
+                    "segment length mismatch for `{}`: expected {} completed bytes, observed {} completed bytes",
+                    request.segment_id, request.length, completed_bytes
                 ),
                 retryable: true,
             },
@@ -1260,6 +1267,31 @@ mod tests {
         let outcome = verifier
             .verify_segment(&request, &fetched, &written)
             .expect("matching length should verify successfully");
+
+        assert_eq!(outcome, DownloadSegmentVerifyOutcome::Verified);
+    }
+
+    #[test]
+    fn download_segment_length_verify_port_accepts_partial_completion_from_start_offset() {
+        let job_id = JobId::generate();
+        let mut request = make_segment_execution_request(&job_id, "segment-length-partial");
+        request.resume_mode = DownloadResumeWorkMode::Partial;
+        request.start_offset = 6;
+        request.length = 10;
+        let fetched = DownloadSegmentFetchResult {
+            bytes: vec![7, 8, 9, 10],
+            etag: None,
+        };
+        let written = DownloadSegmentWriteResult {
+            downloaded_bytes: 4,
+            partial_path: Some(request.write_target.clone()),
+            hash_state_ref: None,
+        };
+        let verifier = DownloadSegmentLengthVerifyPort;
+
+        let outcome = verifier
+            .verify_segment(&request, &fetched, &written)
+            .expect("partial completion should verify using start_offset plus written bytes");
 
         assert_eq!(outcome, DownloadSegmentVerifyOutcome::Verified);
     }

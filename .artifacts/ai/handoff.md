@@ -430,9 +430,9 @@
 - Next likely code task after this commit:
   - add focused RED tests for `DownloadSegmentLengthVerifyPort` success and handled mismatch failure, then implement the smallest verifier behind `DownloadSegmentVerifyPort`.
 
-## Current Handoff - AT-2026-05-19-251
+## Latest Handoff - AT-2026-05-19-251
 
-- Status: completed; commit/push pending.
+- Status: completed; final commit `c8d1e5c`, pushed to `origin/main`.
 - Scope:
   - Add `DownloadSegmentLengthVerifyPort` with focused TDD in `crates/module-downloads/src/driver.rs`.
   - Re-export the verifier from `crates/module-downloads/src/lib.rs`.
@@ -446,6 +446,22 @@
   - Scoped rustfmt check passed.
 - Preserved boundaries:
   - No hash algorithms, no disk readback, no file/job-level integrity sealing, no retry/backoff, no public `DL_VERIFY_FAILED` projection, no production wiring, no host transport/frontend/schema work.
+
+## Current Handoff - AT-2026-05-19-252
+
+- Status: completed; commit/push pending.
+- Scope:
+  - Correct `DownloadSegmentLengthVerifyPort` partial resume completion semantics.
+  - Update README_IMPL 7.40 to document from-start versus partial length checks.
+  - Update PWF records for Phase 123.
+- Validation passed:
+  - RED failed for partial completion before the fix.
+  - Focused verifier tests passed with 3/3 tests.
+  - Full `launcher-module-downloads --lib` passed with 66/66 tests.
+  - `launcher-composition-root` check passed.
+  - Scoped rustfmt check passed.
+- Preserved boundaries:
+  - No fetcher boundary or HTTP range implementation, no hash algorithms, no file/job-level integrity sealing, no retry/backoff, no public `DL_VERIFY_FAILED` projection, no production wiring, no host transport/frontend/schema work.
 
 ## Dirty Worktree To Preserve
 

@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 122 - Downloads Segment Length Verifier (complete)
+Phase 123 - Downloads Length Verifier Partial Resume Semantics (complete)
 
 ## Current Focus
 
@@ -40,7 +40,8 @@ Phase 122 - Downloads Segment Length Verifier (complete)
 - AT-2026-05-19-248 completed the first concrete filesystem staging writer boundary; committed and pushed as `cd6fa4b`.
 - AT-2026-05-19-249 completed and documented the concrete filesystem staging writer with focused TDD; committed and pushed as `e267db9`.
 - AT-2026-05-19-250 completed the concrete segment length verifier boundary before Rust code; committed and pushed as `10d8c58`.
-- AT-2026-05-19-251 completed the concrete segment length verifier with focused TDD; commit/push pending.
+- AT-2026-05-19-251 completed the concrete segment length verifier with focused TDD; committed and pushed as `c8d1e5c`.
+- AT-2026-05-19-252 completed the partial resume semantics correction in the length verifier; commit/push pending.
 - AT-2026-05-17-220 was published as commit `aa8d6e3` after documenting the shared runtime execution-turn boundary.
 - AT-2026-05-17-219 was published as commit `f618718` after adding host transport smoke coverage for downloads policy runtime application.
 - AT-2026-05-17-218 was published as commit `5aae7f1` after adding documentation-budget rules.
@@ -908,6 +909,12 @@ Phase 122 - Downloads Segment Length Verifier (complete)
 - Atomic tasks: AT-2026-05-19-251
 - **Status:** complete
 
+### Phase 123: Downloads Length Verifier Partial Resume Semantics
+
+- Outcome: correct the concrete length verifier so from-start requests compare current written bytes to total segment length, while partial requests compare `start_offset + current written bytes` to total segment length.
+- Atomic tasks: AT-2026-05-19-252
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -1154,7 +1161,8 @@ Phase 122 - Downloads Segment Length Verifier (complete)
 242. AT-2026-05-19-248 - completed - defined the concrete filesystem staging writer boundary; committed and pushed as `cd6fa4b`.
 243. AT-2026-05-19-249 - completed - implemented and documented the concrete downloads filesystem staging writer with focused TDD; committed and pushed as `e267db9`.
 244. AT-2026-05-19-250 - completed - defined the concrete downloads segment length verifier boundary before Rust code; committed and pushed as `10d8c58`.
-245. AT-2026-05-19-251 - completed - implemented the concrete downloads segment length verifier with focused TDD; commit/push pending.
+245. AT-2026-05-19-251 - completed - implemented the concrete downloads segment length verifier with focused TDD; committed and pushed as `c8d1e5c`.
+246. AT-2026-05-19-252 - completed - corrected partial resume semantics in the downloads length verifier; commit/push pending.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
