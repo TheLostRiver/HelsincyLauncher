@@ -78,3 +78,5 @@ Read before writing:
   - first Rust slice as a pure policy helper with fixed `IsoDateTime now` input.
 - Preserved Rust code, SQLite schema, retry scheduler loops, automatic dispatch, `TerminalFailed`, public `DL_*`, host/frontend/provider/lease/snapshot payload changes out of scope.
 - Validation: scoped `git diff --check` over README, README_IMPL, and PWF files passed with CRLF normalization warnings only.
+- Commit `d25ef93` created locally.
+- Push was not reattempted because the previous direct `origin/main` push was blocked by the safety reviewer and explicit approval is required before retrying.

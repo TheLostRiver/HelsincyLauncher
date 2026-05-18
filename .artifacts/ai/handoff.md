@@ -708,7 +708,7 @@
   - no retry scheduler loop, background worker, automatic retry dispatch, public `DL_*`, `TerminalFailed`, host/frontend/provider HTTP, production wiring, leases, or snapshot error payload change.
 ## Current Handoff - AT-2026-05-19-265
 
-- Status: completed; local commit pending.
+- Status: completed; local commit `d25ef93`, push not reattempted after safety block.
 - Scope:
   - root README
   - `docs/modules/downloads/README_IMPL.md`
@@ -724,3 +724,6 @@
   - README_IMPL 7.47 defines automatic retry classes, non-automatic classes, three-attempt budget, 30s/120s delay schedule, user-attention rules, terminal-candidate constraints, first Rust slice, and non-goals.
 - Validation:
   - scoped `git diff --check` over README, README_IMPL, and PWF files passed with CRLF normalization warnings only.
+- Publish:
+  - Local commit `d25ef93 docs: define download backoff policy boundary` exists.
+  - Push was not reattempted because the previous direct `origin/main` push was blocked by the safety reviewer and explicit approval is required before retrying.
