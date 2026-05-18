@@ -1213,3 +1213,14 @@
 - The first concrete writer should be job-scoped: a configured `.downloads/staging` root plus `request.job_id` plus a validated target.
 - `partial_path` should remain the validated target relative to the job staging root, matching existing fake writer/checkpoint behavior and avoiding a new checkpoint shape.
 - Filesystem errors should stay on the `AppError` infrastructure path for now; public `DL_WRITE_FAILED` projection and retry/backoff need a later classification boundary.
+
+## Phase 120 Downloads Filesystem Staging Writer Findings
+
+- Required code context was read in focused chunks: module-downloads Cargo manifest, driver imports, writer trait/guarded writer code, test helpers, and crate re-export surface.
+- The crate currently has no temp-file test dependency, so focused writer tests should use a unique path under the workspace `target/` directory instead of writing outside `D:\DEV\MyEpicLauncher`.
+- The writer should validate `write_target` itself even when it can also be wrapped by `DownloadSegmentGuardedWritePort`, keeping the concrete writer safe if used directly in tests or later wiring.
+- New code comments/doc comments should be Chinese-first per the user's latest preference.
+- RED/GREEN confirmed `DownloadSegmentFilesystemWritePort` creates job-scoped parent directories, writes from-start bytes under the validated staging target, and preserves an existing prefix when partial writes seek to `start_offset`.
+- The concrete writer returns existing write facts only: `downloaded_bytes`, `partial_path`, and `hash_state_ref = None`; provider fetch, hash verification, final artifact moves, production wiring, retry/backoff, public `DL_*` projection, host transport, frontend, and schema work remain separate later slices.
+- Filesystem IO failures currently stay on the infrastructure `AppError` path, matching the documented split before the later public execution-error classification boundary.
+- README_IMPL 6.1 and 7.39 now reflect the implemented writer status and identify the verifier shell as the next backend-owned slice.

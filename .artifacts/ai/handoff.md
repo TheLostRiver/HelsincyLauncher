@@ -384,7 +384,7 @@
 
 ## Latest Handoff - AT-2026-05-19-248
 
-- Status: completed; commit/push pending at the time this handoff entry was written.
+- Status: completed; final commit `cd6fa4b`, pushed to `origin/main`.
 - Scope:
   - Added README_IMPL 7.39 for the filesystem staging writer boundary.
   - Kept the slice documentation/PWF-only.
@@ -397,9 +397,28 @@
   - No Rust code in AT-248.
   - No provider fetch, verifier, production wiring, retry/backoff, public errors, transport, frontend, or schema work.
 
+## Current Handoff - AT-2026-05-19-249
+
+- Status: completed; commit/push pending.
+- Scope:
+  - Add `DownloadSegmentFilesystemWritePort` and focused TDD in `crates/module-downloads/src/driver.rs`.
+  - Re-export the writer from `crates/module-downloads/src/lib.rs`.
+  - Update `docs/modules/downloads/README_IMPL.md` implementation status and next-slice note.
+- Validation passed:
+  - RED failed on missing `DownloadSegmentFilesystemWritePort`.
+  - Focused filesystem writer tests passed.
+  - Focused executor adapter tests passed.
+  - Full `launcher-module-downloads --lib` passed with 63/63 tests.
+  - `launcher-composition-root` check passed.
+  - Scoped rustfmt check passed after formatting.
+- Preserved boundaries:
+  - No provider fetch, verifier, final artifact moves, production wiring, retry/backoff, public errors, transport, frontend, or schema work.
+- Next likely task:
+  - define the verifier shell boundary behind `DownloadSegmentVerifyPort`, starting with byte-length checks before hash algorithms.
+
 ## Dirty Worktree To Preserve
 
-- Unrelated unstaged/unknown work remains present and must not be committed with AT-218:
+- Unrelated unstaged/unknown work remains present and must not be committed with AT-249:
   - `Cargo.lock`
   - `MyEpicLauncher.pen`
   - frontend files under `app/` and `components/`

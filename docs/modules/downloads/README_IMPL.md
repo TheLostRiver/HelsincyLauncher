@@ -156,8 +156,8 @@ The downloads module should continue in small backend-owned slices. The remainin
 
 Recommended order:
 
-1. define and implement a concrete filesystem staging writer behind `DownloadSegmentWritePort`;
-2. define and implement a concrete verifier shell, starting with byte-length checks before hash algorithms;
+1. completed: define and implement a concrete filesystem staging writer behind `DownloadSegmentWritePort`;
+2. next: define and implement a concrete verifier shell, starting with byte-length checks before hash algorithms;
 3. define the fetcher boundary for provider/local byte sources before introducing real HTTP range behavior;
 4. wire the concrete executor into composition-root only after fetch/write/verify sub-ports are independently covered;
 5. add runtime terminal completion/failure projection after concrete execution can advance checkpoints deterministically;
@@ -1680,7 +1680,7 @@ Next Rust slice:
 
 ### 7.39 Filesystem Staging Writer Boundary
 
-The next concrete IO slice is the filesystem staging writer behind `DownloadSegmentWritePort`. This writer is still module-local execution infrastructure, not production composition wiring.
+The first concrete IO slice is now implemented as `DownloadSegmentFilesystemWritePort` behind `DownloadSegmentWritePort`. This writer is still module-local execution infrastructure, not production composition wiring.
 
 Boundary rules:
 
@@ -1698,12 +1698,18 @@ Non-goals:
 2. no direct writes outside the configured staging root;
 3. no attempt to expose segment or chunk details through host IPC.
 
+Implementation status:
+
+1. focused RED tests cover job-scoped path creation, safe write facts, and partial writes preserving an existing prefix;
+2. `DownloadSegmentFilesystemWritePort` creates parent directories, opens a target under `<staging_root>/<job_id>/...`, truncates from-start writes, and seeks for partial writes;
+3. the writer validates `write_target` directly with `DownloadSegmentStagingTarget`, so it remains safe even when used without the guarded wrapper;
+4. validation covers focused writer tests, executor adapter tests, full downloads module tests, composition-root check, scoped rustfmt, and scoped diff-check.
+
 Next Rust slice:
 
-1. add focused RED tests for job-scoped path creation, safe write facts, and partial writes preserving an existing prefix;
-2. implement a small `DownloadSegmentFilesystemWritePort` behind `DownloadSegmentWritePort`;
-3. keep the guarded writer wrapper usable around the filesystem writer;
-4. validate with focused writer tests, executor adapter tests, full downloads module tests, composition-root check, scoped rustfmt, and scoped diff-check.
+1. define a verifier shell behind `DownloadSegmentVerifyPort`;
+2. start with byte-length verification before hash algorithms or manifest-level sealing;
+3. keep production wiring, retry/backoff, public `DL_*` projection, host transport, frontend, and schema changes out of that verifier slice.
 
 ---
 

@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 119 - Filesystem Staging Writer Boundary (complete)
+Phase 120 - Downloads Filesystem Staging Writer (complete)
 
 ## Current Focus
 
@@ -37,7 +37,8 @@ Phase 119 - Filesystem Staging Writer Boundary (complete)
 - AT-2026-05-18-245 completed the guarded downloads writer wrapper with focused TDD; committed and pushed as `97c4870`.
 - AT-2026-05-18-246 completed guarded writer executor failure mapping coverage; committed and pushed as `e6ce619`.
 - AT-2026-05-19-247 completed the remaining downloads backend completion roadmap before continuing filesystem writer code; committed and pushed as `99e8160`.
-- AT-2026-05-19-248 completed the first concrete filesystem staging writer boundary.
+- AT-2026-05-19-248 completed the first concrete filesystem staging writer boundary; committed and pushed as `cd6fa4b`.
+- AT-2026-05-19-249 completed and documented the concrete filesystem staging writer with focused TDD; commit/push pending.
 - AT-2026-05-17-220 was published as commit `aa8d6e3` after documenting the shared runtime execution-turn boundary.
 - AT-2026-05-17-219 was published as commit `f618718` after adding host transport smoke coverage for downloads policy runtime application.
 - AT-2026-05-17-218 was published as commit `5aae7f1` after adding documentation-budget rules.
@@ -887,6 +888,12 @@ Phase 119 - Filesystem Staging Writer Boundary (complete)
 - Atomic tasks: AT-2026-05-19-248
 - **Status:** complete
 
+### Phase 120: Downloads Filesystem Staging Writer
+
+- Outcome: implement and document `DownloadSegmentFilesystemWritePort` behind `DownloadSegmentWritePort`, proving job-scoped staging writes and partial offset writes without provider fetch, verifier, production wiring, retry/backoff, public errors, transport, frontend, or schema work.
+- Atomic tasks: AT-2026-05-19-249
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -1130,7 +1137,8 @@ Phase 119 - Filesystem Staging Writer Boundary (complete)
 239. AT-2026-05-18-245 - completed - implemented the guarded downloads writer wrapper with focused TDD; committed and pushed as `97c4870`.
 240. AT-2026-05-18-246 - completed - covered guarded writer unsafe-target failure through the segment executor; committed and pushed as `e6ce619`.
 241. AT-2026-05-19-247 - completed - defined the remaining downloads backend completion roadmap; committed and pushed as `99e8160`.
-242. AT-2026-05-19-248 - completed - defined the concrete filesystem staging writer boundary.
+242. AT-2026-05-19-248 - completed - defined the concrete filesystem staging writer boundary; committed and pushed as `cd6fa4b`.
+243. AT-2026-05-19-249 - completed - implemented and documented the concrete downloads filesystem staging writer with focused TDD; commit/push pending.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

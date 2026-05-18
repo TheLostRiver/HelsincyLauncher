@@ -10833,6 +10833,27 @@
 - Added README_IMPL 7.39 defining job-scoped filesystem staging writer behavior, non-goals, and next RED tests.
 - Validation passed: README_IMPL 7.39 was re-read, scoped docs/PWF `git diff --check` returned no whitespace errors, and only expected CRLF normalization warnings were emitted.
 
+## 2026-05-19 - AT-2026-05-19-249 Downloads Filesystem Staging Writer
+
+- Opened Phase 120 / AT-2026-05-19-249 after AT-248 was committed and pushed as `cd6fa4b`.
+- Read focused code context and confirmed no extra test dependency is present for temporary directories.
+- Next step is RED tests for job-scoped from-start writes and partial writes under a workspace `target/` test staging root.
+- Added RED coverage for job-scoped from-start writes and partial writes; RED failed on the missing `DownloadSegmentFilesystemWritePort`.
+- Implemented `DownloadSegmentFilesystemWritePort` behind `DownloadSegmentWritePort`, re-exported it from `launcher-module-downloads`, and kept the slice limited to staging filesystem writes.
+- Updated `docs/modules/downloads/README_IMPL.md` so the roadmap marks the filesystem writer as completed and points the next backend slice at the verifier shell.
+- Validation passed:
+  - `cargo test -p launcher-module-downloads --lib download_segment_filesystem_write_port --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 2/2 tests.
+  - `cargo test -p launcher-module-downloads --lib download_segment_executor_adapter --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 4/4 focused adapter tests.
+  - `cargo test -p launcher-module-downloads --lib --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 63/63 tests after formatting.
+  - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed after formatting.
+  - `cargo fmt --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --package launcher-module-downloads -- --check` passed after scoped `cargo fmt`.
+- After README_IMPL was updated, final validation still passed:
+  - scoped code/README/PWF `git diff --check` passed with CRLF warnings only.
+  - PWF `check-complete.ps1` reported all phases complete.
+  - `cargo fmt --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --package launcher-module-downloads -- --check` passed.
+  - `cargo test -p launcher-module-downloads --lib --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 63/63 tests.
+  - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
+
 ### Auto Record: 2026-05-19 00:52:22
 - Tool: apply_patch
 - Phase: Phase 118 - Downloads Completion Roadmap (in_progress)
@@ -10884,3 +10905,104 @@
   - `.artifacts/ai/task-plan.md` (update)
   - `.artifacts/ai/progress.md` (update)
   - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-19 01:04:00
+- Tool: apply_patch
+- Phase: Phase 120 - Downloads Filesystem Staging Writer (in_progress)
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-19 01:04:46
+- Tool: apply_patch
+- Phase: Phase 120 - Downloads Filesystem Staging Writer (in_progress)
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+
+### Auto Record: 2026-05-19 01:05:22
+- Tool: apply_patch
+- Phase: Phase 120 - Downloads Filesystem Staging Writer (in_progress)
+- Files:
+  - `crates/module-downloads/src/driver.rs` (update)
+
+### Auto Record: 2026-05-19 01:06:25
+- Tool: apply_patch
+- Phase: Phase 120 - Downloads Filesystem Staging Writer (in_progress)
+- Files:
+  - `crates/module-downloads/src/driver.rs` (update)
+  - `crates/module-downloads/src/lib.rs` (update)
+
+### Auto Record: 2026-05-19 01:12:56
+- Tool: apply_patch
+- Phase: Phase 120 - Downloads Filesystem Staging Writer (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-19 01:13:06
+- Tool: apply_patch
+- Phase: Phase 120 - Downloads Filesystem Staging Writer (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-19 01:13:17
+- Tool: apply_patch
+- Phase: Phase 120 - Downloads Filesystem Staging Writer (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-19 01:13:30
+- Tool: apply_patch
+- Phase: Phase 120 - Downloads Filesystem Staging Writer (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-19 01:13:42
+- Tool: apply_patch
+- Phase: Phase 120 - Downloads Filesystem Staging Writer (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 01:16:01
+- Tool: apply_patch
+- Phase: Phase 120 - Downloads Filesystem Staging Writer (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-19 01:16:20
+- Tool: apply_patch
+- Phase: Phase 120 - Downloads Filesystem Staging Writer (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-19 01:16:29
+- Tool: apply_patch
+- Phase: Phase 120 - Downloads Filesystem Staging Writer (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-19 01:16:38
+- Tool: apply_patch
+- Phase: Phase 120 - Downloads Filesystem Staging Writer (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-19 01:16:47
+- Tool: apply_patch
+- Phase: Phase 120 - Downloads Filesystem Staging Writer (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-19 01:16:57
+- Tool: apply_patch
+- Phase: Phase 120 - Downloads Filesystem Staging Writer (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 01:18:25
+- Tool: apply_patch
+- Phase: Phase 120 - Downloads Filesystem Staging Writer (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)

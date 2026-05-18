@@ -1,7 +1,9 @@
-use std::path::{Component, Path};
+use std::fs;
+use std::io::{Seek, SeekFrom, Write};
+use std::path::{Component, Path, PathBuf};
 use std::sync::Arc;
 
-use launcher_kernel_foundation::{AppResult, JobId};
+use launcher_kernel_foundation::{AppError, AppErrorSeverity, AppResult, CorrelationId, JobId};
 use launcher_kernel_jobs::{
     JobDriver, JobExecutionContext, JobRunDisposition, JobSnapshot, RestoreDisposition,
 };
@@ -374,6 +376,91 @@ pub trait DownloadSegmentWritePort: Send + Sync {
         request: &DownloadSegmentExecutionRequest,
         fetched: &DownloadSegmentFetchResult,
     ) -> AppResult<DownloadSegmentWriteOutcome>;
+}
+
+/// 使用本地文件系统写入 job-scoped staging 目标的 writer。
+/// Filesystem writer for job-scoped staging targets.
+#[derive(Clone, Debug)]
+pub struct DownloadSegmentFilesystemWritePort {
+    staging_root: PathBuf,
+}
+
+impl DownloadSegmentFilesystemWritePort {
+    /// 创建一个以 `.downloads/staging` 等目录为根的 filesystem writer。
+    /// Creates a filesystem writer rooted at a directory such as `.downloads/staging`.
+    pub fn new(staging_root: impl Into<PathBuf>) -> Self {
+        Self {
+            staging_root: staging_root.into(),
+        }
+    }
+
+    fn target_path(
+        &self,
+        request: &DownloadSegmentExecutionRequest,
+        target: &DownloadSegmentStagingTarget,
+    ) -> PathBuf {
+        self.staging_root
+            .join(request.job_id.as_str())
+            .join(target.as_str())
+    }
+}
+
+impl DownloadSegmentWritePort for DownloadSegmentFilesystemWritePort {
+    fn write_segment(
+        &self,
+        request: &DownloadSegmentExecutionRequest,
+        fetched: &DownloadSegmentFetchResult,
+    ) -> AppResult<DownloadSegmentWriteOutcome> {
+        let target = match DownloadSegmentStagingTarget::parse(&request.write_target) {
+            Ok(target) => target,
+            Err(failure) => return Ok(DownloadSegmentWriteOutcome::Failed(failure)),
+        };
+        let target_path = self.target_path(request, &target);
+        if let Some(parent) = target_path.parent() {
+            fs::create_dir_all(parent).map_err(|error| {
+                filesystem_write_error("create staging parent directory", parent, error)
+            })?;
+        }
+
+        let mut options = fs::OpenOptions::new();
+        options.create(true).write(true);
+        if request.resume_mode == DownloadResumeWorkMode::FromStart {
+            options.truncate(true);
+        }
+
+        let mut file = options
+            .open(&target_path)
+            .map_err(|error| filesystem_write_error("open staging target", &target_path, error))?;
+        if request.resume_mode == DownloadResumeWorkMode::Partial {
+            file.seek(SeekFrom::Start(request.start_offset))
+                .map_err(|error| {
+                    filesystem_write_error("seek staging target", &target_path, error)
+                })?;
+        }
+        file.write_all(&fetched.bytes)
+            .map_err(|error| filesystem_write_error("write staging target", &target_path, error))?;
+
+        Ok(DownloadSegmentWriteOutcome::Written(
+            DownloadSegmentWriteResult {
+                downloaded_bytes: fetched.bytes.len() as u64,
+                partial_path: Some(target.as_str().to_string()),
+                hash_state_ref: None,
+            },
+        ))
+    }
+}
+
+fn filesystem_write_error(operation: &str, path: &Path, error: std::io::Error) -> AppError {
+    AppError::new(
+        "DOWNLOAD_SEGMENT_WRITE_IO",
+        format!(
+            "downloads filesystem writer failed to {operation} at `{}`: {error}",
+            path.display()
+        ),
+        true,
+        AppErrorSeverity::Error,
+        CorrelationId::generate(),
+    )
 }
 
 /// Guarded writer wrapper that rejects unsafe staging targets before delegation.
@@ -812,6 +899,8 @@ impl JobDriver<()> for DownloadJobDriver {
 #[cfg(test)]
 mod tests {
     use std::collections::HashMap;
+    use std::fs;
+    use std::path::PathBuf;
     use std::sync::{Arc, Mutex};
 
     use launcher_kernel_foundation::{
@@ -832,10 +921,10 @@ mod tests {
         DownloadJobDriver, DownloadSegmentCheckpointRecord, DownloadSegmentCheckpointStatus,
         DownloadSegmentExecutionPort, DownloadSegmentExecutionRequest,
         DownloadSegmentExecutionResult, DownloadSegmentExecutor, DownloadSegmentFetchOutcome,
-        DownloadSegmentFetchPort, DownloadSegmentFetchResult, DownloadSegmentGuardedWritePort,
-        DownloadSegmentHandledFailure, DownloadSegmentStagingTarget, DownloadSegmentVerifyOutcome,
-        DownloadSegmentVerifyPort, DownloadSegmentWriteOutcome, DownloadSegmentWritePort,
-        DownloadSegmentWriteResult,
+        DownloadSegmentFetchPort, DownloadSegmentFetchResult, DownloadSegmentFilesystemWritePort,
+        DownloadSegmentGuardedWritePort, DownloadSegmentHandledFailure,
+        DownloadSegmentStagingTarget, DownloadSegmentVerifyOutcome, DownloadSegmentVerifyPort,
+        DownloadSegmentWriteOutcome, DownloadSegmentWritePort, DownloadSegmentWriteResult,
     };
 
     #[derive(Default)]
@@ -1241,6 +1330,91 @@ mod tests {
             .expect_err("writer infrastructure errors should propagate");
 
         assert_eq!(err.code, "TEST_WRITER_INFRASTRUCTURE");
+    }
+
+    #[test]
+    fn download_segment_filesystem_write_port_writes_job_scoped_target_and_reports_facts() {
+        let job_id = JobId::generate();
+        let mut request = make_segment_execution_request(&job_id, "segment-filesystem-write");
+        request.write_target = "file-a/segment-0001.part".into();
+        let fetched = DownloadSegmentFetchResult {
+            bytes: b"hello segment".to_vec(),
+            etag: None,
+        };
+        let staging_root = test_staging_root("from-start");
+        let writer = DownloadSegmentFilesystemWritePort::new(staging_root.clone());
+
+        let outcome = writer
+            .write_segment(&request, &fetched)
+            .expect("filesystem writer should write fetched bytes");
+
+        let target_path = staging_root
+            .join(request.job_id.as_str())
+            .join("file-a")
+            .join("segment-0001.part");
+        assert_eq!(
+            fs::read(&target_path).expect("written segment should be readable"),
+            fetched.bytes,
+            "filesystem writer should write bytes under the job-scoped staging path"
+        );
+        assert_eq!(
+            outcome,
+            DownloadSegmentWriteOutcome::Written(DownloadSegmentWriteResult {
+                downloaded_bytes: 13,
+                partial_path: Some("file-a/segment-0001.part".into()),
+                hash_state_ref: None,
+            })
+        );
+    }
+
+    #[test]
+    fn download_segment_filesystem_write_port_partial_write_preserves_existing_prefix() {
+        let job_id = JobId::generate();
+        let mut request = make_segment_execution_request(&job_id, "segment-filesystem-partial");
+        request.write_target = "file-a/segment-0002.part".into();
+        request.resume_mode = DownloadResumeWorkMode::Partial;
+        request.start_offset = 6;
+        let fetched = DownloadSegmentFetchResult {
+            bytes: b"tail".to_vec(),
+            etag: None,
+        };
+        let staging_root = test_staging_root("partial");
+        let target_path = staging_root
+            .join(request.job_id.as_str())
+            .join("file-a")
+            .join("segment-0002.part");
+        fs::create_dir_all(target_path.parent().expect("target should have a parent"))
+            .expect("test should prepare parent directory");
+        fs::write(&target_path, b"PREFIX----").expect("test should prepare partial file");
+        let writer = DownloadSegmentFilesystemWritePort::new(staging_root);
+
+        let outcome = writer
+            .write_segment(&request, &fetched)
+            .expect("partial filesystem write should preserve existing prefix");
+
+        assert_eq!(
+            fs::read(&target_path).expect("partial target should be readable"),
+            b"PREFIXtail",
+            "partial writes should seek to start_offset and preserve the prefix"
+        );
+        assert_eq!(
+            outcome,
+            DownloadSegmentWriteOutcome::Written(DownloadSegmentWriteResult {
+                downloaded_bytes: 4,
+                partial_path: Some("file-a/segment-0002.part".into()),
+                hash_state_ref: None,
+            })
+        );
+    }
+
+    fn test_staging_root(label: &str) -> PathBuf {
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("..")
+            .join("..")
+            .join("target")
+            .join("module-downloads-test-staging")
+            .join(label)
+            .join(JobId::generate().as_str())
     }
 
     fn make_snapshot(job_id: JobId) -> launcher_kernel_jobs::JobSnapshot<()> {
