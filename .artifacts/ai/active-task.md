@@ -2,18 +2,17 @@
 
 ## Identity
 
-- task id: AT-2026-05-19-260
-- title: Return completed disposition from downloads driver all-completed checkpoint
+- task id: AT-2026-05-19-261
+- title: Define failed segment metadata and retry classification boundary
 - status: completed
 
 ## Goal
 
-Implement README_IMPL 7.44's first Rust slice so `DownloadJobDriver::run(...)` returns `JobRunDisposition::Completed` only after local execution saves a non-empty checkpoint whose known segment records are all completed, while failed segment mutation stays non-terminal.
+Document the next downloads backend boundary: preserve failed segment metadata durably before implementing retry/backoff, terminal-failed driver decisions, or public `DL_*` execution errors.
 
 ## Scope
 
 - in scope:
-  - `crates/module-downloads/src/driver.rs`
   - `README.md`
   - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
@@ -22,63 +21,56 @@ Implement README_IMPL 7.44's first Rust slice so `DownloadJobDriver::run(...)` r
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
+  - Rust code changes
+  - SQLite schema changes
   - returning `TerminalFailed` from downloads driver
-  - retry/backoff or stable public `DL_*` execution errors
-  - host transport, frontend, SQLite schema, provider HTTP, production wiring, scheduler loops, or leases
-  - unrelated dirty files
+  - retry scheduler/backoff engine or stable public `DL_*` execution errors
+  - host transport, frontend, provider HTTP, production wiring, scheduler loops, leases, or snapshot error payloads
 
 ## Allowed Files
 
-1. crates/module-downloads/src/driver.rs
-2. README.md
-3. docs/modules/downloads/README_IMPL.md
-4. .artifacts/ai/active-task.md
-5. .artifacts/ai/task-plan.md
-6. .artifacts/ai/progress.md
-7. .artifacts/ai/findings.md
-8. .artifacts/ai/handoff.md
+1. README.md
+2. docs/modules/downloads/README_IMPL.md
+3. .artifacts/ai/active-task.md
+4. .artifacts/ai/task-plan.md
+5. .artifacts/ai/progress.md
+6. .artifacts/ai/findings.md
+7. .artifacts/ai/handoff.md
 
 ## Required Context Read
 
 Read before writing:
 
-1. `docs/modules/downloads/README_IMPL.md` 7.44.
-2. `docs/TauriKernelJobsRuntimeDesign.md` terminal snapshot projection ownership.
-3. `docs/TauriDownloadRuntimeDesign.md` checkpoint/runtime ownership.
-4. `docs/TauriTestingStrategyAndQualityGateDesign.md` focused module test guidance.
-5. `docs/TauriCodeCommentStandard.md` Chinese-first and bilingual companion comment rules.
-6. `crates/module-downloads/src/driver.rs` checkpoint statuses, checkpoint mutation helpers, `execute_local_resume_turn(...)`, `run(...)`, and existing driver tests.
-7. `README.md` current status for post-green refresh.
+1. `README.md` current status and near-term roadmap.
+2. `docs/modules/downloads/README_IMPL.md` 7.44 and current roadmap.
+3. `docs/TauriDownloadRuntimeDesign.md` failure classification and retry principles.
+4. `docs/TauriErrorHandlingAndProjectionDesign.md` retryable semantics.
+5. `crates/module-downloads/src/driver.rs` failed result and handled failure data shape.
+6. `crates/adapter-storage-sqlite/src/lib.rs` checkpoint table/round-trip surface.
 
 ## Hypothesis
 
-- falsifiable implementation hypothesis: a saved checkpoint can be classified locally as terminal completed when it has at least one segment and all segment statuses are `Completed`; otherwise `DownloadJobDriver::run(...)` should preserve the existing non-terminal `Accepted`/`Deferred` behavior.
+- falsifiable documentation hypothesis: the next safe backend slice is durable failed-segment metadata, not terminal failure projection, because current checkpoint persistence drops retryability and local diagnostic reason.
 
 ## Cheap Check
 
-1. Add RED driver tests for all-completed checkpoint returning `Completed` and failed checkpoint mutation staying non-terminal.
-2. Verify RED fails because completed checkpoint mutation still returns `Accepted`.
-3. Add the smallest downloads-owned helper/decision after `execute_local_resume_turn(...)`.
-4. Re-run focused driver tests, full downloads module lib tests, composition-root check, scoped rustfmt, and scoped diff-check.
-5. Update README/README_IMPL implementation status, commit, and attempt push.
+1. Update root README current status/roadmap.
+2. Update README_IMPL 6.1 and add 7.45 with current reality, rules, and first Rust slice.
+3. Update PWF task records and handoff.
+4. Run scoped `git diff --check` for touched docs/task files.
+5. Commit and attempt push.
 
 ## Validation Gate
 
-1. RED failure observed before production changes.
-2. All-completed checkpoint run returns `JobRunDisposition::Completed`.
-3. Failed checkpoint mutation remains non-terminal.
-4. Existing missing-port/missing-checkpoint/no-work/accepted-only deferred tests keep passing.
-5. Full `launcher-module-downloads --lib` passes.
-6. `cargo check -p launcher-composition-root` passes.
-7. Scoped rustfmt and diff-check pass.
+1. README points to failed metadata/retry classification, not immediate terminal failure.
+2. README_IMPL explains why `TerminalFailed` remains blocked.
+3. First Rust slice is concrete and avoids host/frontend/provider/scheduler work.
+4. Scoped diff-check passes or CRLF-only warnings are recorded.
 
 ## Completion Evidence
 
-- RED: `cargo test -p launcher-module-downloads driver_run_with_execution_port_records_completed_checkpoint --lib --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` failed because the completed checkpoint run returned `Accepted` instead of `Completed`.
-- GREEN focused completed: the same focused test passed after adding the completion-first checkpoint decision.
-- GREEN focused failed-nonterminal: `cargo test -p launcher-module-downloads driver_run_with_failed_checkpoint_mutation_stays_non_terminal --lib --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
-- Regression: `cargo test -p launcher-module-downloads --lib --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 72/72 tests.
-- Compile gate: `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
-- Format gate: `rustfmt --edition 2021 --check crates\module-downloads\src\driver.rs` passed.
-- Scoped diff-check passed for AT-260 files with CRLF normalization warnings only.
-- Published as commit `55ab2da` and pushed to `origin/main`.
+- Updated `README.md` current status and near-term roadmap to name failed metadata persistence and retry/backoff classification as the next backend boundary.
+- Updated `docs/modules/downloads/README_IMPL.md` 6.1 and added 7.45 with failed segment metadata and retry classification rules.
+- Validation: scoped `git diff --check` over README, README_IMPL, and PWF task files passed with CRLF normalization warnings only.
+- No Rust, SQLite schema, transport, frontend, provider, scheduler, lease, or snapshot error payload files were edited.
+- Commit/push pending.

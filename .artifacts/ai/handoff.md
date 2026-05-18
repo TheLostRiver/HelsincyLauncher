@@ -603,6 +603,22 @@
 - Next likely task:
   - define retry/backoff and terminal-failed classification before any downloads driver path returns `TerminalFailed`.
 
+## Current Handoff - AT-2026-05-19-261
+
+- Status: completed; commit/push pending.
+- Scope:
+  - root README
+  - `docs/modules/downloads/README_IMPL.md`
+  - PWF records under `.artifacts/ai`
+- Boundary selected:
+  - failed segment metadata must be durable before retry/backoff or terminal failed decisions;
+  - preserve local diagnostic reason and retryable hint in checkpoint facts first;
+  - do not expose public `DL_*` execution errors or return `TerminalFailed` yet.
+- Validation passed:
+  - scoped `git diff --check` for README, README_IMPL, and PWF task files passed with CRLF normalization warnings only.
+- Next likely code task:
+  - add failed metadata fields to `DownloadSegmentCheckpointRecord`, record them from failed execution results, and update SQLite checkpoint round-trip tests.
+
 ## Dirty Worktree To Preserve
 
 - Unrelated unstaged/unknown work remains present and must not be committed with AT-249:

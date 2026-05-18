@@ -163,7 +163,7 @@ Recommended order:
 5. completed: implement the composition-root wiring proof with explicit static/local sources while keeping default desktop production deferred;
 6. completed: define and implement runtime terminal completion/failure projection after concrete execution can advance checkpoints deterministically;
 7. completed: teach the downloads driver to return `Completed` only after a completion-first checkpoint proof says the known segment set is complete;
-8. next: add retry/backoff, terminal failed driver decisions, and public `DL_*` execution error projection only after concrete failures are classified;
+8. next: make failed segment facts durable enough for retry/backoff and terminal-failed classification before exposing public `DL_*` execution errors;
 9. keep host transport and frontend changes last, exposing only aggregate job snapshots and stable command/query DTOs.
 
 Every slice must preserve these boundaries:
@@ -1904,9 +1904,37 @@ Implementation status:
 
 Next boundary:
 
-1. define retry/backoff and failed segment classification before any downloads driver path returns `TerminalFailed`;
+1. make failed segment facts durable enough for retry/backoff and failed-state classification before any downloads driver path returns `TerminalFailed`;
 2. decide which failed checkpoint facts are retryable, terminal, or user-attention states without relying on transient reason strings;
 3. introduce stable public `DL_*` execution errors only after the internal classification is durable enough to project.
+
+### 7.45 Failed Segment Metadata And Retry Classification Boundary
+
+The driver now completes jobs when the known checkpoint is entirely completed, but failed segment facts still do not carry enough durable metadata to decide retry, terminal failure, or public error projection. The next boundary must make failed checkpoint facts classifiable before any `TerminalFailed` path is enabled.
+
+Current Rust reality:
+
+1. `DownloadSegmentExecutionResult::Failed` carries a module-local `reason` string and `retryable` hint while the execution result is in memory.
+2. `DownloadSegmentHandledFailure` also carries `downloaded_bytes`, `reason`, and `retryable`, but those facts are flattened when `record_failed_segment_checkpoints(...)` writes a `DownloadSegmentCheckpointRecord`.
+3. `DownloadSegmentCheckpointRecord` persists `status = Failed`, byte facts, and optional staging/hash/provider tokens, but it does not persist failure reason, retryability, retry count, next retry time, or failure class.
+4. `SqliteDownloadCheckpointRepository` round-trips only the current checkpoint fields, so durable failure metadata would require an explicit adapter/schema boundary.
+5. `DownloadJobDriver::run(...)` currently keeps failed checkpoint mutation non-terminal, which is correct until retry/backoff classification is durable.
+
+Boundary rules:
+
+1. failed segment facts need a module-owned durable classification before the driver can decide retry versus terminal failure;
+2. local diagnostic `reason` strings may be preserved for diagnostics, but driver policy must not rely on substring matching;
+3. `retryable` remains a hint, not the retry engine itself; retry count, backoff delay, and scheduling policy must be explicit later fields or policy decisions;
+4. public `DL_*` execution errors must wait until internal failure classes are stable enough to project;
+5. the first persistence slice must not change host transport, frontend state, provider HTTP behavior, production wiring, leases, scheduler loops, or job snapshot error payloads.
+
+First Rust slice:
+
+1. add explicit failed-segment metadata to `DownloadSegmentCheckpointRecord`, starting with local diagnostic reason and retryable hint carried from `DownloadSegmentExecutionResult::Failed`;
+2. update `record_failed_segment_checkpoints(...)` to preserve that metadata when replacing or appending failed segment facts;
+3. update in-memory checkpoint tests first, then SQLite checkpoint round-trip tests and adapter mapping;
+4. keep `DownloadJobDriver::run(...)` returning non-terminal `Accepted` for failed checkpoint mutation until retry count/backoff and terminal-failure policy are separately defined;
+5. run focused downloads driver tests, adapter checkpoint round-trip tests, full affected module/adapter tests, `cargo check -p launcher-composition-root`, scoped rustfmt, and scoped diff-check.
 
 ---
 

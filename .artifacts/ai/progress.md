@@ -11621,6 +11621,21 @@
 - Published AT-260 as `55ab2da feat: complete downloads driver on all-completed checkpoint` and pushed it to `origin/main`.
 - Next likely task: define retry/backoff and terminal-failed classification before any downloads driver path returns `TerminalFailed`.
 
+## Agent Note: 2026-05-19 - Start AT-2026-05-19-261
+
+- AT-260 and its publish record are pushed; the next boundary is failed segment metadata, not immediate terminal failure.
+- Read focused context for retry/backoff and failure projection: download runtime failure classification, error retry semantics, current failed result/handled failure fields, and SQLite checkpoint persistence shape.
+- Selected a docs-first boundary: preserve local failed metadata durably before implementing retry/backoff, terminal-failed decisions, or public `DL_*` execution errors.
+- Preserved Rust code, SQLite schema, transport, frontend, provider HTTP, production wiring, scheduler loops, leases, and snapshot error payloads out of AT-261.
+
+## Agent Note: 2026-05-19 - Complete AT-2026-05-19-261
+
+- Updated root README so the next backend boundary is failed metadata persistence and retry/backoff classification.
+- Added README_IMPL 7.45 to define why `TerminalFailed` remains blocked and what the first persistence slice must carry.
+- Documented the first Rust slice as failed-segment metadata on `DownloadSegmentCheckpointRecord`, carried from `DownloadSegmentExecutionResult::Failed`, with SQLite round-trip updates required later.
+- Validation passed: scoped `git diff --check` for README, README_IMPL, and PWF task files returned only CRLF normalization warnings.
+- Next likely code task: add failed metadata fields to checkpoint records, preserve them in failed checkpoint mutation, and update SQLite round-trip tests.
+
 ### Auto Record: 2026-05-19 02:52:22
 - Tool: apply_patch
 - Phase: Phase 128 - Runtime Terminal Projection Boundary (in_progress)
@@ -11772,6 +11787,26 @@
 ### Auto Record: 2026-05-19 03:27:42
 - Tool: apply_patch
 - Phase: Phase 131 - Downloads Driver Completion-first Terminal Implementation (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 03:32:25
+- Tool: apply_patch
+- Phase: Phase 132 - Failed Segment Metadata Boundary (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\README.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 03:33:29
+- Tool: apply_patch
+- Phase: Phase 132 - Failed Segment Metadata Boundary (complete)
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)

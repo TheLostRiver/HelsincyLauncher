@@ -1314,3 +1314,10 @@
 - The minimal implementation adds a downloads-owned `checkpoint_is_terminal_completed(...)` decision: checkpoint segments must be non-empty and every known segment status must be `Completed`.
 - Failed segment checkpoint mutation stays `Accepted`, preserving retry/backoff and terminal-failure classification for a later boundary.
 - Validation confirmed existing missing-port, missing-checkpoint, no-pending-work, and accepted-only result branches remain covered by the full downloads module test suite.
+
+## Phase 132 Failed Segment Metadata Boundary Findings
+
+- Required context was read in focused chunks: README status, README_IMPL 7.44, download runtime failure classification notes, error retry semantics, current failed result/handled failure data shape, and SQLite checkpoint round-trip surface.
+- `DownloadSegmentExecutionResult::Failed` and `DownloadSegmentHandledFailure` carry `reason` and `retryable` while in memory, but `DownloadSegmentCheckpointRecord` does not persist those facts.
+- `SqliteDownloadCheckpointRepository` uses explicit segment checkpoint columns, so durable failed metadata needs an explicit adapter/schema update rather than hidden JSON.
+- `TerminalFailed` should remain unused from downloads until failed checkpoint facts can distinguish retryable, terminal, and needs-attention states without reason-substring matching.
