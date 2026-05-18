@@ -479,7 +479,7 @@
 
 ## Current Handoff - AT-2026-05-19-254
 
-- Status: completed; commit/push pending.
+- Status: completed; final commit `43a44e1`, pushed to `origin/main`.
 - Scope:
   - Add `DownloadSegmentStaticFetchPort` and static source record with focused TDD.
   - Re-export the fetcher/source from `crates/module-downloads/src/lib.rs`.
@@ -493,6 +493,25 @@
   - Scoped rustfmt check passed after formatting.
 - Preserved boundaries:
   - No real HTTP range requests, provider auth/CDN/retry behavior, public network/provider error projection, streaming worker pools, production wiring, host transport/frontend/schema work.
+
+## Current Handoff - AT-2026-05-19-255
+
+- Status: completed; commit/push pending.
+- Scope:
+  - Update `docs/modules/downloads/README_IMPL.md` with 7.42 composition-root segment executor wiring boundary.
+  - Update root `README.md` so the first entry point reflects downloads concrete segment execution progress and the module implementation doc.
+  - Update PWF records and correct AT-254 pushed status.
+- Boundary selected:
+  - composition-root may prove executor wiring through an explicit private static-source helper/test path.
+  - default desktop production remains no-execution-port/deferred until a real provider fetcher or explicit non-empty source config is designed.
+  - staging root should derive from `DesktopBootstrapConfig.app_data_dir/.downloads/staging`.
+- Preserved boundaries:
+  - No Rust code in AT-255.
+  - No real HTTP/provider behavior, retry/backoff, public `DL_*` execution projection, host transport, frontend, or SQLite schema changes.
+- Validation passed:
+  - Scoped `git diff --check` passed for README, README_IMPL, and PWF task files with CRLF warnings only.
+- Next likely code task:
+  - implement a focused composition-root private static executor wiring proof with TDD, explicit static source input, app-data staging root, and default desktop deferred behavior preserved.
 
 ## Dirty Worktree To Preserve
 

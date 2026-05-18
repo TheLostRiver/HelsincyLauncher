@@ -159,10 +159,11 @@ Recommended order:
 1. completed: define and implement a concrete filesystem staging writer behind `DownloadSegmentWritePort`;
 2. completed: define and implement a concrete verifier shell, starting with byte-length checks before hash algorithms;
 3. completed: define and implement the deterministic static fetcher boundary for local byte sources before real HTTP range behavior;
-4. next: define concrete executor composition-root wiring only after deciding how production supplies fetch/write/verify sub-ports;
-5. add runtime terminal completion/failure projection after concrete execution can advance checkpoints deterministically;
-6. add retry/backoff and public `DL_*` execution error projection only after concrete failures are classified;
-7. keep host transport and frontend changes last, exposing only aggregate job snapshots and stable command/query DTOs.
+4. completed: define concrete executor composition-root wiring without introducing real provider HTTP behavior;
+5. next: implement the composition-root wiring proof with explicit static/local sources while keeping default desktop production deferred;
+6. add runtime terminal completion/failure projection after concrete execution can advance checkpoints deterministically;
+7. add retry/backoff and public `DL_*` execution error projection only after concrete failures are classified;
+8. keep host transport and frontend changes last, exposing only aggregate job snapshots and stable command/query DTOs.
 
 Every slice must preserve these boundaries:
 
@@ -1772,9 +1773,43 @@ Implementation status:
 
 Next Rust slice:
 
-1. define the concrete executor wiring boundary at composition-root without introducing real provider HTTP behavior yet;
-2. decide how staging root, static/local sources, and existing writer/verifier ports are supplied to `DownloadSegmentExecutor`;
+1. implement the composition-root wiring proof described in 7.42;
+2. keep default desktop production downloads execution deferred until an explicit non-empty local/static source set or real provider fetcher is designed;
 3. keep provider auth, real HTTP range, retry/backoff, public network/provider error projection, host transport, frontend, and schema changes out of that wiring slice.
+
+### 7.42 Composition-root Segment Executor Wiring Boundary
+
+This boundary decides how `launcher-composition-root` may assemble the module-local `DownloadSegmentExecutor` for a downloads driver without pretending that provider HTTP behavior already exists.
+
+Current Rust reality:
+
+1. `DownloadJobDriver::with_pending_resume_work_source_and_execution_port(...)` can accept a driver-facing segment execution port.
+2. `build_job_driver_registry(...)` currently registers the downloads driver with a shared pending-work source but no execution port, so default desktop dispatch still returns `Deferred`.
+3. `DownloadSegmentExecutor` can compose `DownloadSegmentStaticFetchPort`, `DownloadSegmentFilesystemWritePort`, and `DownloadSegmentLengthVerifyPort`.
+4. No production provider fetcher, source catalog, auth policy, or persisted static-source config exists yet.
+
+Boundary rules:
+
+1. composition-root may own a private builder that assembles an execution port from explicit fetch/write/verify sub-ports and passes it only to the downloads driver registry;
+2. the filesystem staging root should be derived from `DesktopBootstrapConfig.app_data_dir.join(".downloads").join("staging")`, because resumable partial downloads are app-owned recovery artifacts rather than rebuildable UI cache;
+3. static fetch sources must be supplied explicitly to the private builder or focused tests; default `build_desktop_services(...)` must not wire an empty static fetcher that turns production queued downloads from `Deferred` into handled segment failures;
+4. the first composition-root code slice should prove that a driver built with the private executor wiring can drain prepared work, fetch deterministic bytes, write to the app-data staging root, verify length, and record the existing completed checkpoint mutation;
+5. the default desktop service graph may keep using the no-execution-port driver until a real provider fetcher or explicit local-source configuration boundary is documented;
+6. composition-root remains an assembly owner only: it must not parse manifests, classify provider failures, decide retry/backoff, expose segment details, or mutate frontend/transport DTOs.
+
+Non-goals:
+
+1. no real HTTP range requests, provider authentication, CDN policy, retries, backoff, streaming workers, final artifact moves, cleanup, public `DL_NETWORK_*` / `DL_PROVIDER_*` / `DL_WRITE_FAILED` / `DL_VERIFY_FAILED` projection, host transport, frontend, or SQLite schema changes;
+2. no automatic startup/background execution loop and no change to `StartupPipelineFacade::run_one_runtime_execution_turn(...)` behavior;
+3. no segment payloads in `kernel-jobs` extension fields or host IPC.
+
+Next Rust slice:
+
+1. add a focused RED composition-root test for a private static executor wiring helper;
+2. construct `DownloadSegmentExecutor` from an explicit static source map, `DownloadSegmentFilesystemWritePort`, and `DownloadSegmentLengthVerifyPort`;
+3. build a downloads driver with `with_pending_resume_work_source_and_execution_port(...)` only in the focused helper/test path;
+4. prove default `build_desktop_services(...)` still defers downloads execution when no execution port is explicitly wired;
+5. run focused composition-root tests, full downloads module tests if public exports are touched, `cargo check -p launcher-composition-root`, scoped rustfmt, and scoped diff-check.
 
 ---
 

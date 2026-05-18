@@ -1265,3 +1265,11 @@
 - Tests should cover direct fetcher behavior and one executor completion path with `RecordingWritePort` plus `DownloadSegmentLengthVerifyPort`, proving the static fetcher composes with existing sub-ports.
 - RED/GREEN confirmed the static fetcher returns configured from-start bytes and etag, returns partial remaining bytes after `start_offset`, reports missing locators and impossible offsets as handled failures, and composes through `DownloadSegmentExecutor`.
 - The implementation remains deterministic and in-memory; it does not introduce HTTP, provider auth, streaming workers, public network/provider error projection, composition-root production wiring, host transport, frontend, or schema work.
+
+## Phase 126 Downloads Composition-root Segment Executor Wiring Boundary Findings
+
+- Required context was read in focused chunks: root README, docs map, downloads ARCH/API/FLOW/README_IMPL 6.1/7.41, composition-root wiring design, download runtime fetch/write/verify and staging notes, repository/error/testing/comment docs, composition-root bootstrap code, and downloads driver/executor surfaces.
+- `DownloadJobDriver::with_pending_resume_work_source_and_execution_port(...)` exists, but default composition-root driver registration still omits the execution port so production one-shot dispatch defers.
+- `DownloadSegmentExecutor` can now compose static fetch, filesystem write, and length verify ports, but no real provider fetcher or explicit production local-source config exists.
+- Wiring an empty `DownloadSegmentStaticFetchPort` into default desktop production would change behavior from `Deferred` to handled segment failure for normal provider locators, so the next code slice should keep default `build_desktop_services(...)` deferred.
+- The safe first composition-root proof should use an explicit private static-source helper/test path, derive staging from `app_data_dir/.downloads/staging`, and avoid host transport, frontend, schema, retry/backoff, public `DL_*` execution projection, or real HTTP behavior.

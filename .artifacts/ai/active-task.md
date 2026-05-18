@@ -2,19 +2,18 @@
 
 ## Identity
 
-- task id: AT-2026-05-19-254
-- title: Add downloads static segment fetcher
+- task id: AT-2026-05-19-255
+- title: Define downloads composition-root segment executor wiring boundary
 - status: completed
 
 ## Goal
 
-Implement README_IMPL 7.41 as a deterministic static byte-source fetcher behind `DownloadSegmentFetchPort`.
+Document README_IMPL 7.42 and root README updates for the next composition-root segment executor wiring slice before any Rust wiring code.
 
 ## Scope
 
 - in scope:
-  - `crates/module-downloads/src/driver.rs`
-  - `crates/module-downloads/src/lib.rs`
+  - `README.md`
   - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
@@ -22,61 +21,59 @@ Implement README_IMPL 7.41 as a deterministic static byte-source fetcher behind 
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
+  - Rust code changes
+  - production execution-port wiring
   - real HTTP range requests
   - provider authentication, CDN policy, or retry/backoff
-  - public `DL_NETWORK_*` / `DL_PROVIDER_*` projection
+  - public `DL_NETWORK_*` / `DL_PROVIDER_*` / `DL_WRITE_FAILED` / `DL_VERIFY_FAILED` projection
   - streaming fetch, backpressure, or Tokio worker pools
-  - composition-root production execution-port wiring
   - host transport, frontend, or SQLite schema changes
   - unrelated dirty files
 
 ## Allowed Files
 
-1. crates/module-downloads/src/driver.rs
-2. crates/module-downloads/src/lib.rs
-3. docs/modules/downloads/README_IMPL.md
-4. .artifacts/ai/active-task.md
-5. .artifacts/ai/task-plan.md
-6. .artifacts/ai/progress.md
-7. .artifacts/ai/findings.md
-8. .artifacts/ai/handoff.md
+1. README.md
+2. docs/modules/downloads/README_IMPL.md
+3. .artifacts/ai/active-task.md
+4. .artifacts/ai/task-plan.md
+5. .artifacts/ai/progress.md
+6. .artifacts/ai/findings.md
+7. .artifacts/ai/handoff.md
 
 ## Required Context Read
 
 Read before writing:
 
-1. `docs/modules/downloads/README_IMPL.md` 7.41.
-2. `DownloadSegmentFetchPort`, `DownloadSegmentFetchOutcome`, and `DownloadSegmentFetchResult` code.
-3. `DownloadResumeWorkMode` / `DownloadSegmentExecutionRequest` offset semantics.
-4. Existing executor/fetch test helpers and crate re-export surface.
+1. `README.md` current status, module docs, and near-term roadmap sections.
+2. `docs/README.md` module implementation-doc routing.
+3. `docs/modules/downloads/README_ARCH.md`, `README_API.md`, `README_FLOW.md`, and `README_IMPL.md` 6.1 / 7.41.
+4. `docs/TauriCompositionRootWiringDesign.md` composition-root responsibility and one-shot execution helper sections.
+5. `docs/TauriDownloadRuntimeDesign.md`, repository ports, error, testing, and comment docs for staging/fetch/write/verify rules.
+6. `crates/composition-root/src/bootstrap.rs` current downloads driver wiring.
+7. `crates/module-downloads/src/driver.rs` executor and driver constructor surfaces.
 
 ## Hypothesis
 
-- falsifiable implementation hypothesis: `DownloadSegmentStaticFetchPort` can return configured bytes and etag for from-start requests, return only remaining bytes for partial requests, map missing locators and impossible partial offsets to handled fetch failures, and feed the existing executor completion path with the static fetcher plus existing writer/verifier ports.
+- falsifiable documentation hypothesis: the next safe composition-root slice should use an explicit private static-source wiring helper for deterministic tests, derive staging from `app_data_dir/.downloads/staging`, and keep default desktop production downloads dispatch deferred until a real provider fetcher or explicit non-empty local-source config exists.
 
 ## Cheap Check
 
-1. Add RED tests for from-start bytes+etag, partial remaining bytes, missing locator handled failure, and executor completion with the static fetcher.
-2. Implement the smallest static fetcher and source record.
-3. Re-export the fetcher/source from `launcher-module-downloads`.
-4. Update README_IMPL implementation status.
-5. Run focused fetcher tests, focused executor adapter tests, full downloads module tests, composition-root check, scoped rustfmt, and scoped diff-check.
+1. Update README_IMPL 6.1 and add 7.42 with the composition-root segment executor wiring boundary.
+2. Update root README so the top-level project status points to downloads concrete segment execution progress and README_IMPL.
+3. Update PWF status, including the corrected AT-254 commit/push state.
+4. Run scoped diff/readback checks and commit/push the docs-only boundary.
 
 ## Validation Gate
 
-1. RED tests fail before production code because static fetcher types are missing.
-2. GREEN focused fetcher tests pass.
-3. Existing executor adapter tests pass.
-4. Full downloads module tests and composition-root compile gate pass.
-5. README_IMPL records the implemented static fetcher status.
-6. Scoped rustfmt and diff-check pass before commit/push.
+1. README_IMPL records the 7.42 boundary and next Rust slice.
+2. Root README reflects current downloads backend progress and links the implementation doc.
+3. PWF records AT-254 as pushed and AT-255 as the active boundary task.
+4. Scoped docs/PWF diff-check passes before commit/push.
 
 ## Completion Evidence
 
-- RED: focused static fetcher tests failed before production code because `DownloadSegmentStaticFetchPort` and `DownloadSegmentStaticFetchSource` were missing.
-- GREEN: `cargo test -p launcher-module-downloads --lib download_segment_static_fetch_port --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 5/5 tests after implementation and formatting.
-- Regression: `cargo test -p launcher-module-downloads --lib download_segment_executor_adapter --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 4/4 focused adapter tests.
-- Regression: `cargo test -p launcher-module-downloads --lib --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 71/71 tests.
-- Compile gate: `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
-- Format gate: `cargo fmt --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --package launcher-module-downloads -- --check` passed after scoped formatting.
-- README_IMPL now records the static fetcher implementation status and the next composition-root wiring boundary.
+- README_IMPL 6.1 now marks the composition-root executor wiring boundary as defined and names the next code proof.
+- README_IMPL 7.42 defines the private explicit static-source wiring boundary, app-data staging root, default deferred production rule, non-goals, and next Rust slice.
+- Root README now records downloads concrete segment execution progress and links `docs/modules/downloads/README_IMPL.md`.
+- PWF records corrected AT-254 as committed/pushed at `43a44e1`.
+- Scoped `git diff --check` passed for the task files with CRLF warnings only.

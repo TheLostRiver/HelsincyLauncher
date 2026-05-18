@@ -11436,3 +11436,52 @@
 - Phase: Phase 125 - Downloads Static Segment Fetcher (complete)
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+## Agent Note: 2026-05-19 - Start AT-2026-05-19-255
+
+- Confirmed `main` and `origin/main` are aligned at `43a44e1 feat: add downloads static segment fetcher`; corrected the stale AT-254 commit/push-pending task text in the new PWF update.
+- Read the required docs in focused chunks before writing: root README, docs map, downloads module docs/README_IMPL, composition-root wiring design, download runtime/staging/error/testing/comment docs, composition-root bootstrap, and downloads driver/executor code.
+- Selected AT-255 as a docs-first boundary task: define composition-root segment executor wiring and update root README before any Rust wiring code.
+- Preserved unrelated dirty files and avoided `.artifacts/ai/legacy-root-planning`.
+
+### Auto Record: 2026-05-19 02:23:17
+- Tool: apply_patch
+- Phase: Phase 126 - Downloads Composition-root Segment Executor Wiring Boundary (in_progress)
+- Files:
+  - `README.md` (update)
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+## Agent Note: 2026-05-19 - Complete AT-2026-05-19-255
+
+- Updated README_IMPL 6.1 and added 7.42 to define the composition-root segment executor wiring boundary.
+- Updated root README current status, module-doc links, and near-term roadmap so the first entry point reflects downloads backend progress.
+- Validation: scoped `git diff --check` over README, README_IMPL, and PWF task files passed with CRLF warnings only.
+- Error logged: attempted `plan.py check`, but the current PWF CLI supports `doctor/status/init/switch/attest/capture/compact`; corrected by running `plan.py status` and `plan.py doctor`.
+- PWF status/doctor results: active plan `ai`, current phase complete, planning files ok, attestation not set, progress compaction recommended due 1239 auto records.
+- Error logged: `check-complete.ps1` first failed under `RemoteSigned` because the local script is unsigned; retrying with process-local `ExecutionPolicy Bypass` ran the script but it checks only legacy root `task_plan.md` and reported no active root planning session. The `.artifacts/ai` plan health was therefore verified through `plan.py status` and `plan.py doctor`.
+- Next likely task: implement the focused composition-root static executor wiring proof with TDD, keeping default desktop production downloads execution deferred.
+
+### Auto Record: 2026-05-19 02:24:19
+- Tool: apply_patch
+- Phase: Phase 126 - Downloads Composition-root Segment Executor Wiring Boundary (complete)
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-19 02:25:22
+- Tool: apply_patch
+- Phase: Phase 126 - Downloads Composition-root Segment Executor Wiring Boundary (complete)
+- Files:
+  - `.artifacts/ai/progress.md` (update)
+
+### Auto Record: 2026-05-19 02:26:18
+- Tool: apply_patch
+- Phase: Phase 126 - Downloads Composition-root Segment Executor Wiring Boundary (complete)
+- Files:
+  - `.artifacts/ai/progress.md` (update)
