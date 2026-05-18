@@ -758,3 +758,25 @@
   - Push was not reattempted because the previous direct `origin/main` push was blocked by the safety reviewer and explicit approval is required before retrying.
 - Boundaries:
   - no scheduler loop, automatic retry dispatch, SQLite schema, `TerminalFailed`, public `DL_*`, host/frontend/provider HTTP, production wiring, leases, or snapshot error payload change.
+## Current Handoff - AT-2026-05-19-267
+
+- Status: completed; local commit pending.
+- Scope:
+  - `crates/module-downloads/src/driver.rs`
+  - root README and downloads README_IMPL after green
+  - PWF records under `.artifacts/ai`
+- TDD target:
+  - failed checkpoint mutation with explicit `IsoDateTime now` persists `next_retry_after = now + 30s` when policy returns `ScheduleRetry`.
+- Completed:
+  - added internal explicit-time failed mutation helper;
+  - wired `DownloadSegmentRetryPolicy` into failed checkpoint mutation;
+  - updated README/README_IMPL next boundary to due retry-ready segment selection.
+- Validation:
+  - RED failed on missing helper before implementation.
+  - focused policy-wiring test -> 1 passed.
+  - `cargo test -p launcher-module-downloads --lib` -> 79 passed.
+  - `cargo check -p launcher-composition-root` -> passed.
+  - `rustfmt --check crates/module-downloads/src/driver.rs` -> passed.
+  - scoped `git diff --check` -> passed with CRLF normalization warnings only.
+- Boundaries:
+  - no scheduler loop, automatic retry dispatch, SQLite schema, `TerminalFailed`, public `DL_*`, host/frontend/provider HTTP, production wiring, leases, or snapshot error payload change.

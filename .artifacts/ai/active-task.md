@@ -2,20 +2,18 @@
 
 ## Identity
 
-- task id: AT-2026-05-19-266
-- title: Implement pure download segment retry policy
+- task id: AT-2026-05-19-267
+- title: Wire retry policy into failed checkpoint mutation
 - status: completed
 
 ## Goal
 
-Implement the first Rust slice from downloads README_IMPL 7.47: a pure module-local retry/backoff policy helper that classifies automatic retry scheduling, exhaustion, user attention, and no-automatic-retry decisions without wiring scheduler or terminal projection.
+Implement the next downloads retry slice after the pure policy helper: use `DownloadSegmentRetryPolicy` during failed checkpoint mutation to persist `next_retry_after` only for `ScheduleRetry` decisions while keeping failed mutation non-terminal.
 
 ## Scope
 
 - in scope:
   - `crates/module-downloads/src/driver.rs`
-  - `crates/module-downloads/src/lib.rs`
-  - `crates/kernel-foundation/src/time.rs` for the small shared `IsoDateTime` offset helper required by pure policy time arithmetic
   - `README.md`
   - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
@@ -33,68 +31,57 @@ Implement the first Rust slice from downloads README_IMPL 7.47: a pure module-lo
 ## Allowed Files
 
 1. crates/module-downloads/src/driver.rs
-2. crates/module-downloads/src/lib.rs
-3. crates/kernel-foundation/src/time.rs
-4. README.md
-5. docs/modules/downloads/README_IMPL.md
-6. .artifacts/ai/active-task.md
-7. .artifacts/ai/task-plan.md
-8. .artifacts/ai/progress.md
-9. .artifacts/ai/findings.md
-10. .artifacts/ai/handoff.md
+2. README.md
+3. docs/modules/downloads/README_IMPL.md
+4. .artifacts/ai/active-task.md
+5. .artifacts/ai/task-plan.md
+6. .artifacts/ai/progress.md
+7. .artifacts/ai/findings.md
+8. .artifacts/ai/handoff.md
 
 ## Required Context Read
 
 Read before writing:
 
-1. `README.md` current status and near-term roadmap after AT-265.
-2. `docs/modules/downloads/README_IMPL.md` 7.47 policy defaults and first Rust slice.
+1. `README.md` current status and near-term roadmap after AT-266.
+2. `docs/modules/downloads/README_IMPL.md` 7.47 implementation status and next implementation target.
 3. `docs/TauriErrorHandlingAndProjectionDesign.md` retryable semantics and stable public code rules.
 4. `docs/TauriDownloadRuntimeDesign.md` checkpoint save rules and failure classification principles.
 5. `docs/modules/downloads/README_API.md`, `README_ARCH.md`, and `README_FLOW.md` module boundary notes.
 
 ## Hypothesis
 
-- falsifiable implementation hypothesis: a pure retry policy helper can produce deterministic retry scheduling/exhaustion/user-attention decisions from persisted failed segment facts and explicit `IsoDateTime now` without touching scheduler, driver terminal projection, storage, host, or frontend code.
+- falsifiable implementation hypothesis: failed checkpoint mutation can persist a policy-computed `next_retry_after` for automatic retry decisions without starting retry work, changing storage schema, or returning `TerminalFailed`.
 
 ## Cheap Check
 
-1. Add RED tests for first-attempt retry scheduling, second-attempt retry scheduling, automatic retry exhaustion, user-attention classes, and no-automatic-retry classes.
-2. Implement the smallest `DownloadSegmentRetryPolicy` / decision type that passes those tests.
-3. Update README and README_IMPL implementation status after green.
-4. Run focused/full downloads tests, composition check, scoped rustfmt, and scoped diff-check.
-5. Commit locally; do not reattempt push unless the user explicitly approves after the prior safety block.
+1. Add RED test using an explicit `IsoDateTime now` to prove failed mutation persists `next_retry_after = now + 30s` for an automatic retry decision.
+2. Implement the smallest failed checkpoint mutation wiring, preferably through an internal helper that accepts explicit `now` for deterministic tests.
+3. Update affected existing failed-mutation tests so automatic retry cases expect a scheduled retry fact while exhausted/non-automatic cases remain unset.
+4. Update README and README_IMPL implementation status after green.
+5. Run focused/full downloads tests, composition check, scoped rustfmt, and scoped diff-check.
 
 ## Validation Gate
 
-1. RED tests fail for missing retry policy/decision types before implementation.
+1. RED test fails because failed checkpoint mutation still leaves `next_retry_after` unset.
 2. `cargo test -p launcher-module-downloads --lib` passes after implementation.
-3. `cargo test -p launcher-kernel-foundation --lib` passes for the shared time helper.
-4. `cargo check -p launcher-composition-root` passes.
-5. Public `DL_*`, `TerminalFailed`, host/frontend, provider, scheduler, lease, and snapshot error payload work remain explicitly out of scope.
-6. README and README_IMPL reflect the completed pure policy slice.
+3. `cargo check -p launcher-composition-root` passes.
+4. Public `DL_*`, `TerminalFailed`, host/frontend, provider, scheduler, lease, and snapshot error payload work remain explicitly out of scope.
+5. README and README_IMPL reflect completed policy wiring.
 
 ## Completion Evidence
 
 - RED evidence:
-  - `cargo test -p launcher-module-downloads download_segment_retry_policy --lib` failed before implementation because `DownloadSegmentRetryPolicy` and `DownloadSegmentRetryDecision` did not exist.
-- Implemented `DownloadSegmentRetryPolicy` and `DownloadSegmentRetryDecision` as a pure module-local policy helper.
-- Added focused policy tests proving:
-  - attempt `1` schedules `now + 30s`;
-  - attempt `2` schedules `now + 120s`;
-  - attempt `3` returns `RetryExhausted`;
-  - `DiskNoSpace` and `PolicyBlocked` return `UserAttentionRequired`;
-  - fatal, non-retryable, or incomplete failed facts return `NoAutomaticRetry`.
-- Added `IsoDateTime::add_seconds(...)` in `kernel-foundation` so policy time arithmetic reuses the shared time wrapper without adding a new module dependency.
-- README and downloads README_IMPL were updated to mark this pure policy slice complete and route the next boundary to wiring the policy into failed checkpoint mutation.
+  - `cargo test -p launcher-module-downloads download_job_driver_failed_result_checkpoint_mutation_schedules_next_retry_after --lib` failed before implementation because `record_failed_segment_checkpoints_at(...)` did not exist.
+- Implemented failed checkpoint mutation policy wiring:
+  - public `record_failed_segment_checkpoints(...)` now uses current `IsoDateTime::now()`;
+  - internal `record_failed_segment_checkpoints_at(...)` accepts explicit `now` for deterministic tests;
+  - `next_retry_after` is persisted only when `DownloadSegmentRetryPolicy` returns `ScheduleRetry`.
+- Updated existing failed-mutation tests so automatic retry cases expect a scheduled retry fact while failed mutation remains non-terminal.
+- README and downloads README_IMPL were updated to mark policy wiring complete and route the next boundary to selecting due retry-ready segment checkpoints.
 - Validation:
-  - `cargo test -p launcher-module-downloads download_segment_retry_policy --lib` -> 5 passed.
-  - `cargo test -p launcher-kernel-foundation --lib` -> 0 tests, exit 0.
-  - `cargo test -p launcher-module-downloads --lib` -> 78 passed.
+  - `cargo test -p launcher-module-downloads download_job_driver_failed_result_checkpoint_mutation_schedules_next_retry_after --lib` -> 1 passed.
+  - `cargo test -p launcher-module-downloads --lib` -> 79 passed.
   - `cargo check -p launcher-composition-root` -> passed.
-  - `rustfmt --check crates/kernel-foundation/src/time.rs crates/module-downloads/src/driver.rs crates/module-downloads/src/lib.rs` -> passed.
+  - `rustfmt --check crates/module-downloads/src/driver.rs` -> passed.
   - scoped `git diff --check` -> passed with CRLF normalization warnings only.
-- `Cargo.lock` was inspected and only contains a pre-existing unrelated `launcher-module-engines` hunk; it must remain uncommitted for this AT.
-- Unintended package-wide rustfmt noise in unrelated foundation files was removed; only `time.rs` remains in scope.
-- Commit `6910108` created locally.
-- Push was not reattempted because the previous direct `origin/main` push was blocked by the safety reviewer and explicit approval is required before retrying.

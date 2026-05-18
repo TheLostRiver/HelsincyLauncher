@@ -2023,7 +2023,7 @@ Current Rust reality:
 
 1. Failed segment checkpoints can persist `failure_class`, `failure_retryable`, `retry_attempt_count`, and `next_retry_after`.
 2. `DownloadSegmentRetryPolicy` now owns the pure policy calculation for automatic retry scheduling, exhausted attempts, user attention, and no-automatic-retry decisions.
-3. Driver failed mutation still leaves `next_retry_after = None` because the pure policy is not wired into checkpoint mutation yet.
+3. Driver failed mutation now writes `next_retry_after` when the pure policy returns `ScheduleRetry`.
 4. `DownloadJobDriver::run(...)` still returns non-terminal `Accepted` for failed mutation.
 
 Policy defaults for the first Rust slice:
@@ -2062,12 +2062,13 @@ Implementation status:
 2. Focused tests prove attempt `1` schedules `now + 30s`, attempt `2` schedules `now + 120s`, and attempt `3` returns `RetryExhausted`.
 3. Focused tests prove `DiskNoSpace` and `PolicyBlocked` return `UserAttentionRequired`.
 4. Focused tests prove fatal, non-retryable, or incomplete failed facts return `NoAutomaticRetry`.
-5. The policy helper is pure and receives explicit `IsoDateTime now`; no scheduler, driver terminal projection, public `DL_*`, host/frontend DTO, provider HTTP, lease, or snapshot payload changed.
+5. Failed checkpoint mutation uses the pure policy and persists `next_retry_after` only for `ScheduleRetry` decisions.
+6. The policy helper is pure and receives explicit `IsoDateTime now`; no scheduler, driver terminal projection, public `DL_*`, host/frontend DTO, provider HTTP, lease, or snapshot payload changed.
 
 Next implementation target:
 
-1. add RED tests for wiring `DownloadSegmentRetryPolicy` into `record_failed_segment_checkpoints(...)`;
-2. persist `next_retry_after` only when the pure policy returns `ScheduleRetry`;
+1. add RED tests for selecting failed segment checkpoints whose `next_retry_after` is due;
+2. derive retry-ready segment work without starting a scheduler loop or background worker;
 3. keep exhausted/user-attention/no-automatic-retry decisions non-terminal until job-level aggregation and public projection are separately defined.
 
 ---

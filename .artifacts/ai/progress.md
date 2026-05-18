@@ -12058,6 +12058,25 @@
 - Commit `6910108 feat: add download segment retry policy` was created locally.
 - Push was not reattempted because the previous direct `origin/main` push was blocked by the safety reviewer and explicit approval is required before retrying.
 
+## 2026-05-19 - AT-267 start
+
+- Registered AT-2026-05-19-267 as the retry policy checkpoint wiring implementation task.
+- Required context read: README current roadmap and README_IMPL 7.47 next implementation target.
+- Planned TDD path: RED test for failed checkpoint mutation with explicit `IsoDateTime now` persisting `next_retry_after = now + 30s`; then implement minimal policy wiring while keeping failed mutation non-terminal.
+- Boundary reminder: no scheduler, no automatic retry dispatch, no SQLite schema change, no `TerminalFailed`, no public `DL_*`, no host/frontend/provider/lease/snapshot payload work.
+
+## 2026-05-19 - AT-267 completion
+
+- RED: `cargo test -p launcher-module-downloads download_job_driver_failed_result_checkpoint_mutation_schedules_next_retry_after --lib` failed before implementation because the explicit-time failed mutation helper did not exist.
+- Implemented policy wiring in failed checkpoint mutation and updated existing failed-run assertions to expect scheduled retry facts where the policy allows automatic retry.
+- Updated README and README_IMPL to mark policy wiring complete and set the next boundary to selecting due retry-ready segment checkpoints.
+- Validation passed:
+  - `cargo test -p launcher-module-downloads download_job_driver_failed_result_checkpoint_mutation_schedules_next_retry_after --lib` -> 1 passed.
+  - `cargo test -p launcher-module-downloads --lib` -> 79 passed.
+  - `cargo check -p launcher-composition-root` -> passed.
+  - `rustfmt --check crates/module-downloads/src/driver.rs` -> passed.
+  - scoped `git diff --check` -> passed with CRLF normalization warnings only.
+
 ### Auto Record: 2026-05-19 04:17:57
 - Tool: apply_patch
 - Phase: Phase 135 - Retry Failure Facts Persistence (in_progress)
@@ -12265,5 +12284,61 @@
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 05:09:39
+- Tool: apply_patch
+- Phase: Phase 138 - Retry Policy Checkpoint Wiring (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 05:10:01
+- Tool: apply_patch
+- Phase: Phase 138 - Retry Policy Checkpoint Wiring (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-19 05:10:58
+- Tool: apply_patch
+- Phase: Phase 138 - Retry Policy Checkpoint Wiring (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-19 05:13:18
+- Tool: apply_patch
+- Phase: Phase 138 - Retry Policy Checkpoint Wiring (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-19 05:13:34
+- Tool: apply_patch
+- Phase: Phase 138 - Retry Policy Checkpoint Wiring (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-19 05:13:50
+- Tool: apply_patch
+- Phase: Phase 138 - Retry Policy Checkpoint Wiring (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-19 05:14:31
+- Tool: apply_patch
+- Phase: Phase 138 - Retry Policy Checkpoint Wiring (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\README.md` (update)
+
+### Auto Record: 2026-05-19 05:16:23
+- Tool: apply_patch
+- Phase: Phase 138 - Retry Policy Checkpoint Wiring (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)

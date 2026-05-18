@@ -1369,3 +1369,15 @@
 - Time arithmetic for downloads policy is better centralized on `IsoDateTime::add_seconds(...)` than by adding a direct `chrono` dependency to `module-downloads`; this avoids mixing AT-266 with the pre-existing dirty `Cargo.lock` hunk.
 - `DownloadSegmentRetryPolicy` remains pure because it receives `IsoDateTime now` explicitly and does not read `IsoDateTime::now()` internally.
 - Exhausted automatic retry returns `RetryExhausted` rather than `UserAttentionRequired`; later job-level aggregation can decide how that maps to user attention or terminal failure.
+
+## 2026-05-19 - AT-267 context read
+
+- README says the next downloads backend slice is wiring `DownloadSegmentRetryPolicy` into failed checkpoint mutation to calculate `next_retry_after`.
+- README_IMPL 7.47 says to persist `next_retry_after` only when the pure policy returns `ScheduleRetry`.
+- Exhausted, user-attention, and no-automatic-retry decisions must remain non-terminal until job-level aggregation and public projection are separately defined.
+
+## 2026-05-19 - AT-267 implementation findings
+
+- An internal `record_failed_segment_checkpoints_at(...)` helper keeps tests deterministic while the public mutation path can use `IsoDateTime::now()`.
+- Existing public driver run paths now persist a `next_retry_after` for automatic retry failures, but they still return `JobRunDisposition::Accepted`.
+- Exhausted and non-automatic decisions still leave `next_retry_after = None`; later work should select only due retry-ready segment facts.

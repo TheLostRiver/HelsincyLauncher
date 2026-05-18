@@ -1062,6 +1062,15 @@ impl DownloadJobDriver {
         job_id: &JobId,
         results: &[DownloadSegmentExecutionResult],
     ) -> AppResult<Option<DownloadCheckpointRecord>> {
+        self.record_failed_segment_checkpoints_at(job_id, results, &IsoDateTime::now())
+    }
+
+    fn record_failed_segment_checkpoints_at(
+        &self,
+        job_id: &JobId,
+        results: &[DownloadSegmentExecutionResult],
+        now: &IsoDateTime,
+    ) -> AppResult<Option<DownloadCheckpointRecord>> {
         let Some(mut checkpoint) = self.checkpoint_repo.load(job_id)? else {
             return Ok(None);
         };
@@ -1103,7 +1112,7 @@ impl DownloadJobDriver {
                 .and_then(|segment| segment.retry_attempt_count)
                 .unwrap_or(0)
                 .saturating_add(1);
-            let failed_segment = DownloadSegmentCheckpointRecord {
+            let mut failed_segment = DownloadSegmentCheckpointRecord {
                 job_id: checkpoint.job_id.clone(),
                 segment_id: request.segment_id.clone(),
                 file_id: request.file_id.clone(),
@@ -1120,6 +1129,11 @@ impl DownloadJobDriver {
                 retry_attempt_count: Some(retry_attempt_count),
                 next_retry_after: None,
             };
+            if let DownloadSegmentRetryDecision::ScheduleRetry { next_retry_after } =
+                DownloadSegmentRetryPolicy::default().decide_failed_segment(&failed_segment, now)
+            {
+                failed_segment.next_retry_after = Some(next_retry_after);
+            }
 
             if let Some(index) = existing_index {
                 checkpoint.segments[index] = failed_segment;
@@ -2328,11 +2342,17 @@ mod tests {
             scheduler.pending_work().is_empty(),
             "non-terminal failed mutation should still consume the pending work it executed"
         );
+        let loaded_checkpoint = repo
+            .load(&job_id)
+            .expect("loading saved checkpoint should succeed")
+            .expect("saved checkpoint should exist");
+        let scheduled_next_retry_after = loaded_checkpoint.segments[0].next_retry_after.clone();
+        assert!(
+            scheduled_next_retry_after.is_some(),
+            "fake failed run should persist policy-computed retry eligibility without terminal projection"
+        );
         assert_eq!(
-            repo.load(&job_id)
-                .expect("loading saved checkpoint should succeed")
-                .expect("saved checkpoint should exist")
-                .segments,
+            loaded_checkpoint.segments,
             vec![DownloadSegmentCheckpointRecord {
                 job_id,
                 segment_id: "segment-run-failed".into(),
@@ -2348,7 +2368,7 @@ mod tests {
                 failure_retryable: Some(true),
                 failure_class: Some(DownloadSegmentFailureClass::NetworkTransient),
                 retry_attempt_count: Some(1),
-                next_retry_after: None,
+                next_retry_after: scheduled_next_retry_after,
             }],
             "fake failed run should persist checkpoint mutation without terminal projection"
         );
@@ -3005,6 +3025,7 @@ mod tests {
         let accepted_request = make_segment_execution_request(&job_id, "segment-accepted");
         let completed_request = make_segment_execution_request(&job_id, "segment-completed");
         let mut failed_request = make_segment_execution_request(&job_id, "segment-failed");
+        let now = IsoDateTime::now();
         failed_request.start_offset = 768;
         failed_request.resume_mode = DownloadResumeWorkMode::Partial;
         failed_request.checkpoint_ref = Some("segment-failed".into());
@@ -3017,7 +3038,7 @@ mod tests {
         };
 
         let saved_checkpoint = driver
-            .record_failed_segment_checkpoints(
+            .record_failed_segment_checkpoints_at(
                 &job_id,
                 &[
                     DownloadSegmentExecutionResult::Accepted {
@@ -3032,6 +3053,7 @@ mod tests {
                     },
                     failed_result,
                 ],
+                &now,
             )
             .expect("failed results should be saved through the checkpoint repository")
             .expect("existing checkpoint should be reloaded before failed mutation");
@@ -3051,7 +3073,7 @@ mod tests {
             failure_retryable: Some(true),
             failure_class: Some(DownloadSegmentFailureClass::NetworkTransient),
             retry_attempt_count: Some(1),
-            next_retry_after: None,
+            next_retry_after: Some(now.add_seconds(30)),
         };
         let expected_segments = vec![unrelated_segment, expected_failed_segment];
 
@@ -3167,6 +3189,51 @@ mod tests {
     }
 
     #[test]
+    fn download_job_driver_failed_result_checkpoint_mutation_schedules_next_retry_after() {
+        let repo = Arc::new(InMemoryCheckpointRepository::default());
+        let driver = DownloadJobDriver::new(repo.clone());
+        let job_id = JobId::generate();
+        let now = IsoDateTime::now();
+        repo.save(&DownloadCheckpointRecord::empty(job_id.clone()))
+            .expect("saving an empty checkpoint before retry scheduling should succeed");
+
+        let failed_result = DownloadSegmentExecutionResult::Failed {
+            request: make_segment_execution_request(&job_id, "segment-retry-scheduled"),
+            downloaded_bytes: 32,
+            reason: "network timeout while reading segment".into(),
+            retryable: true,
+            failure_class: DownloadSegmentFailureClass::NetworkTransient,
+        };
+
+        let saved_checkpoint = driver
+            .record_failed_segment_checkpoints_at(&job_id, &[failed_result], &now)
+            .expect("failed mutation should save the scheduled retry fact")
+            .expect("existing checkpoint should be reloaded before retry scheduling");
+
+        assert_eq!(
+            saved_checkpoint.segments,
+            vec![DownloadSegmentCheckpointRecord {
+                job_id: job_id.clone(),
+                segment_id: "segment-retry-scheduled".into(),
+                file_id: "file-1".into(),
+                offset: 0,
+                length: 1024,
+                downloaded_bytes: 32,
+                status: DownloadSegmentCheckpointStatus::Failed,
+                partial_path: None,
+                etag: None,
+                hash_state_ref: None,
+                failure_reason: Some("network timeout while reading segment".into()),
+                failure_retryable: Some(true),
+                failure_class: Some(DownloadSegmentFailureClass::NetworkTransient),
+                retry_attempt_count: Some(1),
+                next_retry_after: Some(now.add_seconds(30)),
+            }],
+            "automatic retry decisions should persist the policy-computed next retry time"
+        );
+    }
+
+    #[test]
     fn download_job_driver_fake_local_resume_execution_records_completed_checkpoint() {
         let repo = Arc::new(InMemoryCheckpointRepository::default());
         let scheduler = InMemoryDownloadResumeWorkScheduler::new();
@@ -3262,6 +3329,11 @@ mod tests {
             scheduler.pending_work().is_empty(),
             "fake local orchestration should drain accepted pending work for the job"
         );
+        let scheduled_next_retry_after = saved_checkpoint.segments[0].next_retry_after.clone();
+        assert!(
+            scheduled_next_retry_after.is_some(),
+            "fake local orchestration should persist policy-computed retry eligibility"
+        );
 
         let expected_failed_segment = DownloadSegmentCheckpointRecord {
             job_id: job_id.clone(),
@@ -3278,7 +3350,7 @@ mod tests {
             failure_retryable: Some(true),
             failure_class: Some(DownloadSegmentFailureClass::NetworkTransient),
             retry_attempt_count: Some(1),
-            next_retry_after: None,
+            next_retry_after: scheduled_next_retry_after,
         };
 
         assert_eq!(
