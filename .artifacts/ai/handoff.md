@@ -4,12 +4,16 @@
 
 - task id: AT-2026-05-19-269
 - title: Implement due retry-ready segment selector
+- status: completed; committed and pushed as `8f02d79`
+
+## Active Atomic Task
+
+- task id: AT-2026-05-19-270
+- title: Define retry-ready manifest binding boundary
 - status: completed; commit/push pending
 
 ## Current Slice
 
-- `crates/module-downloads/src/driver.rs`
-- `crates/module-downloads/src/lib.rs`
 - `README.md`
 - `docs/modules/downloads/README_IMPL.md`
 - `.artifacts/ai/active-task.md`
@@ -20,9 +24,9 @@
 
 ## Next Resume Point
 
-1. Commit and push AT-269 if not already published.
-2. Open the next downloads boundary: bind selected retry-ready checkpoint facts back to current manifest segments.
-3. Preserve stale/mismatch rejection semantics and still avoid scheduler/runtime dispatch until retry work derivation is separately documented.
+1. Commit and push AT-270 if not already published.
+2. The next Rust task should implement only the pure retry-ready manifest binding helper and tests.
+3. Continue to keep retry work derivation, scheduler/runtime dispatch, host/frontend projection, SQLite schema, and terminal failure out of scope until separately documented.
 
 ## Latest Published Atomic Task
 

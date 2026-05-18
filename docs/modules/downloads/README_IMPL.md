@@ -2116,6 +2116,51 @@ Next boundary after selector:
 
 ---
 
+### 7.49 Retry-Ready Manifest Binding Boundary
+
+Due retry-ready selection now returns failed checkpoint facts, but those facts still do not carry manifest-owned execution data. The next safe Rust slice must bind selected checkpoint facts to the current manifest before any retry work item or scheduler request exists.
+
+Current Rust reality:
+
+1. `select_retry_ready_failed_segments(checkpoint, now)` selects due failed checkpoint facts and preserves checkpoint order.
+2. `DownloadManifestSegment` owns `source_locator`, `write_target`, and `expected_hash`.
+3. `DownloadSegmentCheckpointRecord` owns persisted retry facts, local failure facts, and checkpoint boundary facts, but not executable source/write/verifier facts.
+4. Existing resume decision logic already rejects manifest/checkpoint boundary mismatches by matching `segment_id` and comparing `file_id`, `offset`, and `length`.
+5. Existing `build_resume_work_plan(...)` copies executable facts from manifest only after decision derivation has proven the checkpoint safe enough for resume.
+
+Binding rules:
+
+1. Bind selected retry-ready checkpoint facts to manifest segments by `segment_id`.
+2. Missing manifest segment for a selected checkpoint fact is stale retry state and must be rejected, not silently queued from scratch.
+3. `file_id`, `offset`, and `length` must match the current manifest segment exactly.
+4. A mismatch must reuse the existing stale-checkpoint semantics: stop before scheduler/runtime work and report the same domain mismatch boundary until a richer needs-attention projection exists.
+5. Binding must preserve selected checkpoint order so later retry work derivation remains deterministic.
+6. Binding may copy manifest-owned `source_locator`, `write_target`, and `expected_hash`, but it must not choose retry `resume_mode`, enqueue work, or mutate checkpoint state.
+7. Failed `downloaded_bytes` is diagnostic progress in this boundary; it must not be treated as safe partial resume proof without a later explicit failed-range-resume design.
+
+First Rust slice:
+
+1. add a pure helper such as `bind_retry_ready_segments_to_manifest(manifest, selected_retry_segments)`;
+2. return bound retry-ready candidates or a module-local rejection value/error, not executable `DownloadSegmentExecutionRequest` values;
+3. prove matching bind, missing manifest segment, `file_id` mismatch, `offset` mismatch, `length` mismatch, manifest-field copy, and order preservation with focused tests;
+4. keep scheduler queues, runtime dispatch, checkpoint mutation, SQLite schema, host/frontend DTO, provider HTTP, and terminal projection unchanged.
+
+Non-goals:
+
+1. no retry work-plan derivation or `DownloadResumeWorkPlan` reuse decision yet;
+2. no automatic retry scheduler loop, background worker, durable lease, or runtime run trigger;
+3. no job-level retry exhaustion aggregation, `TerminalFailed`, public `DL_*` expansion, or snapshot error payload change;
+4. no provider HTTP behavior, production composition-root wiring, host transport, frontend state, or SQLite migration;
+5. no failed partial-range resume semantics beyond carrying diagnostic checkpoint facts.
+
+Next boundary after binding:
+
+1. derive retry work items from bound retry-ready candidates;
+2. choose the first retry execution mode explicitly, likely from manifest start until failed partial-range retry safety is separately defined;
+3. only then connect retry work items to existing scheduler/driver handoff rules.
+
+---
+
 ## 8. Error Semantics
 
 Downloads-domain errors use `DL_*` codes when they become stable public classifications.

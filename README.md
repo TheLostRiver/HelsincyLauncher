@@ -21,7 +21,7 @@ MyEpicLauncher 是一个面向桌面端的启动器重写仓库。
 2. 目标架构是 Tauri 2 + Rust stable + typed IPC + backend-owned business truth。
 3. 后端骨架的落地顺序、测试门槛、安全边界、环境前提、发布/更新边界都已经写成独立文档并完成第一批落盘。
 4. 当前仓库已经具备 `Cargo.toml`、`Cargo.lock`、`src-tauri/` 和 `crates/`，且核心 smoke baseline 已验证通过。
-5. downloads 后端正在按模块实现文档推进 concrete segment execution：filesystem writer、length verifier、static fetcher、composition-root 静态执行器接线证明、`kernel-jobs` terminal disposition projection、downloads driver completion-first 终态判定、失败/重试事实持久化、纯 retry/backoff policy、failed checkpoint `next_retry_after` 写入，以及 due retry-ready checkpoint selection 已完成；下一步应把这些 retry-ready checkpoint facts 与当前 manifest 重新绑定，再派生可执行 retry work。
+5. downloads 后端正在按模块实现文档推进 concrete segment execution：filesystem writer、length verifier、static fetcher、composition-root 静态执行器接线证明、`kernel-jobs` terminal disposition projection、downloads driver completion-first 终态判定、失败/重试事实持久化、纯 retry/backoff policy、failed checkpoint `next_retry_after` 写入，以及 due retry-ready checkpoint selection 已完成；当前正在文档化 retry-ready checkpoint facts 与当前 manifest 的重新绑定边界，下一步才派生可执行 retry work。
 
 ---
 
@@ -156,7 +156,7 @@ MyEpicLauncher/
 短期最明确的下一步不是继续扩写大蓝图，而是：
 
 1. 在已经通过 smoke gate 的 backend skeleton 基线上继续推进更窄的集成切片。
-2. downloads 后端已落 durable retry facts、纯 `DownloadSegmentRetryPolicy` 计算器、failed checkpoint mutation 的 `next_retry_after` 写入，以及 due retry-ready checkpoint selector；下一步应把 selector 返回的 checkpoint facts 与当前 manifest 重新绑定成可执行 retry work。
+2. downloads 后端已落 durable retry facts、纯 `DownloadSegmentRetryPolicy` 计算器、failed checkpoint mutation 的 `next_retry_after` 写入，以及 due retry-ready checkpoint selector；下一步先按实现文档落 retry-ready manifest binding helper，再把绑定结果派生成可执行 retry work。
 3. 把 contributor-facing 的协作入口和 current-repo 导航补平。
 4. 保持 README、`.artifacts/ai` 协议和深度设计文档之间的一致性。
 

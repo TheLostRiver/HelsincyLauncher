@@ -12434,6 +12434,25 @@
   - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`: passed.
   - `rustfmt --check crates\module-downloads\src\driver.rs crates\module-downloads\src\lib.rs`: passed.
   - scoped `git diff --check`: passed with CRLF normalization warnings only.
+- Commit and push: AT-269 committed and pushed as `8f02d79`.
+
+## 2026-05-19 - AT-270 Start
+
+- Phase: Phase 141 - Retry-Ready Manifest Binding Boundary (in_progress)
+- Context read in focused chunks:
+  - latest commit/status after AT-269 publish;
+  - existing resume manifest/checkpoint decision code and mismatch tests;
+  - README_IMPL 7.1-7.4, 7.48, and error semantics notes;
+  - `docs/TauriDownloadRuntimeDesign.md` manifest/checkpoint/retry ownership references.
+- Planned slice: document retry-ready checkpoint-to-manifest binding before Rust code derives bound retry candidates.
+
+## 2026-05-19 - AT-270 Validation
+
+- Added README_IMPL 7.49 for retry-ready checkpoint-to-manifest binding.
+- Updated README status/roadmap to point the next Rust slice at the pure binding helper.
+- Validation:
+  - README_IMPL 7.49 readback confirmed binding rules, Rust slice, non-goals, and next boundary are present.
+  - scoped `git diff --check`: passed with CRLF normalization warnings only.
 
 ### Auto Record: 2026-05-19 07:32:04
 - Tool: apply_patch
@@ -12490,3 +12509,28 @@
 - Phase: Phase 140 - Due Retry-Ready Selector Implementation (complete)
 - Files:
   - `.codex/skills/focused-module-implementer/SKILL.md` (delete)
+
+### Auto Record: 2026-05-19 07:45:06
+- Tool: apply_patch
+- Phase: Phase 141 - Retry-Ready Manifest Binding Boundary (in_progress)
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-19 07:45:38
+- Tool: apply_patch
+- Phase: Phase 141 - Retry-Ready Manifest Binding Boundary (in_progress)
+- Files:
+  - `README.md` (update)
+
+### Auto Record: 2026-05-19 07:46:39
+- Tool: apply_patch
+- Phase: Phase 141 - Retry-Ready Manifest Binding Boundary (complete)
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)

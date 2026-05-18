@@ -1400,3 +1400,10 @@
 - `select_retry_ready_failed_segments(checkpoint, now)` can remain pure by reading only checkpoint facts and an explicit `IsoDateTime now`.
 - Returning cloned checkpoint facts keeps the helper out of scheduler/execution territory while giving the next manifest-binding slice enough stable segment identity and persisted retry facts.
 - Selector tests cover due, delayed, missing-time, non-failed, and order-preservation branches; no manifest, runtime, SQLite, host, frontend, or public error projection surface changed.
+
+## 2026-05-19 - AT-270 context read
+
+- AT-269 was committed and pushed as `8f02d79`; remote `origin/main` is aligned at that commit.
+- Existing resume code already binds manifest/checkpoint facts through `build_resume_segment_decisions(...)`, matching by `segment_id` and rejecting `file_id`, `offset`, or `length` mismatch with `RejectMismatch`.
+- Existing work-plan code copies `source_locator`, `write_target`, and `expected_hash` from manifest segments only after safe decision derivation; retry binding should follow the same ownership rule.
+- Retry-ready checkpoint facts selected by `select_retry_ready_failed_segments(...)` still lack manifest-owned executable facts, so the next code helper should bind or reject first and should not enqueue scheduler/runtime work.
