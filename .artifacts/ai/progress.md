@@ -11691,6 +11691,12 @@
 - Validation passed: scoped `git diff --check` over README, README_IMPL, and PWF task files returned only CRLF normalization warnings.
 - Next likely code task: implement `DownloadSegmentFailureClass`, `retry_attempt_count`, and `next_retry_after` persistence with TDD while keeping failed mutation non-terminal.
 
+## Agent Note: 2026-05-19 - Publish AT-2026-05-19-263
+
+- Committed AT-263 as `4642653` with message `docs: define download retry failure boundary`.
+- Pushed `4642653` to `origin/main`.
+- Next likely code task: implement the documented retry/failure-class persistence fields with focused TDD.
+
 ### Auto Record: 2026-05-19 02:52:22
 - Tool: apply_patch
 - Phase: Phase 128 - Runtime Terminal Projection Boundary (in_progress)
@@ -11967,6 +11973,15 @@
   - `D:/DEV/MyEpicLauncher/README.md` (update)
 
 ### Auto Record: 2026-05-19 04:06:06
+- Tool: apply_patch
+- Phase: Phase 134 - Retry Backoff Failure-Class Boundary (complete)
+- Files:
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/active-task.md` (update)
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/task-plan.md` (update)
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/progress.md` (update)
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-19 04:08:08
 - Tool: apply_patch
 - Phase: Phase 134 - Retry Backoff Failure-Class Boundary (complete)
 - Files:

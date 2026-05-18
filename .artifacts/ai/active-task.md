@@ -73,4 +73,4 @@ Read before writing:
 - 7.46 defines internal failure class candidates, retry field semantics, first Rust slice, and non-goals.
 - Preserved Rust code, SQLite schema, retry execution, public `DL_*`, `TerminalFailed`, host transport, frontend, provider HTTP, production wiring, leases, scheduler loops, and snapshot error payloads out of scope.
 - Validation: scoped `git diff --check` over README, README_IMPL, and PWF task files passed with CRLF normalization warnings only.
-- Commit/push pending.
+- Commit `4642653` pushed to `origin/main`.
