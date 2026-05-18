@@ -138,6 +138,10 @@ Do not skip directly from checkpoint to `JobRuntime::resume`. The module owns bu
 | `DownloadStagingObjectStore` | minimal facade port exists | `()` placeholder keeps composition wiring stable |
 | `DownloadManifestProviderPort` | minimal facade port exists | currently returns a minimal `DownloadManifestPlan` handle |
 | `JobRuntime` | shared kernel-jobs runtime trait exists | resume uses job-level `EnqueueJobRequest<()>`; segment details still stay out of `kernel-jobs` |
+| `DownloadSegmentExecutionPort` | driver-facing port exists | module-local segment requests can return accepted, completed, or failed execution results |
+| `DownloadSegmentFetchPort` | executor sub-port exists | currently fake/in-memory only; concrete provider fetch remains a later boundary |
+| `DownloadSegmentWritePort` | executor sub-port exists | guarded wrapper validates staging-relative targets before delegation; concrete filesystem writer remains a later boundary |
+| `DownloadSegmentVerifyPort` | executor sub-port exists | currently fake verifier only; concrete length/hash verification remains a later boundary |
 
 When adding a port:
 
@@ -145,6 +149,27 @@ When adding a port:
 2. keep `()` placeholder behavior only when it preserves existing composition wiring;
 3. add module facade tests before production code;
 4. defer concrete adapter behavior unless the task explicitly scopes it.
+
+### 6.1 Completion Roadmap
+
+The downloads module should continue in small backend-owned slices. The remaining work should not jump straight to production wiring or frontend projection.
+
+Recommended order:
+
+1. define and implement a concrete filesystem staging writer behind `DownloadSegmentWritePort`;
+2. define and implement a concrete verifier shell, starting with byte-length checks before hash algorithms;
+3. define the fetcher boundary for provider/local byte sources before introducing real HTTP range behavior;
+4. wire the concrete executor into composition-root only after fetch/write/verify sub-ports are independently covered;
+5. add runtime terminal completion/failure projection after concrete execution can advance checkpoints deterministically;
+6. add retry/backoff and public `DL_*` execution error projection only after concrete failures are classified;
+7. keep host transport and frontend changes last, exposing only aggregate job snapshots and stable command/query DTOs.
+
+Every slice must preserve these boundaries:
+
+1. segment details stay inside `module-downloads`;
+2. composition-root owns concrete wiring but not business rules;
+3. staging files stay on the filesystem while checkpoints stay in SQLite;
+4. frontend receives aggregate task projection, not chunk or segment internals.
 
 ---
 

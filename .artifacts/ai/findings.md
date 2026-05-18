@@ -1199,3 +1199,10 @@
 - No README_IMPL update is needed because the stable boundary was already documented in 7.38; task details belong in `.artifacts/ai`.
 - Mutation RED confirmed the test catches guard regressions: temporarily bypassing `DownloadSegmentStagingTarget::parse(...)` made the test fail because the wrapped writer was called; restoring the guard made it pass.
 - Final validation passed for focused executor adapter tests, full downloads module tests, composition-root check, scoped rustfmt, and scoped diff-check.
+
+## Phase 118 Downloads Completion Roadmap Findings
+
+- Required context was read in focused chunks: README/docs map, downloads module ARCH/API/FLOW/README_IMPL, download runtime design, storage/data placement rules, error projection rules, testing gates, contribution rules, and composition-root boundaries.
+- Current downloads backend has strong resume/checkpoint/policy/query scaffolding plus a module-local segment executor shell, but production concrete execution is still intentionally absent.
+- The safe remaining order is: filesystem staging writer, verifier shell, fetcher boundary, composition wiring, runtime terminal projection, retry/backoff/public execution errors, then host/frontend projection.
+- The roadmap belongs in README_IMPL because it is durable implementation ordering, while individual AT evidence stays in `.artifacts/ai`.

@@ -2,18 +2,18 @@
 
 ## Identity
 
-- task id: AT-2026-05-18-246
-- title: Cover guarded writer through executor failure mapping
+- task id: AT-2026-05-19-247
+- title: Define downloads completion roadmap
 - status: completed
 
 ## Goal
 
-Add focused TDD coverage proving `DownloadSegmentExecutor` maps a guarded writer unsafe-target failure into the existing `DownloadSegmentExecutionResult::Failed` path without delegating to the wrapped writer.
+Record the remaining downloads backend implementation order in README_IMPL so subsequent coding slices can proceed without mixing filesystem writer, verifier, fetcher, composition wiring, runtime projection, transport, or frontend work.
 
 ## Scope
 
 - in scope:
-  - `crates/module-downloads/src/driver.rs`
+  - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
   - `.artifacts/ai/progress.md`
@@ -32,7 +32,7 @@ Add focused TDD coverage proving `DownloadSegmentExecutor` maps a guarded writer
 
 ## Allowed Files
 
-1. crates/module-downloads/src/driver.rs
+1. docs/modules/downloads/README_IMPL.md
 2. .artifacts/ai/active-task.md
 3. .artifacts/ai/task-plan.md
 4. .artifacts/ai/progress.md
@@ -44,25 +44,24 @@ Add focused TDD coverage proving `DownloadSegmentExecutor` maps a guarded writer
 Read before writing:
 
 1. README/docs routing and documentation-budget rules.
-2. `docs/modules/downloads/README_ARCH.md`, `README_API.md`, `README_FLOW.md`, and `README_IMPL.md` around 7.36-7.38.
+2. `docs/modules/downloads/README_ARCH.md`, `README_API.md`, `README_FLOW.md`, and `README_IMPL.md` current state.
 3. `docs/TauriDownloadRuntimeDesign.md` SegmentWriter/staging/fetch/verify sections.
 4. `docs/TauriStorageAndDatabaseDesign.md` staging file ownership notes.
-5. Current `DownloadSegmentExecutor`, `DownloadSegmentGuardedWritePort`, and writer sub-port tests.
+5. `docs/TauriErrorHandlingAndProjectionDesign.md`, `docs/TauriTestingStrategyAndQualityGateDesign.md`, and composition-root wiring rules.
 
 ## Hypothesis
 
-- falsifiable implementation hypothesis: when `DownloadSegmentExecutor` uses `DownloadSegmentGuardedWritePort`, an unsafe request target returns `DownloadSegmentExecutionResult::Failed`, the wrapped writer is not called, and the verifier is not reached.
+- falsifiable documentation hypothesis: README_IMPL can define a clear completion roadmap that lets the next coding slice start with filesystem staging writer work without prematurely adding production wiring, retry/backoff, public error projection, host transport, or frontend changes.
 
 ## Cheap Check
 
-1. Add a RED test using `DownloadSegmentExecutor` with `DownloadSegmentGuardedWritePort`.
-2. Confirm the test fails before any production adjustment because the combined behavior is not covered or not wired as expected.
-3. Add only the minimal production adjustment if the RED test exposes a behavior gap.
-4. Run focused executor/guarded writer tests, full downloads module tests, composition-root check, scoped rustfmt, and scoped diff-check.
+1. Update the README_IMPL port-status table for current segment execution sub-ports.
+2. Add a concise completion roadmap with stable implementation order and boundaries.
+3. Update PWF records.
+4. Run scoped docs/PWF diff-check and PWF completeness check.
 
 ## Validation Gate
 
-1. RED test is observed before production adjustment.
-2. GREEN focused executor/guarded writer tests pass.
-3. Full `launcher-module-downloads` lib tests and composition-root compile gate pass.
-4. Scoped rustfmt and diff-check pass before commit/push.
+1. README_IMPL identifies current segment sub-port status and next implementation order.
+2. PWF records identify AT-247 and leave all phases complete.
+3. Scoped diff-check passes before commit/push.

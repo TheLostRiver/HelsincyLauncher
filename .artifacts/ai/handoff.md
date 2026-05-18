@@ -354,7 +354,7 @@
 
 ## Latest Handoff - AT-2026-05-18-246
 
-- Status: completed; commit/push pending at the time this handoff entry was written.
+- Status: completed; final commit `e6ce619`, pushed to `origin/main`.
 - Scope:
   - Added focused executor coverage for guarded writer unsafe-target failures.
   - Kept the slice in `crates/module-downloads/src/driver.rs` plus PWF records.
@@ -366,6 +366,21 @@
   - scoped rustfmt and diff-check passed.
 - Preserved boundaries:
   - No new docs boundary, no real disk IO, no composition-root wiring, no retry/backoff, no public `DL_*` projection, no host transport/frontend/schema work.
+
+## Latest Handoff - AT-2026-05-19-247
+
+- Status: completed; commit/push pending at the time this handoff entry was written.
+- Scope:
+  - Updated README_IMPL current port status and remaining downloads completion roadmap.
+  - Kept the slice documentation/PWF-only.
+- Validation passed:
+  - README_IMPL roadmap re-read;
+  - scoped docs/PWF diff-check passed with CRLF warnings only.
+- Next likely coding task:
+  - define and implement the first concrete filesystem staging writer boundary behind `DownloadSegmentWritePort`.
+- Preserved boundaries:
+  - No Rust code in AT-247.
+  - No production wiring, retry/backoff, public execution errors, transport, frontend, or schema work.
 
 ## Dirty Worktree To Preserve
 

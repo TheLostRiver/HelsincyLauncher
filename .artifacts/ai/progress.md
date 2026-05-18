@@ -10818,3 +10818,36 @@
   - `.artifacts/ai/findings.md` (update)
   - `.artifacts/ai/progress.md` (update)
   - `.artifacts/ai/handoff.md` (update)
+
+## 2026-05-19 - AT-2026-05-19-247 Downloads Completion Roadmap
+
+- Opened Phase 118 / AT-2026-05-19-247 after the user authorized autonomous downloads-module completion.
+- Read focused module, collaboration, runtime, storage, error, testing, and composition-root docs before planning further code.
+- Updated README_IMPL port status and added a concise remaining implementation roadmap: filesystem staging writer, verifier shell, fetcher boundary, composition wiring, runtime terminal projection, retry/backoff/public execution errors, then host/frontend projection.
+- Validation passed: README_IMPL roadmap was re-read, scoped docs/PWF `git diff --check` returned no whitespace errors, and only expected CRLF normalization warnings were emitted.
+
+### Auto Record: 2026-05-19 00:52:22
+- Tool: apply_patch
+- Phase: Phase 118 - Downloads Completion Roadmap (in_progress)
+- Files:
+  - `docs/modules/downloads/README_IMPL.md` (update)
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-19 00:53:04
+- Tool: apply_patch
+- Phase: Phase 118 - Downloads Completion Roadmap (in_progress)
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+
+### Auto Record: 2026-05-19 00:53:50
+- Tool: apply_patch
+- Phase: Phase 118 - Downloads Completion Roadmap (complete)
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
