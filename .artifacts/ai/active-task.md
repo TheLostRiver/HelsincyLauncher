@@ -2,19 +2,18 @@
 
 ## Identity
 
-- task id: AT-2026-05-18-245
-- title: Add downloads guarded writer port
+- task id: AT-2026-05-18-246
+- title: Cover guarded writer through executor failure mapping
 - status: completed
 
 ## Goal
 
-Implement README_IMPL 7.38 as a minimal module-owned guarded writer wrapper behind `DownloadSegmentWritePort`, rejecting unsafe `write_target` values before delegation and preserving safe delegation behavior.
+Add focused TDD coverage proving `DownloadSegmentExecutor` maps a guarded writer unsafe-target failure into the existing `DownloadSegmentExecutionResult::Failed` path without delegating to the wrapped writer.
 
 ## Scope
 
 - in scope:
   - `crates/module-downloads/src/driver.rs`
-  - `crates/module-downloads/src/lib.rs`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
   - `.artifacts/ai/progress.md`
@@ -34,38 +33,36 @@ Implement README_IMPL 7.38 as a minimal module-owned guarded writer wrapper behi
 ## Allowed Files
 
 1. crates/module-downloads/src/driver.rs
-2. crates/module-downloads/src/lib.rs
-3. .artifacts/ai/active-task.md
-4. .artifacts/ai/task-plan.md
-5. .artifacts/ai/progress.md
-6. .artifacts/ai/findings.md
-7. .artifacts/ai/handoff.md
+2. .artifacts/ai/active-task.md
+3. .artifacts/ai/task-plan.md
+4. .artifacts/ai/progress.md
+5. .artifacts/ai/findings.md
+6. .artifacts/ai/handoff.md
 
 ## Required Context Read
 
 Read before writing:
 
 1. README/docs routing and documentation-budget rules.
-2. `docs/modules/downloads/README_ARCH.md`, `README_API.md`, `README_FLOW.md`, and `README_IMPL.md` around 7.35-7.38.
+2. `docs/modules/downloads/README_ARCH.md`, `README_API.md`, `README_FLOW.md`, and `README_IMPL.md` around 7.36-7.38.
 3. `docs/TauriDownloadRuntimeDesign.md` SegmentWriter/staging/fetch/verify sections.
 4. `docs/TauriStorageAndDatabaseDesign.md` staging file ownership notes.
-5. Current `DownloadSegmentHandledFailure`, `DownloadSegmentStagingTarget`, and writer sub-port contracts.
+5. Current `DownloadSegmentExecutor`, `DownloadSegmentGuardedWritePort`, and writer sub-port tests.
 
 ## Hypothesis
 
-- falsifiable implementation hypothesis: a small guarded writer wrapper can parse `request.write_target` before calling the inner writer, return `DownloadSegmentWriteOutcome::Failed` for unsafe targets, delegate safe targets exactly once, and propagate inner `AppError` values unchanged.
+- falsifiable implementation hypothesis: when `DownloadSegmentExecutor` uses `DownloadSegmentGuardedWritePort`, an unsafe request target returns `DownloadSegmentExecutionResult::Failed`, the wrapped writer is not called, and the verifier is not reached.
 
 ## Cheap Check
 
-1. Add RED tests for unsafe target rejection without delegation, safe target delegation, and inner `AppError` propagation.
-2. Implement the smallest guarded writer wrapper around `DownloadSegmentWritePort`.
-3. Re-export the wrapper if it is a module-owned extension point.
-4. Run focused guarded writer tests, focused adapter tests, full downloads module tests, composition-root check, scoped rustfmt, and scoped diff-check.
+1. Add a RED test using `DownloadSegmentExecutor` with `DownloadSegmentGuardedWritePort`.
+2. Confirm the test fails before any production adjustment because the combined behavior is not covered or not wired as expected.
+3. Add only the minimal production adjustment if the RED test exposes a behavior gap.
+4. Run focused executor/guarded writer tests, full downloads module tests, composition-root check, scoped rustfmt, and scoped diff-check.
 
 ## Validation Gate
 
-1. RED tests fail before production code because the guarded writer type is missing.
-2. GREEN focused guarded writer tests pass after implementation.
-3. Existing executor adapter tests still pass.
-4. Full `launcher-module-downloads` lib tests and composition-root compile gate pass.
-5. Scoped rustfmt and diff-check pass before commit/push.
+1. RED test is observed before production adjustment.
+2. GREEN focused executor/guarded writer tests pass.
+3. Full `launcher-module-downloads` lib tests and composition-root compile gate pass.
+4. Scoped rustfmt and diff-check pass before commit/push.

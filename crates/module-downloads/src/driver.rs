@@ -1929,6 +1929,43 @@ mod tests {
     }
 
     #[test]
+    fn download_segment_executor_adapter_maps_guarded_target_rejection_to_failed_result() {
+        let job_id = JobId::generate();
+        let mut request = make_segment_execution_request(&job_id, "segment-guarded-rejection");
+        request.write_target = "../escape.part".into();
+        let writer = Arc::new(RecordingWritePort::default());
+        let verifier = Arc::new(RecordingVerifyPort::default());
+        let executor = DownloadSegmentExecutor::new(
+            Arc::new(RecordingFetchPort::default()),
+            Arc::new(DownloadSegmentGuardedWritePort::new(writer.clone())),
+            verifier.clone(),
+        );
+
+        let result = executor
+            .accept_segment_execution(&request)
+            .expect("guarded writer rejection should stay in the local result channel");
+
+        assert!(
+            writer.writes().is_empty(),
+            "guarded writer rejection must skip the wrapped writer"
+        );
+        assert!(
+            verifier.verifications().is_empty(),
+            "guarded writer rejection must stop before verifier work"
+        );
+        assert_eq!(
+            result,
+            DownloadSegmentExecutionResult::Failed {
+                request,
+                downloaded_bytes: 0,
+                reason: "unsafe staging write target: ../escape.part".into(),
+                retryable: false,
+            },
+            "unsafe target rejection should become the existing failed execution result shape"
+        );
+    }
+
+    #[test]
     fn download_segment_executor_adapter_propagates_infrastructure_errors() {
         let job_id = JobId::generate();
         let request = make_segment_execution_request(&job_id, "segment-infrastructure-error");

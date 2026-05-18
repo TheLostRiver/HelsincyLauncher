@@ -10696,6 +10696,20 @@
   - scoped `cargo fmt --package launcher-module-downloads -- --check`;
   - scoped `git diff --check` for AT-245 files, with CRLF normalization warnings only.
 
+## 2026-05-18 - AT-2026-05-18-246 Guarded Writer Executor Coverage
+
+- Opened Phase 117 / AT-2026-05-18-246 after AT-245 was committed and pushed as `97c4870`.
+- Read focused required docs and code context; scope is a TDD-backed executor coverage slice only.
+- Planned RED assertion: unsafe `write_target` through `DownloadSegmentExecutor + DownloadSegmentGuardedWritePort` becomes `DownloadSegmentExecutionResult::Failed`, while the wrapped writer and verifier are not called.
+- Added the focused executor coverage test in `crates/module-downloads/src/driver.rs`.
+- Baseline run passed because AT-245 already implemented the behavior; to verify the test, temporarily bypassed the guard and reran the same focused test. It failed on the wrapped writer being called, then passed again after restoring the guard.
+- Validation passed:
+  - `cargo test -p launcher-module-downloads --lib download_segment_executor_adapter --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`: 4 passed;
+  - `cargo test -p launcher-module-downloads --lib --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`: 61 passed;
+  - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`;
+  - `cargo fmt --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --package launcher-module-downloads -- --check`;
+  - scoped `git diff --check` for AT-246 files, with CRLF normalization warnings only.
+
 ### Auto Record: 2026-05-18 13:04:59
 - Tool: apply_patch
 - Phase: Phase 115 - Downloads Guarded Writer Boundary (in_progress)
@@ -10754,6 +10768,50 @@
 ### Auto Record: 2026-05-18 13:20:54
 - Tool: apply_patch
 - Phase: Phase 116 - Downloads Guarded Writer Port (complete)
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-18 23:35:39
+- Tool: apply_patch
+- Phase: Phase 117 - Downloads Guarded Writer Executor Coverage (in_progress)
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-18 23:36:01
+- Tool: apply_patch
+- Phase: Phase 117 - Downloads Guarded Writer Executor Coverage (in_progress)
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+
+### Auto Record: 2026-05-18 23:36:52
+- Tool: apply_patch
+- Phase: Phase 117 - Downloads Guarded Writer Executor Coverage (in_progress)
+- Files:
+  - `crates/module-downloads/src/driver.rs` (update)
+
+### Auto Record: 2026-05-18 23:37:20
+- Tool: apply_patch
+- Phase: Phase 117 - Downloads Guarded Writer Executor Coverage (in_progress)
+- Files:
+  - `crates/module-downloads/src/driver.rs` (update)
+
+### Auto Record: 2026-05-18 23:37:45
+- Tool: apply_patch
+- Phase: Phase 117 - Downloads Guarded Writer Executor Coverage (in_progress)
+- Files:
+  - `crates/module-downloads/src/driver.rs` (update)
+
+### Auto Record: 2026-05-18 23:39:50
+- Tool: apply_patch
+- Phase: Phase 117 - Downloads Guarded Writer Executor Coverage (complete)
 - Files:
   - `.artifacts/ai/active-task.md` (update)
   - `.artifacts/ai/task-plan.md` (update)

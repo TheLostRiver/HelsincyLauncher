@@ -339,7 +339,7 @@
 
 ## Latest Handoff - AT-2026-05-18-245
 
-- Status: completed; commit/push pending at the time this handoff entry was written.
+- Status: completed; final commit `97c4870`, pushed to `origin/main`.
 - Scope:
   - Added focused TDD for a guarded downloads writer wrapper.
   - Implemented only the module-owned wrapper behind `DownloadSegmentWritePort`.
@@ -351,6 +351,21 @@
   - scoped rustfmt and diff-check passed.
 - Preserved boundaries:
   - No real disk IO, no composition-root wiring, no retry/backoff, no public `DL_*` projection, no host transport/frontend/schema work.
+
+## Latest Handoff - AT-2026-05-18-246
+
+- Status: completed; commit/push pending at the time this handoff entry was written.
+- Scope:
+  - Added focused executor coverage for guarded writer unsafe-target failures.
+  - Kept the slice in `crates/module-downloads/src/driver.rs` plus PWF records.
+- Validation passed:
+  - mutation RED failed when the guard was temporarily bypassed;
+  - focused executor adapter tests passed;
+  - full downloads module tests passed;
+  - composition-root check passed;
+  - scoped rustfmt and diff-check passed.
+- Preserved boundaries:
+  - No new docs boundary, no real disk IO, no composition-root wiring, no retry/backoff, no public `DL_*` projection, no host transport/frontend/schema work.
 
 ## Dirty Worktree To Preserve
 

@@ -1190,3 +1190,12 @@
 - Unsafe target handling can reuse `DownloadSegmentStagingTarget::parse(...)` directly, returning `Ok(DownloadSegmentWriteOutcome::Failed(failure))` so the existing executor mapping turns it into a failed segment result later.
 - Safe target delegation should not rewrite the request yet because no concrete writer accepts a typed `DownloadSegmentStagingTarget` value in this boundary.
 - RED/GREEN confirmed the wrapper rejects unsafe targets without calling the inner writer, delegates safe targets exactly once, and propagates inner writer `AppError` values unchanged.
+
+## Phase 117 Downloads Guarded Writer Executor Coverage Findings
+
+- Required context was read in focused chunks: README/docs routing, downloads module docs, README_IMPL 7.36-7.38, download runtime writer/staging notes, documentation budget/testing rules, and current executor/guarded-writer tests.
+- The next useful slice is coverage, not a new abstraction: `DownloadSegmentExecutor` already maps `DownloadSegmentWriteOutcome::Failed` to `DownloadSegmentExecutionResult::Failed`, but no test proves the new guarded writer can feed that path.
+- The test should assert three observable facts: failed segment result, wrapped writer not called, verifier not reached.
+- No README_IMPL update is needed because the stable boundary was already documented in 7.38; task details belong in `.artifacts/ai`.
+- Mutation RED confirmed the test catches guard regressions: temporarily bypassing `DownloadSegmentStagingTarget::parse(...)` made the test fail because the wrapped writer was called; restoring the guard made it pass.
+- Final validation passed for focused executor adapter tests, full downloads module tests, composition-root check, scoped rustfmt, and scoped diff-check.
