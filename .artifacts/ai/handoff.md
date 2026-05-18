@@ -785,7 +785,7 @@
   - no scheduler loop, automatic retry dispatch, SQLite schema, `TerminalFailed`, public `DL_*`, host/frontend/provider HTTP, production wiring, leases, or snapshot error payload change.
 ## Current Handoff - AT-2026-05-19-268
 
-- Status: completed; local commit pending.
+- Status: completed; local commit `39a2077`, push not reattempted after safety block.
 - Scope:
   - root README
   - `docs/modules/downloads/README_IMPL.md`
@@ -800,3 +800,6 @@
   - README_IMPL 7.48 defines due selection, delayed/missing/non-failed exclusions, order preservation, first Rust slice, and manifest-binding non-goals.
 - Validation:
   - scoped `git diff --check` over README, README_IMPL, and PWF files passed with CRLF normalization warnings only.
+- Publish:
+  - Local commit `39a2077 docs: define retry-ready selection boundary` exists.
+  - Push was not reattempted because the previous direct `origin/main` push was blocked by the safety reviewer and explicit approval is required before retrying.

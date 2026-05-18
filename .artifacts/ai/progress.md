@@ -12032,6 +12032,7 @@
 - Added README_IMPL 7.47 with deterministic automatic retry gates, attempt budget, delay schedule, user-attention classes, terminal eligibility constraints, first Rust slice, and non-goals.
 - Validation passed: scoped `git diff --check` over README, README_IMPL, and PWF task files returned exit 0 with CRLF normalization warnings only.
 - Push remains blocked from the prior safety review; no additional push attempt was made without explicit approval.
+- Commit `39a2077 docs: define retry-ready selection boundary` was created locally.
 - Commit `d25ef93 docs: define download backoff policy boundary` was created locally.
 
 ## 2026-05-19 - AT-266 start
@@ -12385,6 +12386,15 @@
   - `D:\DEV\MyEpicLauncher\README.md` (update)
 
 ### Auto Record: 2026-05-19 05:22:07
+- Tool: apply_patch
+- Phase: Phase 139 - Due Retry Selection Boundary (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 05:23:28
 - Tool: apply_patch
 - Phase: Phase 139 - Due Retry Selection Boundary (complete)
 - Files:

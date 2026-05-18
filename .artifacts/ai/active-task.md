@@ -78,3 +78,5 @@ Read before writing:
   - explicit separation from manifest reconstruction and executable retry work.
 - Preserved Rust code, SQLite schema, scheduler loops, automatic dispatch, `TerminalFailed`, public `DL_*`, host/frontend/provider/lease/snapshot payload changes out of scope.
 - Validation: scoped `git diff --check` over README, README_IMPL, and PWF files passed with CRLF normalization warnings only.
+- Commit `39a2077` created locally.
+- Push was not reattempted because the previous direct `origin/main` push was blocked by the safety reviewer and explicit approval is required before retrying.
