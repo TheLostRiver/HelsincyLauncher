@@ -539,7 +539,7 @@
 
 ## Current Handoff - AT-2026-05-19-257
 
-- Status: completed; commit/push pending.
+- Status: completed; final commit `95c3e76`, pushed to `origin/main`.
 - Scope:
   - Update `README.md` current status/roadmap.
   - Update `docs/modules/downloads/README_IMPL.md` port/roadmap status, 7.42 implementation status, and new 7.43 runtime terminal projection boundary.

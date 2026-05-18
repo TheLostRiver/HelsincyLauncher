@@ -76,4 +76,4 @@ Read before writing:
 - Updated `docs/modules/downloads/README_IMPL.md` 6.1, 7.42 implementation status, and new 7.43 terminal projection boundary.
 - Validation: `git diff --check -- README.md docs/modules/downloads/README_IMPL.md .artifacts/ai/active-task.md .artifacts/ai/task-plan.md .artifacts/ai/findings.md .artifacts/ai/progress.md .artifacts/ai/handoff.md` passed with CRLF normalization warnings only.
 - No Rust, transport, frontend, provider, retry/backoff, public `DL_*`, or schema files were edited.
-- Commit/push pending.
+- Published as commit `95c3e76` and pushed to `origin/main`.

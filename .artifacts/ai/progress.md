@@ -11568,6 +11568,7 @@
 - Updated README_IMPL 6.1/7.42 and added 7.43 to define explicit terminal dispositions before any `kernel-jobs` code change.
 - Validation passed: scoped `git diff --check` over README, README_IMPL, and PWF task files returned only CRLF normalization warnings.
 - No Rust behavior, host transport, frontend, provider HTTP, retry/backoff, public `DL_*` execution error, or schema change was made.
+- Published AT-257 as `95c3e76 docs: define runtime terminal projection boundary` and pushed it to `origin/main`.
 - Next likely code task: add focused `launcher-kernel-jobs` RED tests for explicit terminal run dispositions projecting stored snapshots to Completed/Failed.
 
 ### Auto Record: 2026-05-19 02:52:22
@@ -11588,6 +11589,15 @@
   - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
 
 ### Auto Record: 2026-05-19 02:54:07
+- Tool: apply_patch
+- Phase: Phase 128 - Runtime Terminal Projection Boundary (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 02:56:15
 - Tool: apply_patch
 - Phase: Phase 128 - Runtime Terminal Projection Boundary (complete)
 - Files:
