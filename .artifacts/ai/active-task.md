@@ -85,3 +85,5 @@ Read before writing:
   - `cargo check -p launcher-composition-root` -> passed.
   - `rustfmt --check crates/module-downloads/src/driver.rs` -> passed.
   - scoped `git diff --check` -> passed with CRLF normalization warnings only.
+- Commit `d99470d` created locally.
+- Push was not reattempted because the previous direct `origin/main` push was blocked by the safety reviewer and explicit approval is required before retrying.

@@ -760,7 +760,7 @@
   - no scheduler loop, automatic retry dispatch, SQLite schema, `TerminalFailed`, public `DL_*`, host/frontend/provider HTTP, production wiring, leases, or snapshot error payload change.
 ## Current Handoff - AT-2026-05-19-267
 
-- Status: completed; local commit pending.
+- Status: completed; local commit `d99470d`, push not reattempted after safety block.
 - Scope:
   - `crates/module-downloads/src/driver.rs`
   - root README and downloads README_IMPL after green
@@ -778,5 +778,8 @@
   - `cargo check -p launcher-composition-root` -> passed.
   - `rustfmt --check crates/module-downloads/src/driver.rs` -> passed.
   - scoped `git diff --check` -> passed with CRLF normalization warnings only.
+- Publish:
+  - Local commit `d99470d feat: schedule retry eligibility in failed checkpoints` exists.
+  - Push was not reattempted because the previous direct `origin/main` push was blocked by the safety reviewer and explicit approval is required before retrying.
 - Boundaries:
   - no scheduler loop, automatic retry dispatch, SQLite schema, `TerminalFailed`, public `DL_*`, host/frontend/provider HTTP, production wiring, leases, or snapshot error payload change.
