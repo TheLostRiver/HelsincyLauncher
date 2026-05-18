@@ -9,16 +9,16 @@ pub mod driver;
 pub mod facade;
 
 pub use driver::{
-    DownloadCheckpointRecord, DownloadCheckpointRepository, DownloadDriverExecutionTurn,
-    DownloadJobDriver, DownloadSegmentCheckpointRecord, DownloadSegmentCheckpointStatus,
-    DownloadSegmentExecutionPort, DownloadSegmentExecutionRequest, DownloadSegmentExecutionResult,
-    DownloadSegmentExecutor, DownloadSegmentFailureClass, DownloadSegmentFetchOutcome,
-    DownloadSegmentFetchPort, DownloadSegmentFetchResult, DownloadSegmentFilesystemWritePort,
-    DownloadSegmentGuardedWritePort, DownloadSegmentHandledFailure,
-    DownloadSegmentLengthVerifyPort, DownloadSegmentRetryDecision, DownloadSegmentRetryPolicy,
-    DownloadSegmentStagingTarget, DownloadSegmentStaticFetchPort, DownloadSegmentStaticFetchSource,
-    DownloadSegmentVerifyOutcome, DownloadSegmentVerifyPort, DownloadSegmentWriteOutcome,
-    DownloadSegmentWritePort, DownloadSegmentWriteResult,
+    select_retry_ready_failed_segments, DownloadCheckpointRecord, DownloadCheckpointRepository,
+    DownloadDriverExecutionTurn, DownloadJobDriver, DownloadSegmentCheckpointRecord,
+    DownloadSegmentCheckpointStatus, DownloadSegmentExecutionPort, DownloadSegmentExecutionRequest,
+    DownloadSegmentExecutionResult, DownloadSegmentExecutor, DownloadSegmentFailureClass,
+    DownloadSegmentFetchOutcome, DownloadSegmentFetchPort, DownloadSegmentFetchResult,
+    DownloadSegmentFilesystemWritePort, DownloadSegmentGuardedWritePort,
+    DownloadSegmentHandledFailure, DownloadSegmentLengthVerifyPort, DownloadSegmentRetryDecision,
+    DownloadSegmentRetryPolicy, DownloadSegmentStagingTarget, DownloadSegmentStaticFetchPort,
+    DownloadSegmentStaticFetchSource, DownloadSegmentVerifyOutcome, DownloadSegmentVerifyPort,
+    DownloadSegmentWriteOutcome, DownloadSegmentWritePort, DownloadSegmentWriteResult,
 };
 pub use facade::{
     build_resume_segment_decisions, build_resume_work_plan, DownloadFacade, DownloadJobRecord,

@@ -1,5 +1,29 @@
 # Handoff
 
+## Active Atomic Task
+
+- task id: AT-2026-05-19-269
+- title: Implement due retry-ready segment selector
+- status: completed; commit/push pending
+
+## Current Slice
+
+- `crates/module-downloads/src/driver.rs`
+- `crates/module-downloads/src/lib.rs`
+- `README.md`
+- `docs/modules/downloads/README_IMPL.md`
+- `.artifacts/ai/active-task.md`
+- `.artifacts/ai/task-plan.md`
+- `.artifacts/ai/progress.md`
+- `.artifacts/ai/findings.md`
+- `.artifacts/ai/handoff.md`
+
+## Next Resume Point
+
+1. Commit and push AT-269 if not already published.
+2. Open the next downloads boundary: bind selected retry-ready checkpoint facts back to current manifest segments.
+3. Preserve stale/mismatch rejection semantics and still avoid scheduler/runtime dispatch until retry work derivation is separately documented.
+
 ## Latest Published Atomic Task
 
 - task id: AT-2026-05-17-221

@@ -2082,7 +2082,7 @@ Current Rust reality:
 1. Failed checkpoint mutation persists `next_retry_after` only for automatic retry decisions.
 2. Failed checkpoint records carry `segment_id`, `file_id`, offset/length, partial path, provider/hash facts, and retry facts.
 3. Failed checkpoint records do not carry `source_locator`, `write_target`, or expected hash; those remain manifest/work-plan facts.
-4. No selector currently returns only retry-ready failed segment checkpoint facts.
+4. `select_retry_ready_failed_segments(checkpoint, now)` now returns only retry-ready failed segment checkpoint facts.
 
 Due-selection rules:
 
@@ -2093,12 +2093,12 @@ Due-selection rules:
 5. Exhausted/user-attention/no-automatic-retry facts must not be selected by this helper.
 6. Selection must preserve checkpoint order so later manifest binding can remain deterministic.
 
-First Rust slice:
+Implemented Rust slice:
 
-1. add a pure selector such as `select_retry_ready_failed_segments(checkpoint, now)`;
-2. return segment checkpoint facts or stable segment identifiers, not executable requests;
-3. prove due, delayed, missing-time, non-failed, and order-preservation branches with focused tests;
-4. do not reconstruct manifest facts, enqueue runtime work, drain scheduler queues, or mutate checkpoint state in this slice.
+1. `select_retry_ready_failed_segments(checkpoint, now)` exists in `module-downloads`.
+2. It returns cloned segment checkpoint facts, not executable requests.
+3. Focused tests prove due, delayed, missing-time, non-failed, and order-preservation branches.
+4. It does not reconstruct manifest facts, enqueue runtime work, drain scheduler queues, or mutate checkpoint state.
 
 Non-goals:
 

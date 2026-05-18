@@ -1387,3 +1387,16 @@
 - README now says the next downloads backend slice is due retry-ready segment selection.
 - README_IMPL 7.47 says the next implementation target is selecting failed segment checkpoints whose `next_retry_after` is due.
 - Checkpoint facts alone do not contain `source_locator`, `write_target`, or expected hash, so executable retry work must be a later manifest-bound slice.
+
+## 2026-05-19 - AT-269 context read
+
+- Read the required downloads module docs (`README_ARCH.md`, `README_API.md`, `README_FLOW.md`, `README_IMPL.md`) and confirmed this slice stays in backend checkpoint/driver logic; frontend continues to consume only aggregate projections.
+- Read `CONTRIBUTING.md`, `docs/README.md`, backend crate layout/API drafts, download runtime design, kernel-jobs runtime design, testing strategy, AI transaction protocol, and comment standard in focused chunks.
+- README_IMPL 7.48 defines the code target as a pure selector over durable checkpoint facts: select only `Failed` segments with present `next_retry_after <= now`, preserve order, and do not reconstruct manifest facts or enqueue runtime work.
+- `DownloadSegmentCheckpointRecord` already has the needed facts: `status`, `next_retry_after`, stable segment identity, and retry metadata; no SQLite schema change is required for this selector.
+
+## 2026-05-19 - AT-269 implementation findings
+
+- `select_retry_ready_failed_segments(checkpoint, now)` can remain pure by reading only checkpoint facts and an explicit `IsoDateTime now`.
+- Returning cloned checkpoint facts keeps the helper out of scheduler/execution territory while giving the next manifest-binding slice enough stable segment identity and persisted retry facts.
+- Selector tests cover due, delayed, missing-time, non-failed, and order-preservation branches; no manifest, runtime, SQLite, host, frontend, or public error projection surface changed.

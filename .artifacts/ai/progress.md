@@ -12402,3 +12402,91 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+## 2026-05-19 - AT-269 Start
+
+- Phase: Phase 140 - Due Retry-Ready Selector Implementation (in_progress)
+- Context read in focused chunks:
+  - `README.md`
+  - `CONTRIBUTING.md`
+  - `docs/README.md`
+  - `docs/modules/downloads/README_ARCH.md`
+  - `docs/modules/downloads/README_API.md`
+  - `docs/modules/downloads/README_FLOW.md`
+  - `docs/modules/downloads/README_IMPL.md` 7.47-7.48
+  - `docs/TauriDownloadRuntimeDesign.md`
+  - `docs/TauriBackendCrateLayoutAndUseCaseStubDesign.md`
+  - `docs/TauriFirstCrateApiDrafts.md`
+  - `docs/TauriKernelJobsRuntimeDesign.md`
+  - `docs/TauriTestingStrategyAndQualityGateDesign.md`
+  - `docs/TauriAIDevelopmentTransactionProtocolDesign.md`
+  - `docs/TauriCodeCommentStandard.md`
+- Planned slice: add TDD coverage and a pure due retry-ready checkpoint selector in `module-downloads`, keeping manifest binding, scheduler/runtime dispatch, SQLite schema, host/frontend, public `DL_*`, and terminal projection out of scope.
+
+## 2026-05-19 - AT-269 Validation
+
+- RED confirmed: focused selector test failed before implementation because `select_retry_ready_failed_segments` did not exist.
+- Implemented `select_retry_ready_failed_segments(checkpoint, now)` as a pure checkpoint selector and re-exported it from `launcher-module-downloads`.
+- Updated README and `docs/modules/downloads/README_IMPL.md` so the next boundary is manifest binding, not due selection.
+- Validation:
+  - `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml download_retry_ready_selector --lib`: 3 passed / 0 failed after implementation.
+  - `cargo test -p launcher-module-downloads --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --lib`: 82 passed / 0 failed.
+  - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml`: passed.
+  - `rustfmt --check crates\module-downloads\src\driver.rs crates\module-downloads\src\lib.rs`: passed.
+  - scoped `git diff --check`: passed with CRLF normalization warnings only.
+
+### Auto Record: 2026-05-19 07:32:04
+- Tool: apply_patch
+- Phase: Phase 140 - Due Retry-Ready Selector Implementation (in_progress)
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-19 07:33:41
+- Tool: apply_patch
+- Phase: Phase 140 - Due Retry-Ready Selector Implementation (in_progress)
+- Files:
+  - `crates/module-downloads/src/driver.rs` (update)
+
+### Auto Record: 2026-05-19 07:34:10
+- Tool: apply_patch
+- Phase: Phase 140 - Due Retry-Ready Selector Implementation (in_progress)
+- Files:
+  - `crates/module-downloads/src/driver.rs` (update)
+
+### Auto Record: 2026-05-19 07:35:07
+- Tool: apply_patch
+- Phase: Phase 140 - Due Retry-Ready Selector Implementation (in_progress)
+- Files:
+  - `crates/module-downloads/src/driver.rs` (update)
+
+### Auto Record: 2026-05-19 07:35:16
+- Tool: apply_patch
+- Phase: Phase 140 - Due Retry-Ready Selector Implementation (in_progress)
+- Files:
+  - `crates/module-downloads/src/lib.rs` (update)
+
+### Auto Record: 2026-05-19 07:36:44
+- Tool: apply_patch
+- Phase: Phase 140 - Due Retry-Ready Selector Implementation (in_progress)
+- Files:
+  - `README.md` (update)
+
+### Auto Record: 2026-05-19 07:38:56
+- Tool: apply_patch
+- Phase: Phase 140 - Due Retry-Ready Selector Implementation (complete)
+- Files:
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-19 07:40:11
+- Tool: apply_patch
+- Phase: Phase 140 - Due Retry-Ready Selector Implementation (complete)
+- Files:
+  - `.codex/skills/focused-module-implementer/SKILL.md` (delete)

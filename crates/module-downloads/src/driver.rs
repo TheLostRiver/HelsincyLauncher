@@ -188,6 +188,26 @@ impl DownloadSegmentRetryPolicy {
     }
 }
 
+/// 选择已经到期、可进入后续 retry 绑定阶段的失败 segment checkpoint 事实。
+/// Selects due failed segment checkpoint facts for a later retry binding phase.
+pub fn select_retry_ready_failed_segments(
+    checkpoint: &DownloadCheckpointRecord,
+    now: &IsoDateTime,
+) -> Vec<DownloadSegmentCheckpointRecord> {
+    checkpoint
+        .segments
+        .iter()
+        .filter(|segment| {
+            segment.status == DownloadSegmentCheckpointStatus::Failed
+                && matches!(
+                    segment.next_retry_after.as_ref(),
+                    Some(next_retry_after) if next_retry_after <= now
+                )
+        })
+        .cloned()
+        .collect()
+}
+
 /// Segment-level persisted checkpoint fact owned by downloads.
 /// downloads 拥有的 segment 级持久化 checkpoint 事实。
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1246,17 +1266,17 @@ mod tests {
     };
 
     use super::{
-        DownloadCheckpointRecord, DownloadCheckpointRepository, DownloadDriverExecutionTurn,
-        DownloadJobDriver, DownloadSegmentCheckpointRecord, DownloadSegmentCheckpointStatus,
-        DownloadSegmentExecutionPort, DownloadSegmentExecutionRequest,
-        DownloadSegmentExecutionResult, DownloadSegmentExecutor, DownloadSegmentFailureClass,
-        DownloadSegmentFetchOutcome, DownloadSegmentFetchPort, DownloadSegmentFetchResult,
-        DownloadSegmentFilesystemWritePort, DownloadSegmentGuardedWritePort,
-        DownloadSegmentHandledFailure, DownloadSegmentLengthVerifyPort,
-        DownloadSegmentRetryDecision, DownloadSegmentRetryPolicy, DownloadSegmentStagingTarget,
-        DownloadSegmentStaticFetchPort, DownloadSegmentStaticFetchSource,
-        DownloadSegmentVerifyOutcome, DownloadSegmentVerifyPort, DownloadSegmentWriteOutcome,
-        DownloadSegmentWritePort, DownloadSegmentWriteResult,
+        select_retry_ready_failed_segments, DownloadCheckpointRecord, DownloadCheckpointRepository,
+        DownloadDriverExecutionTurn, DownloadJobDriver, DownloadSegmentCheckpointRecord,
+        DownloadSegmentCheckpointStatus, DownloadSegmentExecutionPort,
+        DownloadSegmentExecutionRequest, DownloadSegmentExecutionResult, DownloadSegmentExecutor,
+        DownloadSegmentFailureClass, DownloadSegmentFetchOutcome, DownloadSegmentFetchPort,
+        DownloadSegmentFetchResult, DownloadSegmentFilesystemWritePort,
+        DownloadSegmentGuardedWritePort, DownloadSegmentHandledFailure,
+        DownloadSegmentLengthVerifyPort, DownloadSegmentRetryDecision, DownloadSegmentRetryPolicy,
+        DownloadSegmentStagingTarget, DownloadSegmentStaticFetchPort,
+        DownloadSegmentStaticFetchSource, DownloadSegmentVerifyOutcome, DownloadSegmentVerifyPort,
+        DownloadSegmentWriteOutcome, DownloadSegmentWritePort, DownloadSegmentWriteResult,
     };
 
     #[derive(Default)]
@@ -2180,6 +2200,99 @@ mod tests {
                 "fatal, non-retryable, or incomplete facts must not schedule automatic retry"
             );
         }
+    }
+
+    #[test]
+    fn download_retry_ready_selector_returns_due_failed_segments_in_checkpoint_order() {
+        let job_id = JobId::generate();
+        let now = IsoDateTime::now();
+        let mut delayed_segment = make_segment_checkpoint_record(
+            &job_id,
+            "segment-delayed",
+            DownloadSegmentCheckpointStatus::Failed,
+        );
+        delayed_segment.next_retry_after = Some(now.add_seconds(1));
+        let mut due_first = make_segment_checkpoint_record(
+            &job_id,
+            "segment-due-first",
+            DownloadSegmentCheckpointStatus::Failed,
+        );
+        due_first.next_retry_after = Some(now.clone());
+        let mut due_second = make_segment_checkpoint_record(
+            &job_id,
+            "segment-due-second",
+            DownloadSegmentCheckpointStatus::Failed,
+        );
+        due_second.next_retry_after = Some(now.add_seconds(0));
+        let checkpoint = DownloadCheckpointRecord {
+            job_id,
+            segments: vec![delayed_segment, due_first.clone(), due_second.clone()],
+        };
+
+        let selected = select_retry_ready_failed_segments(&checkpoint, &now);
+
+        assert_eq!(
+            selected,
+            vec![due_first, due_second],
+            "retry-ready selection should preserve persisted checkpoint order for due failed facts"
+        );
+    }
+
+    #[test]
+    fn download_retry_ready_selector_ignores_missing_or_future_retry_times() {
+        let job_id = JobId::generate();
+        let now = IsoDateTime::now();
+        let mut future_segment = make_segment_checkpoint_record(
+            &job_id,
+            "segment-future",
+            DownloadSegmentCheckpointStatus::Failed,
+        );
+        future_segment.next_retry_after = Some(now.add_seconds(30));
+        let missing_time_segment = make_segment_checkpoint_record(
+            &job_id,
+            "segment-missing-time",
+            DownloadSegmentCheckpointStatus::Failed,
+        );
+        let checkpoint = DownloadCheckpointRecord {
+            job_id,
+            segments: vec![future_segment, missing_time_segment],
+        };
+
+        let selected = select_retry_ready_failed_segments(&checkpoint, &now);
+
+        assert!(
+            selected.is_empty(),
+            "future or missing retry eligibility times must not become retry-ready work"
+        );
+    }
+
+    #[test]
+    fn download_retry_ready_selector_ignores_non_failed_segments() {
+        let job_id = JobId::generate();
+        let now = IsoDateTime::now();
+        let mut completed_segment = make_segment_checkpoint_record(
+            &job_id,
+            "segment-completed",
+            DownloadSegmentCheckpointStatus::Completed,
+        );
+        completed_segment.next_retry_after = Some(now.clone());
+        let mut in_progress_segment = make_segment_checkpoint_record(
+            &job_id,
+            "segment-in-progress",
+            DownloadSegmentCheckpointStatus::InProgress,
+        );
+        in_progress_segment.next_retry_after = Some(now.clone());
+        let checkpoint = DownloadCheckpointRecord {
+            job_id,
+            segments: vec![completed_segment, in_progress_segment],
+        };
+
+        let selected = select_retry_ready_failed_segments(&checkpoint, &now);
+
+        assert!(
+            selected.is_empty(),
+            "only failed checkpoint facts may be selected for automatic retry readiness"
+        );
     }
 
     #[test]
