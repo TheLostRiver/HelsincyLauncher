@@ -90,3 +90,5 @@ Read before writing:
   - `cargo check -p launcher-composition-root` -> passed.
   - `cargo fmt -p launcher-module-downloads -p launcher-adapter-storage-sqlite -- --check` -> passed.
   - scoped `git diff --check` -> passed with CRLF normalization warnings only.
+- Commit `ad6cef2` created locally.
+- Push to `origin/main` was attempted and blocked by the safety reviewer because direct shared-branch mutation/export needs explicit approval; no workaround was attempted.

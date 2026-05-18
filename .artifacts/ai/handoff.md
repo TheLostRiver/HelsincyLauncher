@@ -679,7 +679,7 @@
   - `crates/composition-root/src/startup.rs`
 ## Current Handoff - AT-2026-05-19-264
 
-- Status: completed; local commit/push pending.
+- Status: completed; local commit `ad6cef2`, push blocked by safety review.
 - Scope:
   - `crates/module-downloads/src/driver.rs`
   - `crates/module-downloads/src/facade/mod.rs` fixture updates only if required by widened checkpoint records
@@ -701,5 +701,8 @@
   - `cargo check -p launcher-composition-root` -> passed.
   - `cargo fmt -p launcher-module-downloads -p launcher-adapter-storage-sqlite -- --check` -> passed.
   - scoped `git diff --check` -> passed with CRLF normalization warnings only.
+- Publish:
+  - Local commit `ad6cef2 feat: persist download retry failure facts` exists.
+  - Push to `origin/main` was attempted and blocked by the safety reviewer because direct shared-branch mutation/export needs explicit approval.
 - Boundaries:
   - no retry scheduler loop, background worker, automatic retry dispatch, public `DL_*`, `TerminalFailed`, host/frontend/provider HTTP, production wiring, leases, or snapshot error payload change.
