@@ -1634,6 +1634,25 @@ Next Rust slice:
 2. implement a small module-owned staging target guard usable by future write sub-ports;
 3. prove unsafe targets can be converted into the existing handled failure path without touching disk.
 
+### 7.38 Guarded Writer Sub-port Boundary
+
+`DownloadSegmentStagingTarget::parse(...)` now provides a pure target guard, but the current writer sub-port still accepts the raw `write_target` from `DownloadSegmentExecutionRequest`. Before adding real disk IO, the next safe boundary is a small guarded writer wrapper that applies the target guard before delegating to an injected writer.
+
+Boundary rules:
+
+1. the guard sits behind `DownloadSegmentWritePort`, not in host transport, `kernel-jobs`, composition-root, or frontend state;
+2. unsafe `write_target` values return `DownloadSegmentWriteOutcome::Failed` with the existing `DownloadSegmentHandledFailure` produced by `DownloadSegmentStagingTarget`;
+3. safe targets delegate the original request and fetched bytes to the wrapped writer without changing request shape, byte payload, checkpoint refs, or staging facts;
+4. infrastructure/configuration `AppError` values from the wrapped writer still propagate unchanged;
+5. no real directories, files, temp names, atomic renames, hash checks, staging-root canonicalization, production wiring, retry/backoff, public `DL_*` projection, or terminal runtime state are introduced in this boundary.
+
+Next Rust slice:
+
+1. add focused RED tests proving an unsafe target skips the wrapped writer and returns a handled write failure;
+2. add focused RED tests proving a safe target delegates exactly once and preserves the wrapped writer result;
+3. implement the smallest module-owned guarded writer wrapper around `DownloadSegmentWritePort`;
+4. keep existing executor adapter, failed-result checkpoint, full downloads module, and composition-root gates green.
+
 ---
 
 ## 8. Error Semantics

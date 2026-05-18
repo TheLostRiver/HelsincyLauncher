@@ -10674,3 +10674,36 @@
 - Phase: Phase 114 - Downloads Segment Executor Adapter Shell (complete)
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+## 2026-05-18 - AT-2026-05-18-244 Guarded Writer Boundary
+
+- Confirmed AT-2026-05-17-243 is completed and pushed; no active task is currently open.
+- Read focused recovery and design context instead of scanning the whole docs tree: README/docs map, documentation-budget rules, downloads module docs, README_IMPL 7.35-7.37, runtime SegmentWriter/staging notes, storage staging-file ownership notes, and current writer sub-port code.
+- Opened Phase 115 / AT-2026-05-18-244 to document the guarded writer sub-port boundary before any Rust writer integration.
+- Added README_IMPL 7.38 and updated PWF records; scoped `git diff --check` for touched docs/PWF files passed with CRLF normalization warnings only.
+
+### Auto Record: 2026-05-18 13:04:59
+- Tool: apply_patch
+- Phase: Phase 115 - Downloads Guarded Writer Boundary (in_progress)
+- Files:
+  - `docs/modules/downloads/README_IMPL.md` (update)
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/findings.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)
+
+### Auto Record: 2026-05-18 13:05:30
+- Tool: apply_patch
+- Phase: Phase 115 - Downloads Guarded Writer Boundary (in_progress)
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+
+### Auto Record: 2026-05-18 13:06:10
+- Tool: apply_patch
+- Phase: Phase 115 - Downloads Guarded Writer Boundary (complete)
+- Files:
+  - `.artifacts/ai/active-task.md` (update)
+  - `.artifacts/ai/task-plan.md` (update)
+  - `.artifacts/ai/progress.md` (update)
+  - `.artifacts/ai/handoff.md` (update)

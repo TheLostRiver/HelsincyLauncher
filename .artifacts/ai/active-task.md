@@ -2,25 +2,25 @@
 
 ## Identity
 
-- task id: AT-2026-05-17-243
-- title: Add downloads staging target guard
+- task id: AT-2026-05-18-244
+- title: Define guarded downloads writer boundary
 - status: completed
 
 ## Goal
 
-Implement README_IMPL 7.37 as a pure Rust guard for staging-relative `write_target` values, rejecting unsafe targets as module-local handled segment failures without touching the file system or adding real writer IO.
+Define the next durable downloads implementation boundary for applying `DownloadSegmentStagingTarget` inside a guarded writer sub-port before real disk IO or production wiring exists.
 
 ## Scope
 
 - in scope:
-  - `crates/module-downloads/src/driver.rs`
-  - `crates/module-downloads/src/lib.rs`
+  - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
   - `.artifacts/ai/progress.md`
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
+  - Rust production or test code
   - real HTTP range requests or provider object fetches
   - real staging writes, directory creation, file opening, artifact moves, or hash verification
   - host file-system canonicalization
@@ -33,39 +33,35 @@ Implement README_IMPL 7.37 as a pure Rust guard for staging-relative `write_targ
 
 ## Allowed Files
 
-1. crates/module-downloads/src/driver.rs
-2. crates/module-downloads/src/lib.rs
-3. .artifacts/ai/active-task.md
-4. .artifacts/ai/task-plan.md
-5. .artifacts/ai/progress.md
-6. .artifacts/ai/findings.md
-7. .artifacts/ai/handoff.md
+1. docs/modules/downloads/README_IMPL.md
+2. .artifacts/ai/active-task.md
+3. .artifacts/ai/task-plan.md
+4. .artifacts/ai/progress.md
+5. .artifacts/ai/findings.md
+6. .artifacts/ai/handoff.md
 
 ## Required Context Read
 
 Read before writing:
 
-1. README/docs routing and documentation-budget rules from this session.
-2. docs/modules/downloads/README_IMPL.md 7.37.
-3. docs/TauriDownloadRuntimeDesign.md SegmentWriter/staging sections.
-4. docs/TauriStorageAndDatabaseDesign.md staging file ownership notes.
-5. Current `DownloadSegmentHandledFailure` and writer sub-port contracts.
+1. README/docs routing and documentation-budget rules.
+2. `docs/modules/downloads/README_ARCH.md`, `README_API.md`, `README_FLOW.md`, and `README_IMPL.md` around 7.35-7.37.
+3. `docs/TauriDownloadRuntimeDesign.md` SegmentWriter/staging/fetch/verify sections.
+4. `docs/TauriStorageAndDatabaseDesign.md` staging file ownership notes.
+5. Current `DownloadSegmentHandledFailure`, `DownloadSegmentStagingTarget`, and writer sub-port contracts.
 
 ## Hypothesis
 
-- falsifiable implementation hypothesis: a pure `DownloadSegmentStagingTarget` guard can accept normal relative target components and reject unsafe target strings as `DownloadSegmentHandledFailure { downloaded_bytes: 0, retryable: false, ... }` without file-system side effects.
+- falsifiable documentation hypothesis: README_IMPL can make the next code slice concrete enough to TDD a guarded `DownloadSegmentWritePort` wrapper that rejects unsafe targets before delegation, while keeping real disk IO and production wiring out of scope.
 
 ## Cheap Check
 
-1. Add RED tests for accepted relative target and rejected unsafe targets.
-2. Implement the smallest guard using path component inspection only.
-3. Re-export the guard type if it is a module-owned extension point for future writer sub-ports.
-4. Run focused guard tests, focused adapter tests, full module tests, composition-root check, scoped rustfmt, and scoped diff-check.
+1. Add README_IMPL 7.38 describing the guarded writer boundary.
+2. Record the next RED tests and non-goals clearly enough for AT-245.
+3. Update PWF records and run scoped docs/PWF diff-check.
 
 ## Validation Gate
 
-1. RED test fails before production code because the guard type is missing.
-2. GREEN focused guard tests pass after implementation.
-3. Existing adapter tests still pass.
-4. Full `launcher-module-downloads` lib tests and composition-root compile gate pass.
-5. Scoped rustfmt and diff-check pass before commit/push.
+1. README_IMPL 7.38 exists and does not duplicate task-log detail.
+2. Active task, task plan, findings, progress, and handoff identify AT-244 and the next Rust slice.
+3. Scoped `git diff --check` passes before commit/push.

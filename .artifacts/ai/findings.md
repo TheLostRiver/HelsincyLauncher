@@ -1175,3 +1175,10 @@
 - RED/GREEN confirmed `DownloadSegmentStagingTarget::parse(...)` accepts a normal relative target and rejects empty, current-dir, parent-dir, drive-prefixed, UNC/rooted, and absolute-looking targets as handled failures.
 - The implementation uses path component inspection only and does not create directories, open files, canonicalize, move artifacts, inspect provider URLs, or introduce public error projection.
 - Validation passed for focused guard tests, focused adapter tests, full `launcher-module-downloads` lib tests, `launcher-composition-root` check, and scoped rustfmt.
+
+## Phase 115 Downloads Guarded Writer Boundary Findings
+
+- Required context was read in focused chunks: README/docs routing, docs map, documentation-budget rules, downloads ARCH/API/FLOW notes, README_IMPL 7.35-7.37, download runtime fetch/write/verify/staging notes, storage staging-file ownership notes, and current driver writer/handled-failure contracts.
+- AT-243 added the pure `DownloadSegmentStagingTarget` guard, but `DownloadSegmentWritePort` still receives the raw request; integrating the guard directly into a future disk writer would mix path-safety semantics with IO too early.
+- The next durable boundary should be a module-owned guarded writer wrapper behind `DownloadSegmentWritePort`: unsafe targets become `DownloadSegmentWriteOutcome::Failed`, safe targets delegate unchanged to an injected writer.
+- Real directories, file writes, temp naming, staging-root canonicalization, artifact moves, hash checks, public `DL_*` projection, retry/backoff, terminal runtime state, production wiring, transport, frontend, and schema remain out of scope.

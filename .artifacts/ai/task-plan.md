@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 114 - Downloads Segment Executor Adapter Shell (complete)
+Phase 115 - Downloads Guarded Writer Boundary (complete)
 
 ## Current Focus
 
@@ -33,6 +33,7 @@ Phase 114 - Downloads Segment Executor Adapter Shell (complete)
 - AT-2026-05-17-241 was published as commit `cab15c2` after mapping handled segment failures in the downloads executor adapter.
 - AT-2026-05-17-242 was published as commit `7527476` after documenting the staging target guard boundary.
 - AT-2026-05-17-243 was published as commit `69ea5e7` after adding the pure downloads staging target guard.
+- AT-2026-05-18-244 completed the guarded writer sub-port boundary before Rust writer integration.
 - AT-2026-05-17-220 was published as commit `aa8d6e3` after documenting the shared runtime execution-turn boundary.
 - AT-2026-05-17-219 was published as commit `f618718` after adding host transport smoke coverage for downloads policy runtime application.
 - AT-2026-05-17-218 was published as commit `5aae7f1` after adding documentation-budget rules.
@@ -852,6 +853,12 @@ Phase 114 - Downloads Segment Executor Adapter Shell (complete)
 - Atomic tasks: AT-2026-05-17-239, AT-2026-05-17-240, AT-2026-05-17-241, AT-2026-05-17-242, AT-2026-05-17-243
 - **Status:** complete
 
+### Phase 115: Downloads Guarded Writer Boundary
+
+- Outcome: define how future writer sub-ports apply the pure staging target guard before any real disk IO, production wiring, retry/backoff, public error projection, host transport, frontend, or schema work.
+- Atomic tasks: AT-2026-05-18-244
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -1091,6 +1098,7 @@ Phase 114 - Downloads Segment Executor Adapter Shell (complete)
 235. AT-2026-05-17-241 - completed - added downloads segment executor handled failure mapping in Rust; committed and pushed as `cab15c2`.
 236. AT-2026-05-17-242 - completed - defined the downloads segment staging target guard boundary before real writer IO; committed and pushed as `7527476`.
 237. AT-2026-05-17-243 - completed - added a pure downloads staging target guard in Rust; committed and pushed as `69ea5e7`.
+238. AT-2026-05-18-244 - completed - defined the guarded downloads writer sub-port boundary before Rust writer integration.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

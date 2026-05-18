@@ -320,6 +320,23 @@
   - `launcher-composition-root` check
   - scoped rustfmt check
 
+## Latest Handoff - AT-2026-05-18-244
+
+- Status: completed; commit/push pending at the time this handoff entry was written.
+- Scope:
+  - Define README_IMPL 7.38 for a guarded downloads writer sub-port boundary.
+  - Keep this slice documentation/PWF-only.
+- Validation passed:
+  - scoped docs/PWF `git diff --check` returned no whitespace errors;
+  - only expected CRLF normalization warnings were emitted.
+- Next likely code task after this docs commit:
+  - add RED tests for a guarded `DownloadSegmentWritePort` wrapper;
+  - prove unsafe `write_target` skips the wrapped writer and returns `DownloadSegmentWriteOutcome::Failed`;
+  - prove safe targets delegate exactly once and preserve wrapped writer results.
+- Preserved boundaries:
+  - No Rust code in AT-244.
+  - No real staging writes, directory creation, temp naming, artifact moves, hash checks, production wiring, retry/backoff, public `DL_*` projection, host transport, frontend, or schema work.
+
 ## Dirty Worktree To Preserve
 
 - Unrelated unstaged/unknown work remains present and must not be committed with AT-218:
