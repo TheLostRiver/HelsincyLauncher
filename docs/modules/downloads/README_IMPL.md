@@ -2015,6 +2015,55 @@ Next boundary:
 
 ---
 
+### 7.47 Backoff Policy And Terminal Eligibility Boundary
+
+Retry-ready facts are durable, so the next safe Rust slice is a pure policy calculation. It must decide whether a failed segment is eligible for automatic retry, exhausted, or needs user attention without starting a retry worker or changing job-level terminal projection.
+
+Current Rust reality:
+
+1. Failed segment checkpoints can persist `failure_class`, `failure_retryable`, `retry_attempt_count`, and `next_retry_after`.
+2. Driver failed mutation currently leaves `next_retry_after = None`.
+3. `DownloadJobDriver::run(...)` still returns non-terminal `Accepted` for failed mutation.
+4. No module-local policy object owns max attempts, delay calculation, retry exhaustion, or user-attention classification.
+
+Policy defaults for the first Rust slice:
+
+1. automatic retry is allowed only when `failure_retryable = Some(true)` and `failure_class` is one of `NetworkTransient`, `WriteFailed`, `VerifyFailed`, or `Unknown`;
+2. `NetworkFatal`, `ProviderManifestInvalid`, `DiskNoSpace`, and `PolicyBlocked` are not automatic-retry classes in the first policy slice;
+3. automatic segment retry budget is three observed failed attempts; `retry_attempt_count >= 3` means exhausted for automatic retry;
+4. delay schedule is deterministic and segment-local: attempt `1` schedules `now + 30s`, attempt `2` schedules `now + 120s`, attempt `3+` schedules nothing because the automatic retry budget is exhausted;
+5. `Unknown` may only use automatic retry when the persisted retryable hint is true, and still exhausts under the same budget;
+6. user-attention classes are `DiskNoSpace`, `PolicyBlocked`, and exhausted automatic-retry classes;
+7. terminal eligibility is only a candidate state in this boundary; it must not be projected as `JobRunDisposition::TerminalFailed` until public `DL_*` mapping and job-level aggregation are separately documented.
+
+First Rust slice:
+
+1. introduce a pure module-local `DownloadSegmentRetryPolicy` value object or equivalent helper;
+2. introduce a module-local retry decision enum with at least:
+   - `ScheduleRetry { next_retry_after }`
+   - `RetryExhausted`
+   - `UserAttentionRequired`
+   - `NoAutomaticRetry`
+3. accept the persisted failed segment facts plus an explicit `IsoDateTime now` input; do not read wall clock inside the pure policy function;
+4. prove delay calculation and exhaustion with focused unit tests before wiring it into driver mutation;
+5. do not enqueue retry work, mutate scheduler queues, claim leases, or return `TerminalFailed` in this slice.
+
+Non-goals:
+
+1. no retry scheduler loop, background worker, durable lease, or automatic retry dispatch;
+2. no host/frontend DTO change or public `DL_*` execution projection;
+3. no provider HTTP behavior, network backoff adapter, CDN policy, or production wiring;
+4. no job-level aggregation of multiple failed segments;
+5. no `TerminalFailed` driver return until retry exhaustion aggregation, user-attention projection, and public error mapping are separately defined.
+
+Next implementation target:
+
+1. add RED tests for the pure policy helper using fixed `IsoDateTime` values;
+2. implement only deterministic decision and delay calculation;
+3. update README_IMPL implementation status after green while keeping driver failed mutation non-terminal.
+
+---
+
 ## 8. Error Semantics
 
 Downloads-domain errors use `DL_*` codes when they become stable public classifications.

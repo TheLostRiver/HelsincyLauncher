@@ -12019,6 +12019,20 @@
 - Commit `ad6cef2 feat: persist download retry failure facts` was created locally.
 - `git push origin main` was attempted and blocked by the safety reviewer as high risk for direct shared-branch mutation/export; no workaround was attempted.
 
+## 2026-05-19 - AT-265 start
+
+- Registered AT-2026-05-19-265 as a docs-first boundary task.
+- Required context read in small batches: README current roadmap, README_IMPL 7.46 next boundary, error-handling retry semantics, and download-runtime failed/canceled checkpoint preservation rules.
+- Planned output: README points the next Rust slice at a pure retry/backoff policy calculator; README_IMPL gains a 7.47 boundary with deterministic automatic retry gates, attempt limits, delay schedule, user-attention classes, and explicit non-goals.
+- No Rust code, SQLite schema, scheduler, public `DL_*`, `TerminalFailed`, host/frontend/provider/lease/snapshot payload change in this AT.
+
+## 2026-05-19 - AT-265 completion
+
+- Updated README roadmap so the next Rust slice is the pure backoff policy calculator.
+- Added README_IMPL 7.47 with deterministic automatic retry gates, attempt budget, delay schedule, user-attention classes, terminal eligibility constraints, first Rust slice, and non-goals.
+- Validation passed: scoped `git diff --check` over README, README_IMPL, and PWF task files returned exit 0 with CRLF normalization warnings only.
+- Push remains blocked from the prior safety review; no additional push attempt was made without explicit approval.
+
 ### Auto Record: 2026-05-19 04:17:57
 - Tool: apply_patch
 - Phase: Phase 135 - Retry Failure Facts Persistence (in_progress)
@@ -12116,6 +12130,31 @@
 ### Auto Record: 2026-05-19 04:43:16
 - Tool: apply_patch
 - Phase: Phase 135 - Retry Failure Facts Persistence (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 04:46:41
+- Tool: apply_patch
+- Phase: Phase 136 - Backoff Policy Boundary (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 04:47:17
+- Tool: apply_patch
+- Phase: Phase 136 - Backoff Policy Boundary (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\README.md` (update)
+
+### Auto Record: 2026-05-19 04:48:08
+- Tool: apply_patch
+- Phase: Phase 136 - Backoff Policy Boundary (complete)
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)

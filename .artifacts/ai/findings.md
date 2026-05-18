@@ -1349,3 +1349,10 @@
 - `next_retry_after` can be stored as RFC3339 text via `IsoDateTime::to_string()` and parsed back through the existing serde-based `IsoDateTime` path, so no new `chrono` dependency was needed in `launcher-adapter-storage-sqlite`.
 - `record_failed_segment_checkpoints(...)` should derive `retry_attempt_count` only from an existing failed checkpoint record; non-failed existing records start at `1` when replaced by a failed fact.
 - `DownloadJobDriver::run(...)` remains non-terminal for failed checkpoint mutation after the new retry facts are durable.
+
+## 2026-05-19 - AT-265 context read
+
+- README now says the next downloads backend step is backoff policy, retry exhaustion, and terminal failure eligibility after durable retry facts.
+- README_IMPL 7.46 says the next boundary is a clock-owned `next_retry_after` calculation plus retry exhaustion/user-attention rules before `TerminalFailed`.
+- Error handling design says `retryable` is only a hint and does not mean immediate retry, retry count, backoff, or frontend-owned retry execution.
+- Download runtime design says failed/canceled tasks preserve recoverable staging and checkpoint by default; terminal cleanup and failure projection must not erase recovery facts prematurely.

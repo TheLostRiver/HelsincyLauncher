@@ -706,3 +706,21 @@
   - Push to `origin/main` was attempted and blocked by the safety reviewer because direct shared-branch mutation/export needs explicit approval.
 - Boundaries:
   - no retry scheduler loop, background worker, automatic retry dispatch, public `DL_*`, `TerminalFailed`, host/frontend/provider HTTP, production wiring, leases, or snapshot error payload change.
+## Current Handoff - AT-2026-05-19-265
+
+- Status: completed; local commit pending.
+- Scope:
+  - root README
+  - `docs/modules/downloads/README_IMPL.md`
+  - PWF records under `.artifacts/ai`
+- Boundary to define:
+  - pure retry/backoff policy calculation;
+  - retry exhaustion and user-attention rules;
+  - terminal failure eligibility constraints before any `TerminalFailed` code.
+- Boundaries:
+  - no Rust code, SQLite schema, retry scheduler loop, automatic retry dispatch, public `DL_*`, host/frontend/provider HTTP, production wiring, leases, or snapshot error payload change.
+- Completed:
+  - README now points the next Rust slice at pure backoff policy calculation.
+  - README_IMPL 7.47 defines automatic retry classes, non-automatic classes, three-attempt budget, 30s/120s delay schedule, user-attention rules, terminal-candidate constraints, first Rust slice, and non-goals.
+- Validation:
+  - scoped `git diff --check` over README, README_IMPL, and PWF files passed with CRLF normalization warnings only.
