@@ -1,0 +1,4 @@
+interface:
+  display_name: "Focused Module Implementer"
+  short_description: "Docs-first autonomous module execution"
+  default_prompt: "Use $focused-module-implementer to complete the specified module task autonomously."
