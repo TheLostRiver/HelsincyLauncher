@@ -555,7 +555,7 @@
 
 ## Current Handoff - AT-2026-05-19-258
 
-- Status: completed; commit/push pending.
+- Status: completed; final commit `ac12ec0`, pushed to `origin/main`.
 - Scope:
   - `crates/kernel-jobs/src/runtime.rs`
   - root README and downloads README_IMPL implementation status after green

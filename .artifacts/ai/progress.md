@@ -11585,6 +11585,7 @@
 - Added focused fake-driver tests for completed and terminal-failed projection, preserving the existing non-terminal `Accepted`, `Deferred`, and `Failed { reason }` behavior.
 - Updated root README and downloads README_IMPL to mark the kernel runtime projection slice complete and identify the next boundary as downloads driver terminal decisions.
 - Validation passed: focused completed and terminal-failed tests, full `launcher-kernel-jobs --lib` 14/14, `cargo check -p launcher-composition-root`, scoped rustfmt, and scoped diff-check with CRLF warnings only.
+- Published AT-258 as `ac12ec0 feat: project terminal job run dispositions` and pushed it to `origin/main`.
 - Next likely task: define when `DownloadJobDriver::run(...)` may return `Completed` or `TerminalFailed` based on persisted checkpoint facts, before coding the downloads driver behavior.
 
 ### Auto Record: 2026-05-19 02:52:22
@@ -11657,5 +11658,14 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 03:06:02
+- Tool: apply_patch
+- Phase: Phase 129 - Kernel-jobs Terminal Projection (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
