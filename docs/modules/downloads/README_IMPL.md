@@ -139,7 +139,7 @@ Do not skip directly from checkpoint to `JobRuntime::resume`. The module owns bu
 | `DownloadManifestProviderPort` | minimal facade port exists | currently returns a minimal `DownloadManifestPlan` handle |
 | `JobRuntime` | shared kernel-jobs runtime trait exists | resume uses job-level `EnqueueJobRequest<()>`; segment details still stay out of `kernel-jobs` |
 | `DownloadSegmentExecutionPort` | driver-facing port exists | module-local segment requests can return accepted, completed, or failed execution results |
-| `DownloadSegmentFetchPort` | executor sub-port exists | currently fake/in-memory only; deterministic static byte-source fetcher is the next boundary before real provider/HTTP range behavior |
+| `DownloadSegmentFetchPort` | executor sub-port exists | `DownloadSegmentStaticFetchPort` provides deterministic static byte-source fetches; real provider/HTTP range behavior remains later |
 | `DownloadSegmentWritePort` | executor sub-port exists | guarded wrapper validates staging-relative targets and `DownloadSegmentFilesystemWritePort` implements job-scoped staging writes; production wiring remains later |
 | `DownloadSegmentVerifyPort` | executor sub-port exists | `DownloadSegmentLengthVerifyPort` verifies from-start and partial byte counts; hash verification remains later |
 
@@ -158,8 +158,8 @@ Recommended order:
 
 1. completed: define and implement a concrete filesystem staging writer behind `DownloadSegmentWritePort`;
 2. completed: define and implement a concrete verifier shell, starting with byte-length checks before hash algorithms;
-3. next: define the fetcher boundary for provider/local byte sources before introducing real HTTP range behavior;
-4. wire the concrete executor into composition-root only after fetch/write/verify sub-ports are independently covered;
+3. completed: define and implement the deterministic static fetcher boundary for local byte sources before real HTTP range behavior;
+4. next: define concrete executor composition-root wiring only after deciding how production supplies fetch/write/verify sub-ports;
 5. add runtime terminal completion/failure projection after concrete execution can advance checkpoints deterministically;
 6. add retry/backoff and public `DL_*` execution error projection only after concrete failures are classified;
 7. keep host transport and frontend changes last, exposing only aggregate job snapshots and stable command/query DTOs.
@@ -1763,14 +1763,18 @@ Non-goals:
 2. no provider-specific chunk model leaks into `kernel-jobs`, host IPC, or frontend projection;
 3. no direct filesystem reads in the fetcher; filesystem staging remains owned by the writer.
 
+Implementation status:
+
+1. `DownloadSegmentStaticFetchPort` returns configured bytes and etag for from-start requests;
+2. partial requests return only the remaining bytes after `request.start_offset`;
+3. missing locators and invalid partial offsets become handled fetch failures without public `DL_*` projection;
+4. focused tests cover direct fetch behavior and executor completion with the static fetcher plus existing writer/verifier ports.
+
 Next Rust slice:
 
-1. add focused RED tests for a static fetcher returning bytes and etag for a from-start request;
-2. add focused RED tests for a partial request returning only the remaining bytes after `start_offset`;
-3. add focused RED tests for a missing locator or invalid partial offset returning a handled fetch failure;
-4. implement a small `DownloadSegmentStaticFetchPort` behind `DownloadSegmentFetchPort`;
-5. re-export the fetcher if it is intended for later composition-root wiring;
-6. validate with focused fetcher/executor tests, full downloads module tests, composition-root check, scoped rustfmt, and scoped diff-check.
+1. define the concrete executor wiring boundary at composition-root without introducing real provider HTTP behavior yet;
+2. decide how staging root, static/local sources, and existing writer/verifier ports are supplied to `DownloadSegmentExecutor`;
+3. keep provider auth, real HTTP range, retry/backoff, public network/provider error projection, host transport, frontend, and schema changes out of that wiring slice.
 
 ---
 

@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fs;
 use std::io::{Seek, SeekFrom, Write};
 use std::path::{Component, Path, PathBuf};
@@ -364,6 +365,93 @@ pub trait DownloadSegmentFetchPort: Send + Sync {
         &self,
         request: &DownloadSegmentExecutionRequest,
     ) -> AppResult<DownloadSegmentFetchOutcome>;
+}
+
+/// 静态 fetcher 使用的 segment 字节源记录。
+/// Static segment byte source record used by the static fetcher.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct DownloadSegmentStaticFetchSource {
+    bytes: Vec<u8>,
+    etag: Option<String>,
+}
+
+impl DownloadSegmentStaticFetchSource {
+    /// 创建一个精确绑定到 source locator 的静态字节源。
+    /// Creates a static byte source bound to an exact source locator.
+    pub fn new(bytes: Vec<u8>, etag: Option<String>) -> Self {
+        Self { bytes, etag }
+    }
+}
+
+/// 通过预配置字节源实现的 deterministic segment fetcher。
+/// Deterministic segment fetcher backed by configured byte sources.
+#[derive(Clone, Debug, Default)]
+pub struct DownloadSegmentStaticFetchPort {
+    sources: HashMap<String, DownloadSegmentStaticFetchSource>,
+}
+
+impl DownloadSegmentStaticFetchPort {
+    /// 使用 source locator 到静态字节源的映射创建 fetcher。
+    /// Creates the fetcher from source locator to static byte source mappings.
+    pub fn new(
+        sources: impl IntoIterator<Item = (String, DownloadSegmentStaticFetchSource)>,
+    ) -> Self {
+        Self {
+            sources: sources.into_iter().collect(),
+        }
+    }
+}
+
+impl DownloadSegmentFetchPort for DownloadSegmentStaticFetchPort {
+    fn fetch_segment(
+        &self,
+        request: &DownloadSegmentExecutionRequest,
+    ) -> AppResult<DownloadSegmentFetchOutcome> {
+        let Some(source) = self.sources.get(&request.source_locator) else {
+            return Ok(DownloadSegmentFetchOutcome::Failed(static_fetch_failure(
+                format!("static fetch source not found: {}", request.source_locator),
+            )));
+        };
+
+        let bytes = match request.resume_mode {
+            DownloadResumeWorkMode::FromStart => source.bytes.clone(),
+            DownloadResumeWorkMode::Partial => {
+                let Ok(offset) = usize::try_from(request.start_offset) else {
+                    return Ok(DownloadSegmentFetchOutcome::Failed(static_fetch_failure(
+                        format!(
+                            "static fetch partial offset does not fit usize: {}",
+                            request.start_offset
+                        ),
+                    )));
+                };
+                if offset > source.bytes.len() {
+                    return Ok(DownloadSegmentFetchOutcome::Failed(static_fetch_failure(
+                        format!(
+                            "static fetch partial offset {} exceeds source length {}",
+                            request.start_offset,
+                            source.bytes.len()
+                        ),
+                    )));
+                }
+                source.bytes[offset..].to_vec()
+            }
+        };
+
+        Ok(DownloadSegmentFetchOutcome::Fetched(
+            DownloadSegmentFetchResult {
+                bytes,
+                etag: source.etag.clone(),
+            },
+        ))
+    }
+}
+
+fn static_fetch_failure(reason: String) -> DownloadSegmentHandledFailure {
+    DownloadSegmentHandledFailure {
+        downloaded_bytes: 0,
+        reason,
+        retryable: false,
+    }
 }
 
 /// Module-owned staging writer boundary used behind `DownloadSegmentExecutionPort`.
@@ -960,6 +1048,7 @@ mod tests {
         DownloadSegmentFetchPort, DownloadSegmentFetchResult, DownloadSegmentFilesystemWritePort,
         DownloadSegmentGuardedWritePort, DownloadSegmentHandledFailure,
         DownloadSegmentLengthVerifyPort, DownloadSegmentStagingTarget,
+        DownloadSegmentStaticFetchPort, DownloadSegmentStaticFetchSource,
         DownloadSegmentVerifyOutcome, DownloadSegmentVerifyPort, DownloadSegmentWriteOutcome,
         DownloadSegmentWritePort, DownloadSegmentWriteResult,
     };
@@ -1122,6 +1211,132 @@ mod tests {
                 },
             ))
         }
+    }
+
+    #[test]
+    fn download_segment_static_fetch_port_returns_from_start_bytes_and_etag() {
+        let job_id = JobId::generate();
+        let mut request = make_segment_execution_request(&job_id, "segment-static-fetch");
+        request.source_locator = "static://segment-a".into();
+        request.length = 4;
+        let fetcher = DownloadSegmentStaticFetchPort::new([(
+            request.source_locator.clone(),
+            DownloadSegmentStaticFetchSource::new(vec![1, 2, 3, 4], Some("etag-a".into())),
+        )]);
+
+        let outcome = fetcher
+            .fetch_segment(&request)
+            .expect("static fetch should not produce infrastructure errors");
+
+        assert_eq!(
+            outcome,
+            DownloadSegmentFetchOutcome::Fetched(DownloadSegmentFetchResult {
+                bytes: vec![1, 2, 3, 4],
+                etag: Some("etag-a".into()),
+            })
+        );
+    }
+
+    #[test]
+    fn download_segment_static_fetch_port_returns_partial_remaining_bytes() {
+        let job_id = JobId::generate();
+        let mut request = make_segment_execution_request(&job_id, "segment-static-partial");
+        request.source_locator = "static://segment-b".into();
+        request.resume_mode = DownloadResumeWorkMode::Partial;
+        request.start_offset = 2;
+        request.length = 5;
+        let fetcher = DownloadSegmentStaticFetchPort::new([(
+            request.source_locator.clone(),
+            DownloadSegmentStaticFetchSource::new(vec![10, 11, 12, 13, 14], None),
+        )]);
+
+        let outcome = fetcher
+            .fetch_segment(&request)
+            .expect("partial static fetch should not produce infrastructure errors");
+
+        assert_eq!(
+            outcome,
+            DownloadSegmentFetchOutcome::Fetched(DownloadSegmentFetchResult {
+                bytes: vec![12, 13, 14],
+                etag: None,
+            })
+        );
+    }
+
+    #[test]
+    fn download_segment_static_fetch_port_reports_missing_source_as_handled_failure() {
+        let job_id = JobId::generate();
+        let mut request = make_segment_execution_request(&job_id, "segment-static-missing");
+        request.source_locator = "static://missing".into();
+        let fetcher = DownloadSegmentStaticFetchPort::default();
+
+        let outcome = fetcher
+            .fetch_segment(&request)
+            .expect("missing static source should be handled in-band");
+
+        let DownloadSegmentFetchOutcome::Failed(failure) = outcome else {
+            panic!("missing static source should become a handled fetch failure");
+        };
+        assert_eq!(failure.downloaded_bytes, 0);
+        assert!(!failure.retryable);
+        assert!(failure.reason.contains("static fetch source not found"));
+    }
+
+    #[test]
+    fn download_segment_static_fetch_port_reports_invalid_partial_offset_as_handled_failure() {
+        let job_id = JobId::generate();
+        let mut request = make_segment_execution_request(&job_id, "segment-static-offset");
+        request.source_locator = "static://segment-c".into();
+        request.resume_mode = DownloadResumeWorkMode::Partial;
+        request.start_offset = 4;
+        request.length = 4;
+        let fetcher = DownloadSegmentStaticFetchPort::new([(
+            request.source_locator.clone(),
+            DownloadSegmentStaticFetchSource::new(vec![20, 21], None),
+        )]);
+
+        let outcome = fetcher
+            .fetch_segment(&request)
+            .expect("invalid static offset should be handled in-band");
+
+        let DownloadSegmentFetchOutcome::Failed(failure) = outcome else {
+            panic!("invalid static offset should become a handled fetch failure");
+        };
+        assert_eq!(failure.downloaded_bytes, 0);
+        assert!(!failure.retryable);
+        assert!(failure.reason.contains("static fetch partial offset"));
+    }
+
+    #[test]
+    fn download_segment_static_fetch_port_completes_through_executor_with_length_verifier() {
+        let job_id = JobId::generate();
+        let mut request = make_segment_execution_request(&job_id, "segment-static-executor");
+        request.source_locator = "static://segment-d".into();
+        request.length = 4;
+        let fetcher = DownloadSegmentStaticFetchPort::new([(
+            request.source_locator.clone(),
+            DownloadSegmentStaticFetchSource::new(vec![1, 2, 3, 4], Some("etag-d".into())),
+        )]);
+        let executor = DownloadSegmentExecutor::new(
+            Arc::new(fetcher),
+            Arc::new(RecordingWritePort::default()),
+            Arc::new(DownloadSegmentLengthVerifyPort),
+        );
+
+        let result = executor
+            .accept_segment_execution(&request)
+            .expect("static fetcher should compose with writer and length verifier");
+
+        assert_eq!(
+            result,
+            DownloadSegmentExecutionResult::Completed {
+                request: request.clone(),
+                downloaded_bytes: 4,
+                partial_path: Some(request.write_target.clone()),
+                etag: Some("etag-d".into()),
+                hash_state_ref: Some(format!("hash-{}", request.segment_id)),
+            }
+        );
     }
 
     #[derive(Default)]

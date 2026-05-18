@@ -1257,3 +1257,11 @@
 - `FromStart` should return the configured segment bytes unchanged because this boundary treats the locator as already segment-scoped.
 - `Partial` should return bytes after `request.start_offset`, matching the corrected length verifier and partial writer semantics.
 - Missing locators or impossible partial offsets can be handled fetch failures for now; real network/provider errors and stable public `DL_NETWORK_*` / `DL_PROVIDER_*` projection remain later.
+
+## Phase 125 Downloads Static Segment Fetcher Findings
+
+- Required code context was read in focused chunks: README_IMPL 7.41, `DownloadSegmentFetchPort`, fetch outcome/result types, resume mode semantics, existing executor test helpers, and crate re-export surface.
+- The first static fetcher can live entirely in `driver.rs` beside the fetch port because it is module-local execution infrastructure, not a provider adapter.
+- Tests should cover direct fetcher behavior and one executor completion path with `RecordingWritePort` plus `DownloadSegmentLengthVerifyPort`, proving the static fetcher composes with existing sub-ports.
+- RED/GREEN confirmed the static fetcher returns configured from-start bytes and etag, returns partial remaining bytes after `start_offset`, reports missing locators and impossible offsets as handled failures, and composes through `DownloadSegmentExecutor`.
+- The implementation remains deterministic and in-memory; it does not introduce HTTP, provider auth, streaming workers, public network/provider error projection, composition-root production wiring, host transport, frontend, or schema work.

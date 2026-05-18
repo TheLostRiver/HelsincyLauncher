@@ -15,9 +15,9 @@ pub use driver::{
     DownloadSegmentExecutor, DownloadSegmentFetchOutcome, DownloadSegmentFetchPort,
     DownloadSegmentFetchResult, DownloadSegmentFilesystemWritePort,
     DownloadSegmentGuardedWritePort, DownloadSegmentHandledFailure,
-    DownloadSegmentLengthVerifyPort, DownloadSegmentStagingTarget, DownloadSegmentVerifyOutcome,
-    DownloadSegmentVerifyPort, DownloadSegmentWriteOutcome, DownloadSegmentWritePort,
-    DownloadSegmentWriteResult,
+    DownloadSegmentLengthVerifyPort, DownloadSegmentStagingTarget, DownloadSegmentStaticFetchPort,
+    DownloadSegmentStaticFetchSource, DownloadSegmentVerifyOutcome, DownloadSegmentVerifyPort,
+    DownloadSegmentWriteOutcome, DownloadSegmentWritePort, DownloadSegmentWriteResult,
 };
 pub use facade::{
     build_resume_segment_decisions, build_resume_work_plan, DownloadFacade, DownloadJobRecord,

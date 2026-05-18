@@ -463,9 +463,9 @@
 - Preserved boundaries:
   - No fetcher boundary or HTTP range implementation, no hash algorithms, no file/job-level integrity sealing, no retry/backoff, no public `DL_VERIFY_FAILED` projection, no production wiring, no host transport/frontend/schema work.
 
-## Current Handoff - AT-2026-05-19-253
+## Latest Handoff - AT-2026-05-19-253
 
-- Status: completed; commit/push pending.
+- Status: completed; final commit `dcf62cf`, pushed to `origin/main`.
 - Scope:
   - Update README_IMPL port status, roadmap, verifier implementation status, and add static fetcher boundary 7.41.
   - Update PWF records for Phase 124.
@@ -476,6 +476,23 @@
   - No Rust code, no real HTTP range requests, no provider auth/CDN/retry behavior, no public network/provider error projection, no production wiring, no host transport/frontend/schema work.
 - Next likely code task:
   - implement `DownloadSegmentStaticFetchPort` with focused TDD for from-start bytes+etag, partial remaining bytes, and handled missing/invalid source failures.
+
+## Current Handoff - AT-2026-05-19-254
+
+- Status: completed; commit/push pending.
+- Scope:
+  - Add `DownloadSegmentStaticFetchPort` and static source record with focused TDD.
+  - Re-export the fetcher/source from `crates/module-downloads/src/lib.rs`.
+  - Update README_IMPL implementation status and PWF records.
+- Validation passed:
+  - RED failed on missing static fetcher types.
+  - Focused static fetcher tests passed with 5/5 tests.
+  - Focused executor adapter tests passed.
+  - Full `launcher-module-downloads --lib` passed with 71/71 tests.
+  - `launcher-composition-root` check passed.
+  - Scoped rustfmt check passed after formatting.
+- Preserved boundaries:
+  - No real HTTP range requests, provider auth/CDN/retry behavior, public network/provider error projection, streaming worker pools, production wiring, host transport/frontend/schema work.
 
 ## Dirty Worktree To Preserve
 

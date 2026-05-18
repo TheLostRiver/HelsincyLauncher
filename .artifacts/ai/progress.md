@@ -10903,7 +10903,20 @@
   - README_IMPL port status/roadmap and 7.41 were re-read.
   - PWF check reported Phase 124 in progress before final status update, matching the task state at that moment.
   - Scoped docs/PWF `git diff --check` passed with CRLF warnings only.
-- Next step is docs/PWF-only commit.
+- Final commit `dcf62cf` was pushed to `origin/main`.
+
+## 2026-05-19 - AT-2026-05-19-254 Downloads Static Segment Fetcher
+
+- Opened Phase 125 / AT-2026-05-19-254 after AT-253 was committed and pushed as `dcf62cf`.
+- Re-read README_IMPL 7.41 and current fetch/write/verify code before coding.
+- Added RED tests for from-start bytes+etag, partial remaining bytes, handled missing/invalid source failures, and executor completion; RED failed on missing static fetcher types.
+- Implemented `DownloadSegmentStaticFetchSource` and `DownloadSegmentStaticFetchPort`, re-exported both, and updated README_IMPL implementation status.
+- Validation passed:
+  - `cargo test -p launcher-module-downloads --lib download_segment_static_fetch_port --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 5/5 focused fetcher tests after formatting.
+  - `cargo test -p launcher-module-downloads --lib download_segment_executor_adapter --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 4/4 focused adapter tests.
+  - `cargo test -p launcher-module-downloads --lib --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 71/71 tests after formatting.
+  - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed after formatting.
+  - `cargo fmt --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --package launcher-module-downloads -- --check` passed after scoped formatting.
 
 ### Auto Record: 2026-05-19 00:52:22
 - Tool: apply_patch
@@ -11337,5 +11350,89 @@
 ### Auto Record: 2026-05-19 01:52:47
 - Tool: apply_patch
 - Phase: Phase 124 - Downloads Static Segment Fetcher Boundary (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 02:01:17
+- Tool: apply_patch
+- Phase: Phase 124 - Downloads Static Segment Fetcher Boundary (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-19 02:01:34
+- Tool: apply_patch
+- Phase: Phase 125 - Downloads Static Segment Fetcher (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-19 02:01:50
+- Tool: apply_patch
+- Phase: Phase 125 - Downloads Static Segment Fetcher (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-19 02:02:02
+- Tool: apply_patch
+- Phase: Phase 125 - Downloads Static Segment Fetcher (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-19 02:02:16
+- Tool: apply_patch
+- Phase: Phase 125 - Downloads Static Segment Fetcher (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 02:02:58
+- Tool: apply_patch
+- Phase: Phase 125 - Downloads Static Segment Fetcher (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-19 02:03:54
+- Tool: apply_patch
+- Phase: Phase 125 - Downloads Static Segment Fetcher (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-19 02:04:07
+- Tool: apply_patch
+- Phase: Phase 125 - Downloads Static Segment Fetcher (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\lib.rs` (update)
+
+### Auto Record: 2026-05-19 02:05:12
+- Tool: apply_patch
+- Phase: Phase 125 - Downloads Static Segment Fetcher (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-19 02:08:14
+- Tool: apply_patch
+- Phase: Phase 125 - Downloads Static Segment Fetcher (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-19 02:09:12
+- Tool: apply_patch
+- Phase: Phase 125 - Downloads Static Segment Fetcher (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-19 02:09:29
+- Tool: apply_patch
+- Phase: Phase 125 - Downloads Static Segment Fetcher (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-19 02:09:48
+- Tool: apply_patch
+- Phase: Phase 125 - Downloads Static Segment Fetcher (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-19 02:10:05
+- Tool: apply_patch
+- Phase: Phase 125 - Downloads Static Segment Fetcher (complete)
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)

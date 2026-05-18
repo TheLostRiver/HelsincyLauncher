@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 124 - Downloads Static Segment Fetcher Boundary (complete)
+Phase 125 - Downloads Static Segment Fetcher (complete)
 
 ## Current Focus
 
@@ -42,7 +42,8 @@ Phase 124 - Downloads Static Segment Fetcher Boundary (complete)
 - AT-2026-05-19-250 completed the concrete segment length verifier boundary before Rust code; committed and pushed as `10d8c58`.
 - AT-2026-05-19-251 completed the concrete segment length verifier with focused TDD; committed and pushed as `c8d1e5c`.
 - AT-2026-05-19-252 completed the partial resume semantics correction in the length verifier; committed and pushed as `6684205`.
-- AT-2026-05-19-253 completed the static segment fetcher boundary before Rust code; commit/push pending.
+- AT-2026-05-19-253 completed the static segment fetcher boundary before Rust code; committed and pushed as `dcf62cf`.
+- AT-2026-05-19-254 completed the static segment fetcher with focused TDD; commit/push pending.
 - AT-2026-05-17-220 was published as commit `aa8d6e3` after documenting the shared runtime execution-turn boundary.
 - AT-2026-05-17-219 was published as commit `f618718` after adding host transport smoke coverage for downloads policy runtime application.
 - AT-2026-05-17-218 was published as commit `5aae7f1` after adding documentation-budget rules.
@@ -922,6 +923,12 @@ Phase 124 - Downloads Static Segment Fetcher Boundary (complete)
 - Atomic tasks: AT-2026-05-19-253
 - **Status:** complete
 
+### Phase 125: Downloads Static Segment Fetcher
+
+- Outcome: implement `DownloadSegmentStaticFetchPort` behind `DownloadSegmentFetchPort`, proving from-start bytes/etag, partial remaining-byte fetches, handled missing/invalid source failures, and executor completion without real HTTP/provider behavior.
+- Atomic tasks: AT-2026-05-19-254
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -1170,7 +1177,8 @@ Phase 124 - Downloads Static Segment Fetcher Boundary (complete)
 244. AT-2026-05-19-250 - completed - defined the concrete downloads segment length verifier boundary before Rust code; committed and pushed as `10d8c58`.
 245. AT-2026-05-19-251 - completed - implemented the concrete downloads segment length verifier with focused TDD; committed and pushed as `c8d1e5c`.
 246. AT-2026-05-19-252 - completed - corrected partial resume semantics in the downloads length verifier; committed and pushed as `6684205`.
-247. AT-2026-05-19-253 - completed - defined the static segment fetcher boundary before Rust code; commit/push pending.
+247. AT-2026-05-19-253 - completed - defined the static segment fetcher boundary before Rust code; committed and pushed as `dcf62cf`.
+248. AT-2026-05-19-254 - completed - implemented the static segment fetcher with focused TDD; commit/push pending.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
