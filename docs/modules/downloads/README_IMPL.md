@@ -1678,6 +1678,33 @@ Next Rust slice:
 3. implement the smallest module-owned guarded writer wrapper around `DownloadSegmentWritePort`;
 4. keep existing executor adapter, failed-result checkpoint, full downloads module, and composition-root gates green.
 
+### 7.39 Filesystem Staging Writer Boundary
+
+The next concrete IO slice is the filesystem staging writer behind `DownloadSegmentWritePort`. This writer is still module-local execution infrastructure, not production composition wiring.
+
+Boundary rules:
+
+1. the writer owns a configured filesystem staging root that represents `.downloads/staging`;
+2. each write is scoped under `<staging_root>/<job_id>/<validated_write_target>`;
+3. `DownloadSegmentStagingTarget` remains the only target parser before joining paths;
+4. the first writer may create parent directories and write fetched in-memory bytes to the target file;
+5. `DownloadResumeWorkMode::FromStart` may truncate the target before writing, while `Partial` may preserve existing bytes and write from `start_offset`;
+6. successful writes return `DownloadSegmentWriteOutcome::Written` with `downloaded_bytes = fetched.bytes.len()` and `partial_path = Some(validated_write_target)`;
+7. filesystem errors remain `AppError` infrastructure/configuration failures until public `DL_WRITE_FAILED` projection and retry/backoff are separately designed.
+
+Non-goals:
+
+1. no provider fetch, HTTP range requests, hash verification, final artifact rename, cleanup, sparse preallocation, production composition-root wiring, SQLite schema changes, public error DTOs, host transport, frontend, or runtime terminal state;
+2. no direct writes outside the configured staging root;
+3. no attempt to expose segment or chunk details through host IPC.
+
+Next Rust slice:
+
+1. add focused RED tests for job-scoped path creation, safe write facts, and partial writes preserving an existing prefix;
+2. implement a small `DownloadSegmentFilesystemWritePort` behind `DownloadSegmentWritePort`;
+3. keep the guarded writer wrapper usable around the filesystem writer;
+4. validate with focused writer tests, executor adapter tests, full downloads module tests, composition-root check, scoped rustfmt, and scoped diff-check.
+
 ---
 
 ## 8. Error Semantics

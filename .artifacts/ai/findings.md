@@ -1206,3 +1206,10 @@
 - Current downloads backend has strong resume/checkpoint/policy/query scaffolding plus a module-local segment executor shell, but production concrete execution is still intentionally absent.
 - The safe remaining order is: filesystem staging writer, verifier shell, fetcher boundary, composition wiring, runtime terminal projection, retry/backoff/public execution errors, then host/frontend projection.
 - The roadmap belongs in README_IMPL because it is durable implementation ordering, while individual AT evidence stays in `.artifacts/ai`.
+
+## Phase 119 Filesystem Staging Writer Boundary Findings
+
+- Required context was read in focused chunks: README_IMPL roadmap and segment execution sections, download runtime SegmentWriter/sparse-write/staging-first notes, storage staging-file ownership notes, and current `DownloadSegmentStagingTarget`/writer contracts.
+- The first concrete writer should be job-scoped: a configured `.downloads/staging` root plus `request.job_id` plus a validated target.
+- `partial_path` should remain the validated target relative to the job staging root, matching existing fake writer/checkpoint behavior and avoiding a new checkpoint shape.
+- Filesystem errors should stay on the `AppError` infrastructure path for now; public `DL_WRITE_FAILED` projection and retry/backoff need a later classification boundary.

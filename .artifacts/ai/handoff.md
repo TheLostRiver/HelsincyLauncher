@@ -369,7 +369,7 @@
 
 ## Latest Handoff - AT-2026-05-19-247
 
-- Status: completed; commit/push pending at the time this handoff entry was written.
+- Status: completed; final commit `99e8160`, pushed to `origin/main`.
 - Scope:
   - Updated README_IMPL current port status and remaining downloads completion roadmap.
   - Kept the slice documentation/PWF-only.
@@ -381,6 +381,21 @@
 - Preserved boundaries:
   - No Rust code in AT-247.
   - No production wiring, retry/backoff, public execution errors, transport, frontend, or schema work.
+
+## Latest Handoff - AT-2026-05-19-248
+
+- Status: completed; commit/push pending at the time this handoff entry was written.
+- Scope:
+  - Added README_IMPL 7.39 for the filesystem staging writer boundary.
+  - Kept the slice documentation/PWF-only.
+- Validation passed:
+  - README_IMPL 7.39 re-read;
+  - scoped docs/PWF diff-check passed with CRLF warnings only.
+- Next likely coding task:
+  - implement `DownloadSegmentFilesystemWritePort` with TDD for job-scoped writes and partial offset writes.
+- Preserved boundaries:
+  - No Rust code in AT-248.
+  - No provider fetch, verifier, production wiring, retry/backoff, public errors, transport, frontend, or schema work.
 
 ## Dirty Worktree To Preserve
 

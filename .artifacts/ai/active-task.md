@@ -2,13 +2,13 @@
 
 ## Identity
 
-- task id: AT-2026-05-19-247
-- title: Define downloads completion roadmap
+- task id: AT-2026-05-19-248
+- title: Define filesystem staging writer boundary
 - status: completed
 
 ## Goal
 
-Record the remaining downloads backend implementation order in README_IMPL so subsequent coding slices can proceed without mixing filesystem writer, verifier, fetcher, composition wiring, runtime projection, transport, or frontend work.
+Define the first concrete filesystem staging writer boundary behind `DownloadSegmentWritePort` before adding disk-writing Rust code.
 
 ## Scope
 
@@ -44,24 +44,24 @@ Record the remaining downloads backend implementation order in README_IMPL so su
 Read before writing:
 
 1. README/docs routing and documentation-budget rules.
-2. `docs/modules/downloads/README_ARCH.md`, `README_API.md`, `README_FLOW.md`, and `README_IMPL.md` current state.
-3. `docs/TauriDownloadRuntimeDesign.md` SegmentWriter/staging/fetch/verify sections.
-4. `docs/TauriStorageAndDatabaseDesign.md` staging file ownership notes.
-5. `docs/TauriErrorHandlingAndProjectionDesign.md`, `docs/TauriTestingStrategyAndQualityGateDesign.md`, and composition-root wiring rules.
+2. `docs/modules/downloads/README_IMPL.md` roadmap and 7.35-7.38.
+3. `docs/TauriDownloadRuntimeDesign.md` SegmentWriter, sparse/partial writes, staging-first, and cleanup sections.
+4. `docs/TauriStorageAndDatabaseDesign.md` staging file ownership and SQLite boundary notes.
+5. Existing `DownloadSegmentStagingTarget`, `DownloadSegmentWritePort`, and `DownloadResumeWorkMode` code.
 
 ## Hypothesis
 
-- falsifiable documentation hypothesis: README_IMPL can define a clear completion roadmap that lets the next coding slice start with filesystem staging writer work without prematurely adding production wiring, retry/backoff, public error projection, host transport, or frontend changes.
+- falsifiable documentation hypothesis: README_IMPL can make the first concrete filesystem writer slice specific enough to TDD path scoping, parent directory creation, from-start writes, and partial offset writes without adding production wiring or public error projection.
 
 ## Cheap Check
 
-1. Update the README_IMPL port-status table for current segment execution sub-ports.
-2. Add a concise completion roadmap with stable implementation order and boundaries.
+1. Add README_IMPL 7.39 for the filesystem staging writer boundary.
+2. Record accepted behavior, non-goals, and next RED tests.
 3. Update PWF records.
 4. Run scoped docs/PWF diff-check and PWF completeness check.
 
 ## Validation Gate
 
-1. README_IMPL identifies current segment sub-port status and next implementation order.
+1. README_IMPL 7.39 identifies path scoping, write facts, partial-write behavior, and non-goals.
 2. PWF records identify AT-247 and leave all phases complete.
 3. Scoped diff-check passes before commit/push.
