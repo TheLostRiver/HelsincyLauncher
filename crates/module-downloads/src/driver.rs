@@ -976,6 +976,16 @@ impl DownloadJobDriver {
     }
 }
 
+fn checkpoint_is_terminal_completed(checkpoint: &DownloadCheckpointRecord) -> bool {
+    // Completion is downloads-owned proof: a non-empty known segment set with every fact completed.
+    // 完成态必须由 downloads 自己证明：已知 segment 集合非空，且每条事实都已完成。
+    !checkpoint.segments.is_empty()
+        && checkpoint
+            .segments
+            .iter()
+            .all(|segment| segment.status == DownloadSegmentCheckpointStatus::Completed)
+}
+
 impl JobDriver<()> for DownloadJobDriver {
     fn module(&self) -> &'static str {
         "downloads"
@@ -1009,6 +1019,9 @@ impl JobDriver<()> for DownloadJobDriver {
         };
 
         match self.execute_local_resume_turn(context.job_id(), segment_execution_port)? {
+            Some(checkpoint) if checkpoint_is_terminal_completed(&checkpoint) => {
+                Ok(JobRunDisposition::Completed)
+            }
             Some(_) => Ok(JobRunDisposition::Accepted),
             None => Ok(JobRunDisposition::Deferred {
                 reason: format!(
@@ -1915,7 +1928,7 @@ mod tests {
     }
 
     #[test]
-    fn driver_run_with_execution_port_records_completed_checkpoint_and_accepts() {
+    fn driver_run_with_execution_port_records_completed_checkpoint_and_returns_completed() {
         let repo = Arc::new(InMemoryCheckpointRepository::default());
         let scheduler = InMemoryDownloadResumeWorkScheduler::new();
         let job_id = JobId::generate();
@@ -1938,10 +1951,10 @@ mod tests {
             .run(JobExecutionContext::new(&snapshot))
             .expect("fake completed execution should produce a run disposition");
 
-        assert_eq!(disposition, JobRunDisposition::Accepted);
+        assert_eq!(disposition, JobRunDisposition::Completed);
         assert!(
             scheduler.pending_work().is_empty(),
-            "accepted run should consume the pending work it executed"
+            "completed run should consume the pending work it executed"
         );
         assert_eq!(
             repo.load(&job_id)
@@ -1961,6 +1974,60 @@ mod tests {
                 hash_state_ref: Some("hash-segment-run-completed".into()),
             }],
             "fake completed run should persist checkpoint mutation"
+        );
+    }
+
+    #[test]
+    fn driver_run_with_failed_checkpoint_mutation_stays_non_terminal() {
+        let repo = Arc::new(InMemoryCheckpointRepository::default());
+        let scheduler = InMemoryDownloadResumeWorkScheduler::new();
+        let job_id = JobId::generate();
+        let checkpoint = DownloadCheckpointRecord::empty(job_id.clone());
+        let plan = make_resume_work_plan("segment-run-failed");
+        let driver = DownloadJobDriver::with_pending_resume_work_source_and_execution_port(
+            repo.clone(),
+            Arc::new(scheduler.clone()),
+            Arc::new(FailedSegmentExecutionPort),
+        );
+
+        repo.save(&checkpoint)
+            .expect("saving a synthetic checkpoint should succeed");
+        scheduler
+            .schedule_resume_work(&job_id, &plan)
+            .expect("scheduling pending work for the driver should succeed");
+        let snapshot = make_snapshot(job_id.clone());
+
+        let disposition = driver
+            .run(JobExecutionContext::new(&snapshot))
+            .expect("fake failed execution should produce a non-terminal run disposition");
+
+        assert_eq!(
+            disposition,
+            JobRunDisposition::Accepted,
+            "failed segment checkpoint mutation remains non-terminal until retry/backoff classification exists"
+        );
+        assert!(
+            scheduler.pending_work().is_empty(),
+            "non-terminal failed mutation should still consume the pending work it executed"
+        );
+        assert_eq!(
+            repo.load(&job_id)
+                .expect("loading saved checkpoint should succeed")
+                .expect("saved checkpoint should exist")
+                .segments,
+            vec![DownloadSegmentCheckpointRecord {
+                job_id,
+                segment_id: "segment-run-failed".into(),
+                file_id: "file-1".into(),
+                offset: 0,
+                length: 1024,
+                downloaded_bytes: 128,
+                status: DownloadSegmentCheckpointStatus::Failed,
+                partial_path: None,
+                etag: None,
+                hash_state_ref: None,
+            }],
+            "fake failed run should persist checkpoint mutation without terminal projection"
         );
     }
 

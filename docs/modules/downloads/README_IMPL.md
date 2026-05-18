@@ -162,8 +162,8 @@ Recommended order:
 4. completed: define concrete executor composition-root wiring without introducing real provider HTTP behavior;
 5. completed: implement the composition-root wiring proof with explicit static/local sources while keeping default desktop production deferred;
 6. completed: define and implement runtime terminal completion/failure projection after concrete execution can advance checkpoints deterministically;
-7. next: teach the downloads driver to return `Completed` only after a completion-first checkpoint proof says the known segment set is complete;
-8. add retry/backoff, terminal failed driver decisions, and public `DL_*` execution error projection only after concrete failures are classified;
+7. completed: teach the downloads driver to return `Completed` only after a completion-first checkpoint proof says the known segment set is complete;
+8. next: add retry/backoff, terminal failed driver decisions, and public `DL_*` execution error projection only after concrete failures are classified;
 9. keep host transport and frontend changes last, exposing only aggregate job snapshots and stable command/query DTOs.
 
 Every slice must preserve these boundaries:
@@ -1894,6 +1894,19 @@ First Rust slice:
 3. add the smallest downloads-owned helper or inline decision needed to classify the saved checkpoint after `execute_local_resume_turn(...)`;
 4. keep missing execution port, missing checkpoint, no pending work, accepted-only results, and default production deferred behavior unchanged;
 5. run focused downloads driver tests, full `launcher-module-downloads --lib`, `cargo check -p launcher-composition-root`, scoped rustfmt, and scoped diff-check.
+
+Implementation status:
+
+1. `DownloadJobDriver::run(...)` returns `JobRunDisposition::Completed` after local execution saves a non-empty checkpoint whose known segment facts are all `Completed`;
+2. failed segment checkpoint mutation still returns `Accepted`, keeping retry/backoff and terminal-failure classification out of this slice;
+3. missing execution port, missing checkpoint, no pending work, and accepted-only result sets keep their existing deferred behavior;
+4. focused driver tests cover all-completed completion and failed-mutation non-terminal behavior.
+
+Next boundary:
+
+1. define retry/backoff and failed segment classification before any downloads driver path returns `TerminalFailed`;
+2. decide which failed checkpoint facts are retryable, terminal, or user-attention states without relying on transient reason strings;
+3. introduce stable public `DL_*` execution errors only after the internal classification is durable enough to project.
 
 ---
 

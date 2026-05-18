@@ -586,6 +586,23 @@
 - Next likely code task:
   - add focused downloads driver RED tests for all-completed checkpoint returning `JobRunDisposition::Completed` and failed checkpoint mutation remaining non-terminal.
 
+## Current Handoff - AT-2026-05-19-260
+
+- Status: completed; commit/push pending.
+- Scope:
+  - `crates/module-downloads/src/driver.rs`
+  - root README and downloads README_IMPL implementation status after green
+  - PWF records under `.artifacts/ai`
+- Completed TDD path:
+  - RED failed on all-completed checkpoint returning `Accepted`.
+  - Added the smallest downloads-owned checkpoint terminal-completion decision after local execution.
+  - Verified all-completed returns `Completed` and failed checkpoint mutation remains non-terminal.
+  - Verified focused driver tests, full downloads module lib tests, composition-root check, scoped rustfmt, and diff-check.
+- Preserved boundaries:
+  - No `TerminalFailed` return from downloads, no retry/backoff/public `DL_*`, no transport/frontend/schema/provider/scheduler/lease changes.
+- Next likely task:
+  - define retry/backoff and terminal-failed classification before any downloads driver path returns `TerminalFailed`.
+
 ## Dirty Worktree To Preserve
 
 - Unrelated unstaged/unknown work remains present and must not be committed with AT-249:

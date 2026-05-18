@@ -11604,6 +11604,22 @@
 - Published AT-259 as `bf6af24 docs: define downloads completion terminal boundary` and pushed it to `origin/main`.
 - Next likely code task: implement README_IMPL 7.44 with focused downloads driver TDD.
 
+## Agent Note: 2026-05-19 - Start AT-2026-05-19-260
+
+- AT-259 and its publish record are pushed; README_IMPL 7.44 is the active implementation spec.
+- Read focused downloads driver test helpers, existing `run(...)` tests, checkpoint mutation helpers, and local execution orchestration tests before editing code.
+- Selected RED tests around existing `DownloadJobDriver::run(...)`: all-completed checkpoint should return `Completed`, while failed checkpoint mutation should stay non-terminal.
+- Scope includes post-green README/README_IMPL status updates, but no terminal failed driver decision, retry/backoff, public `DL_*`, transport, frontend, provider HTTP, schema, scheduler, or lease work.
+
+## Agent Note: 2026-05-19 - Complete AT-2026-05-19-260
+
+- RED observed: completed local execution persisted a completed checkpoint but `DownloadJobDriver::run(...)` returned `Accepted` instead of `Completed`.
+- Added a downloads-owned completion-first checkpoint decision requiring a non-empty known segment set with every segment status `Completed`.
+- Added/updated focused tests proving all-completed local execution returns `Completed` while failed segment checkpoint mutation remains non-terminal `Accepted`.
+- Updated root README and README_IMPL 7.44 implementation status; next durable boundary is retry/backoff and terminal failed classification.
+- Validation passed: focused completed and failed-nonterminal tests, full `launcher-module-downloads --lib` 72/72, `cargo check -p launcher-composition-root`, scoped rustfmt, and scoped diff-check with CRLF warnings only.
+- Next likely task: define retry/backoff and terminal-failed classification before any downloads driver path returns `TerminalFailed`.
+
 ### Auto Record: 2026-05-19 02:52:22
 - Tool: apply_patch
 - Phase: Phase 128 - Runtime Terminal Projection Boundary (in_progress)
@@ -11712,5 +11728,42 @@
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 03:21:25
+- Tool: apply_patch
+- Phase: Phase 131 - Downloads Driver Completion-first Terminal Implementation (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 03:22:13
+- Tool: apply_patch
+- Phase: Phase 131 - Downloads Driver Completion-first Terminal Implementation (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-19 03:22:51
+- Tool: apply_patch
+- Phase: Phase 131 - Downloads Driver Completion-first Terminal Implementation (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\crates\module-downloads\src\driver.rs` (update)
+
+### Auto Record: 2026-05-19 03:23:49
+- Tool: apply_patch
+- Phase: Phase 131 - Downloads Driver Completion-first Terminal Implementation (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\README.md` (update)
+
+### Auto Record: 2026-05-19 03:25:31
+- Tool: apply_patch
+- Phase: Phase 131 - Downloads Driver Completion-first Terminal Implementation (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)

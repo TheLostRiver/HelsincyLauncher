@@ -1307,3 +1307,10 @@
 - Current failed segment checkpoint persistence drops the local failure reason and retryable hint, so using `TerminalFailed` from downloads now would be too broad.
 - The safe first driver terminal decision is completion-only: non-empty known checkpoint, all segment statuses `Completed`, and only after the module has saved that checkpoint.
 - `NoPendingWork`, empty checkpoints, `Pending`/`InProgress`/`Failed` segment facts, missing execution port, missing checkpoint, and accepted-only result sets must remain non-terminal for the first Rust slice.
+
+## Phase 131 Downloads Driver Completion-first Terminal Implementation Findings
+
+- RED confirmed the current driver gap: a fake completed execution saved a completed checkpoint but `run(...)` still returned `Accepted`.
+- The minimal implementation adds a downloads-owned `checkpoint_is_terminal_completed(...)` decision: checkpoint segments must be non-empty and every known segment status must be `Completed`.
+- Failed segment checkpoint mutation stays `Accepted`, preserving retry/backoff and terminal-failure classification for a later boundary.
+- Validation confirmed existing missing-port, missing-checkpoint, no-pending-work, and accepted-only result branches remain covered by the full downloads module test suite.

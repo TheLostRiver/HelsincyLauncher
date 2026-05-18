@@ -21,7 +21,7 @@ MyEpicLauncher 是一个面向桌面端的启动器重写仓库。
 2. 目标架构是 Tauri 2 + Rust stable + typed IPC + backend-owned business truth。
 3. 后端骨架的落地顺序、测试门槛、安全边界、环境前提、发布/更新边界都已经写成独立文档并完成第一批落盘。
 4. 当前仓库已经具备 `Cargo.toml`、`Cargo.lock`、`src-tauri/` 和 `crates/`，且核心 smoke baseline 已验证通过。
-5. downloads 后端正在按模块实现文档推进 concrete segment execution：filesystem writer、length verifier、static fetcher、composition-root 静态执行器接线证明，以及 `kernel-jobs` terminal disposition projection 已完成；下一步是实现 downloads driver 的 completion-first 终态判定。
+5. downloads 后端正在按模块实现文档推进 concrete segment execution：filesystem writer、length verifier、static fetcher、composition-root 静态执行器接线证明、`kernel-jobs` terminal disposition projection，以及 downloads driver completion-first 终态判定已完成；下一步是 retry/backoff 与终态失败分类。
 
 ---
 
@@ -156,7 +156,7 @@ MyEpicLauncher/
 短期最明确的下一步不是继续扩写大蓝图，而是：
 
 1. 在已经通过 smoke gate 的 backend skeleton 基线上继续推进更窄的集成切片。
-2. downloads 后端优先让 downloads driver 在非空 checkpoint 且已知 segment 全部完成后返回 `Completed`，再设计 retry/backoff、终态失败和稳定 `DL_*` 执行错误分类。
+2. downloads 后端下一步应设计 retry/backoff、终态失败和稳定 `DL_*` 执行错误分类，再考虑 host/frontend 聚合投影。
 3. 把 contributor-facing 的协作入口和 current-repo 导航补平。
 4. 保持 README、`.artifacts/ai` 协议和深度设计文档之间的一致性。
 
