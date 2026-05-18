@@ -11636,6 +11636,12 @@
 - Validation passed: scoped `git diff --check` for README, README_IMPL, and PWF task files returned only CRLF normalization warnings.
 - Next likely code task: add failed metadata fields to checkpoint records, preserve them in failed checkpoint mutation, and update SQLite round-trip tests.
 
+## Agent Note: 2026-05-19 - Publish AT-2026-05-19-261
+
+- Committed AT-261 docs as `124dbb3` with message `docs: define failed segment metadata boundary`.
+- Pushed `124dbb3` to `origin/main`.
+- Next likely code task remains failed metadata persistence on checkpoint records and SQLite round-trip mapping, with downloads driver failure mutation still non-terminal.
+
 ### Auto Record: 2026-05-19 02:52:22
 - Tool: apply_patch
 - Phase: Phase 128 - Runtime Terminal Projection Boundary (in_progress)
@@ -11812,3 +11818,12 @@
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 03:39:41
+- Tool: apply_patch
+- Phase: Phase 132 - Failed Segment Metadata Boundary (complete)
+- Files:
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/task-plan.md` (update)
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/active-task.md` (update)
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/handoff.md` (update)
+  - `D:/DEV/MyEpicLauncher/.artifacts/ai/progress.md` (update)

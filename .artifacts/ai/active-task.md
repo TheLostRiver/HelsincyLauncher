@@ -73,4 +73,4 @@ Read before writing:
 - Updated `docs/modules/downloads/README_IMPL.md` 6.1 and added 7.45 with failed segment metadata and retry classification rules.
 - Validation: scoped `git diff --check` over README, README_IMPL, and PWF task files passed with CRLF normalization warnings only.
 - No Rust, SQLite schema, transport, frontend, provider, scheduler, lease, or snapshot error payload files were edited.
-- Commit/push pending.
+- Commit `124dbb3` pushed to `origin/main`.

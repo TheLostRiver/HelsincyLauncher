@@ -50,7 +50,7 @@ Phase 132 - Failed Segment Metadata Boundary (complete)
 - AT-2026-05-19-258 implemented the explicit `kernel-jobs` terminal disposition projection slice with focused TDD; committed and pushed as `ac12ec0`.
 - AT-2026-05-19-259 defined the downloads driver completion-first terminal decision boundary before Rust changes; committed and pushed as `bf6af24`.
 - AT-2026-05-19-260 implemented the downloads driver completion-first terminal decision with focused TDD; committed and pushed as `55ab2da`.
-- AT-2026-05-19-261 defined failed segment metadata persistence and retry classification before Rust changes; commit/push pending.
+- AT-2026-05-19-261 defined failed segment metadata persistence and retry classification before Rust changes; committed and pushed as `124dbb3`.
 - AT-2026-05-17-220 was published as commit `aa8d6e3` after documenting the shared runtime execution-turn boundary.
 - AT-2026-05-17-219 was published as commit `f618718` after adding host transport smoke coverage for downloads policy runtime application.
 - AT-2026-05-17-218 was published as commit `5aae7f1` after adding documentation-budget rules.
@@ -1234,7 +1234,7 @@ Phase 132 - Failed Segment Metadata Boundary (complete)
 252. AT-2026-05-19-258 - completed - implemented explicit terminal run disposition projection in `kernel-jobs` with focused TDD; committed and pushed as `ac12ec0`.
 253. AT-2026-05-19-259 - completed - defined the downloads driver completion-first terminal decision boundary before Rust changes; committed and pushed as `bf6af24`.
 254. AT-2026-05-19-260 - completed - implemented the downloads driver completion-first terminal decision with focused TDD; committed and pushed as `55ab2da`.
-255. AT-2026-05-19-261 - completed - defined failed segment metadata persistence and retry classification before Rust changes; commit/push pending.
+255. AT-2026-05-19-261 - completed - defined failed segment metadata persistence and retry classification before Rust changes; committed and pushed as `124dbb3`.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions
