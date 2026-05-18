@@ -729,7 +729,7 @@
   - Push was not reattempted because the previous direct `origin/main` push was blocked by the safety reviewer and explicit approval is required before retrying.
 ## Current Handoff - AT-2026-05-19-266
 
-- Status: completed; local commit pending.
+- Status: completed; local commit `6910108`, push not reattempted after safety block.
 - Scope:
   - `crates/module-downloads/src/driver.rs`
   - `crates/module-downloads/src/lib.rs`
@@ -753,5 +753,8 @@
 - Note:
   - `Cargo.lock` has a pre-existing unrelated `launcher-module-engines` hunk and must not be committed for this AT.
   - Unintended package-wide rustfmt noise in unrelated foundation files was removed; only `time.rs` is part of this AT.
+- Publish:
+  - Local commit `6910108 feat: add download segment retry policy` exists.
+  - Push was not reattempted because the previous direct `origin/main` push was blocked by the safety reviewer and explicit approval is required before retrying.
 - Boundaries:
   - no scheduler loop, automatic retry dispatch, SQLite schema, `TerminalFailed`, public `DL_*`, host/frontend/provider HTTP, production wiring, leases, or snapshot error payload change.
