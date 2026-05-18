@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 138 - Retry Policy Checkpoint Wiring (complete)
+Phase 139 - Due Retry Selection Boundary (complete)
 
 ## Current Focus
 
@@ -57,6 +57,7 @@ Phase 138 - Retry Policy Checkpoint Wiring (complete)
 - AT-2026-05-19-265 completed the backoff policy, retry exhaustion, user-attention, and terminal failure eligibility boundary before any Rust retry policy implementation; committed locally as `d25ef93`, push not reattempted after safety block.
 - AT-2026-05-19-266 completed the pure README_IMPL 7.47 retry/backoff policy helper with TDD, without scheduler or terminal projection wiring; committed locally as `6910108`, push not reattempted after safety block.
 - AT-2026-05-19-267 completed retry policy wiring into failed checkpoint mutation so automatic retry decisions persist `next_retry_after` without scheduling or terminal projection; committed locally as `d99470d`, push not reattempted after safety block.
+- AT-2026-05-19-268 completed the due retry-ready segment selection boundary before Rust code tries to derive executable retry work.
 - AT-2026-05-17-220 was published as commit `aa8d6e3` after documenting the shared runtime execution-turn boundary.
 - AT-2026-05-17-219 was published as commit `f618718` after adding host transport smoke coverage for downloads policy runtime application.
 - AT-2026-05-17-218 was published as commit `5aae7f1` after adding documentation-budget rules.

@@ -12079,6 +12079,20 @@
 - Commit `d99470d feat: schedule retry eligibility in failed checkpoints` was created locally.
 - Push was not reattempted because the previous direct `origin/main` push was blocked by the safety reviewer and explicit approval is required before retrying.
 
+## 2026-05-19 - AT-268 start
+
+- Registered AT-2026-05-19-268 as a docs-first boundary task.
+- Required context read: README current roadmap and README_IMPL 7.47 next implementation target.
+- Planned output: README points the next Rust slice at due retry-ready checkpoint selection; README_IMPL gains a 7.48 boundary separating due failed checkpoint selection from later manifest-bound executable retry work.
+- No Rust code, SQLite schema, scheduler, public `DL_*`, `TerminalFailed`, host/frontend/provider/lease/snapshot payload change in this AT.
+
+## 2026-05-19 - AT-268 completion
+
+- Updated README roadmap so the next Rust slice is due retry-ready checkpoint selection before manifest-bound retry work derivation.
+- Added README_IMPL 7.48 with due-selection rules, selector input/output boundary, order preservation, first Rust slice, non-goals, and next manifest-binding boundary.
+- Validation passed: scoped `git diff --check` over README, README_IMPL, and PWF task files returned exit 0 with CRLF normalization warnings only.
+- Push remains blocked from the prior safety review; no additional push attempt was made without explicit approval.
+
 ### Auto Record: 2026-05-19 04:17:57
 - Tool: apply_patch
 - Phase: Phase 135 - Retry Failure Facts Persistence (in_progress)
@@ -12348,6 +12362,31 @@
 ### Auto Record: 2026-05-19 05:18:17
 - Tool: apply_patch
 - Phase: Phase 138 - Retry Policy Checkpoint Wiring (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 05:20:30
+- Tool: apply_patch
+- Phase: Phase 139 - Due Retry Selection Boundary (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 05:21:07
+- Tool: apply_patch
+- Phase: Phase 139 - Due Retry Selection Boundary (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\README.md` (update)
+
+### Auto Record: 2026-05-19 05:22:07
+- Tool: apply_patch
+- Phase: Phase 139 - Due Retry Selection Boundary (complete)
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)

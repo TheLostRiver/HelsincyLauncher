@@ -783,3 +783,20 @@
   - Push was not reattempted because the previous direct `origin/main` push was blocked by the safety reviewer and explicit approval is required before retrying.
 - Boundaries:
   - no scheduler loop, automatic retry dispatch, SQLite schema, `TerminalFailed`, public `DL_*`, host/frontend/provider HTTP, production wiring, leases, or snapshot error payload change.
+## Current Handoff - AT-2026-05-19-268
+
+- Status: completed; local commit pending.
+- Scope:
+  - root README
+  - `docs/modules/downloads/README_IMPL.md`
+  - PWF records under `.artifacts/ai`
+- Boundary to define:
+  - selecting failed segment checkpoint facts whose `next_retry_after` is due;
+  - separating selection from later manifest-bound executable retry work derivation.
+- Boundaries:
+  - no Rust code, SQLite schema, scheduler loop, automatic retry dispatch, public `DL_*`, `TerminalFailed`, host/frontend/provider HTTP, production wiring, leases, or snapshot error payload change.
+- Completed:
+  - README now points the next Rust slice at due retry-ready checkpoint selection.
+  - README_IMPL 7.48 defines due selection, delayed/missing/non-failed exclusions, order preservation, first Rust slice, and manifest-binding non-goals.
+- Validation:
+  - scoped `git diff --check` over README, README_IMPL, and PWF files passed with CRLF normalization warnings only.

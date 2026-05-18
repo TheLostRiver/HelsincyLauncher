@@ -156,7 +156,7 @@ MyEpicLauncher/
 短期最明确的下一步不是继续扩写大蓝图，而是：
 
 1. 在已经通过 smoke gate 的 backend skeleton 基线上继续推进更窄的集成切片。
-2. downloads 后端已落 durable retry facts、纯 `DownloadSegmentRetryPolicy` 计算器，并已在 failed checkpoint mutation 中写入 policy-computed `next_retry_after`；下一步应先做到期 retry-ready segment 选择，再考虑 scheduler、`TerminalFailed` 或公开稳定 `DL_*` 执行错误。
+2. downloads 后端已落 durable retry facts、纯 `DownloadSegmentRetryPolicy` 计算器，并已在 failed checkpoint mutation 中写入 policy-computed `next_retry_after`；下一步应先按文档实现 due retry-ready checkpoint selection，再把这些 checkpoint facts 与 manifest 重新绑定成可执行 retry work。
 3. 把 contributor-facing 的协作入口和 current-repo 导航补平。
 4. 保持 README、`.artifacts/ai` 协议和深度设计文档之间的一致性。
 

@@ -1381,3 +1381,9 @@
 - An internal `record_failed_segment_checkpoints_at(...)` helper keeps tests deterministic while the public mutation path can use `IsoDateTime::now()`.
 - Existing public driver run paths now persist a `next_retry_after` for automatic retry failures, but they still return `JobRunDisposition::Accepted`.
 - Exhausted and non-automatic decisions still leave `next_retry_after = None`; later work should select only due retry-ready segment facts.
+
+## 2026-05-19 - AT-268 context read
+
+- README now says the next downloads backend slice is due retry-ready segment selection.
+- README_IMPL 7.47 says the next implementation target is selecting failed segment checkpoints whose `next_retry_after` is due.
+- Checkpoint facts alone do not contain `source_locator`, `write_target`, or expected hash, so executable retry work must be a later manifest-bound slice.

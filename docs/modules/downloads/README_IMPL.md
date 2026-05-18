@@ -2073,6 +2073,49 @@ Next implementation target:
 
 ---
 
+### 7.48 Due Retry-Ready Segment Selection Boundary
+
+Policy-computed `next_retry_after` is now persisted, but a checkpoint fact is not yet executable retry work. The next safe slice must first select which failed checkpoint facts are due, then leave manifest-bound work derivation for a separate slice.
+
+Current Rust reality:
+
+1. Failed checkpoint mutation persists `next_retry_after` only for automatic retry decisions.
+2. Failed checkpoint records carry `segment_id`, `file_id`, offset/length, partial path, provider/hash facts, and retry facts.
+3. Failed checkpoint records do not carry `source_locator`, `write_target`, or expected hash; those remain manifest/work-plan facts.
+4. No selector currently returns only retry-ready failed segment checkpoint facts.
+
+Due-selection rules:
+
+1. A segment is retry-ready only when `status = Failed`.
+2. `next_retry_after` must be present.
+3. `next_retry_after <= now` means due; `next_retry_after > now` remains delayed.
+4. Missing `next_retry_after` means not selected, even if `failure_retryable = Some(true)`.
+5. Exhausted/user-attention/no-automatic-retry facts must not be selected by this helper.
+6. Selection must preserve checkpoint order so later manifest binding can remain deterministic.
+
+First Rust slice:
+
+1. add a pure selector such as `select_retry_ready_failed_segments(checkpoint, now)`;
+2. return segment checkpoint facts or stable segment identifiers, not executable requests;
+3. prove due, delayed, missing-time, non-failed, and order-preservation branches with focused tests;
+4. do not reconstruct manifest facts, enqueue runtime work, drain scheduler queues, or mutate checkpoint state in this slice.
+
+Non-goals:
+
+1. no scheduler loop, background worker, durable lease, or automatic retry dispatch;
+2. no manifest reconstruction or `DownloadSegmentExecutionRequest` derivation yet;
+3. no SQLite schema change;
+4. no job-level retry exhaustion aggregation or `TerminalFailed`;
+5. no public `DL_*`, host/frontend DTO, provider HTTP, production wiring, or snapshot error payload change.
+
+Next boundary after selector:
+
+1. bind selected retry-ready checkpoint facts back to current manifest segments;
+2. reject stale retry checkpoint facts with the existing mismatch semantics instead of silently retrying unsafe work;
+3. only then derive retry work items for a later scheduler/driver slice.
+
+---
+
 ## 8. Error Semantics
 
 Downloads-domain errors use `DL_*` codes when they become stable public classifications.
