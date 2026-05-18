@@ -1224,3 +1224,11 @@
 - The concrete writer returns existing write facts only: `downloaded_bytes`, `partial_path`, and `hash_state_ref = None`; provider fetch, hash verification, final artifact moves, production wiring, retry/backoff, public `DL_*` projection, host transport, frontend, and schema work remain separate later slices.
 - Filesystem IO failures currently stay on the infrastructure `AppError` path, matching the documented split before the later public execution-error classification boundary.
 - README_IMPL 6.1 and 7.39 now reflect the implemented writer status and identify the verifier shell as the next backend-owned slice.
+
+## Phase 121 Downloads Segment Length Verifier Boundary Findings
+
+- Required context was read in focused chunks: repository README, docs map, CONTRIBUTING, downloads module docs, README_IMPL port status/7.39, download runtime verifier/staging-first/verification-stage notes, error projection rules, testing guidance, and code comment rules.
+- The first verifier should stay module-local behind `DownloadSegmentVerifyPort`; it should not become a host DTO, scheduler policy, retry engine, or composition-root wiring task.
+- The smallest useful verifier is byte-length only: compare `written.downloaded_bytes` with `request.length` after the writer returns facts.
+- A length mismatch can reuse the existing handled segment failure path through `DownloadSegmentVerifyOutcome::Failed`, preserving `AppError` for infrastructure/configuration failures and avoiding public `DL_VERIFY_FAILED` projection for now.
+- Hash verification, file-level verification, job-level manifest sealing, retry/backoff, runtime terminal state, host transport, frontend, and schema work remain later slices.

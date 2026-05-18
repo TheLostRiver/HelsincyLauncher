@@ -6,7 +6,7 @@ Use the stabilized `.artifacts/ai` workflow to drive current-repo backend skelet
 
 ## Current Phase
 
-Phase 120 - Downloads Filesystem Staging Writer (complete)
+Phase 121 - Downloads Segment Length Verifier Boundary (complete)
 
 ## Current Focus
 
@@ -38,7 +38,8 @@ Phase 120 - Downloads Filesystem Staging Writer (complete)
 - AT-2026-05-18-246 completed guarded writer executor failure mapping coverage; committed and pushed as `e6ce619`.
 - AT-2026-05-19-247 completed the remaining downloads backend completion roadmap before continuing filesystem writer code; committed and pushed as `99e8160`.
 - AT-2026-05-19-248 completed the first concrete filesystem staging writer boundary; committed and pushed as `cd6fa4b`.
-- AT-2026-05-19-249 completed and documented the concrete filesystem staging writer with focused TDD; commit/push pending.
+- AT-2026-05-19-249 completed and documented the concrete filesystem staging writer with focused TDD; committed and pushed as `e267db9`.
+- AT-2026-05-19-250 completed the concrete segment length verifier boundary before Rust code; commit/push pending.
 - AT-2026-05-17-220 was published as commit `aa8d6e3` after documenting the shared runtime execution-turn boundary.
 - AT-2026-05-17-219 was published as commit `f618718` after adding host transport smoke coverage for downloads policy runtime application.
 - AT-2026-05-17-218 was published as commit `5aae7f1` after adding documentation-budget rules.
@@ -894,6 +895,12 @@ Phase 120 - Downloads Filesystem Staging Writer (complete)
 - Atomic tasks: AT-2026-05-19-249
 - **Status:** complete
 
+### Phase 121: Downloads Segment Length Verifier Boundary
+
+- Outcome: document the first concrete verifier shell behind `DownloadSegmentVerifyPort`, starting with byte-length verification and preserving hash, retry/backoff, public `DL_*` projection, production wiring, host transport, frontend, and schema work for later slices.
+- Atomic tasks: AT-2026-05-19-250
+- **Status:** complete
+
 ## Atomic Task Ledger
 
 1. AT-2026-05-03-001 - committed - switched hooks, repo instructions, and workflow templates to `.artifacts/ai` and bootstrapped the new task records.
@@ -1138,7 +1145,8 @@ Phase 120 - Downloads Filesystem Staging Writer (complete)
 240. AT-2026-05-18-246 - completed - covered guarded writer unsafe-target failure through the segment executor; committed and pushed as `e6ce619`.
 241. AT-2026-05-19-247 - completed - defined the remaining downloads backend completion roadmap; committed and pushed as `99e8160`.
 242. AT-2026-05-19-248 - completed - defined the concrete filesystem staging writer boundary; committed and pushed as `cd6fa4b`.
-243. AT-2026-05-19-249 - completed - implemented and documented the concrete downloads filesystem staging writer with focused TDD; commit/push pending.
+243. AT-2026-05-19-249 - completed - implemented and documented the concrete downloads filesystem staging writer with focused TDD; committed and pushed as `e267db9`.
+244. AT-2026-05-19-250 - completed - defined the concrete downloads segment length verifier boundary before Rust code; commit/push pending.
 90. AT-2026-05-07-096 - completed - added the missing declaration comments to the SQLite download checkpoint repository shell while preserving its current config wiring and checkpoint persistence behavior.
 
 ## Key Questions

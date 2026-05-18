@@ -2,19 +2,17 @@
 
 ## Identity
 
-- task id: AT-2026-05-19-249
-- title: Add downloads filesystem staging writer
+- task id: AT-2026-05-19-250
+- title: Define downloads segment length verifier boundary
 - status: completed
 
 ## Goal
 
-Implement README_IMPL 7.39 as a concrete module-local filesystem staging writer behind `DownloadSegmentWritePort`.
+Document the next downloads verifier shell slice before coding, so `DownloadSegmentVerifyPort` can get a concrete byte-length verifier without guessing hash, retry, public error, or production wiring semantics.
 
 ## Scope
 
 - in scope:
-  - `crates/module-downloads/src/driver.rs`
-  - `crates/module-downloads/src/lib.rs`
   - `docs/modules/downloads/README_IMPL.md`
   - `.artifacts/ai/active-task.md`
   - `.artifacts/ai/task-plan.md`
@@ -22,62 +20,56 @@ Implement README_IMPL 7.39 as a concrete module-local filesystem staging writer 
   - `.artifacts/ai/findings.md`
   - `.artifacts/ai/handoff.md`
 - out of scope:
-  - real HTTP range requests or provider object fetches
-  - final artifact moves or hash verification
-  - host file-system canonicalization
-  - composition-root production execution-port wiring
+  - Rust production code
+  - hash algorithm verification
+  - file-level or job-level manifest sealing
   - retry/backoff policy
-  - terminal runtime completion/failure projection
+  - public `DL_VERIFY_FAILED` DTO projection
+  - composition-root production execution-port wiring
   - host transport, frontend, or SQLite schema changes
-  - public `DL_*` execution error DTOs
   - unrelated dirty files
 
 ## Allowed Files
 
-1. crates/module-downloads/src/driver.rs
-2. crates/module-downloads/src/lib.rs
-3. docs/modules/downloads/README_IMPL.md
-4. .artifacts/ai/active-task.md
-5. .artifacts/ai/task-plan.md
-6. .artifacts/ai/progress.md
-7. .artifacts/ai/findings.md
-8. .artifacts/ai/handoff.md
+1. docs/modules/downloads/README_IMPL.md
+2. .artifacts/ai/active-task.md
+3. .artifacts/ai/task-plan.md
+4. .artifacts/ai/progress.md
+5. .artifacts/ai/findings.md
+6. .artifacts/ai/handoff.md
 
 ## Required Context Read
 
 Read before writing:
 
-1. README/docs routing and documentation-budget rules.
-2. `docs/modules/downloads/README_IMPL.md` 7.39.
-3. `docs/TauriDownloadRuntimeDesign.md` SegmentWriter, sparse/partial writes, staging-first, and cleanup sections.
-4. `docs/TauriStorageAndDatabaseDesign.md` staging file ownership and SQLite boundary notes.
-5. Existing `DownloadSegmentStagingTarget`, `DownloadSegmentWritePort`, and `DownloadResumeWorkMode` code.
+1. `README.md`, `docs/README.md`, and `CONTRIBUTING.md` entry/collaboration constraints.
+2. `docs/modules/downloads/README_ARCH.md`, `README_API.md`, `README_FLOW.md`, and `README_IMPL.md` verifier/segment sections.
+3. `docs/TauriDownloadRuntimeDesign.md` verifier, staging-first, and verification stages.
+4. `docs/TauriErrorHandlingAndProjectionDesign.md` retryable/public projection rules.
+5. `docs/TauriTestingStrategyAndQualityGateDesign.md` quality-gate guidance.
+6. `docs/TauriCodeCommentStandard.md` Chinese-first comment rule for the later code slice.
 
 ## Hypothesis
 
-- falsifiable implementation hypothesis: `DownloadSegmentFilesystemWritePort` can create job-scoped staging parents, write from-start bytes, preserve existing prefixes for partial writes at `start_offset`, and return existing write facts without production wiring.
+- falsifiable planning hypothesis: the next safe verifier slice can be documented as a module-local byte-length verifier that compares `written.downloaded_bytes` to `request.length`, returns `Verified` on match, returns an in-band handled failure on mismatch, and leaves hash/public projection/retry/wiring for later tasks.
 
 ## Cheap Check
 
-1. Add RED tests for job-scoped from-start writes and partial writes preserving an existing prefix.
-2. Implement the smallest filesystem writer behind `DownloadSegmentWritePort`.
-3. Re-export the writer from `launcher-module-downloads`.
-4. Update README_IMPL to mark the filesystem writer implemented and point the next slice at verifier work.
-5. Run focused writer tests, executor adapter tests, full downloads module tests, composition-root check, scoped rustfmt, and scoped diff-check.
+1. Update README_IMPL port status and add a focused verifier shell boundary section.
+2. Record AT-249 as committed/pushed and AT-250 as the active docs boundary task.
+3. Re-read changed README_IMPL snippets.
+4. Run PWF check and scoped docs/PWF `git diff --check`.
 
 ## Validation Gate
 
-1. RED tests fail before production code because the filesystem writer type is missing.
-2. GREEN focused filesystem writer tests pass.
-3. Existing executor adapter tests pass.
-4. Full downloads module tests and composition-root compile gate pass.
-5. Scoped rustfmt and diff-check pass before commit/push.
+1. README_IMPL states the concrete filesystem writer is implemented and the verifier shell is next.
+2. README_IMPL defines verifier success/failure behavior, non-goals, and next Rust RED tests.
+3. PWF records identify AT-250 as docs-only and preserve unrelated dirty work.
+4. Scoped diff-check passes before commit/push.
 
 ## Completion Evidence
 
-- RED: focused writer tests failed before production code because `DownloadSegmentFilesystemWritePort` was missing.
-- GREEN: `cargo test -p launcher-module-downloads --lib download_segment_filesystem_write_port --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 2/2 tests.
-- Regression: `cargo test -p launcher-module-downloads --lib --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 63/63 tests.
-- Compile gate: `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
-- Format gate: `cargo fmt --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --package launcher-module-downloads -- --check` passed after scoped formatting.
-- README_IMPL now records the implemented writer status and the next verifier-shell slice.
+- README_IMPL port status now records `DownloadSegmentFilesystemWritePort` as implemented and `DownloadSegmentVerifyPort` as the next byte-length verifier boundary.
+- README_IMPL 7.40 defines byte-length verifier success, handled mismatch failure, non-goals, and next Rust RED tests.
+- PWF check reported 120/121 phases complete before final status update, as expected while Phase 121 was still in progress.
+- Scoped docs/PWF `git diff --check` passed with CRLF warnings only.

@@ -140,8 +140,8 @@ Do not skip directly from checkpoint to `JobRuntime::resume`. The module owns bu
 | `JobRuntime` | shared kernel-jobs runtime trait exists | resume uses job-level `EnqueueJobRequest<()>`; segment details still stay out of `kernel-jobs` |
 | `DownloadSegmentExecutionPort` | driver-facing port exists | module-local segment requests can return accepted, completed, or failed execution results |
 | `DownloadSegmentFetchPort` | executor sub-port exists | currently fake/in-memory only; concrete provider fetch remains a later boundary |
-| `DownloadSegmentWritePort` | executor sub-port exists | guarded wrapper validates staging-relative targets before delegation; concrete filesystem writer remains a later boundary |
-| `DownloadSegmentVerifyPort` | executor sub-port exists | currently fake verifier only; concrete length/hash verification remains a later boundary |
+| `DownloadSegmentWritePort` | executor sub-port exists | guarded wrapper validates staging-relative targets and `DownloadSegmentFilesystemWritePort` implements job-scoped staging writes; production wiring remains later |
+| `DownloadSegmentVerifyPort` | executor sub-port exists | currently fake verifier only; concrete byte-length verifier is the next boundary, while hash verification remains later |
 
 When adding a port:
 
@@ -1710,6 +1710,33 @@ Next Rust slice:
 1. define a verifier shell behind `DownloadSegmentVerifyPort`;
 2. start with byte-length verification before hash algorithms or manifest-level sealing;
 3. keep production wiring, retry/backoff, public `DL_*` projection, host transport, frontend, and schema changes out of that verifier slice.
+
+### 7.40 Segment Length Verifier Boundary
+
+The next concrete verifier slice should make `DownloadSegmentVerifyPort` useful without turning it into the final integrity system. The first verifier only checks the segment byte count already reported by the writer.
+
+Boundary rules:
+
+1. the verifier sits behind `DownloadSegmentVerifyPort` and remains module-local execution infrastructure;
+2. success means `written.downloaded_bytes == request.length`;
+3. mismatch returns `DownloadSegmentVerifyOutcome::Failed` with the original request facts flowing through the existing executor failure path;
+4. the failure should report the best-known downloaded byte count as `written.downloaded_bytes`;
+5. the failure is retryable because a segment length mismatch can usually be corrected by refetching or rewriting that segment later;
+6. the verifier should not read files, recalculate bytes from disk, or inspect provider URLs in this first slice.
+
+Non-goals:
+
+1. no hash algorithms, incremental hash state management, file-level verification, job-level manifest sealing, final artifact moves, cleanup, production composition-root wiring, SQLite schema changes, public `DL_VERIFY_FAILED` projection, host transport, frontend, retry/backoff, or runtime terminal state;
+2. no direct exposure of segment or chunk details through host IPC;
+3. no change to `DownloadSegmentExecutionRequest`, `DownloadSegmentExecutionResult`, or checkpoint record shapes.
+
+Next Rust slice:
+
+1. add focused RED tests for a length match returning `Verified`;
+2. add focused RED tests for a length mismatch returning a handled verify failure through `DownloadSegmentExecutor`;
+3. implement a small `DownloadSegmentLengthVerifyPort` behind `DownloadSegmentVerifyPort`;
+4. re-export the verifier if it is intended for later composition-root wiring;
+5. validate with focused verifier/executor tests, full downloads module tests, composition-root check, scoped rustfmt, and scoped diff-check.
 
 ---
 

@@ -10853,6 +10853,18 @@
   - `cargo fmt --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml --package launcher-module-downloads -- --check` passed.
   - `cargo test -p launcher-module-downloads --lib --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed with 63/63 tests.
   - `cargo check -p launcher-composition-root --manifest-path D:\DEV\MyEpicLauncher\Cargo.toml` passed.
+- Final commit `e267db9` was pushed to `origin/main`.
+
+## 2026-05-19 - AT-2026-05-19-250 Downloads Segment Length Verifier Boundary
+
+- Opened Phase 121 / AT-2026-05-19-250 after AT-249 was committed and pushed as `e267db9`.
+- Read repository entry docs, collaboration constraints, downloads module docs, download runtime verifier/staging guidance, error projection rules, testing guidance, and comment rules before editing.
+- Updated README_IMPL port status and added 7.40 defining the first concrete verifier shell: byte-length verification only, handled mismatch failure, no hash/public projection/retry/wiring/transport/frontend/schema work.
+- Validation passed:
+  - README_IMPL port status and 7.40 were re-read.
+  - PWF check reported Phase 121 in progress before final status update, matching the task state at that moment.
+  - Scoped docs/PWF `git diff --check` passed with CRLF warnings only.
+- Next step is docs/PWF-only commit.
 
 ### Auto Record: 2026-05-19 00:52:22
 - Tool: apply_patch
@@ -11006,3 +11018,63 @@
 - Phase: Phase 120 - Downloads Filesystem Staging Writer (complete)
 - Files:
   - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-19 01:22:18
+- Tool: apply_patch
+- Phase: Phase 120 - Downloads Filesystem Staging Writer (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (delete)
+
+### Auto Record: 2026-05-19 01:22:32
+- Tool: apply_patch
+- Phase: Phase 121 - Downloads Segment Length Verifier Boundary (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-19 01:22:54
+- Tool: apply_patch
+- Phase: Phase 121 - Downloads Segment Length Verifier Boundary (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\docs\modules\downloads\README_IMPL.md` (update)
+
+### Auto Record: 2026-05-19 01:23:05
+- Tool: apply_patch
+- Phase: Phase 121 - Downloads Segment Length Verifier Boundary (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\findings.md` (update)
+
+### Auto Record: 2026-05-19 01:23:17
+- Tool: apply_patch
+- Phase: Phase 121 - Downloads Segment Length Verifier Boundary (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-19 01:23:31
+- Tool: apply_patch
+- Phase: Phase 121 - Downloads Segment Length Verifier Boundary (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
+
+### Auto Record: 2026-05-19 01:24:16
+- Tool: apply_patch
+- Phase: Phase 121 - Downloads Segment Length Verifier Boundary (in_progress)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\active-task.md` (update)
+
+### Auto Record: 2026-05-19 01:24:30
+- Tool: apply_patch
+- Phase: Phase 121 - Downloads Segment Length Verifier Boundary (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\task-plan.md` (update)
+
+### Auto Record: 2026-05-19 01:24:43
+- Tool: apply_patch
+- Phase: Phase 121 - Downloads Segment Length Verifier Boundary (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\progress.md` (update)
+
+### Auto Record: 2026-05-19 01:25:12
+- Tool: apply_patch
+- Phase: Phase 121 - Downloads Segment Length Verifier Boundary (complete)
+- Files:
+  - `D:\DEV\MyEpicLauncher\.artifacts\ai\handoff.md` (update)
